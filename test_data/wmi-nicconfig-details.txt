@@ -1,0 +1,15 @@
+
+
+InterfaceIndex=1
+IPEnabled=TRUE
+MACAddress=A0:CE:C8:05:0D:32
+MTU=1400
+
+
+InterfaceIndex=2
+IPEnabled=FALSE
+MACAddress=
+MTU=
+
+
+

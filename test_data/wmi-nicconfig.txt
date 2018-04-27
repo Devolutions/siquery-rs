@@ -1,0 +1,20 @@
+
+
+DefaultIPGateway={"192.168.1.1"}
+Description=Realtek USB GbE Family Controller
+IPAddress={"192.168.1.172","fe80::ecae:5782:b2f4:9e80"}
+IPSubnet={"255.255.248.0","64"}
+InterfaceIndex=1
+DHCPEnabled=TRUE
+IPEnabled=TRUE
+
+
+DefaultIPGateway=
+Description=Bluetooth Device (Personal Area Network)
+IPAddress=
+IPSubnet=
+DHCPEnabled=FALSE
+IPEnabled=FALSE
+InterfaceIndex=2
+
+

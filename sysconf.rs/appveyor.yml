@@ -1,0 +1,84 @@
+# Partially adapted from https://github.com/starkat99/appveyor-rust/blob/master/appveyor.yml
+
+# Description of environment variables:
+# CHANNEL - stable/beta/nightly
+# TARGET - target platform
+# CYGWIN_BASH - cygwin's bash binary
+# RUST_NIGHTLY - set to "1" on the nightly channel so that appveyor.sh scripts
+#                can check for it
+
+environment:
+  matrix:
+
+### MSVC Toolchains ###
+
+  # Stable 64-bit MSVC
+    - CHANNEL: stable
+      TARGET: x86_64-pc-windows-msvc
+      CYGWIN_BASH: C:\Cygwin64\bin\bash
+  # Stable 32-bit MSVC
+    - CHANNEL: stable
+      TARGET: i686-pc-windows-msvc
+      CYGWIN_BASH: C:\Cygwin\bin\bash
+  # Nightly 64-bit MSVC
+    - CHANNEL: nightly
+      TARGET: x86_64-pc-windows-msvc
+      CYGWIN_BASH: C:\Cygwin64\bin\bash
+      RUST_NIGHTLY: 1
+  # Nightly 32-bit MSVC
+    - CHANNEL: nightly
+      TARGET: i686-pc-windows-msvc
+      CYGWIN_BASH: C:\Cygwin\bin\bash
+      RUST_NIGHTLY: 1
+  # 1.8.0 64-bit MSVC
+    - CHANNEL: 1.8.0
+      TARGET: x86_64-pc-windows-msvc
+      CYGWIN_BASH: C:\Cygwin64\bin\bash
+  # 1.8.0 32-bit MSVC
+    - CHANNEL: 1.8.0
+      TARGET: i686-pc-windows-msvc
+      CYGWIN_BASH: C:\Cygwin\bin\bash
+
+### GNU Toolchains ###
+
+  # Stable 64-bit GNU
+    - CHANNEL: stable
+      TARGET: x86_64-pc-windows-gnu
+      CYGWIN_BASH: C:\Cygwin64\bin\bash
+  # Stable 32-bit GNU
+    - CHANNEL: stable
+      TARGET: i686-pc-windows-gnu
+      CYGWIN_BASH: C:\Cygwin\bin\bash
+  # Nightly 64-bit GNU
+    - CHANNEL: nightly
+      TARGET: x86_64-pc-windows-gnu
+      CYGWIN_BASH: C:\Cygwin64\bin\bash
+      RUST_NIGHTLY: 1
+  # Nightly 32-bit GNU
+    - CHANNEL: nightly
+      TARGET: i686-pc-windows-gnu
+      CYGWIN_BASH: C:\Cygwin\bin\bash
+      RUST_NIGHTLY: 1
+  # 1.8.0 64-bit GNU
+    - CHANNEL: 1.8.0
+      TARGET: x86_64-pc-windows-gnu
+      CYGWIN_BASH: C:\Cygwin64\bin\bash
+  # 1.8.0 32-bit GNU
+    - CHANNEL: 1.8.0
+      TARGET: i686-pc-windows-gnu
+      CYGWIN_BASH: C:\Cygwin\bin\bash
+
+# NOTE: The %CHANNEL% and %TARGET% environment variables are taken from the
+# build matrix defined above.
+install:
+  - curl -fsS --retry 10 --retry-connrefused -o rustup-init.exe https://win.rustup.rs/
+  - rustup-init -yv --default-toolchain %CHANNEL% --default-host %TARGET%
+  - set PATH=%PATH%;%USERPROFILE%\.cargo\bin
+  - rustc -vV
+  - cargo -vV
+
+# We build ourselves (in the test script)
+build: false
+
+test_script:
+  - "%CYGWIN_BASH% -c './appveyor.sh'"

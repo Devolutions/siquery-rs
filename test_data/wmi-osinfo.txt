@@ -1,0 +1,4 @@
+Caption=Microsoft Windows 10 Pro
+CSName=DEVOLUTIONS93
+OSArchitecture=64-bit
+Version=10.0.16299
