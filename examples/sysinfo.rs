@@ -7,6 +7,7 @@ fn main() {
     let system_reader = Box::new(SystemReader::new());
     let system_info = SystemInfo::new(system_reader);
     println!("System Information");
+    println!("Hosts: {:?}", &system_info.etc_hosts);
     println!("Computer name: {}", system_info.system_info.computer_name);
     println!("Operating System");
     println!("  Platform: {} ", system_info.os_version.platform);

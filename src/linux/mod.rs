@@ -17,8 +17,8 @@ use tables::{
     LogicalDrive,
     OsVersion,
     SystemInfoData,
+    EtcHosts,
 };
-
 use utils;
 
 pub trait SystemReaderInterface {
@@ -28,6 +28,7 @@ pub trait SystemReaderInterface {
     fn os_release(&self) -> Option<String>;
     fn os_platform(&self) -> Option<String>;
     fn meminfo(&self) -> Option<String>;
+    fn get_hosts_file(&self) -> Option<String>;
 }
 
 pub struct SystemReader {
@@ -83,6 +84,12 @@ impl SystemReaderInterface for SystemReader {
         Some(s)
     }
 
+    fn get_hosts_file(&self) -> Option<String> {
+        let mut s = String::new();
+        File::open("/etc/hosts").ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
+    }
+
 }
 
 pub struct SystemInfo {
@@ -92,6 +99,7 @@ pub struct SystemInfo {
     pub logical_drives: Vec<LogicalDrive>,
     pub interface_addresses: Vec<InterfaceAddress>,
     pub interface_details: Vec<InterfaceDetails>,
+    pub etc_hosts: Vec<EtcHosts>,
 }
 
 impl SystemInfo {
@@ -105,6 +113,7 @@ impl SystemInfo {
             logical_drives: Vec::new(),
             interface_addresses: Vec::new(),
             interface_details: Vec::new(),
+            etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             system_reader,
         }
     }
@@ -115,7 +124,8 @@ impl SystemInfo {
             "os_version" : self.os_version,
             "logical_drives" : self.logical_drives,
             "interface_addresses" : self.interface_addresses,
-            "interface_details" : self.interface_details
+            "interface_details" : self.interface_details,
+            "etc_hosts" : self.etc_hosts
         })).unwrap()
     }
 }
@@ -150,6 +160,10 @@ mod tests {
         fn meminfo(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/meminfo.txt")))
         }
+
+        fn get_hosts_file(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/hosts.txt")))
+        }
     }
 
     #[test]
@@ -164,5 +178,8 @@ mod tests {
         assert_eq!(system_info.os_version.version, "17.10");
         assert_eq!(system_info.os_version.major, 17);
         assert_eq!(system_info.os_version.minor, 10);
+        //hosts
+        assert_eq!(system_info.etc_hosts.get(0).unwrap().address, "127.0.0.1");
+        assert_eq!(system_info.etc_hosts.get(0).unwrap().hostnames, "localhost");
     }
 }
