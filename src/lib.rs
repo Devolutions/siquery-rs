@@ -8,8 +8,8 @@ extern crate serde_json;
 extern crate regex;
 #[macro_use]
 extern crate lazy_static;
-#[macro_use]
-extern crate prettytable;
+//#[macro_use]
+//extern crate prettytable;
 
 
 mod tables;
