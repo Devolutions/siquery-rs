@@ -6,6 +6,14 @@ pub struct EtcHosts {
     pub hostnames: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EtcProtocols {
+    pub name: String,
+    pub number: String,
+    pub alias: String,
+    pub comment: String,
+}
+
 #[derive(Serialize)]
 pub struct SystemInfoData {
     pub computer_name: String,

@@ -8,7 +8,7 @@ use serde_json;
 mod os_version;
 mod system_info;
 
-use tables::{LogicalDrive, OsVersion, SystemInfoData};
+use tables::{LogicalDrive, OsVersion, SystemInfoData, EtcHosts, EtcProtocols};
 use utils;
 
 pub trait SystemReaderInterface {
@@ -18,6 +18,7 @@ pub trait SystemReaderInterface {
     fn meminfo(&self) -> Option<String>;
     fn system_version(&self) -> Option<String>;
     fn get_hosts_file(&self) -> Option<String>;
+    fn get_protocols_file(&self) -> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -61,6 +62,12 @@ impl SystemReaderInterface for SystemReader {
         File::open("/etc/hosts").ok()?.read_to_string(&mut s).ok()?;
         Some(s)
     }
+
+    fn get_protocols_file(&self) -> Option<String> {
+        let mut s = String::new();
+        File::open("/etc/protocols").ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
+    }
 }
 
 struct CpuInfo {
@@ -73,7 +80,8 @@ pub struct SystemInfo {
     pub system_info: SystemInfoData,
     pub os_version: OsVersion,
     pub logical_drives: Vec<LogicalDrive>,
-    pub etc_hosts: Vec<EtcHosts>
+    pub etc_hosts: Vec<EtcHosts>,
+    pub etc_protocols: Vec<EtcProtocols>
 }
 
 impl SystemInfo {
@@ -86,6 +94,7 @@ impl SystemInfo {
             os_version: OsVersion::new(system_reader.borrow()),
             logical_drives: Vec::new(),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
+            etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             system_reader,
         }
     }
@@ -95,7 +104,8 @@ impl SystemInfo {
             "system_info": self.system_info,
             "os_version" : self.os_version,
             "logical_drives" : self.logical_drives,
-            "etc_hosts" : self.etc_hosts
+            "etc_hosts" : self.etc_hosts,
+            "etc_protocols" : self.etc_protocols
         })).unwrap()
     }
 }
@@ -130,6 +140,10 @@ mod tests {
         fn get_hosts_file(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/hosts.txt")))
         }
+
+        fn get_protocols_file(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/protocols.txt")))
+        }
     }
 
     #[test]
@@ -154,5 +168,15 @@ mod tests {
         assert_eq!(system_info.etc_hosts.get(4).unwrap().address, "127.0.0.1");
         assert_eq!(system_info.etc_hosts.get(4).unwrap().hostnames, "example.net");
         assert_eq!(system_info.etc_hosts.len(), 5);
+        //protocols
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().name, "ip");
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().number, "0");
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().alias, "IP");
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().comment, "internet protocol, pseudo protocol number");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().name, "icmp");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().number, "1");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().alias, "ICMP");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().comment, "internet control message protocol");
+        assert_eq!(system_info.etc_protocols.len(), 3);
     }
 }
