@@ -18,6 +18,7 @@ use tables::{
     OsVersion,
     SystemInfoData,
     EtcHosts,
+    EtcProtocols,
 };
 use utils;
 
@@ -29,6 +30,7 @@ pub trait SystemReaderInterface {
     fn os_platform(&self) -> Option<String>;
     fn meminfo(&self) -> Option<String>;
     fn get_hosts_file(&self) -> Option<String>;
+    fn get_protocols_file(&self) -> Option<String>;
 }
 
 pub struct SystemReader {
@@ -90,6 +92,12 @@ impl SystemReaderInterface for SystemReader {
         Some(s)
     }
 
+    fn get_protocols_file(&self) -> Option<String> {
+        let mut s = String::new();
+        File::open("/etc/protocols").ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
+    }
+
 }
 
 pub struct SystemInfo {
@@ -100,6 +108,7 @@ pub struct SystemInfo {
     pub interface_addresses: Vec<InterfaceAddress>,
     pub interface_details: Vec<InterfaceDetails>,
     pub etc_hosts: Vec<EtcHosts>,
+    pub etc_protocols: Vec<EtcProtocols>,
 }
 
 impl SystemInfo {
@@ -114,6 +123,7 @@ impl SystemInfo {
             interface_addresses: Vec::new(),
             interface_details: Vec::new(),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
+            etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             system_reader,
         }
     }
@@ -125,7 +135,8 @@ impl SystemInfo {
             "logical_drives" : self.logical_drives,
             "interface_addresses" : self.interface_addresses,
             "interface_details" : self.interface_details,
-            "etc_hosts" : self.etc_hosts
+            "etc_hosts" : self.etc_hosts,
+            "etc_protocols" : self.etc_protocols
         })).unwrap()
     }
 }
@@ -164,6 +175,10 @@ mod tests {
         fn get_hosts_file(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/hosts.txt")))
         }
+
+        fn get_protocols_file(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/protocols.txt")))
+        }
     }
 
     #[test]
@@ -190,5 +205,15 @@ mod tests {
         assert_eq!(system_info.etc_hosts.get(4).unwrap().address, "127.0.0.1");
         assert_eq!(system_info.etc_hosts.get(4).unwrap().hostnames, "example.net");
         assert_eq!(system_info.etc_hosts.len(), 5);
+        //protocols
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().name, "ip");
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().number, "0");
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().alias, "IP");
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().comment, "internet protocol, pseudo protocol number");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().name, "icmp");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().number, "1");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().alias, "ICMP");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().comment, "internet control message protocol");
+        assert_eq!(system_info.etc_protocols.len(), 3);
     }
 }
