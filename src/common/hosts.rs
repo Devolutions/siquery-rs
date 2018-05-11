@@ -1,7 +1,21 @@
 use tables::EtcHosts;
 use regex::Regex;
 use std::net::{IpAddr};
-use windows::SystemReaderInterface;
+
+cfg_if! {
+    if #[cfg(target_os = "linux")] {
+        use linux::SystemReaderInterface;
+    } else if #[cfg(target_os = "macos")] {
+       use macos::SystemReaderInterface;
+    } else if #[cfg(target_os = "windows")] {
+        use windows::SystemReaderInterface;
+    }
+}
+
+lazy_static! {
+        //regex filter: remove everything from "#" till the line break
+        static ref HOSTS_FILE_REGEX: Regex = Regex::new(r"(?m)^([^#]*)").unwrap();
+    }
 
 impl EtcHosts {
 
@@ -16,35 +30,31 @@ impl EtcHosts {
 
         let mut hosts: Vec<EtcHosts> = Vec::new();
 
-        lazy_static! {
-        //regex filter: remove everything from "#" till the line break
-        static ref RE: Regex = Regex::new(r"(?m)^([^#]*)").unwrap();
-    }
-
-        for line in system_reader.get_hosts_file().unwrap().lines() {
-            let captures = RE.captures(&line);
+        for line in system_reader.get_hosts_file().unwrap_or("".to_string()).lines() {
+            let captures = HOSTS_FILE_REGEX.captures(&line);
             if let Some(cap) = captures {
-                //omitting empty outputs from regex
-                if cap.get(0).unwrap().as_str().len() == 0 {
-                    continue
-                }
-                    else {
-                        let mut etc_hosts = EtcHosts::new();
-                        let v: Vec<_> = cap.get(0).unwrap().as_str().trim().split_whitespace().collect();
-                        //check ip for format validity
-                        match v[0].parse::<IpAddr>() {
-                            Ok(_r) => {
-                                //the ip address will always be the leftmost entry
-                                etc_hosts.address = v[0].to_string();
-                                etc_hosts.hostnames = v[1..].join(",");
-                                hosts.push(etc_hosts);
-                            }
-                            Err(_e) => {
-                                continue;
-                            }
-                        };
+                if let Some(ip_group) = cap.get(0) {
+                    //omitting empty outputs from regex
+                    if ip_group.as_str().len() == 0 {
+                        continue
                     }
+                    let mut etc_hosts = EtcHosts::new();
+                    let v: Vec<_> = ip_group.as_str().trim().split_whitespace().collect();
+                    //check ip for format validity
+                    match v[0].parse::<IpAddr>() {
+                        Ok(_r) => {
+                            //the ip address will always be the leftmost entry
+                            etc_hosts.address = v[0].to_string();
+                            etc_hosts.hostnames = v[1..].join(",");
+                            hosts.push(etc_hosts);
+                        }
+                        Err(_e) => {
+                            continue;
+                        }
+                    };
+                }
             }
-        }   hosts
+        }
+        hosts
     }
 }

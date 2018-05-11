@@ -11,6 +11,8 @@ use tables::{
     OsVersion,
     SystemInfoData,
 };
+use std::env;
+
 mod interface_address;
 mod interface_details;
 mod logical_drive;
@@ -78,7 +80,9 @@ impl SystemReaderInterface for SystemReader {
 
     fn get_hosts_file(&self) -> Option<String> {
         let mut s = String::new();
-        File::open("c:\\windows\\system32\\drivers\\etc\\hosts").ok()?.read_to_string(&mut s).ok()?;
+        let mut t = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
+        t.push_str(&"\\system32\\drivers\\etc\\hosts".to_string());
+        File::open(t).ok()?.read_to_string(&mut s).ok()?;
         Some(s)
     }
 }
@@ -163,6 +167,15 @@ mod tests {
         //hosts
         assert_eq!(system_info.etc_hosts.get(0).unwrap().address, "127.0.0.1");
         assert_eq!(system_info.etc_hosts.get(0).unwrap().hostnames, "localhost");
+        assert_eq!(system_info.etc_hosts.get(1).unwrap().address, "255.255.255.255");
+        assert_eq!(system_info.etc_hosts.get(1).unwrap().hostnames, "broadcasthost");
+        assert_eq!(system_info.etc_hosts.get(2).unwrap().address, "::1");
+        assert_eq!(system_info.etc_hosts.get(2).unwrap().hostnames, "localhost");
+        assert_eq!(system_info.etc_hosts.get(3).unwrap().address, "127.0.0.1");
+        assert_eq!(system_info.etc_hosts.get(3).unwrap().hostnames, "example.com,example");
+        assert_eq!(system_info.etc_hosts.get(4).unwrap().address, "127.0.0.1");
+        assert_eq!(system_info.etc_hosts.get(4).unwrap().hostnames, "example.net");
+        assert_eq!(system_info.etc_hosts.len(), 5);
 
         // system_info
         assert_eq!(system_info.system_info.computer_name, "galaxy500");

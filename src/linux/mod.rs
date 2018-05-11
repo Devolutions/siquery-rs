@@ -181,5 +181,14 @@ mod tests {
         //hosts
         assert_eq!(system_info.etc_hosts.get(0).unwrap().address, "127.0.0.1");
         assert_eq!(system_info.etc_hosts.get(0).unwrap().hostnames, "localhost");
+        assert_eq!(system_info.etc_hosts.get(1).unwrap().address, "255.255.255.255");
+        assert_eq!(system_info.etc_hosts.get(1).unwrap().hostnames, "broadcasthost");
+        assert_eq!(system_info.etc_hosts.get(2).unwrap().address, "::1");
+        assert_eq!(system_info.etc_hosts.get(2).unwrap().hostnames, "localhost");
+        assert_eq!(system_info.etc_hosts.get(3).unwrap().address, "127.0.0.1");
+        assert_eq!(system_info.etc_hosts.get(3).unwrap().hostnames, "example.com,example");
+        assert_eq!(system_info.etc_hosts.get(4).unwrap().address, "127.0.0.1");
+        assert_eq!(system_info.etc_hosts.get(4).unwrap().hostnames, "example.net");
+        assert_eq!(system_info.etc_hosts.len(), 5);
     }
 }
