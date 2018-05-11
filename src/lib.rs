@@ -5,9 +5,13 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
+extern crate regex;
+#[macro_use]
+extern crate lazy_static;
 
 mod tables;
 mod utils;
+mod common;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {

@@ -1,21 +1,23 @@
 use std::borrow::Borrow;
 use std::process::Command;
-
 use serde_json;
-
-mod interface_address;
-mod interface_details;
-mod logical_drive;
-mod os_version;
-mod system_info;
-
+use std::fs::File;
+use std::io::Read;
 use tables::{
+    EtcHosts,
     InterfaceAddress,
     InterfaceDetails,
     LogicalDrive,
     OsVersion,
     SystemInfoData,
 };
+use std::env;
+
+mod interface_address;
+mod interface_details;
+mod logical_drive;
+mod os_version;
+mod system_info;
 
 pub trait SystemReaderInterface {
     fn get_wmi_os_info(&self) -> Option<String>;
@@ -24,6 +26,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_drives_info(&self) -> Option<String>;
     fn get_wmi_nicconfig(&self) -> Option<String>;
     fn get_wmi_nicconfig_details(&self) -> Option<String>;
+    fn get_hosts_file(&self) -> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -35,6 +38,7 @@ impl SystemReader {
 }
 
 impl SystemReaderInterface for SystemReader {
+
     fn get_wmi_os_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["os", "get", "Caption,Version,CSName,OSArchitecture", "/format:list"]).output().ok()?;
@@ -56,22 +60,30 @@ impl SystemReaderInterface for SystemReader {
     fn get_wmi_drives_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["logicaldisk", "get", "DeviceID,FileSystem,Size,FreeSpace,DriveType",
-                    "/format:list"]).output().ok()?;
+                "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
     fn get_wmi_nicconfig(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["nicconfig", "get",
-                    "IPEnabled,InterfaceIndex,Description,DefaultIPGateway,IPAddress,IPSubnet,DHCPEnabled",
-                    "/format:list"]).output().ok()?;
+                "IPEnabled,InterfaceIndex,Description,DefaultIPGateway,IPAddress,IPSubnet,DHCPEnabled",
+                "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
-    
+
     fn get_wmi_nicconfig_details(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["nicconfig", "get", "IPEnabled,InterfaceIndex,MACAddress,MTU", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
+    }
+
+    fn get_hosts_file(&self) -> Option<String> {
+        let mut s = String::new();
+        let mut t = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
+        t.push_str(&"\\system32\\drivers\\etc\\hosts".to_string());
+        File::open(t).ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
     }
 }
 
@@ -82,6 +94,7 @@ pub struct SystemInfo {
     pub logical_drives: Vec<LogicalDrive>,
     pub interface_addresses: Vec<InterfaceAddress>,
     pub interface_details: Vec<InterfaceDetails>,
+    pub etc_hosts: Vec<EtcHosts>,
 }
 
 impl SystemInfo {
@@ -95,6 +108,7 @@ impl SystemInfo {
             logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
             interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
+            etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             system_reader,
         }
     }
@@ -105,7 +119,8 @@ impl SystemInfo {
             "os_version" : self.os_version,
             "logical_drives" : self.logical_drives,
             "interface_addresses" : self.interface_addresses,
-            "interface_details" : self.interface_details
+            "interface_details" : self.interface_details,
+            "etc_hosts" : self.etc_hosts
         })).unwrap()
     }
 }
@@ -126,32 +141,48 @@ mod tests {
         }
 
         fn get_wmi_computer_info(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/wmi-computerinfo.txt")))  
+            Some(String::from(include_str!("../../test_data/wmi-computerinfo.txt")))
         }
 
         fn get_wmi_drives_info(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/wmi-driveinfo.txt")))  
+            Some(String::from(include_str!("../../test_data/wmi-driveinfo.txt")))
         }
 
         fn get_wmi_nicconfig(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/wmi-nicconfig.txt")))  
+            Some(String::from(include_str!("../../test_data/wmi-nicconfig.txt")))
         }
 
         fn get_wmi_nicconfig_details(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/wmi-nicconfig-details.txt")))  
+            Some(String::from(include_str!("../../test_data/wmi-nicconfig-details.txt")))
+        }
+
+        fn get_hosts_file(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/hosts.txt")))
         }
     }
 
     #[test]
     fn test_system_info() {
         let system_info = SystemInfo::new(Box::new(MockSystemReader{}));
-        
+        //hosts
+        assert_eq!(system_info.etc_hosts.get(0).unwrap().address, "127.0.0.1");
+        assert_eq!(system_info.etc_hosts.get(0).unwrap().hostnames, "localhost");
+        assert_eq!(system_info.etc_hosts.get(1).unwrap().address, "255.255.255.255");
+        assert_eq!(system_info.etc_hosts.get(1).unwrap().hostnames, "broadcasthost");
+        assert_eq!(system_info.etc_hosts.get(2).unwrap().address, "::1");
+        assert_eq!(system_info.etc_hosts.get(2).unwrap().hostnames, "localhost");
+        assert_eq!(system_info.etc_hosts.get(3).unwrap().address, "127.0.0.1");
+        assert_eq!(system_info.etc_hosts.get(3).unwrap().hostnames, "example.com,example");
+        assert_eq!(system_info.etc_hosts.get(4).unwrap().address, "127.0.0.1");
+        assert_eq!(system_info.etc_hosts.get(4).unwrap().hostnames, "example.net");
+        assert_eq!(system_info.etc_hosts.len(), 5);
+
         // system_info
         assert_eq!(system_info.system_info.computer_name, "galaxy500");
         assert_eq!(system_info.system_info.cpu_logical_cores, 4);
         assert_eq!(system_info.system_info.cpu_brand, "Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz");
         assert_eq!(system_info.system_info.physical_memory, 17043189760);
-        
+
         // os_version
         assert_eq!(system_info.os_version.platform, "Windows");
         assert_eq!(system_info.os_version.name, "Microsoft Windows 10 Pro");
@@ -161,7 +192,7 @@ mod tests {
 
         // logical_drives
         assert_eq!(system_info.logical_drives.len(), 2);
-        
+
         let drive = &system_info.logical_drives[0];
         assert_eq!(drive.device_id, "C:");
         assert_eq!(drive.file_system, "NTFS");

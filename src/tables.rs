@@ -1,5 +1,11 @@
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EtcHosts {
+    pub address: String,
+    pub hostnames: String,
+}
+
 #[derive(Serialize)]
 pub struct SystemInfoData {
     pub computer_name: String,
