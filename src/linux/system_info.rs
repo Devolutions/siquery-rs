@@ -17,13 +17,13 @@ impl SystemInfoData {
     }
 
     pub(crate) fn update(&mut self, system_reader: &SystemReaderInterface) {
-        self.computer_name = system_reader.hostname().unwrap_or(String::from(""));
+        self.computer_name = system_reader.hostname().unwrap_or_else(|| String::from(""));
 
         self.physical_memory = match system_reader.meminfo() {
             Some(s) => {
                 let n = s.split('\n').find(|line| line.starts_with("MemTotal"))
                          .and_then(|line| line.split(':').last())
-                         .and_then(|v| v.trim_left_matches(" ").split(' ').next())
+                         .and_then(|v| v.trim_left_matches(' ').split(' ').next())
                          .and_then(|v| v.parse::<u64>().ok());
                 n.unwrap_or(0) * 1024
             }
