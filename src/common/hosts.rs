@@ -41,6 +41,11 @@ impl EtcHosts {
                         continue;
                     }
                     let v: Vec<_> = ip_group.as_str().trim().split_whitespace().collect();
+                    
+                    if v.len() < 2 {
+                        continue;
+                    }
+
                     // Check the ip for format validity.
                     if v[0].parse::<IpAddr>().is_ok() {
                         hosts.push(EtcHosts {
