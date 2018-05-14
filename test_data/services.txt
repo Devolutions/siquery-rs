@@ -1,0 +1,26 @@
+# Copyright (c) 1993-2004 Microsoft Corp.
+#
+# This file contains port numbers for well-known services defined by IANA
+#
+# Format:
+#
+# <service name>  <port number>/<protocol>  [aliases...]   [#<comment>]
+#
+
+echo                7/tcp
+echo                7/udp
+discard             9/tcp    sink null
+discard             9/udp    sink null
+systat             11/tcp    users                  #Active users
+systat             11/udp    users                  #Active users
+daytime            13/tcp
+daytime            13/udp
+qotd               17/tcp    quote                  #Quote of the day
+qotd               17/udp    quote                  #Quote of the day
+chargen            19/tcp    ttytst source          #Character generator
+chargen            19/udp    ttytst source          #Character generator
+ftp-data           20/tcp                           #FTP, data
+ftp                21/tcp                           #FTP. control
+ssh                22/tcp                           #SSH Remote Login Protocol
+echo                                                #invalid entry
+echo               22tcp                            #invalid entry

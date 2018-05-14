@@ -14,6 +14,15 @@ pub struct EtcProtocols {
     pub comment: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EtcServices {
+    pub name: String,
+    pub port: String,
+    pub protocol: String,
+    pub aliases: String,
+    pub comment: String,
+}
+
 #[derive(Serialize)]
 pub struct SystemInfoData {
     pub computer_name: String,

@@ -19,6 +19,7 @@ use tables::{
     SystemInfoData,
     EtcHosts,
     EtcProtocols,
+    EtcServices,
 };
 use utils;
 
@@ -31,6 +32,7 @@ pub trait SystemReaderInterface {
     fn meminfo(&self) -> Option<String>;
     fn get_hosts_file(&self) -> Option<String>;
     fn get_protocols_file(&self) -> Option<String>;
+    fn get_services_file(&self) -> Option<String>;
 }
 
 pub struct SystemReader {
@@ -98,6 +100,12 @@ impl SystemReaderInterface for SystemReader {
         Some(s)
     }
 
+    fn get_services_file(&self) -> Option<String> {
+        let mut s = String::new();
+        File::open("/etc/services").ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
+    }
+
 }
 
 pub struct SystemInfo {
@@ -109,6 +117,7 @@ pub struct SystemInfo {
     pub interface_details: Vec<InterfaceDetails>,
     pub etc_hosts: Vec<EtcHosts>,
     pub etc_protocols: Vec<EtcProtocols>,
+    pub etc_services: Vec<EtcServices>,
 }
 
 impl SystemInfo {
@@ -124,6 +133,7 @@ impl SystemInfo {
             interface_details: Vec::new(),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
+            etc_services: EtcServices::get_services(system_reader.borrow()),
             system_reader,
         }
     }
@@ -136,7 +146,8 @@ impl SystemInfo {
             "interface_addresses" : self.interface_addresses,
             "interface_details" : self.interface_details,
             "etc_hosts" : self.etc_hosts,
-            "etc_protocols" : self.etc_protocols
+            "etc_protocols" : self.etc_protocols,
+            "etc_services" : self.etc_services
         })).unwrap()
     }
 }
@@ -179,11 +190,34 @@ mod tests {
         fn get_protocols_file(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/protocols.txt")))
         }
+
+        fn get_services_file(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/services.txt")))
+        }
     }
 
     #[test]
     fn test_system_info() {
         let system_info = SystemInfo::new(Box::new(MockSystemReader{}));
+
+        // checking possible cases for services file
+        assert_eq!(system_info.etc_services.get(0).unwrap().name, "echo");
+        assert_eq!(system_info.etc_services.get(0).unwrap().port, "7");
+        assert_eq!(system_info.etc_services.get(0).unwrap().protocol, "tcp");
+        assert_eq!(system_info.etc_services.get(0).unwrap().aliases, "");
+        assert_eq!(system_info.etc_services.get(0).unwrap().comment, "");
+        assert_eq!(system_info.etc_services.get(2).unwrap().name, "discard");
+        assert_eq!(system_info.etc_services.get(2).unwrap().port, "9");
+        assert_eq!(system_info.etc_services.get(2).unwrap().protocol, "tcp");
+        assert_eq!(system_info.etc_services.get(2).unwrap().aliases, "sink null");
+        assert_eq!(system_info.etc_services.get(2).unwrap().comment, "");
+        assert_eq!(system_info.etc_services.get(12).unwrap().name, "ftp-data");
+        assert_eq!(system_info.etc_services.get(12).unwrap().port, "20");
+        assert_eq!(system_info.etc_services.get(12).unwrap().protocol, "tcp");
+        assert_eq!(system_info.etc_services.get(12).unwrap().aliases, "");
+        assert_eq!(system_info.etc_services.get(12).unwrap().comment, "FTP, data");
+        assert_eq!(system_info.etc_services.len(), 15);
+
         assert_eq!(system_info.system_info.computer_name, "galaxy500");
         assert_eq!(system_info.system_info.cpu_brand, "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz");
         assert_eq!(system_info.system_info.cpu_logical_cores, 4);

@@ -8,8 +8,15 @@ fn main() {
     let system_info = SystemInfo::new(system_reader);
     println!("System Information");
     println!("Computer name: {}", system_info.system_info.computer_name);
-    println!("Hosts: {:?}", &system_info.etc_hosts);
-    println!("Protocols: {:?}", &system_info.etc_protocols);
+    for hosts in &system_info.etc_hosts {
+        println!("{:?}", &hosts);
+    }
+    for protocol_entries in &system_info.etc_protocols {
+        println!("{:?}", protocol_entries);
+    }
+    for services_entries in &system_info.etc_services {
+        println!("{:?}", services_entries);
+    }
     println!("Operating System");
     println!("  Platform: {} ", system_info.os_version.platform);
     println!("  Name: {}", system_info.os_version.name);
