@@ -9,7 +9,7 @@ pub struct EtcHosts {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EtcProtocols {
     pub name: String,
-    pub number: String,
+    pub number: u16,
     pub alias: String,
     pub comment: String,
 }
@@ -17,7 +17,7 @@ pub struct EtcProtocols {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EtcServices {
     pub name: String,
-    pub port: String,
+    pub port: u16,
     pub protocol: String,
     pub aliases: String,
     pub comment: String,

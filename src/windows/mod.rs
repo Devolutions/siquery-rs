@@ -85,25 +85,22 @@ impl SystemReaderInterface for SystemReader {
 
     fn get_hosts_file(&self) -> Option<String> {
         let mut string = String::new();
-        let mut file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
-        file_location.push_str(&"\\system32\\drivers\\etc\\hosts".to_string());
-        File::open(file_location).ok()?.read_to_string(&mut string).ok()?;
+        let file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
+        File::open(file_location + "\\system32\\drivers\\etc\\hosts").ok()?.read_to_string(&mut string).ok()?;
         Some(string)
     }
 
     fn get_protocols_file(&self) -> Option<String> {
         let mut string = String::new();
-        let mut file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
-        file_location.push_str(&"\\system32\\drivers\\etc\\protocol".to_string());
-        File::open(file_location).ok()?.read_to_string(&mut string).ok()?;
+        let file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
+        File::open(file_location + "\\system32\\drivers\\etc\\protocol").ok()?.read_to_string(&mut string).ok()?;
         Some(string)
     }
 
     fn get_services_file(&self) -> Option<String> {
         let mut string = String::new();
-        let mut file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
-        file_location.push_str(&"\\system32\\drivers\\etc\\services".to_string());
-        File::open(file_location).ok()?.read_to_string(&mut string).ok()?;
+        let file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
+        File::open(file_location + "\\system32\\drivers\\etc\\services").ok()?.read_to_string(&mut string).ok()?;
         Some(string)
     }
 }
@@ -202,17 +199,17 @@ mod tests {
 
         // checking possible cases for services file
         assert_eq!(system_info.etc_services.get(0).unwrap().name, "echo");
-        assert_eq!(system_info.etc_services.get(0).unwrap().port, "7");
+        assert_eq!(system_info.etc_services.get(0).unwrap().port, 7);
         assert_eq!(system_info.etc_services.get(0).unwrap().protocol, "tcp");
         assert_eq!(system_info.etc_services.get(0).unwrap().aliases, "");
         assert_eq!(system_info.etc_services.get(0).unwrap().comment, "");
         assert_eq!(system_info.etc_services.get(2).unwrap().name, "discard");
-        assert_eq!(system_info.etc_services.get(2).unwrap().port, "9");
+        assert_eq!(system_info.etc_services.get(2).unwrap().port, 9);
         assert_eq!(system_info.etc_services.get(2).unwrap().protocol, "tcp");
         assert_eq!(system_info.etc_services.get(2).unwrap().aliases, "sink null");
         assert_eq!(system_info.etc_services.get(2).unwrap().comment, "");
         assert_eq!(system_info.etc_services.get(12).unwrap().name, "ftp-data");
-        assert_eq!(system_info.etc_services.get(12).unwrap().port, "20");
+        assert_eq!(system_info.etc_services.get(12).unwrap().port, 20);
         assert_eq!(system_info.etc_services.get(12).unwrap().protocol, "tcp");
         assert_eq!(system_info.etc_services.get(12).unwrap().aliases, "");
         assert_eq!(system_info.etc_services.get(12).unwrap().comment, "FTP, data");
@@ -220,11 +217,11 @@ mod tests {
 
         //protocols
         assert_eq!(system_info.etc_protocols.get(0).unwrap().name, "ip");
-        assert_eq!(system_info.etc_protocols.get(0).unwrap().number, "0");
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().number, 0);
         assert_eq!(system_info.etc_protocols.get(0).unwrap().alias, "IP");
         assert_eq!(system_info.etc_protocols.get(0).unwrap().comment, "internet protocol, pseudo protocol number");
         assert_eq!(system_info.etc_protocols.get(1).unwrap().name, "icmp");
-        assert_eq!(system_info.etc_protocols.get(1).unwrap().number, "1");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().number, 1);
         assert_eq!(system_info.etc_protocols.get(1).unwrap().alias, "ICMP");
         assert_eq!(system_info.etc_protocols.get(1).unwrap().comment, "internet control message protocol");
         assert_eq!(system_info.etc_protocols.len(), 3);

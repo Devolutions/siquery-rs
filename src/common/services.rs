@@ -1,5 +1,6 @@
 use tables::EtcServices;
 use regex::Regex;
+use std::str::FromStr;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
@@ -23,7 +24,7 @@ impl EtcServices {
     pub(crate) fn new() -> EtcServices {
         EtcServices {
             name: String::new(),
-            port: String::new(),
+            port: 0,
             protocol: String::new(),
             aliases: String::new(),
             comment: String::new(),
@@ -36,7 +37,7 @@ impl EtcServices {
 
         for line in system_reader
             .get_services_file()
-            .unwrap_or("".to_string())
+            .unwrap_or_else(|| "".to_string())
             .lines() {
 
             let mut etc_services = EtcServices::new();
@@ -73,7 +74,7 @@ impl EtcServices {
                     }
 
                     etc_services.name = v[0].to_string();
-                    etc_services.port = v_1[0].to_string();
+                    etc_services.port = u16::from_str(v_1[0]).unwrap_or(0);
                     etc_services.protocol = v_1[1].to_string();
 
                     // Get aliases if they exist
