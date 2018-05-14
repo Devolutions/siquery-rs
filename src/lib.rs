@@ -9,9 +9,9 @@ extern crate regex;
 #[macro_use]
 extern crate lazy_static;
 
+mod common;
 mod tables;
 mod utils;
-mod common;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
