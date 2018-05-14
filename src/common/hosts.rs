@@ -18,12 +18,6 @@ lazy_static! {
 }
 
 impl EtcHosts {
-    pub(crate) fn new() -> EtcHosts {
-        EtcHosts {
-            address: String::new(),
-            hostnames: String::new(),
-        }
-    }
 
     pub fn get_hosts(system_reader: &SystemReaderInterface) -> Vec<EtcHosts> {
         let mut hosts: Vec<EtcHosts> = Vec::new();

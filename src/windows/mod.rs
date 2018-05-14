@@ -4,6 +4,7 @@ use serde_json;
 use std::fs::File;
 use std::io::Read;
 use tables::{
+    EtcServices,
     EtcProtocols,
     EtcHosts,
     InterfaceAddress,
@@ -29,6 +30,8 @@ pub trait SystemReaderInterface {
     fn get_wmi_nicconfig_details(&self) -> Option<String>;
     fn get_hosts_file(&self) -> Option<String>;
     fn get_protocols_file(&self) -> Option<String>;
+    fn get_services_file(&self) -> Option<String>;
+
 }
 
 pub struct SystemReader {}
@@ -81,19 +84,24 @@ impl SystemReaderInterface for SystemReader {
     }
 
     fn get_hosts_file(&self) -> Option<String> {
-        let mut s = String::new();
-        let mut t = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
-        t.push_str(&"\\system32\\drivers\\etc\\hosts".to_string());
-        File::open(t).ok()?.read_to_string(&mut s).ok()?;
-        Some(s)
+        let mut string = String::new();
+        let file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
+        File::open(file_location + "\\system32\\drivers\\etc\\hosts").ok()?.read_to_string(&mut string).ok()?;
+        Some(string)
     }
 
     fn get_protocols_file(&self) -> Option<String> {
-        let mut s = String::new();
-        let mut t = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
-        t.push_str(&"\\system32\\drivers\\etc\\protocol".to_string());
-        File::open(t).ok()?.read_to_string(&mut s).ok()?;
-        Some(s)
+        let mut string = String::new();
+        let file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
+        File::open(file_location + "\\system32\\drivers\\etc\\protocol").ok()?.read_to_string(&mut string).ok()?;
+        Some(string)
+    }
+
+    fn get_services_file(&self) -> Option<String> {
+        let mut string = String::new();
+        let file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
+        File::open(file_location + "\\system32\\drivers\\etc\\services").ok()?.read_to_string(&mut string).ok()?;
+        Some(string)
     }
 }
 
@@ -106,6 +114,7 @@ pub struct SystemInfo {
     pub interface_details: Vec<InterfaceDetails>,
     pub etc_hosts: Vec<EtcHosts>,
     pub etc_protocols: Vec<EtcProtocols>,
+    pub etc_services: Vec<EtcServices>,
 }
 
 impl SystemInfo {
@@ -121,6 +130,7 @@ impl SystemInfo {
             interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
+            etc_services: EtcServices::get_services(system_reader.borrow()),
             system_reader,
         }
     }
@@ -133,7 +143,8 @@ impl SystemInfo {
             "interface_addresses" : self.interface_addresses,
             "interface_details" : self.interface_details,
             "etc_hosts" : self.etc_hosts,
-            "etc_protocols" : self.etc_protocols
+            "etc_protocols" : self.etc_protocols,
+            "etc_services" : self.etc_services
         })).unwrap()
     }
 }
@@ -176,18 +187,41 @@ mod tests {
         fn get_protocols_file(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/protocols.txt")))
         }
+
+        fn get_services_file(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/services.txt")))
+        }
     }
 
     #[test]
     fn test_system_info() {
         let system_info = SystemInfo::new(Box::new(MockSystemReader{}));
+
+        // checking possible cases for services file
+        assert_eq!(system_info.etc_services.get(0).unwrap().name, "echo");
+        assert_eq!(system_info.etc_services.get(0).unwrap().port, 7);
+        assert_eq!(system_info.etc_services.get(0).unwrap().protocol, "tcp");
+        assert_eq!(system_info.etc_services.get(0).unwrap().aliases, "");
+        assert_eq!(system_info.etc_services.get(0).unwrap().comment, "");
+        assert_eq!(system_info.etc_services.get(2).unwrap().name, "discard");
+        assert_eq!(system_info.etc_services.get(2).unwrap().port, 9);
+        assert_eq!(system_info.etc_services.get(2).unwrap().protocol, "tcp");
+        assert_eq!(system_info.etc_services.get(2).unwrap().aliases, "sink null");
+        assert_eq!(system_info.etc_services.get(2).unwrap().comment, "");
+        assert_eq!(system_info.etc_services.get(12).unwrap().name, "ftp-data");
+        assert_eq!(system_info.etc_services.get(12).unwrap().port, 20);
+        assert_eq!(system_info.etc_services.get(12).unwrap().protocol, "tcp");
+        assert_eq!(system_info.etc_services.get(12).unwrap().aliases, "");
+        assert_eq!(system_info.etc_services.get(12).unwrap().comment, "FTP, data");
+        assert_eq!(system_info.etc_services.len(), 15);
+
         //protocols
         assert_eq!(system_info.etc_protocols.get(0).unwrap().name, "ip");
-        assert_eq!(system_info.etc_protocols.get(0).unwrap().number, "0");
+        assert_eq!(system_info.etc_protocols.get(0).unwrap().number, 0);
         assert_eq!(system_info.etc_protocols.get(0).unwrap().alias, "IP");
         assert_eq!(system_info.etc_protocols.get(0).unwrap().comment, "internet protocol, pseudo protocol number");
         assert_eq!(system_info.etc_protocols.get(1).unwrap().name, "icmp");
-        assert_eq!(system_info.etc_protocols.get(1).unwrap().number, "1");
+        assert_eq!(system_info.etc_protocols.get(1).unwrap().number, 1);
         assert_eq!(system_info.etc_protocols.get(1).unwrap().alias, "ICMP");
         assert_eq!(system_info.etc_protocols.get(1).unwrap().comment, "internet control message protocol");
         assert_eq!(system_info.etc_protocols.len(), 3);
@@ -251,7 +285,6 @@ mod tests {
         assert_eq!(interface_details.mac, "A0:CE:C8:05:0D:32");
         assert_eq!(interface_details.enabled, 1);
         assert_eq!(interface_details.mtu, 1400);
-
 
     }
 }

@@ -1,5 +1,6 @@
 use regex::Regex;
 use tables::EtcProtocols;
+use std::str::FromStr;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
@@ -22,7 +23,7 @@ impl EtcProtocols {
     pub(crate) fn new() -> EtcProtocols {
         EtcProtocols {
             name: String::new(),
-            number: String::new(),
+            number: 0,
             alias: String::new(),
             comment: String::new(),
         }
@@ -55,7 +56,7 @@ impl EtcProtocols {
                     }
 
                     etc_protocols.name = v[0].to_string();
-                    etc_protocols.number = v[1].to_string();
+                    etc_protocols.number = u16::from_str(v[1]).unwrap_or(0);
 
                     //get alias if it exists
                     if let Some(alias) = v.get(2) {
