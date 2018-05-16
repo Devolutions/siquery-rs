@@ -60,7 +60,7 @@ fn main() {
                 println!("{:?}", services_entries);
             }
         },
-        "uptime_info" => {
+        "uptime" => {
             println!("{:?}", &system_info.uptime);
         }
         _ => {

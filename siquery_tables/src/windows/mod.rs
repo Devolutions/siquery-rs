@@ -21,7 +21,7 @@ mod interface_details;
 mod logical_drive;
 mod os_version;
 mod system_info;
-mod uptime_info;
+mod uptime;
 
 pub trait SystemReaderInterface {
     fn get_wmi_os_info(&self) -> Option<String>;
