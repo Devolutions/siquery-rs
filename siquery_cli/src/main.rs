@@ -1,3 +1,4 @@
+
 extern crate siquery;
 
 use siquery::SystemInfo;
@@ -43,3 +44,4 @@ fn main() {
     println!("\n");
     println!("{}", system_info.to_json());
 }
+
