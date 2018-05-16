@@ -8,6 +8,7 @@ extern crate serde_json;
 extern crate regex;
 #[macro_use]
 extern crate lazy_static;
+extern crate time;
 
 mod common;
 mod tables;
@@ -27,6 +28,8 @@ cfg_if! {
         pub mod macos;
         pub use macos as sys;
     } else if #[cfg(target_os = "windows")] {
+        extern crate kernel32;
+
         pub mod windows;
         pub use windows as sys;
     }

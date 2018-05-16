@@ -12,6 +12,7 @@ use tables::{
     LogicalDrive,
     OsVersion,
     SystemInfoData,
+    Uptime,
 };
 use std::env;
 
@@ -20,6 +21,7 @@ mod interface_details;
 mod logical_drive;
 mod os_version;
 mod system_info;
+mod uptime_info;
 
 pub trait SystemReaderInterface {
     fn get_wmi_os_info(&self) -> Option<String>;
@@ -115,6 +117,7 @@ pub struct SystemInfo {
     pub etc_hosts: Vec<EtcHosts>,
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
+    pub uptime: Uptime,
 }
 
 impl SystemInfo {
@@ -131,6 +134,7 @@ impl SystemInfo {
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
+            uptime: Uptime::get_uptime(),
             system_reader,
         }
     }
@@ -144,7 +148,8 @@ impl SystemInfo {
             "interface_details" : self.interface_details,
             "etc_hosts" : self.etc_hosts,
             "etc_protocols" : self.etc_protocols,
-            "etc_services" : self.etc_services
+            "etc_services" : self.etc_services,
+             "uptime" : self.uptime
         })).unwrap()
     }
 }
