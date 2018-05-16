@@ -149,7 +149,7 @@ impl SystemInfo {
             "etc_hosts" : self.etc_hosts,
             "etc_protocols" : self.etc_protocols,
             "etc_services" : self.etc_services,
-             "uptime" : self.uptime
+            "uptime" : self.uptime
         })).unwrap()
     }
 }
@@ -290,6 +290,9 @@ mod tests {
         assert_eq!(interface_details.mac, "A0:CE:C8:05:0D:32");
         assert_eq!(interface_details.enabled, 1);
         assert_eq!(interface_details.mtu, 1400);
+
+        //uptime
+        assert_eq!(system_info.uptime.test_uptime_result().is_ok(), true);
 
     }
 }
