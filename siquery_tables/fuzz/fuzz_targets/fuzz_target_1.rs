@@ -54,6 +54,10 @@ impl SystemReaderInterface for FuzzSystemReader {
     fn get_protocols_file(&self) -> Option<String> {
         Some(self.s.to_string())
     }
+
+    fn get_services_file(&self) -> Option<String> {
+        Some(self.s.to_string())
+    }
 }
 
 fuzz_target!(|data: &[u8]| {

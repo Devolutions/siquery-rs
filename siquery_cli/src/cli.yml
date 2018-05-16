@@ -1,0 +1,13 @@
+name: siquery
+author: Marc-André Moreau <marcandre.moreau@gmail.com>
+about: a system info querying tool
+args:
+    - table:
+        long: table
+        value_name: table
+        help: table name to query
+        takes_value: true
+    - verbose:
+        short: v
+        multiple: true
+        help: Sets the level of verbosity

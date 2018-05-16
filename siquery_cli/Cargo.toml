@@ -1,0 +1,15 @@
+[package]
+name = "siquery_cli"
+version = "0.1.0"
+authors = ["Marc-André Moreau <marcandre.moreau@gmail.com>"]
+
+[[bin]]
+name = "siquery"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "2.31", features = ["yaml"] }
+
+[dependencies.siquery]
+path = "../siquery_tables"
+
