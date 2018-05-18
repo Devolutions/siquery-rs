@@ -7,6 +7,7 @@ use serde_json;
 
 mod os_version;
 mod system_info;
+mod uptime;
 
 use tables::{
     LogicalDrive,
@@ -14,7 +15,8 @@ use tables::{
     SystemInfoData,
     EtcHosts,
     EtcProtocols,
-    EtcServices
+    EtcServices,
+    Uptime,
 };
 use utils;
 
@@ -96,7 +98,8 @@ pub struct SystemInfo {
     pub logical_drives: Vec<LogicalDrive>,
     pub etc_hosts: Vec<EtcHosts>,
     pub etc_protocols: Vec<EtcProtocols>,
-    pub etc_services: Vec<EtcServices>
+    pub etc_services: Vec<EtcServices>,
+    pub uptime: Uptime,
 }
 
 impl SystemInfo {
@@ -111,6 +114,7 @@ impl SystemInfo {
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
+            uptime: Uptime::get_uptime(),
             system_reader,
         }
     }
@@ -122,7 +126,8 @@ impl SystemInfo {
             "logical_drives" : self.logical_drives,
             "etc_hosts" : self.etc_hosts,
             "etc_protocols" : self.etc_protocols,
-            "etc_services" : self.etc_services
+            "etc_services" : self.etc_services,
+            "uptime" : self.uptime
         })).unwrap()
     }
 }
@@ -218,5 +223,7 @@ mod tests {
         assert_eq!(system_info.etc_protocols.get(1).unwrap().alias, "ICMP");
         assert_eq!(system_info.etc_protocols.get(1).unwrap().comment, "internet control message protocol");
         assert_eq!(system_info.etc_protocols.len(), 3);
+        //uptime
+        assert_eq!(system_info.uptime.test_uptime_result().is_ok(), true);
     }
 }

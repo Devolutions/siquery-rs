@@ -24,6 +24,7 @@ cfg_if! {
     } else if #[cfg(target_os = "macos")] {
         extern crate plist;
         extern crate uname;
+        extern crate libc;
 
         pub mod macos;
         pub use macos as sys;
