@@ -95,3 +95,12 @@ pub struct InterfaceDetails {
     pub mtu: u32,
     pub enabled: u8,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Uptime {
+    pub days: u64,
+    pub hours: u64,
+    pub minutes: u64,
+    pub seconds: u64,
+    pub total_seconds: f64,
+}
