@@ -48,7 +48,7 @@ impl Uptime {
         upt
     }
 
-    pub fn test_uptime_result() -> Result<Uptime, String> {
+    pub fn test_uptime_result(&self) -> Result<Uptime, String> {
         let uptime = Uptime::get_uptime();
         Ok(uptime)
     }
