@@ -61,7 +61,7 @@ fn main() {
             }
         },
         "uptime" => {
-            println!("{:?}", &system_info.uptime);
+            println!("{:?}", &system_info.uptime.unwrap());
         }
         "printers" => {
             for printer in &system_info.wmi_printers {

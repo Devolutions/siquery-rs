@@ -3,8 +3,7 @@ use utils;
 use windows::SystemReaderInterface;
 
 impl WmiPrinters {
-
-    pub fn new() -> WmiPrinters {
+    pub(crate) fn new() -> WmiPrinters {
         WmiPrinters {
             attributes: String::new(),
             caption: String::new(),
@@ -28,7 +27,7 @@ impl WmiPrinters {
         }
     }
 
-    pub fn get_printers_info(system_reader: &SystemReaderInterface) -> Vec<WmiPrinters> {
+    pub(crate) fn get_printers_info(system_reader: &SystemReaderInterface) -> Vec<WmiPrinters> {
 
         let mut printers: Vec<WmiPrinters> = Vec::new();
 
@@ -115,6 +114,7 @@ impl WmiPrinters {
                 }
             }
         }
+
         printers
     }
 }
