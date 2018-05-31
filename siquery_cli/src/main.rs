@@ -64,7 +64,9 @@ fn main() {
             println!("{:?}", &system_info.uptime);
         }
         "printers" => {
-            println!("{:?}", &system_info.printers);
+            for printer in &system_info.wmi_printers {
+                println!("{:?}", &printer);
+            }
         }
         _ => {
 

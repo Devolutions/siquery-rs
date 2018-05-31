@@ -106,7 +106,7 @@ pub struct Uptime {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Printers {
+pub struct WmiPrinters {
     pub attributes: String,
     pub caption: String,
     pub creation_class_name: String,

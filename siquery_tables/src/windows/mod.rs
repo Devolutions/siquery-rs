@@ -13,7 +13,7 @@ use tables::{
     OsVersion,
     SystemInfoData,
     Uptime,
-    Printers,
+    WmiPrinters,
 };
 use std::env;
 
@@ -23,7 +23,7 @@ mod logical_drive;
 mod os_version;
 mod system_info;
 mod uptime;
-mod printers;
+mod wmi_printers;
 
 pub trait SystemReaderInterface {
     fn get_wmi_os_info(&self) -> Option<String>;
@@ -129,7 +129,7 @@ pub struct SystemInfo {
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
     pub uptime: Uptime,
-    pub printers: Vec<Printers>,
+    pub wmi_printers: Vec<WmiPrinters>,
 }
 
 impl SystemInfo {
@@ -147,7 +147,7 @@ impl SystemInfo {
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
-            printers: Printers::get_printers_info(system_reader.borrow()),
+            wmi_printers: WmiPrinters::get_printers_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -163,7 +163,7 @@ impl SystemInfo {
             "etc_protocols" : self.etc_protocols,
             "etc_services" : self.etc_services,
             "uptime" : self.uptime,
-            "printers" : self.printers,
+            "wmi_printers" : self.wmi_printers,
         })).unwrap()
     }
 }
@@ -312,6 +312,28 @@ mod tests {
 
         //uptime
         assert_eq!(system_info.uptime.test_uptime_result().is_ok(), true);
+
+        //wmi_printers
+        assert_eq!(system_info.wmi_printers.get(0).attributes, "64");
+        assert_eq!(system_info.wmi_printers.get(0).caption, "Snagit 2018");
+        assert_eq!(system_info.wmi_printers.get(0).creation_class_name, "Win32_Printer");
+        assert_eq!(system_info.wmi_printers.get(0).device_id, "Snagit 2018");
+        assert_eq!(system_info.wmi_printers.get(0).do_complete_first, "FALSE");
+        assert_eq!(system_info.wmi_printers.get(0).driver_name, "Snagit 18 Printer");
+        assert_eq!(system_info.wmi_printers.get(0).extended_printer_status, "2");
+        assert_eq!(system_info.wmi_printers.get(0).horizontal_resolution, "200");
+        assert_eq!(system_info.wmi_printers.get(0).local, "TRUE");
+        assert_eq!(system_info.wmi_printers.get(0).name, "Snagit 2018");
+        assert_eq!(system_info.wmi_printers.get(0).port_name, "C:\\ProgramData\\TechSmith\\Snagit 18\\PrinterPortFile");
+        assert_eq!(system_info.wmi_printers.get(0).printer_status, "3");
+        assert_eq!(system_info.wmi_printers.get(0).print_job_data_type, "RAW");
+        assert_eq!(system_info.wmi_printers.get(0).print_processor, "winprint");
+        assert_eq!(system_info.wmi_printers.get(0).priority, "1");
+        assert_eq!(system_info.wmi_printers.get(0).status, "Unknown");
+        assert_eq!(system_info.wmi_printers.get(0).system_creation_class_name, "Win32_ComputerSystem");
+        assert_eq!(system_info.wmi_printers.get(0).system_name, "DEVOLUTIONS124");
+        assert_eq!(system_info.wmi_printers.get(0).vertical_resolution, "200");
+
 
     }
 }

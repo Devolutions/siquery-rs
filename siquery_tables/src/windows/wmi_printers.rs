@@ -1,11 +1,11 @@
-use tables::Printers;
+use tables::WmiPrinters;
 use utils;
 use windows::SystemReaderInterface;
 
-impl Printers {
+impl WmiPrinters {
 
-    pub fn new() -> Printers {
-        Printers {
+    pub fn new() -> WmiPrinters {
+        WmiPrinters {
             attributes: String::new(),
             caption: String::new(),
             creation_class_name: String::new(),
@@ -28,12 +28,12 @@ impl Printers {
         }
     }
 
-    pub fn get_printers_info(system_reader: &SystemReaderInterface) -> Vec<Printers> {
+    pub fn get_printers_info(system_reader: &SystemReaderInterface) -> Vec<WmiPrinters> {
 
-        let mut printers: Vec<Printers> = Vec::new();
+        let mut printers: Vec<WmiPrinters> = Vec::new();
 
         if let Some(printer_info) = system_reader.get_wmi_printers_info() {
-            let mut printer = Printers::new();
+            let mut printer = WmiPrinters::new();
             let lines = printer_info.split('\n');
 
             for line in lines {
@@ -41,7 +41,7 @@ impl Printers {
                     if printer.attributes != "" {
                         printers.push(printer);
                     }
-                    printer = Printers::new();
+                    printer = WmiPrinters::new();
                 }
                 let v: Vec<_> = line.split('=').collect();
                 if v.len() != 2 {
