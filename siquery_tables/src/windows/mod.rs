@@ -13,6 +13,7 @@ use tables::{
     OsVersion,
     SystemInfoData,
     Uptime,
+    Printers,
 };
 use std::env;
 
@@ -22,6 +23,7 @@ mod logical_drive;
 mod os_version;
 mod system_info;
 mod uptime;
+mod printers;
 
 pub trait SystemReaderInterface {
     fn get_wmi_os_info(&self) -> Option<String>;
@@ -33,7 +35,7 @@ pub trait SystemReaderInterface {
     fn get_hosts_file(&self) -> Option<String>;
     fn get_protocols_file(&self) -> Option<String>;
     fn get_services_file(&self) -> Option<String>;
-
+    fn get_wmi_printers_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -105,6 +107,15 @@ impl SystemReaderInterface for SystemReader {
         File::open(file_location + "\\system32\\drivers\\etc\\services").ok()?.read_to_string(&mut string).ok()?;
         Some(string)
     }
+
+    fn get_wmi_printers_info(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["printer",
+                "get",
+                "Attributes,Caption,CreationClassName,DeviceID,DoCompleteFirst,DriverNAme,ExtendedPrinterStatus,HorizontalResolution,Local,Name,PortName,PrinterStatus,PrintJobDataType,PrintProcessor,Priority,Status,SystemCreationClassName,SystemName,VerticalResolution",
+                "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 }
 
 pub struct SystemInfo {
@@ -118,6 +129,7 @@ pub struct SystemInfo {
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
     pub uptime: Uptime,
+    pub printers: Vec<Printers>,
 }
 
 impl SystemInfo {
@@ -135,6 +147,7 @@ impl SystemInfo {
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
+            printers: Printers::get_printers_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -149,7 +162,8 @@ impl SystemInfo {
             "etc_hosts" : self.etc_hosts,
             "etc_protocols" : self.etc_protocols,
             "etc_services" : self.etc_services,
-            "uptime" : self.uptime
+            "uptime" : self.uptime,
+            "printers" : self.printers,
         })).unwrap()
     }
 }
@@ -196,6 +210,11 @@ mod tests {
         fn get_services_file(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/services.txt")))
         }
+
+        fn get_wmi_printers_info(&self) -> Option<String>{
+            Some(String::from(include_str!("../../test_data/printers.txt")))
+        }
+
     }
 
     #[test]

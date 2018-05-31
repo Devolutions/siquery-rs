@@ -104,3 +104,26 @@ pub struct Uptime {
     pub seconds: u64,
     pub total_seconds: f64,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Printers {
+    pub attributes: String,
+    pub caption: String,
+    pub creation_class_name: String,
+    pub device_id: String,
+    pub do_complete_first: String,
+    pub driver_name: String,
+    pub extended_printer_status: String,
+    pub horizontal_resolution: String,
+    pub local: String,
+    pub name: String,
+    pub port_name: String,
+    pub printer_status: String,
+    pub print_job_data_type: String,
+    pub print_processor: String,
+    pub priority: String,
+    pub status: String,
+    pub system_creation_class_name: String,
+    pub system_name: String,
+    pub vertical_resolution: String,
+}

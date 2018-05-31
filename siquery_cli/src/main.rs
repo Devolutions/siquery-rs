@@ -63,6 +63,9 @@ fn main() {
         "uptime" => {
             println!("{:?}", &system_info.uptime);
         }
+        "printers" => {
+            println!("{:?}", &system_info.printers);
+        }
         _ => {
 
         }
