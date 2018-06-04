@@ -127,3 +127,26 @@ pub struct WmiPrinters {
     pub system_name: String,
     pub vertical_resolution: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiServices {
+    pub accept_pause: String,
+    pub accept_stop: String,
+    pub caption: String,
+    pub creation_class_name: String,
+    pub description: String,
+    pub desktop_interact: String,
+    pub display_name: String,
+    pub error_control: String,
+    pub exit_code: u32,
+    pub name: String,
+    pub path_name: String,
+    pub service_type: String,
+    pub started: String,
+    pub start_mode: String,
+    pub start_name: String,
+    pub state: String,
+    pub status: String,
+    pub system_creation_class_name: String,
+    pub system_name: String,
+}

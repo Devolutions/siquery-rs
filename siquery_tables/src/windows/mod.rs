@@ -14,6 +14,7 @@ use tables::{
     SystemInfoData,
     Uptime,
     WmiPrinters,
+    WmiServices,
 };
 use std::env;
 
@@ -24,6 +25,8 @@ mod os_version;
 mod system_info;
 mod uptime;
 mod wmi_printers;
+mod wmi_services;
+
 
 pub trait SystemReaderInterface {
     fn get_wmi_os_info(&self) -> Option<String>;
@@ -36,6 +39,7 @@ pub trait SystemReaderInterface {
     fn get_protocols_file(&self) -> Option<String>;
     fn get_services_file(&self) -> Option<String>;
     fn get_wmi_printers_info(&self)-> Option<String>;
+    fn get_wmi_services_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -116,6 +120,15 @@ impl SystemReaderInterface for SystemReader {
                 "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
+
+    fn get_wmi_services_info(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["service",
+                "get",
+                "AcceptPause,AcceptStop,Caption,CreationClassName,Description,DesktopInteract,DisplayName,ErrorControl,ExitCode,Name,PathName,ServiceType,Started,StartMode,StartName,State,Status,SystemCreationClassName,SystemName",
+                "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 }
 
 pub struct SystemInfo {
@@ -130,6 +143,7 @@ pub struct SystemInfo {
     pub etc_services: Vec<EtcServices>,
     pub uptime: Result<Uptime, String>,
     pub wmi_printers: Vec<WmiPrinters>,
+    pub wmi_services: Vec<WmiServices>,
 }
 
 impl SystemInfo {
@@ -148,6 +162,7 @@ impl SystemInfo {
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
             wmi_printers: WmiPrinters::get_printers_info(system_reader.borrow()),
+            wmi_services: WmiServices::get_services_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -164,6 +179,7 @@ impl SystemInfo {
             "etc_services" : self.etc_services,
             "uptime" : self.uptime,
             "wmi_printers" : self.wmi_printers,
+            "wmi_services" : self.wmi_services,
         })).unwrap()
     }
 }
@@ -215,6 +231,9 @@ mod tests {
             Some(String::from(include_str!("../../test_data/wmi-printers.txt")))
         }
 
+        fn get_wmi_services_info(&self)-> Option<String>{
+            Some(String::from(include_str!("../../test_data/wmi-services.txt")))
+        }
     }
 
     #[test]
@@ -333,5 +352,27 @@ mod tests {
         assert_eq!(_test_printer.unwrap().system_creation_class_name, "Win32_ComputerSystem");
         assert_eq!(_test_printer.unwrap().system_name, "ekyaw");
         assert_eq!(_test_printer.unwrap().vertical_resolution, "200");
+
+        //wmi-services
+        let _test_service = &system_info.wmi_services.get(0);
+        assert_eq!(_test_service.unwrap().accept_pause,"FALSE");
+        assert_eq!(_test_service.unwrap().accept_stop,"TRUE");
+        assert_eq!(_test_service.unwrap().caption,"Windows Push Notifications User Service_10b2b340");
+        assert_eq!(_test_service.unwrap().creation_class_name,"Win32_Service");
+        assert_eq!(_test_service.unwrap().description,"do something");
+        assert_eq!(_test_service.unwrap().desktop_interact,"FALSE");
+        assert_eq!(_test_service.unwrap().display_name,"Windows Push Notifications User Service_10b2b340");
+        assert_eq!(_test_service.unwrap().error_control,"Ignore");
+        assert_eq!(_test_service.unwrap().exit_code, 0);
+        assert_eq!(_test_service.unwrap().name,"WpnUserService_10b2b340");
+        assert_eq!(_test_service.unwrap().path_name,"C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup");
+        assert_eq!(_test_service.unwrap().service_type,"Unknown");
+        assert_eq!(_test_service.unwrap().started,"TRUE");
+        assert_eq!(_test_service.unwrap().start_mode,"Auto");
+        assert_eq!(_test_service.unwrap().start_name,"");
+        assert_eq!(_test_service.unwrap().state,"Running");
+        assert_eq!(_test_service.unwrap().status,"OK");
+        assert_eq!(_test_service.unwrap().system_creation_class_name, "Win32_ComputerSystem");
+        assert_eq!(_test_service.unwrap().system_name, "waka-waka");
     }
 }
