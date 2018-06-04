@@ -18,16 +18,16 @@ impl WmiHotfixes {
 
         let mut hotfixes: Vec<WmiHotfixes> = Vec::new();
 
-        if let Some(hotfixe_info) = system_reader.get_wmi_hotfixes_info() {
+        if let Some(hotfix_info) = system_reader.get_wmi_hotfixes_info() {
 
-            let mut hotfixe = WmiHotfixes::new();
-            let lines = hotfixe_info.split('\n');
+            let mut hotfix = WmiHotfixes::new();
+            let lines = hotfix_info.split('\n');
             for line in lines {
                 if line.len() <= 2 {
-                    if hotfixe.caption != "" {
-                        hotfixes.push(hotfixe);
+                    if hotfix.caption != "" {
+                        hotfixes.push(hotfix);
                     }
-                    hotfixe = WmiHotfixes::new();
+                    hotfix = WmiHotfixes::new();
                 }
 
                 let v: Vec<_> = line.splitn(2, '=').collect();
@@ -42,22 +42,22 @@ impl WmiHotfixes {
 
                 match k.as_str() {
                     "Caption" => {
-                        hotfixe.caption = v;
+                        hotfix.caption = v;
                     },
                     "CSName" => {
-                        hotfixe.csname = v;
+                        hotfix.csname = v;
                     },
                     "Description" => {
-                        hotfixe.description = v;
+                        hotfix.description = v;
                     },
                     "HotFixID" => {
-                        hotfixe.hotfixe_id = v;
+                        hotfix.hotfixe_id = v;
                     },
                     "InstalledBy" => {
-                        hotfixe.installed_by = v;
+                        hotfix.installed_by = v;
                     },
                     "InstalledOn" => {
-                        hotfixe.installed_on = v;
+                        hotfix.installed_on = v;
                     },
                     _ => ()
                 }

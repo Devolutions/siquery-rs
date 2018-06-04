@@ -251,7 +251,7 @@ mod tests {
         }
 
         fn get_wmi_hotfixes_info(&self)-> Option<String>{
-            Some(String::from(include_str!("../../test_data/wmi-hotfixs.txt")))
+            Some(String::from(include_str!("../../test_data/wmi-hotfixes.txt")))
         }
     }
 
@@ -394,13 +394,13 @@ mod tests {
         assert_eq!(_test_service.unwrap().system_creation_class_name, "Win32_ComputerSystem");
         assert_eq!(_test_service.unwrap().system_name, "waka-waka");
 
-        //wmi-hotfixs
-        let _test_hotfixe = &system_info.wmi_hotfixes.get(0);
-        assert_eq!(_test_hotfixe.unwrap().caption,"http://support.microsoft.com/?kbid=4103");
-        assert_eq!(_test_hotfixe.unwrap().csname,"wakwaka");
-        assert_eq!(_test_hotfixe.unwrap().description,"Update");
-        assert_eq!(_test_hotfixe.unwrap().hotfixe_id,"KB4103");
-        assert_eq!(_test_hotfixe.unwrap().installed_by,"wakwaka\\johnCena");
-        assert_eq!(_test_hotfixe.unwrap().installed_on,"5/10/2018");
+        //wmi-hotfixes
+        let _test_hotfix = &system_info.wmi_hotfixes.get(0);
+        assert_eq!(_test_hotfix.unwrap().caption,"http://support.microsoft.com/?kbid=4103");
+        assert_eq!(_test_hotfix.unwrap().csname,"wakwaka");
+        assert_eq!(_test_hotfix.unwrap().description,"Update");
+        assert_eq!(_test_hotfix.unwrap().hotfixe_id,"KB4103");
+        assert_eq!(_test_hotfix.unwrap().installed_by,"wakwaka\\johnCena");
+        assert_eq!(_test_hotfix.unwrap().installed_on,"5/10/2018");
     }
 }

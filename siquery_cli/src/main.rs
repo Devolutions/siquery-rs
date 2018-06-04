@@ -119,7 +119,7 @@ fn main() {
             #[cfg(not(windows))]
                 println!("Not implemented!");
         }
-        "wmi_hotfixs" => {
+        "wmi_hotfixes" => {
             #[cfg(target_os = "windows")]
             for hotfixe in &system_info.wmi_hotfixes {
                 println!("Caption: {:?}", &hotfixe.caption);
