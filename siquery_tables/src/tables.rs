@@ -150,3 +150,13 @@ pub struct WmiServices {
     pub system_creation_class_name: String,
     pub system_name: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiHotfixs {
+    pub caption: String,
+    pub csname: String,
+    pub description: String,
+    pub hotfixe_id: String,
+    pub installed_by : String,
+    pub installed_on : String,
+}
