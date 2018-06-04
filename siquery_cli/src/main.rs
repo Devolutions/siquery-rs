@@ -92,6 +92,35 @@ fn main() {
             println!("Not implemented!");
 
         }
+
+        "services" => {
+            #[cfg(target_os = "windows")]
+            for service in &system_info.wmi_services {
+                println!("AcceptPause: {:?}", &service.accept_pause);
+                println!("AcceptStop: {:?}", &service.accept_stop);
+                println!("Caption: {:?}", &service.caption);
+                println!("CreationClassName: {:?}", &service.creation_class_name);
+                println!("Description: {:?}", &service.description);
+                println!("DesktopInteract: {:?}", &service.desktop_interact);
+                println!("DisplayName: {:?}", &service.display_name);
+                println!("ErrorControl: {:?}", &service.error_control);
+                println!("ExitCode: {:?}", &service.exit_code);
+                println!("Name: {:?}", &service.name);
+                println!("PathName: {:?}", &service.path_name);
+                println!("ServiceType:  {:?}", &service.service_type);
+                println!("Started: {:?}", &service.started);
+                println!("StartMode: {:?}", &service.start_mode);
+                println!("StartName: {:?}", &service.start_name);
+                println!("State: {:?}", &service.state);
+                println!("Status: {:?}", &service.status);
+                println!("SystemCreationClassName: {:?}", &service.system_creation_class_name);
+                println!("SystemName: {:?}", &service.system_name);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+
+        }
         _ => {}
     }
 }

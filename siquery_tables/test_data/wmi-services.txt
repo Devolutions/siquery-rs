@@ -1,0 +1,21 @@
+AcceptPause=FALSE
+AcceptStop=TRUE
+Caption=Windows Push Notifications User Service_10b2b340
+CreationClassName=Win32_Service
+Description=do something
+DesktopInteract=FALSE
+DisplayName=Windows Push Notifications User Service_10b2b340
+ErrorControl=Ignore
+ExitCode=0
+Name=WpnUserService_10b2b340
+PathName=C:\WINDOWS\system32\svchost.exe -k UnistackSvcGroup
+ServiceType=Unknown
+Started=TRUE
+StartMode=Auto
+StartName=
+State=Running
+Status=OK
+SystemCreationClassName=Win32_ComputerSystem
+SystemName=waka-waka
+
+
