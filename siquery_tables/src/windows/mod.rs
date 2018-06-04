@@ -13,6 +13,7 @@ use tables::{
     OsVersion,
     SystemInfoData,
     Uptime,
+    WmiPrinters,
 };
 use std::env;
 
@@ -22,6 +23,7 @@ mod logical_drive;
 mod os_version;
 mod system_info;
 mod uptime;
+mod wmi_printers;
 
 pub trait SystemReaderInterface {
     fn get_wmi_os_info(&self) -> Option<String>;
@@ -33,7 +35,7 @@ pub trait SystemReaderInterface {
     fn get_hosts_file(&self) -> Option<String>;
     fn get_protocols_file(&self) -> Option<String>;
     fn get_services_file(&self) -> Option<String>;
-
+    fn get_wmi_printers_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -105,6 +107,15 @@ impl SystemReaderInterface for SystemReader {
         File::open(file_location + "\\system32\\drivers\\etc\\services").ok()?.read_to_string(&mut string).ok()?;
         Some(string)
     }
+
+    fn get_wmi_printers_info(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["printer",
+                "get",
+                "Attributes,Caption,CreationClassName,DeviceID,DoCompleteFirst,DriverName,ExtendedPrinterStatus,HorizontalResolution,Local,Name,PortName,PrinterStatus,PrintJobDataType,PrintProcessor,Priority,Status,SystemCreationClassName,SystemName,VerticalResolution",
+                "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 }
 
 pub struct SystemInfo {
@@ -117,7 +128,8 @@ pub struct SystemInfo {
     pub etc_hosts: Vec<EtcHosts>,
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
-    pub uptime: Uptime,
+    pub uptime: Result<Uptime, String>,
+    pub wmi_printers: Vec<WmiPrinters>,
 }
 
 impl SystemInfo {
@@ -135,6 +147,7 @@ impl SystemInfo {
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
+            wmi_printers: WmiPrinters::get_printers_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -149,7 +162,8 @@ impl SystemInfo {
             "etc_hosts" : self.etc_hosts,
             "etc_protocols" : self.etc_protocols,
             "etc_services" : self.etc_services,
-            "uptime" : self.uptime
+            "uptime" : self.uptime,
+            "wmi_printers" : self.wmi_printers,
         })).unwrap()
     }
 }
@@ -196,6 +210,11 @@ mod tests {
         fn get_services_file(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/services.txt")))
         }
+
+        fn get_wmi_printers_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-printers.txt")))
+        }
+
     }
 
     #[test]
@@ -292,7 +311,27 @@ mod tests {
         assert_eq!(interface_details.mtu, 1400);
 
         //uptime
-        assert_eq!(system_info.uptime.test_uptime_result().is_ok(), true);
+        assert_eq!(system_info.uptime.is_ok(), true);
 
+        //wmi_printers
+        let _test_printer = &system_info.wmi_printers.get(0);
+        assert_eq!(_test_printer.unwrap().caption, "Snagit 2018");
+        assert_eq!(_test_printer.unwrap().creation_class_name, "Win32_Printer");
+        assert_eq!(_test_printer.unwrap().device_id, "Snagit 2018");
+        assert_eq!(_test_printer.unwrap().do_complete_first, "FALSE");
+        assert_eq!(_test_printer.unwrap().driver_name, "Snagit 18 Printer");
+        assert_eq!(_test_printer.unwrap().extended_printer_status, "2");
+        assert_eq!(_test_printer.unwrap().horizontal_resolution, "200");
+        assert_eq!(_test_printer.unwrap().local, "TRUE");
+        assert_eq!(_test_printer.unwrap().name, "Snagit 2018");
+        assert_eq!(_test_printer.unwrap().port_name, "C:\\ProgramData\\TechSmith\\Snagit18\\PrinterPortFile");
+        assert_eq!(_test_printer.unwrap().printer_status, "3");
+        assert_eq!(_test_printer.unwrap().print_job_data_type, "RAW");
+        assert_eq!(_test_printer.unwrap().print_processor, "winprint");
+        assert_eq!(_test_printer.unwrap().priority, "1");
+        assert_eq!(_test_printer.unwrap().status, "Unknown");
+        assert_eq!(_test_printer.unwrap().system_creation_class_name, "Win32_ComputerSystem");
+        assert_eq!(_test_printer.unwrap().system_name, "ekyaw");
+        assert_eq!(_test_printer.unwrap().vertical_resolution, "200");
     }
 }

@@ -4,7 +4,7 @@ use tables::Uptime;
 
 impl Uptime {
 
-    pub fn get_uptime() -> Uptime {
+    pub fn get_uptime() ->Result <Uptime, String> {
         let mut upt = Uptime{
             days: 0,
             hours: 0,
@@ -37,14 +37,8 @@ impl Uptime {
         upt.seconds = get_seconds;
         upt.total_seconds = t as f64 / 1000.0;
 
-        upt
+        Ok(upt)
     }
-
-    pub fn test_uptime_result() -> Result <Uptime, String> {
-        let uptime = Uptime::get_uptime();
-        Ok(uptime)
-    }
-
 }
 
 

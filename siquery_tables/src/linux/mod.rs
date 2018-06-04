@@ -120,7 +120,7 @@ pub struct SystemInfo {
     pub etc_hosts: Vec<EtcHosts>,
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
-    pub uptime: Uptime,
+    pub uptime: Result<Uptime, String>,
 }
 
 impl SystemInfo {
@@ -255,6 +255,6 @@ mod tests {
         assert_eq!(system_info.etc_protocols.get(1).unwrap().comment, "internet control message protocol");
         assert_eq!(system_info.etc_protocols.len(), 3);
         //uptime
-        assert_eq!(system_info.uptime.test_uptime_result().is_ok(), true);
+        assert_eq!(system_info.uptime.is_ok(), true);
     }
 }

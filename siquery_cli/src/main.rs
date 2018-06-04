@@ -61,10 +61,37 @@ fn main() {
             }
         },
         "uptime" => {
-            println!("{:?}", &system_info.uptime);
+            println!("{:?}", &system_info.uptime.unwrap());
         }
-        _ => {
+
+        "printers" => {
+            #[cfg(target_os = "windows")]
+            for printer in &system_info.wmi_printers {
+                println!("Printer name : {:?}", &printer.name);
+                println!("Attributes : {:?}", &printer.attributes);
+                println!("Caption : {:?}", &printer.caption);
+                println!("Creation class name : {:?}", &printer.creation_class_name);
+                println!("DeviceID : {:?}", &printer.device_id);
+                println!("Do complete first : {:?}", &printer.do_complete_first);
+                println!("Driver name :{:?}", &printer.driver_name);
+                println!("Extended printer status : {:?}", &printer.extended_printer_status);
+                println!("Horizontal resolution : {:?}", &printer.horizontal_resolution);
+                println!("local : {:?}", &printer.local);
+                println!("Port name : {:?}", &printer.port_name);
+                println!("Printer status : {:?}", &printer.printer_status);
+                println!("Print job data type : {:?}", &printer.print_job_data_type);
+                println!("Print processor : {:?}", &printer.print_processor);
+                println!("Priority : {:?}", &printer.priority);
+                println!("Status : {:?}", &printer.status);
+                println!("System creation class name : {:?}", &printer.system_creation_class_name);
+                println!("System name : {:?}", &printer.system_name);
+                println!("Vertical resolution : {:?}", &printer.vertical_resolution);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
 
         }
+        _ => {}
     }
 }

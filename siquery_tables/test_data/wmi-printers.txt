@@ -1,0 +1,23 @@
+
+
+
+Attributes=64
+Caption=Snagit 2018
+CreationClassName=Win32_Printer
+DeviceID=Snagit 2018
+DoCompleteFirst=FALSE
+DriverName=Snagit 18 Printer
+ExtendedPrinterStatus=2
+HorizontalResolution=200
+Local=TRUE
+Name=Snagit 2018
+PortName=C:\ProgramData\TechSmith\Snagit18\PrinterPortFile
+PrinterStatus=3
+PrintJobDataType=RAW
+PrintProcessor=winprint
+Priority=1
+Status=Unknown
+SystemCreationClassName=Win32_ComputerSystem
+SystemName=ekyaw
+VerticalResolution=200
+
