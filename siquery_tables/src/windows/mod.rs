@@ -129,7 +129,6 @@ impl SystemReaderInterface for SystemReader {
                 "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
-
 }
 
 pub struct SystemInfo {
@@ -235,7 +234,6 @@ mod tests {
         fn get_wmi_services_info(&self)-> Option<String>{
             Some(String::from(include_str!("../../test_data/wmi-services.txt")))
         }
-
     }
 
     #[test]

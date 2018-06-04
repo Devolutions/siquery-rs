@@ -90,7 +90,6 @@ fn main() {
             }
             #[cfg(not(windows))]
             println!("Not implemented!");
-
         }
 
         "services" => {
@@ -119,7 +118,6 @@ fn main() {
             }
             #[cfg(not(windows))]
             println!("Not implemented!");
-
         }
         _ => {}
     }
