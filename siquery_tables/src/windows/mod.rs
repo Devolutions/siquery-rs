@@ -112,7 +112,7 @@ impl SystemReaderInterface for SystemReader {
         let output = Command::new("wmic")
             .args(&["printer",
                 "get",
-                "Attributes,Caption,CreationClassName,DeviceID,DoCompleteFirst,DriverNAme,ExtendedPrinterStatus,HorizontalResolution,Local,Name,PortName,PrinterStatus,PrintJobDataType,PrintProcessor,Priority,Status,SystemCreationClassName,SystemName,VerticalResolution",
+                "Attributes,Caption,CreationClassName,DeviceID,DoCompleteFirst,DriverName,ExtendedPrinterStatus,HorizontalResolution,Local,Name,PortName,PrinterStatus,PrintJobDataType,PrintProcessor,Priority,Status,SystemCreationClassName,SystemName,VerticalResolution",
                 "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
@@ -331,7 +331,7 @@ mod tests {
         assert_eq!(_test_printer.unwrap().priority, "1");
         assert_eq!(_test_printer.unwrap().status, "Unknown");
         assert_eq!(_test_printer.unwrap().system_creation_class_name, "Win32_ComputerSystem");
-        assert_eq!(_test_printer.unwrap().system_name, "DEVOLUTIONS124");
+        assert_eq!(_test_printer.unwrap().system_name, "ekyaw");
         assert_eq!(_test_printer.unwrap().vertical_resolution, "200");
     }
 }

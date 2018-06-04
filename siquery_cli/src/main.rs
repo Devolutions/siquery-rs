@@ -63,7 +63,9 @@ fn main() {
         "uptime" => {
             println!("{:?}", &system_info.uptime.unwrap());
         }
+
         "printers" => {
+            #[cfg(target_os = "windows")]
             for printer in &system_info.wmi_printers {
                 println!("Printer name : {:?}", &printer.name);
                 println!("Attributes : {:?}", &printer.attributes);
@@ -86,9 +88,10 @@ fn main() {
                 println!("Vertical resolution : {:?}", &printer.vertical_resolution);
                 println!("----------------------------------------------------------------");
             }
-        }
-        _ => {
+            #[cfg(not(windows))]
+            println!("Not implemented!");
 
         }
+        _ => {}
     }
 }

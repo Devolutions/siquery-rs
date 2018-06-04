@@ -18,6 +18,6 @@ PrintProcessor=winprint
 Priority=1
 Status=Unknown
 SystemCreationClassName=Win32_ComputerSystem
-SystemName=DEVOLUTIONS124
+SystemName=ekyaw
 VerticalResolution=200
 

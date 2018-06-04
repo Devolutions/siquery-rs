@@ -7,8 +7,7 @@ use tables::Uptime;
 use std::ptr;
 
 impl Uptime {
-
-    pub fn get_uptime() -> Uptime {
+    pub fn get_uptime() -> Result<Uptime, String> {
         let mut upt = Uptime {
             days: 0,
             hours: 0,
@@ -63,14 +62,8 @@ impl Uptime {
             upt.total_seconds = t as f64;
         }
 
-        upt
+        Ok(upt)
     }
-
-    pub fn test_uptime_result(&self) -> Result<Uptime, String> {
-        let uptime = Uptime::get_uptime();
-        Ok(uptime)
-    }
-
-    }
+}
 
 
