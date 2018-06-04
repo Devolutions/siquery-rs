@@ -1,10 +1,10 @@
-use tables::WmiHotfixs;
+use tables::WmiHotfixes;
 use utils;
 use windows::SystemReaderInterface;
 
-impl WmiHotfixs {
-    pub(crate) fn new() -> WmiHotfixs {
-        WmiHotfixs {
+impl WmiHotfixes {
+    pub(crate) fn new() -> WmiHotfixes {
+        WmiHotfixes {
             caption: String::new(),
             csname: String::new(),
             description: String::new(),
@@ -14,24 +14,23 @@ impl WmiHotfixs {
         }
     }
 
-    pub(crate) fn get_hotfixs_info(system_reader: &SystemReaderInterface) -> Vec<WmiHotfixs> {
+    pub(crate) fn get_hotfixes_info(system_reader: &SystemReaderInterface) -> Vec<WmiHotfixes> {
 
-        let mut hotfixs: Vec<WmiHotfixs> = Vec::new();
+        let mut hotfixes: Vec<WmiHotfixes> = Vec::new();
 
-        if let Some(hotfix_info) = system_reader.get_wmi_hotfixs_info() {
+        if let Some(hotfixe_info) = system_reader.get_wmi_hotfixes_info() {
 
-            let mut hotfix = WmiHotfixs::new();
-            let lines = hotfix_info.split('\n');
+            let mut hotfixe = WmiHotfixes::new();
+            let lines = hotfixe_info.split('\n');
             for line in lines {
                 if line.len() <= 2 {
-                    if hotfix.caption != "" {
-                        hotfixs.push(hotfix);
+                    if hotfixe.caption != "" {
+                        hotfixes.push(hotfixe);
                     }
-                    hotfix = WmiHotfixs::new();
+                    hotfixe = WmiHotfixes::new();
                 }
 
                 let v: Vec<_> = line.splitn(2, '=').collect();
-
                 if v.len() != 2 {
                     continue
                 }
@@ -43,27 +42,27 @@ impl WmiHotfixs {
 
                 match k.as_str() {
                     "Caption" => {
-                        hotfix.caption = v;
+                        hotfixe.caption = v;
                     },
                     "CSName" => {
-                        hotfix.csname = v;
+                        hotfixe.csname = v;
                     },
                     "Description" => {
-                        hotfix.description = v;
+                        hotfixe.description = v;
                     },
                     "HotFixID" => {
-                        hotfix.hotfixe_id = v;
+                        hotfixe.hotfixe_id = v;
                     },
                     "InstalledBy" => {
-                        hotfix.installed_by = v;
+                        hotfixe.installed_by = v;
                     },
                     "InstalledOn" => {
-                        hotfix.installed_on = v;
+                        hotfixe.installed_on = v;
                     },
                     _ => ()
                 }
             }
         }
-        hotfixs
+        hotfixes
     }
 }

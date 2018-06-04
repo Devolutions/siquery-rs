@@ -66,7 +66,7 @@ fn main() {
 
         "wmi_printers" => {
             #[cfg(target_os = "windows")]
-                for printer in &system_info.wmi_printers {
+            for printer in &system_info.wmi_printers {
                 println!("Printer name : {:?}", &printer.name);
                 println!("Attributes : {:?}", &printer.attributes);
                 println!("Caption : {:?}", &printer.caption);
@@ -89,12 +89,12 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-                println!("Not implemented!");
+            println!("Not implemented!");
         }
 
         "wmi_services" => {
             #[cfg(target_os = "windows")]
-                for service in &system_info.wmi_services {
+            for service in &system_info.wmi_services {
                 println!("AcceptPause: {:?}", &service.accept_pause);
                 println!("AcceptStop: {:?}", &service.accept_stop);
                 println!("Caption: {:?}", &service.caption);
@@ -121,17 +121,17 @@ fn main() {
         }
         "wmi_hotfixs" => {
             #[cfg(target_os = "windows")]
-                for hotfix in &system_info.wmi_hotfixs {
-                println!("Caption: {:?}", &hotfix.caption);
-                println!("CSName: {:?}", &hotfix.csname);
-                println!("Description: {:?}", &hotfix.description);
-                println!("HotFixID: {:?}", &hotfix.hotfixe_id);
-                println!("InstalledBy: {:?}", &hotfix.installed_by);
-                println!("InstalledOn: {:?}", &hotfix.installed_on);
+            for hotfixe in &system_info.wmi_hotfixes {
+                println!("Caption: {:?}", &hotfixe.caption);
+                println!("CSName: {:?}", &hotfixe.csname);
+                println!("Description: {:?}", &hotfixe.description);
+                println!("HotFixID: {:?}", &hotfixe.hotfixe_id);
+                println!("InstalledBy: {:?}", &hotfixe.installed_by);
+                println!("InstalledOn: {:?}", &hotfixe.installed_on);
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-                println!("Not implemented!");
+            println!("Not implemented!");
         }
         _ => {}
     }

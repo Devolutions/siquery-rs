@@ -152,7 +152,7 @@ pub struct WmiServices {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiHotfixs {
+pub struct WmiHotfixes {
     pub caption: String,
     pub csname: String,
     pub description: String,

@@ -15,7 +15,7 @@ use tables::{
     Uptime,
     WmiPrinters,
     WmiServices,
-    WmiHotfixs,
+    WmiHotfixes,
 };
 use std::env;
 
@@ -27,7 +27,7 @@ mod system_info;
 mod uptime;
 mod wmi_printers;
 mod wmi_services;
-mod wmi_hotfixs;
+mod wmi_hotfixes;
 
 
 pub trait SystemReaderInterface {
@@ -42,7 +42,7 @@ pub trait SystemReaderInterface {
     fn get_services_file(&self) -> Option<String>;
     fn get_wmi_printers_info(&self)-> Option<String>;
     fn get_wmi_services_info(&self)-> Option<String>;
-    fn get_wmi_hotfixs_info(&self)-> Option<String>;
+    fn get_wmi_hotfixes_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -133,7 +133,7 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_hotfixs_info(&self)-> Option<String>{
+    fn get_wmi_hotfixes_info(&self)-> Option<String>{
         let output = Command::new("wmic")
             .args(&["qfe",
                 "get",
@@ -156,7 +156,7 @@ pub struct SystemInfo {
     pub uptime: Result<Uptime, String>,
     pub wmi_printers: Vec<WmiPrinters>,
     pub wmi_services: Vec<WmiServices>,
-    pub wmi_hotfixs: Vec<WmiHotfixs>,
+    pub wmi_hotfixes: Vec<WmiHotfixes>,
 }
 
 impl SystemInfo {
@@ -176,7 +176,7 @@ impl SystemInfo {
             uptime: Uptime::get_uptime(),
             wmi_printers: WmiPrinters::get_printers_info(system_reader.borrow()),
             wmi_services: WmiServices::get_services_info(system_reader.borrow()),
-            wmi_hotfixs: WmiHotfixs::get_hotfixs_info(system_reader.borrow()),
+            wmi_hotfixes: WmiHotfixes::get_hotfixes_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -194,7 +194,7 @@ impl SystemInfo {
             "uptime" : self.uptime,
             "wmi_printers" : self.wmi_printers,
             "wmi_services" : self.wmi_services,
-            "wmi_hotfixs" : self.wmi_hotfixs,
+            "wmi_hotfixes" : self.wmi_hotfixes,
         })).unwrap()
     }
 }
@@ -250,7 +250,7 @@ mod tests {
             Some(String::from(include_str!("../../test_data/wmi-services.txt")))
         }
 
-        fn get_wmi_hotfixs_info(&self)-> Option<String>{
+        fn get_wmi_hotfixes_info(&self)-> Option<String>{
             Some(String::from(include_str!("../../test_data/wmi-hotfixs.txt")))
         }
     }
@@ -395,12 +395,12 @@ mod tests {
         assert_eq!(_test_service.unwrap().system_name, "waka-waka");
 
         //wmi-hotfixs
-        let _test_hotfix = &system_info.wmi_hotfixs.get(0);
-        assert_eq!(_test_hotfix.unwrap().caption,"http://support.microsoft.com/?kbid=4103");
-        assert_eq!(_test_hotfix.unwrap().csname,"wakwaka");
-        assert_eq!(_test_hotfix.unwrap().description,"Update");
-        assert_eq!(_test_hotfix.unwrap().hotfixe_id,"KB4103");
-        assert_eq!(_test_hotfix.unwrap().installed_by,"wakwaka\\johnCena");
-        assert_eq!(_test_hotfix.unwrap().installed_on,"5/10/2018");
+        let _test_hotfixe = &system_info.wmi_hotfixes.get(0);
+        assert_eq!(_test_hotfixe.unwrap().caption,"http://support.microsoft.com/?kbid=4103");
+        assert_eq!(_test_hotfixe.unwrap().csname,"wakwaka");
+        assert_eq!(_test_hotfixe.unwrap().description,"Update");
+        assert_eq!(_test_hotfixe.unwrap().hotfixe_id,"KB4103");
+        assert_eq!(_test_hotfixe.unwrap().installed_by,"wakwaka\\johnCena");
+        assert_eq!(_test_hotfixe.unwrap().installed_on,"5/10/2018");
     }
 }
