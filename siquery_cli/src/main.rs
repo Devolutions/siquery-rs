@@ -64,7 +64,7 @@ fn main() {
             println!("{:?}", &system_info.uptime.unwrap());
         }
 
-        "printers" => {
+        "wmi_printers" => {
             #[cfg(target_os = "windows")]
             for printer in &system_info.wmi_printers {
                 println!("Printer name : {:?}", &printer.name);
@@ -92,7 +92,7 @@ fn main() {
             println!("Not implemented!");
         }
 
-        "services" => {
+        "wmi_services" => {
             #[cfg(target_os = "windows")]
             for service in &system_info.wmi_services {
                 println!("AcceptPause: {:?}", &service.accept_pause);
