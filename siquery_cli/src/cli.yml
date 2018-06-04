@@ -3,10 +3,21 @@ author: Marc-André Moreau <marcandre.moreau@gmail.com>
 about: a system info querying tool
 args:
     - table:
-        long: table
+        short: a
+        long: A
         value_name: table
-        help: table name to query
+        help: select all from table
         takes_value: true
+    - list_all:
+        short: l
+        long: L
+        help: list all table names
+    - csv_mode:
+        long: csv
+        help: set 'csv' output mode
+    - json_mode:
+        long: json
+        help: set 'json' output mode
     - verbose:
         short: v
         multiple: true
