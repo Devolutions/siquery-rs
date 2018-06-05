@@ -1,0 +1,8 @@
+Caption=http://support.microsoft.com/?kbid=4103
+CSName=wakwaka
+Description=Update
+HotFixID=KB4103
+InstalledBy=wakwaka\johnCena
+InstalledOn=5/10/2018
+
+
