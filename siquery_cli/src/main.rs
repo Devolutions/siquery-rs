@@ -121,13 +121,13 @@ fn main() {
         }
         "wmi_hotfixes" => {
             #[cfg(target_os = "windows")]
-            for hotfixe in &system_info.wmi_hotfixes {
-                println!("Caption: {:?}", &hotfixe.caption);
-                println!("CSName: {:?}", &hotfixe.csname);
-                println!("Description: {:?}", &hotfixe.description);
-                println!("HotFixID: {:?}", &hotfixe.hotfixe_id);
-                println!("InstalledBy: {:?}", &hotfixe.installed_by);
-                println!("InstalledOn: {:?}", &hotfixe.installed_on);
+            for hotfix in &system_info.wmi_hotfixes {
+                println!("Caption: {:?}", &hotfix.caption);
+                println!("CSName: {:?}", &hotfix.csname);
+                println!("Description: {:?}", &hotfix.description);
+                println!("HotFixID: {:?}", &hotfix.hotfix_id);
+                println!("InstalledBy: {:?}", &hotfix.installed_by);
+                println!("InstalledOn: {:?}", &hotfix.installed_on);
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]

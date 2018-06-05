@@ -8,7 +8,7 @@ impl WmiHotfixes {
             caption: String::new(),
             csname: String::new(),
             description: String::new(),
-            hotfixe_id: String::new(),
+            hotfix_id: String::new(),
             installed_by: String::new(),
             installed_on: String::new(),
         }
@@ -51,7 +51,7 @@ impl WmiHotfixes {
                         hotfix.description = v;
                     },
                     "HotFixID" => {
-                        hotfix.hotfixe_id = v;
+                        hotfix.hotfix_id = v;
                     },
                     "InstalledBy" => {
                         hotfix.installed_by = v;

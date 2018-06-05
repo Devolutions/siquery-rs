@@ -399,7 +399,7 @@ mod tests {
         assert_eq!(_test_hotfix.unwrap().caption,"http://support.microsoft.com/?kbid=4103");
         assert_eq!(_test_hotfix.unwrap().csname,"wakwaka");
         assert_eq!(_test_hotfix.unwrap().description,"Update");
-        assert_eq!(_test_hotfix.unwrap().hotfixe_id,"KB4103");
+        assert_eq!(_test_hotfix.unwrap().hotfix_id,"KB4103");
         assert_eq!(_test_hotfix.unwrap().installed_by,"wakwaka\\johnCena");
         assert_eq!(_test_hotfix.unwrap().installed_on,"5/10/2018");
     }
