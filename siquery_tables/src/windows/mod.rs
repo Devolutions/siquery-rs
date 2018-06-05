@@ -16,6 +16,7 @@ use tables::{
     WmiPrinters,
     WmiServices,
     WmiHotfixes,
+    Products,
 };
 use std::env;
 
@@ -28,6 +29,7 @@ mod uptime;
 mod wmi_printers;
 mod wmi_services;
 mod wmi_hotfixes;
+mod products;
 
 
 pub trait SystemReaderInterface {
@@ -157,6 +159,7 @@ pub struct SystemInfo {
     pub wmi_printers: Vec<WmiPrinters>,
     pub wmi_services: Vec<WmiServices>,
     pub wmi_hotfixes: Vec<WmiHotfixes>,
+    pub products: Vec<Products>,
 }
 
 impl SystemInfo {
@@ -177,6 +180,7 @@ impl SystemInfo {
             wmi_printers: WmiPrinters::get_printers_info(system_reader.borrow()),
             wmi_services: WmiServices::get_services_info(system_reader.borrow()),
             wmi_hotfixes: WmiHotfixes::get_hotfixes_info(system_reader.borrow()),
+            products: Products::get_products_info(),
             system_reader,
         }
     }
@@ -195,6 +199,7 @@ impl SystemInfo {
             "wmi_printers" : self.wmi_printers,
             "wmi_services" : self.wmi_services,
             "wmi_hotfixes" : self.wmi_hotfixes,
+            "products": self.products,
         })).unwrap()
     }
 }

@@ -160,3 +160,14 @@ pub struct WmiHotfixes {
     pub installed_by : String,
     pub installed_on : String,
 }
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Products {
+    pub install_date: String,
+    pub install_location: String,
+    pub help_link: String,
+    pub name: String,
+    pub vendor: String,
+    pub version: String,
+}
