@@ -122,7 +122,7 @@ fn main() {
         }
         "wmi_hotfixes" => {
             #[cfg(target_os = "windows")]
-                for hotfix in &system_info.wmi_hotfixes {
+            for hotfix in &system_info.wmi_hotfixes {
                 println!("Caption: {:?}", &hotfix.caption);
                 println!("CSName: {:?}", &hotfix.csname);
                 println!("Description: {:?}", &hotfix.description);
@@ -136,7 +136,7 @@ fn main() {
         }
         "products" => {
             #[cfg(target_os = "windows")]
-                for product in &system_info.products{
+            for product in &system_info.products{
                 println!("Name: {}",	product.name);
                 println!("HelpLink: {}", product.help_link);
                 println!("InstallDate: {}", product.install_date);
