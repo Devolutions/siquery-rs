@@ -1,4 +1,5 @@
 extern crate winreg;
+extern crate chrono;
 
 use tables::Products;
 use windows::products::winreg::enums::{HKEY_LOCAL_MACHINE, KEY_READ};
@@ -74,10 +75,6 @@ impl Products {
                 });
 
             if product.name != ""{
-                if product.install_date != ""{
-                    product.install_date.insert_str(4, "/");
-                    product.install_date.insert_str(7, "/");
-                }
                 products.push(product);
             }
 
