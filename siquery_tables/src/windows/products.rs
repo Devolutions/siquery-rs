@@ -1,5 +1,4 @@
 extern crate winreg;
-extern crate chrono;
 
 use tables::Products;
 use windows::products::winreg::enums::{HKEY_LOCAL_MACHINE, KEY_READ};
