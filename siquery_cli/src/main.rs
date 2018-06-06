@@ -43,6 +43,7 @@ fn main() {
                 println!("  File system: {}", drive.file_system);
                 println!("  Size: {}", drive.size);
                 println!("  Free space: {}", drive.free_space);
+                println!("  Drive Type: {}", drive.drive_type)
             }
         },
         "etc_hosts" => {
@@ -121,7 +122,7 @@ fn main() {
         }
         "wmi_hotfixes" => {
             #[cfg(target_os = "windows")]
-            for hotfix in &system_info.wmi_hotfixes {
+                for hotfix in &system_info.wmi_hotfixes {
                 println!("Caption: {:?}", &hotfix.caption);
                 println!("CSName: {:?}", &hotfix.csname);
                 println!("Description: {:?}", &hotfix.description);
@@ -135,13 +136,28 @@ fn main() {
         }
         "products" => {
             #[cfg(target_os = "windows")]
-            for product in &system_info.products{
+                for product in &system_info.products{
                 println!("Name: {}",	product.name);
                 println!("HelpLink: {}", product.help_link);
                 println!("InstallDate: {}", product.install_date);
                 println!("InstallLocation: {}", product.install_location);
                 println!("Vendor: {}", product.vendor);
                 println!("Version: {}", product.version);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+        "wmi_shares" => {
+            #[cfg(target_os = "windows")]
+            for share in &system_info.wmi_shares{
+                println!("Name: {}",	share.name);
+                println!("caption: {}", share.caption);
+                println!("description: {}", share.description);
+                println!("Path: {}", share.path);
+                println!("Status: {}", share.status);
+                println!("Type: {}", share._type);
+                println!("AllowMaximum: {}", share.allow_maximum);
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
