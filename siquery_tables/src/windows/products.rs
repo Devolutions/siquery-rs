@@ -19,8 +19,6 @@ impl Products {
         let mut products: Vec<Products> = Vec::new();
         let mut product = Products::new();
 
-        println!("will print all installed products on this machine");
-
         let hklm = &winreg::RegKey::predef(HKEY_LOCAL_MACHINE);
 
         let subkey = hklm.open_subkey_with_flags(r#"Software\Microsoft\Windows\CurrentVersion\Uninstall"#, KEY_READ)
@@ -28,7 +26,7 @@ impl Products {
 
         for _x in 0..subkey.enum_keys().count() {
 
-            let ref mut display_name_key = subkey.enum_keys().nth(_x).unwrap();
+            let display_name_key = subkey.enum_keys().nth(_x).unwrap();
             let _ = display_name_key.and_then(|display_name_key| subkey.open_subkey_with_flags(display_name_key, KEY_READ))
                 .and_then(|program_key| program_key.get_value("DisplayName"))
                 .and_then(|name: String| { product.name = name;
@@ -75,10 +73,21 @@ impl Products {
                     Ok(())
                 });
 
-            products.push(product);
+            if product.name != ""{
+                if product.install_date != ""{
+                    product.install_date.insert_str(4, "/");
+                    product.install_date.insert_str(7, "/");
+                }
+                products.push(product);
+            }
+
             product = Products::new();
         }
 
         products
     }
 }
+
+
+
+

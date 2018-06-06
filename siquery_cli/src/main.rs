@@ -117,7 +117,7 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-                println!("Not implemented!");
+            println!("Not implemented!");
         }
         "wmi_hotfixes" => {
             #[cfg(target_os = "windows")]
@@ -134,20 +134,18 @@ fn main() {
             println!("Not implemented!");
         }
         "products" => {
-        #[cfg(target_os = "windows")]
-            //&system_info.products;
-
-        for product in &system_info.products{
-            println!("Name: {}",	product.name);
-            println!("HelpLink: {}", product.help_link);
-            println!("InstallDate: {}", product.install_date);
-            println!("InstallLocation: {}", product.install_location);
-            println!("Vendor: {}", product.vendor);
-            println!("Version: {}", product.version);
-            println!("----------------------------------------------------------------");
-        }
-        #[cfg(not(windows))]
-        println!("Not implemented!");
+            #[cfg(target_os = "windows")]
+            for product in &system_info.products{
+                println!("Name: {}",	product.name);
+                println!("HelpLink: {}", product.help_link);
+                println!("InstallDate: {}", product.install_date);
+                println!("InstallLocation: {}", product.install_location);
+                println!("Vendor: {}", product.vendor);
+                println!("Version: {}", product.version);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
         }
         _ => {}
     }
