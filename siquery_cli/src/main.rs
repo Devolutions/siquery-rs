@@ -135,7 +135,17 @@ fn main() {
         }
         "products" => {
         #[cfg(target_os = "windows")]
-        println!("work in progress");
+            //&system_info.products;
+
+        for product in &system_info.products{
+            println!("Name: {}",	product.name);
+            println!("HelpLink: {}", product.help_link);
+            println!("InstallDate: {}", product.install_date);
+            println!("InstallLocation: {}", product.install_location);
+            println!("Vendor: {}", product.vendor);
+            println!("Version: {}", product.version);
+            println!("----------------------------------------------------------------");
+        }
         #[cfg(not(windows))]
         println!("Not implemented!");
         }
