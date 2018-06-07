@@ -5,6 +5,10 @@ DriveType=3
 FileSystem=NTFS
 FreeSpace=55674548224
 Size=496869830656
+Description=Local Fixed Disk
+MaximumComponentLength=255
+SupportsFileBasedCompression=TRUE
+VolumeSerialNumber=C098888
 
 
 DeviceID=D:
@@ -12,6 +16,10 @@ DriveType=5
 FileSystem=
 FreeSpace=
 Size=
+Description=
+MaximumComponentLength=
+SupportsFileBasedCompression=
+VolumeSerialNumber=
 
 
 DeviceID=E:
@@ -19,6 +27,10 @@ DriveType=3
 FileSystem=NTFS
 FreeSpace=469622784
 Size=501215232
+Description=Local Fixed Disk
+MaximumComponentLength=255
+SupportsFileBasedCompression=TRUE
+VolumeSerialNumber=C098888
 
 
 

@@ -43,6 +43,10 @@ fn main() {
                 println!("  File system: {}", drive.file_system);
                 println!("  Size: {}", drive.size);
                 println!("  Free space: {}", drive.free_space);
+                println!("  Description: {}", drive.description);
+                println!("  Maximum Component Length: {}", drive.maximum_component_length);
+                println!("  Supports file based compression: {}", drive.supports_file_based_compression);
+                println!("  Volume serial number: {}", drive.volume_serial_number);
             }
         },
         "etc_hosts" => {
