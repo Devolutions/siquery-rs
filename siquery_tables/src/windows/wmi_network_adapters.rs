@@ -79,7 +79,7 @@ impl WmiNetworkAdapters {
 
             for line in lines {
                 if line.len() <= 2 {
-                    if network_adapter.caption != "" {
+                    if network_adapter.mac_address != "" {
                         network_adapters.push(network_adapter);
                     }
                     network_adapter = WmiNetworkAdapters::new();
@@ -288,9 +288,12 @@ impl WmiNetworkAdapters {
 }
 
 fn add_formatted_entry(s: &mut String, v: &mut Vec<String>){
-    s.retain(|c| c != '\"');
+    s.retain(|c| c != '"');
     s.retain(|c| c != '{');
     s.retain(|c| c != '}');
+    s.retain(|c| c != ']');
+    s.retain(|c| c != '[');
+    s.retain(|c| c != ' ');
 
     let p: Vec<_> = s.split(',').collect();
 

@@ -447,14 +447,15 @@ mod tests {
         assert_eq!(_test_hotfix.unwrap().installed_by,"wakwaka\\johnCena");
         assert_eq!(_test_hotfix.unwrap().installed_on,"5/10/2018");
 
-        //wmi-shares
-        let _test_share = &system_info.wmi_shares.get(0);
-        assert_eq!(_test_share.unwrap().name,"print$");
-        assert_eq!(_test_share.unwrap().caption,"Printer Drivers");
-        assert_eq!(_test_share.unwrap().description,"Printer Drivers");
-        assert_eq!(_test_share.unwrap().path,"C:\\WINDOWS\\system32\\spool\\drivers");
-        assert_eq!(_test_share.unwrap().status,"OK");
-        assert_eq!(_test_share.unwrap()._type,"Device Admin");
-        assert_eq!(_test_share.unwrap().allow_maximum,"TRUE");
+        //wmi-network-adapter
+        let _wmi_network_adapter = &system_info.wmi_network_adapters.get(0);
+        assert_eq!(_wmi_network_adapter.unwrap().description,"VMware Virtual Ethernet Adapter for VMnet8");
+        assert_eq!(_wmi_network_adapter.unwrap().database_path,"%SystemRoot%\\System32\\drivers\\etc");
+        assert_eq!(_wmi_network_adapter.unwrap().dhcp_enabled,"TRUE");
+        assert_eq!(_wmi_network_adapter.unwrap().ip_address,vec!["192.168.197.1", "fe80::657f:efba:1143:a910"]);
+        assert_eq!(_wmi_network_adapter.unwrap().ip_enabled,"TRUE");
+        assert_eq!(_wmi_network_adapter.unwrap().ip_subnet,vec!["255.255.255.0", "64"]);
+        assert_eq!(_wmi_network_adapter.unwrap().mac_address,"00:50:56:C0:00:08");
+
     }
 }
