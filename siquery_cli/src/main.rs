@@ -43,7 +43,7 @@ fn main() {
                 println!("  File system: {}", drive.file_system);
                 println!("  Size: {}", drive.size);
                 println!("  Free space: {}", drive.free_space);
-                println!("  Drive Type: {}", drive.drive_type)
+                println!("  Drive Type: {}", drive.drive_type);
             }
         },
         "etc_hosts" => {
