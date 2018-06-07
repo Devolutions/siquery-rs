@@ -51,8 +51,8 @@ pub struct LogicalDrive {
 
 impl Serialize for LogicalDrive {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+        where
+            S: Serializer,
     {
         let mut state = serializer.serialize_struct("LogicalDrive", 5)?;
         state.serialize_field("device_id", &self.device_id)?;
@@ -75,8 +75,8 @@ pub struct InterfaceAddress {
 
 impl Serialize for InterfaceAddress {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+        where
+            S: Serializer,
     {
         let mut state = serializer.serialize_struct("InterfaceAddress", 5)?;
         state.serialize_field("interface", &self.interface)?;
@@ -171,3 +171,70 @@ pub struct Products {
     pub vendor: String,
     pub version: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiNetworkAdapters {
+    pub caption: String,
+    pub description: String,
+    pub setting_id: String,
+    pub arp_always_source_route: String,
+    pub arp_use_ether_snap: String,
+    pub database_path: String,
+    pub dead_gw_detect_enabled: String,
+    pub default_ip_gateway: Vec<String>,
+    pub default_tos: String,
+    pub default_ttl: String,
+    pub dhcp_enabled: String,
+    pub dhcp_lease_expires: String,
+    pub dhcp_lease_obtained: String,
+    pub dhcp_server: String,
+    pub dns_domain: String,
+    pub dns_domain_suffix_search_order: Vec<String>,
+    pub dns_enabled_for_wins_resolution: String,
+    pub dns_host_name: String,
+    pub dns_server_search_order: Vec<String>,
+    pub domain_dns_registration_enabled: String,
+    pub forward_buffer_memory: String,
+    pub full_dns_registration_enabled: String,
+    pub gateway_cost_metric: Vec<String>,
+    pub igmp_level: String,
+    pub index: String,
+    pub interface_index: String,
+    pub ip_address: Vec<String>,
+    pub ip_connection_metric: String,
+    pub ip_enabled: String,
+    pub ip_filter_security_enabled: String,
+    pub ip_port_security_enabled: String,
+    pub ip_sec_permit_ip_protocols: Vec<String>,
+    pub ip_sec_permit_tcp_ports: Vec<String>,
+    pub ip_sec_permit_udp_ports: Vec<String>,
+    pub ip_subnet: Vec<String>,
+    pub ip_use_zero_broadcast: String,
+    pub ip_x_address: String,
+    pub ip_x_enabled: String,
+    pub ip_x_frame_type: Vec<String>,
+    pub ip_x_media_type: String,
+    pub ip_x_network_number: Vec<String>,
+    pub ip_x_virtual_net_number: String,
+    pub keep_alive_interval: String,
+    pub keep_alive_time: String,
+    pub mac_address: String,
+    pub mtu: String,
+    pub num_forward_packets: String,
+    pub pmtu_bh_detect_enabled: String,
+    pub pmtu_discovery_enabled: String,
+    pub service_name: String,
+    pub tcp_ip_netbios_options: String,
+    pub tcp_max_connect_retransmissions: String,
+    pub tcp_max_data_retransmissions: String,
+    pub tcp_num_connections: String,
+    pub tcp_use_rfc1122_urgent_pointer: String,
+    pub tcp_window_size: String,
+    pub wins_enable_lm_hosts_lookup: String,
+    pub wins_host_lookup_file: String,
+    pub wins_primary_server: String,
+    pub wins_scope_id: String,
+    pub wins_secondary_server: String,
+}
+
+

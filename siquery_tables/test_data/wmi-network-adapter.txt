@@ -1,0 +1,10 @@
+Description=VMware Virtual Ethernet Adapter for VMnet8
+DatabasePath=%SystemRoot%\System32\drivers\etc
+DHCPEnabled=TRUE
+IPAddress=["192.168.197.1", "fe80::657f:efba:1143:a910"]
+IPEnabled=TRUE
+IPSubnet=["255.255.255.0", "64"]
+MACAddress=00:50:56:C0:00:08
+
+
+

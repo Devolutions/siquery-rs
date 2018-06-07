@@ -43,6 +43,7 @@ fn main() {
                 println!("  File system: {}", drive.file_system);
                 println!("  Size: {}", drive.size);
                 println!("  Free space: {}", drive.free_space);
+                println!("  Drive Type: {}", drive.drive_type);
             }
         },
         "etc_hosts" => {
@@ -66,7 +67,7 @@ fn main() {
 
         "wmi_printers" => {
             #[cfg(target_os = "windows")]
-            for printer in &system_info.wmi_printers {
+                for printer in &system_info.wmi_printers {
                 println!("Printer name : {:?}", &printer.name);
                 println!("Attributes : {:?}", &printer.attributes);
                 println!("Caption : {:?}", &printer.caption);
@@ -89,12 +90,12 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
 
         "wmi_services" => {
             #[cfg(target_os = "windows")]
-            for service in &system_info.wmi_services {
+                for service in &system_info.wmi_services {
                 println!("AcceptPause: {:?}", &service.accept_pause);
                 println!("AcceptStop: {:?}", &service.accept_stop);
                 println!("Caption: {:?}", &service.caption);
@@ -117,11 +118,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_hotfixes" => {
             #[cfg(target_os = "windows")]
-            for hotfix in &system_info.wmi_hotfixes {
+                for hotfix in &system_info.wmi_hotfixes {
                 println!("Caption: {:?}", &hotfix.caption);
                 println!("CSName: {:?}", &hotfix.csname);
                 println!("Description: {:?}", &hotfix.description);
@@ -131,11 +132,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "products" => {
             #[cfg(target_os = "windows")]
-            for product in &system_info.products{
+                for product in &system_info.products{
                 println!("Name: {}",	product.name);
                 println!("HelpLink: {}", product.help_link);
                 println!("InstallDate: {}", product.install_date);
@@ -145,7 +146,22 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
+        }
+        "wmi_network_adapters" => {
+            #[cfg(target_os = "windows")]
+                for network_adapter in &system_info.wmi_network_adapters {
+                println!("Description: {}", network_adapter.description);
+                println!("DatabasePath: {}", network_adapter.database_path);
+                println!("DHCPEnabled: {}", network_adapter.dhcp_enabled);
+                println!("IPAddress{:?}", network_adapter.ip_address);
+                println!("IPEnabled: {}", network_adapter.ip_enabled);
+                println!("IPSubnet: {:?}", network_adapter.ip_subnet);
+                println!("MACAddress: {}", network_adapter.mac_address);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+                println!("Not implemented!");
         }
         _ => {}
     }
