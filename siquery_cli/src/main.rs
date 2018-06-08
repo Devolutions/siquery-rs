@@ -43,6 +43,7 @@ fn main() {
                 println!("  File system: {}", drive.file_system);
                 println!("  Size: {}", drive.size);
                 println!("  Free space: {}", drive.free_space);
+                println!("  Drive Type: {}", drive.drive_type);
             }
         },
         "etc_hosts" => {
@@ -142,6 +143,21 @@ fn main() {
                 println!("InstallLocation: {}", product.install_location);
                 println!("Vendor: {}", product.vendor);
                 println!("Version: {}", product.version);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+        "wmi_shares" => {
+            #[cfg(target_os = "windows")]
+            for share in &system_info.wmi_shares{
+                println!("Name: {}",	share.name);
+                println!("caption: {}", share.caption);
+                println!("description: {}", share.description);
+                println!("Path: {}", share.path);
+                println!("Status: {}", share.status);
+                println!("Type: {}", share._type);
+                println!("AllowMaximum: {}", share.allow_maximum);
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]

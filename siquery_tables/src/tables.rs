@@ -51,8 +51,8 @@ pub struct LogicalDrive {
 
 impl Serialize for LogicalDrive {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+        where
+            S: Serializer,
     {
         let mut state = serializer.serialize_struct("LogicalDrive", 5)?;
         state.serialize_field("device_id", &self.device_id)?;
@@ -75,8 +75,8 @@ pub struct InterfaceAddress {
 
 impl Serialize for InterfaceAddress {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+        where
+            S: Serializer,
     {
         let mut state = serializer.serialize_struct("InterfaceAddress", 5)?;
         state.serialize_field("interface", &self.interface)?;
@@ -170,4 +170,15 @@ pub struct Products {
     pub name: String,
     pub vendor: String,
     pub version: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiShares {
+    pub caption: String,
+    pub description: String,
+    pub name: String,
+    pub path: String,
+    pub status: String,
+    pub _type: String,
+    pub allow_maximum: String,
 }
