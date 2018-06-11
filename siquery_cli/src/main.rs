@@ -163,6 +163,21 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        "wmi_network_adapters" => {
+            #[cfg(target_os = "windows")]
+            for network_adapter in &system_info.wmi_network_adapters {
+                println!("Description: {}", network_adapter.description);
+                println!("DatabasePath: {}", network_adapter.database_path);
+                println!("DHCPEnabled: {}", network_adapter.dhcp_enabled);
+                println!("IPAddress{:?}", network_adapter.ip_address);
+                println!("IPEnabled: {}", network_adapter.ip_enabled);
+                println!("IPSubnet: {:?}", network_adapter.ip_subnet);
+                println!("MACAddress: {}", network_adapter.mac_address);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
         _ => {}
     }
 }
