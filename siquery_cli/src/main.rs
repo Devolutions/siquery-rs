@@ -118,7 +118,7 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-                println!("Not implemented!");
+            println!("Not implemented!");
         }
         "wmi_hotfixes" => {
             #[cfg(target_os = "windows")]
@@ -146,11 +146,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-                println!("Not implemented!");
+            println!("Not implemented!");
         }
         "wmi_shares" => {
             #[cfg(target_os = "windows")]
-                for share in &system_info.wmi_shares{
+            for share in &system_info.wmi_shares{
                 println!("Name: {}",	share.name);
                 println!("caption: {}", share.caption);
                 println!("description: {}", share.description);
@@ -161,7 +161,7 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-                println!("Not implemented!");
+            println!("Not implemented!");
         }
         "wmi_network_adapters" => {
             #[cfg(target_os = "windows")]
