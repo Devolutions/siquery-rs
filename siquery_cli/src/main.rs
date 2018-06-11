@@ -47,6 +47,7 @@ fn main() {
                 println!("  Maximum Component Length: {}", drive.maximum_component_length);
                 println!("  Supports file based compression: {}", drive.supports_file_based_compression);
                 println!("  Volume serial number: {}", drive.volume_serial_number);
+                println!("  Drive Type: {}", drive.drive_type);
             }
         },
         "etc_hosts" => {
