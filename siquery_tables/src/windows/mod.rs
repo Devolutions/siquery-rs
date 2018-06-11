@@ -83,7 +83,8 @@ impl SystemReaderInterface for SystemReader {
 
     fn get_wmi_drives_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["logicaldisk", "get", "DeviceID,FileSystem,Size,FreeSpace,DriveType",
+            .args(&["logicaldisk", "get", "Description,DeviceID,FileSystem,MaximumComponentLength,\
+            Size,SupportsFileBasedCompression,FreeSpace,DriveType,VolumeSerialNumber",
                 "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
@@ -367,12 +368,20 @@ mod tests {
         assert_eq!(drive.file_system, "NTFS");
         assert_eq!(drive.size, 496869830656);
         assert_eq!(drive.free_space, 55674548224);
+        assert_eq!(drive.description, "Local Fixed Disk");
+        assert_eq!(drive.maximum_component_length, "255");
+        assert_eq!(drive.supports_file_based_compression, "TRUE");
+        assert_eq!(drive.volume_serial_number, "C098888");
 
         let drive = &system_info.logical_drives[1];
         assert_eq!(drive.device_id, "E:");
         assert_eq!(drive.file_system, "NTFS");
         assert_eq!(drive.size, 501215232);
         assert_eq!(drive.free_space, 469622784);
+        assert_eq!(drive.description, "Local Fixed Disk");
+        assert_eq!(drive.maximum_component_length, "255");
+        assert_eq!(drive.supports_file_based_compression, "TRUE");
+        assert_eq!(drive.volume_serial_number, "C098888");
 
         // interface_addresses
         assert_eq!(system_info.interface_addresses.len(), 1);

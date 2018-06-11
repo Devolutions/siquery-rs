@@ -47,6 +47,10 @@ pub struct LogicalDrive {
     pub free_space: u64,
     pub size: u64,
     pub file_system: String,
+    pub description: String,
+    pub maximum_component_length: String,
+    pub supports_file_based_compression: String,
+    pub volume_serial_number: String,
 }
 
 impl Serialize for LogicalDrive {

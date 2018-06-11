@@ -10,6 +10,10 @@ impl LogicalDrive {
             free_space: 0,
             size: 0,
             file_system: String::new(),
+            description: String::new(),
+            maximum_component_length: String::new(),
+            supports_file_based_compression: String::new(),
+            volume_serial_number: String::new(),
         }
     }
 
@@ -54,6 +58,18 @@ impl LogicalDrive {
                         if v == "3" {
                             drive.drive_type = String::from("Disk drive");
                         }
+                    },
+                    "Description" => {
+                        drive.description = v;
+                    },
+                    "MaximumComponentLength" => {
+                        drive.maximum_component_length = v;
+                    },
+                    "SupportsFileBasedCompression" => {
+                        drive.supports_file_based_compression = v;
+                    },
+                    "VolumeSerialNumber" => {
+                        drive.volume_serial_number = v;
                     },
                     _ => ()
                 }
