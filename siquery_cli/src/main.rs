@@ -22,11 +22,23 @@ fn main() {
         "os_version" => {
             println!("Operating System");
             println!("  Platform: {} ", system_info.os_version.platform);
-            println!("  Name: {}", system_info.os_version.name);
+            println!("  BuildNumber: {} ", system_info.os_version.build_number);
+            println!("  CSName: {}", system_info.os_version.csname);
+            println!("  Caption: {} ", system_info.os_version.caption);
+            println!("  FreePhysicalMemory: {} ", system_info.os_version.free_physical_mem);
+            println!("  FreeVirtualMemory: {} ", system_info.os_version.free_virtual_mem);
             println!(
                 "  Version: {} Major: {} Minor: {}",
                 system_info.os_version.version, system_info.os_version.major, system_info.os_version.minor
             );
+            println!("  Manufacturer: {} ", system_info.os_version.manufacturer);
+            println!("  Name: {} ", system_info.os_version.name);
+            println!("  ServicePackMajorVersion: {} ", system_info.os_version.service_pack_major);
+            println!("  ServicePackMinorVersion: {} ", system_info.os_version.service_pack_minor);
+            println!("  SizeStoredInPagingFiles: {} ", system_info.os_version.size_stored_in_paging_file);
+            println!("  TotalVirtualMemorySize: {} ", system_info.os_version.total_virtual_mem_size);
+            println!("  TotalVisibleMemorySize: {} ", system_info.os_version.total_visible_mem_size);
+            println!("  WindowsDirectory: {} ", system_info.os_version.win_directory);
         },
         "system_info" => {
             println!("Cpu brand: {}", system_info.system_info.cpu_brand);

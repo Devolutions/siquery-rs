@@ -33,11 +33,23 @@ pub struct SystemInfoData {
 
 #[derive(Serialize, Deserialize)]
 pub struct OsVersion {
-    pub name: String,
+    pub build_number: String,
+    pub csname: String,
+    pub caption: String,
+    pub free_physical_mem: String,
+    pub free_virtual_mem: String,
     pub platform: String,
     pub version: String,
-    pub major: u32,
-    pub minor: u32,
+    pub major: String,
+    pub manufacturer: String,
+    pub minor: String,
+    pub name: String,
+    pub service_pack_major: String,
+    pub service_pack_minor: String,
+    pub size_stored_in_paging_file: String,
+    pub total_virtual_mem_size: String,
+    pub total_visible_mem_size: String,
+    pub win_directory: String,
 }
 
 #[derive(Debug)]

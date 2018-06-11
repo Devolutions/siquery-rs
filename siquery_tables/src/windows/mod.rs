@@ -65,7 +65,7 @@ impl SystemReaderInterface for SystemReader {
 
     fn get_wmi_os_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["os", "get", "Caption,Version,CSName,OSArchitecture", "/format:list"]).output().ok()?;
+            .args(&["os", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
@@ -354,10 +354,23 @@ mod tests {
 
         // os_version
         assert_eq!(system_info.os_version.platform, "Windows");
-        assert_eq!(system_info.os_version.name, "Microsoft Windows 10 Pro");
-        assert_eq!(system_info.os_version.version, "10.0.16299");
-        assert_eq!(system_info.os_version.major, 10);
-        assert_eq!(system_info.os_version.minor, 0);
+        assert_eq!(system_info.os_version.csname, "bipbip123");
+        assert_eq!(system_info.os_version.version, "10.10.16299");
+        assert_eq!(system_info.os_version.major, "10");
+        assert_eq!(system_info.os_version.minor, "10");
+        assert_eq!(system_info.os_version.build_number, "9999");
+        assert_eq!(system_info.os_version.caption, "describe something here");
+        assert_eq!(system_info.os_version.free_physical_mem, "10138896");
+        assert_eq!(system_info.os_version.free_virtual_mem, "10900164");
+        assert_eq!(system_info.os_version.manufacturer, "Microsoft Corporation");
+        assert_eq!(system_info.os_version.name, "Microsoft Windows 10 Home");
+        assert_eq!(system_info.os_version.service_pack_major, "0");
+        assert_eq!(system_info.os_version.service_pack_minor, "0");
+        assert_eq!(system_info.os_version.size_stored_in_paging_file, "2490368");
+        assert_eq!(system_info.os_version.total_virtual_mem_size, "19134092");
+        assert_eq!(system_info.os_version.total_visible_mem_size, "16643724");
+        assert_eq!(system_info.os_version.win_directory, "C:\\WINDOWS");
+
 
         // logical_drives
         assert_eq!(system_info.logical_drives.len(), 2);
