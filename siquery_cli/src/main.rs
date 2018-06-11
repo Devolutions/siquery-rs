@@ -47,6 +47,7 @@ fn main() {
                 println!("  Maximum Component Length: {}", drive.maximum_component_length);
                 println!("  Supports file based compression: {}", drive.supports_file_based_compression);
                 println!("  Volume serial number: {}", drive.volume_serial_number);
+                println!("  Drive Type: {}", drive.drive_type);
             }
         },
         "etc_hosts" => {
@@ -146,6 +147,21 @@ fn main() {
                 println!("InstallLocation: {}", product.install_location);
                 println!("Vendor: {}", product.vendor);
                 println!("Version: {}", product.version);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+        "wmi_shares" => {
+            #[cfg(target_os = "windows")]
+            for share in &system_info.wmi_shares{
+                println!("Name: {}",	share.name);
+                println!("caption: {}", share.caption);
+                println!("description: {}", share.description);
+                println!("Path: {}", share.path);
+                println!("Status: {}", share.status);
+                println!("Type: {}", share._type);
+                println!("AllowMaximum: {}", share.allow_maximum);
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]

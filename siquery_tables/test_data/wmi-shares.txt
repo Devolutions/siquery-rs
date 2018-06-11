@@ -1,0 +1,8 @@
+Caption=Printer Drivers
+Name=print$
+Description=Printer Drivers
+Path=C:\WINDOWS\system32\spool\drivers
+Status=OK
+Type=2147483650
+AllowMaximum=TRUE
+
