@@ -23,6 +23,18 @@ pub struct EtcServices {
     pub comment: String,
 }
 
+#[cfg(target_os = "windows")]
+#[derive(Serialize)]
+pub struct SystemInfoData {
+    pub computer_name: String,
+    pub domain: String,
+    pub manufacturer: String,
+    pub model: String,
+    pub number_of_processors: String,
+    pub system_type: String,
+}
+
+#[cfg(not(windows))]
 #[derive(Serialize)]
 pub struct SystemInfoData {
     pub computer_name: String,
@@ -31,6 +43,7 @@ pub struct SystemInfoData {
     pub physical_memory: u64,
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize)]
 pub struct OsVersion {
     pub build_number: String,
@@ -50,6 +63,16 @@ pub struct OsVersion {
     pub total_virtual_mem_size: String,
     pub total_visible_mem_size: String,
     pub win_directory: String,
+}
+
+#[cfg(not(windows))]
+#[derive(Serialize, Deserialize)]
+pub struct OsVersion {
+    pub name: String,
+    pub platform: String,
+    pub version: String,
+    pub major: u32,
+    pub minor: u32,
 }
 
 #[derive(Debug)]

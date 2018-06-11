@@ -80,7 +80,7 @@ impl SystemReaderInterface for SystemReader {
 
     fn get_wmi_computer_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["computersystem", "get", "Caption,TotalPhysicalMemory", "/format:list"]).output().ok()?;
+            .args(&["computersystem", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
@@ -203,11 +203,9 @@ pub struct SystemInfo {
 
 impl SystemInfo {
     pub fn new(system_reader: Box<SystemReaderInterface>) -> SystemInfo {
-        let mut system_info_data = SystemInfoData::new();
-        system_info_data.update(system_reader.borrow());
 
         SystemInfo {
-            system_info: system_info_data,
+            system_info: SystemInfoData::get_system_info(system_reader.borrow()),
             os_version: OsVersion::new(system_reader.borrow()),
             logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),

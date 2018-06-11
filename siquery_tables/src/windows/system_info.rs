@@ -2,54 +2,59 @@ use utils;
 use tables::SystemInfoData;
 use windows::SystemReaderInterface;
 
-
 impl SystemInfoData {
     pub fn new() -> SystemInfoData {
         SystemInfoData {
             computer_name: String::new(),
-            cpu_brand: String::new(),
-            cpu_logical_cores: 0,
-            physical_memory: 0
+            domain: String::new(),
+            manufacturer: String::new(),
+            model: String::new(),
+            number_of_processors: String::new(),
+            system_type: String::new(),
         }
     }
 
-    pub(crate) fn update(&mut self, system_reader: &SystemReaderInterface) {
-        if let Some(os_info) = system_reader.get_wmi_cpu_info() {
-            let lines = os_info.split('\n');
+    pub(crate) fn get_system_info(system_reader: &SystemReaderInterface) -> SystemInfoData {
+        let mut computer = SystemInfoData::new();
+
+        if let Some(computer_info) = system_reader.get_wmi_computer_info() {
+
+            let lines = computer_info.split('\n');
 
             for line in lines {
                 let v: Vec<_> = line.split('=').collect();
                 if v.len() != 2 {
                     continue
                 }
-                if v[0].starts_with("Name") {
-                    self.cpu_brand = String::from(v[1]);
-                    utils::trim_string(&mut self.cpu_brand);
-                } else if v[0].starts_with("NumberOfLogicalProcessors") {
-                    let mut n = String::from(v[1]);
-                    utils::trim_string(&mut n);
-                    self.cpu_logical_cores = n.parse::<u32>().unwrap_or(1);
+
+                let mut k = String::from(v[0]);
+                let mut v = String::from(v[1]);
+                utils::trim_string(&mut k);
+                utils::trim_string(&mut v);
+
+                match k.as_str() {
+                    "Name" => {
+                        computer.computer_name = v;
+                    },
+                    "Domain" => {
+                        computer.domain = v;
+                    },
+                    "Manufacturer" => {
+                        computer.manufacturer = v;
+                    },
+                    "Model" => {
+                        computer.model = v;
+                    },
+                    "NumberOfProcessors" => {
+                        computer.number_of_processors = v;
+                    },
+                    "SystemType" => {
+                        computer.system_type = v;
+                    },
+                    _ => {}
                 }
             }
         }
-
-        if let Some(os_info) = system_reader.get_wmi_computer_info() {
-        let lines = os_info.split('\n');
-
-        for line in lines {
-                let v: Vec<_> = line.split('=').collect();
-                if v.len() != 2 {
-                    continue
-                }
-                if v[0].starts_with("Caption") {
-                    self.computer_name = String::from(v[1]);
-                    utils::trim_string(&mut self.computer_name);
-                } else if v[0].starts_with("TotalPhysicalMemory") {
-                    let mut n = String::from(v[1]);
-                    utils::trim_string(&mut n);
-                    self.physical_memory = n.parse::<u64>().unwrap_or(0);
-                }
-            }
-        }
+        computer
     }
 }
