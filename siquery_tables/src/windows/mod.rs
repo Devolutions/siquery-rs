@@ -463,10 +463,10 @@ mod tests {
         assert_eq!(_wmi_network_adapter.unwrap().description,"VMware Virtual Ethernet Adapter for VMnet8");
         assert_eq!(_wmi_network_adapter.unwrap().database_path,"%SystemRoot%\\System32\\drivers\\etc");
         assert_eq!(_wmi_network_adapter.unwrap().dhcp_enabled,"TRUE");
-        assert_eq!(_wmi_network_adapter.unwrap().ip_address,vec!["192.168.197.1", "fe80::657f:efba:1143:a910"]);
+        assert_eq!(_wmi_network_adapter.unwrap().ip_address,vec!["192.168.197.1", "ff80::9999:ffff:9999:f9f9"]);
         assert_eq!(_wmi_network_adapter.unwrap().ip_enabled,"TRUE");
         assert_eq!(_wmi_network_adapter.unwrap().ip_subnet,vec!["255.255.255.0", "64"]);
-        assert_eq!(_wmi_network_adapter.unwrap().mac_address,"00:50:56:C0:00:08");
+        assert_eq!(_wmi_network_adapter.unwrap().mac_address,"FF:FF:FF:FF:FF:FF");
 
     }
 }
