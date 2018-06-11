@@ -132,7 +132,7 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-                println!("Not implemented!");
+            println!("Not implemented!");
         }
         "products" => {
             #[cfg(target_os = "windows")]
