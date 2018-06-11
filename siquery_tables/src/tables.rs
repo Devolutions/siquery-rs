@@ -237,4 +237,13 @@ pub struct WmiNetworkAdapters {
     pub wins_secondary_server: String,
 }
 
-
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiShares {
+    pub caption: String,
+    pub description: String,
+    pub name: String,
+    pub path: String,
+    pub status: String,
+    pub _type: String,
+    pub allow_maximum: String,
+}

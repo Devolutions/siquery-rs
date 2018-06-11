@@ -148,6 +148,21 @@ fn main() {
             #[cfg(not(windows))]
                 println!("Not implemented!");
         }
+        "wmi_shares" => {
+            #[cfg(target_os = "windows")]
+                for share in &system_info.wmi_shares{
+                println!("Name: {}",	share.name);
+                println!("caption: {}", share.caption);
+                println!("description: {}", share.description);
+                println!("Path: {}", share.path);
+                println!("Status: {}", share.status);
+                println!("Type: {}", share._type);
+                println!("AllowMaximum: {}", share.allow_maximum);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+                println!("Not implemented!");
+        }
         "wmi_network_adapters" => {
             #[cfg(target_os = "windows")]
             for network_adapter in &system_info.wmi_network_adapters {

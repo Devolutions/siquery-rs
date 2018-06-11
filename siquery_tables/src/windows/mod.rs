@@ -17,6 +17,7 @@ use tables::{
     WmiServices,
     WmiHotfixes,
     Products,
+    WmiShares,
     WmiNetworkAdapters,
 };
 use std::env;
@@ -31,6 +32,7 @@ mod wmi_printers;
 mod wmi_services;
 mod wmi_hotfixes;
 mod products;
+mod wmi_shares;
 mod wmi_network_adapters;
 
 
@@ -47,6 +49,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_printers_info(&self)-> Option<String>;
     fn get_wmi_services_info(&self)-> Option<String>;
     fn get_wmi_hotfixes_info(&self)-> Option<String>;
+    fn get_wmi_shares_info(&self)-> Option<String>;
     fn get_wmi_network_adapters_info(&self)-> Option<String>;
 }
 
@@ -152,27 +155,19 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
+    fn get_wmi_shares_info(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["share",
+                "get",
+                "Caption,Description,Name,Path,Status,Type,AllowMaximum",
+                "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 
-    fn get_wmi_network_adapters_info(&self)-> Option<String>{
+    fn get_wmi_network_adapters_info(&self)-> Option<String> {
         let output = Command::new("wmic")
             .args(&["nicconfig",
-                "get",
-                "Caption,Description,SettingID,ArpAlwaysSourceRoute,ArpUseEtherSNAP,\
-                DatabasePath,DeadGWDetectEnabled,DefaultIPGateway,DefaultTOS,DefaultTTL,\
-                DHCPEnabled,DHCPLeaseExpires,DHCPLeaseObtained,DHCPServer,DNSDomain,\
-                DNSDomainSuffixSearchOrder,DNSEnabledForWINSResolution,DNSHostName,\
-                DNSServerSearchOrder,DomainDNSRegistrationEnabled,ForwardBufferMemory,\
-                FullDNSRegistrationEnabled,GatewayCostMetric,IGMPLevel,Index,\
-                InterfaceIndex,IPAddress,IPConnectionMetric,IPEnabled,IPFilterSecurityEnabled,\
-                IPPortSecurityEnabled,IPSecPermitIPProtocols,IPSecPermitTCPPorts,\
-                IPSecPermitUDPPorts,IPSubnet,IPUseZeroBroadcast,IPXAddress,IPXEnabled,\
-                IPXFrameType,IPXMediaType,IPXNetworkNumber,IPXVirtualNetNumber,\
-                KeepAliveInterval,KeepAliveTime,MACAddress,MTU,NumForwardPackets,\
-                PMTUBHDetectEnabled,PMTUDiscoveryEnabled,ServiceName,TcpipNetbiosOptions,\
-                TcpMaxConnectRetransmissions,TcpMaxDataRetransmissions,TcpNumConnections,\
-                TcpUseRFC1122UrgentPointer,TcpWindowSize,WINSEnableLMHostsLookup,\
-                WINSHostLookupFile,WINSPrimaryServer,WINSScopeID,WINSSecondaryServer",
-                "/format:list"]).output().ok()?;
+                "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 }
@@ -192,6 +187,7 @@ pub struct SystemInfo {
     pub wmi_services: Vec<WmiServices>,
     pub wmi_hotfixes: Vec<WmiHotfixes>,
     pub products: Vec<Products>,
+    pub wmi_shares: Vec<WmiShares>,
     pub wmi_network_adapters: Vec<WmiNetworkAdapters>,
 }
 
@@ -214,6 +210,7 @@ impl SystemInfo {
             wmi_services: WmiServices::get_services_info(system_reader.borrow()),
             wmi_hotfixes: WmiHotfixes::get_hotfixes_info(system_reader.borrow()),
             products: Products::get_products_info(),
+            wmi_shares: WmiShares::get_shares_info(system_reader.borrow()),
             wmi_network_adapters: WmiNetworkAdapters::get_netwok_adapters_info(system_reader.borrow()),
             system_reader,
         }
@@ -234,6 +231,7 @@ impl SystemInfo {
             "wmi_services" : self.wmi_services,
             "wmi_hotfixes" : self.wmi_hotfixes,
             "products": self.products,
+            "wmi_shares" : self.wmi_shares,
             "wmi_network_adapters" : self.wmi_network_adapters,
         })).unwrap()
     }
@@ -286,15 +284,18 @@ mod tests {
             Some(String::from(include_str!("../../test_data/wmi-printers.txt")))
         }
 
-        fn get_wmi_services_info(&self)-> Option<String>{
+        fn get_wmi_services_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-services.txt")))
         }
 
-        fn get_wmi_hotfixes_info(&self)-> Option<String>{
+        fn get_wmi_hotfixes_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-hotfixes.txt")))
         }
+        fn get_wmi_shares_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-shares.txt")))
+        }
 
-        fn get_wmi_network_adapters_info(&self)-> Option<String>{
+        fn get_wmi_network_adapters_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-network-adapters.txt")))
         }
     }
@@ -446,6 +447,16 @@ mod tests {
         assert_eq!(_test_hotfix.unwrap().hotfix_id,"KB4103");
         assert_eq!(_test_hotfix.unwrap().installed_by,"wakwaka\\johnCena");
         assert_eq!(_test_hotfix.unwrap().installed_on,"5/10/2018");
+
+        //wmi-shares
+        let _test_share = &system_info.wmi_shares.get(0);
+        assert_eq!(_test_share.unwrap().name,"print$");
+        assert_eq!(_test_share.unwrap().caption,"Printer Drivers");
+        assert_eq!(_test_share.unwrap().description,"Printer Drivers");
+        assert_eq!(_test_share.unwrap().path,"C:\\WINDOWS\\system32\\spool\\drivers");
+        assert_eq!(_test_share.unwrap().status,"OK");
+        assert_eq!(_test_share.unwrap()._type,"Device Admin");
+        assert_eq!(_test_share.unwrap().allow_maximum,"TRUE");
 
         //wmi-network-adapter
         let _wmi_network_adapter = &system_info.wmi_network_adapters.get(0);
