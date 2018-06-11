@@ -1,7 +1,7 @@
 AccountType=8192
-Caption=DEVO\Acc
+Caption=bipbip\Acc
 Description=A server account
-Domain=DEVO123
+Domain=bipbip1010
 LocalAccount=TRUE
 Name=UtilityAccount
 SID=S-0-0-11-1111111111-111111111-111111111-111
@@ -20,9 +20,9 @@ SIDType=
 Status=
 
 AccountType=8192
-Caption=DEVO\Acc
+Caption=bipbip\Acc
 Description=A server account
-Domain=DEVO123
+Domain=bipbip1010
 LocalAccount=TRUE
 Name=UtilityAccount
 SID=S-0-0-11-1111111111-111111111-111111111-111

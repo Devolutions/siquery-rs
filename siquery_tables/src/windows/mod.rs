@@ -487,9 +487,9 @@ mod tests {
         //wmi-local-accounts
         let _wmi_local_account = &system_info.wmi_local_accounts.get(0);
         assert_eq!(_wmi_local_account.unwrap().account_type,"Server trust account");
-        assert_eq!(_wmi_local_account.unwrap().caption,"DEVO\\Acc");
+        assert_eq!(_wmi_local_account.unwrap().caption,"bipbip\\Acc");
         assert_eq!(_wmi_local_account.unwrap().description,"A server account");
-        assert_eq!(_wmi_local_account.unwrap()._domain,"DEVO123");
+        assert_eq!(_wmi_local_account.unwrap()._domain,"bipbip1010");
         assert_eq!(_wmi_local_account.unwrap().local_account,"TRUE");
         assert_eq!(_wmi_local_account.unwrap().name,"UtilityAccount");
         assert_eq!(_wmi_local_account.unwrap().sid,"S-0-0-11-1111111111-111111111-111111111-111");
