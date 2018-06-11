@@ -19,6 +19,7 @@ use tables::{
     Products,
     WmiShares,
     WmiNetworkAdapters,
+    WmiLocalAccounts,
 };
 use std::env;
 
@@ -34,6 +35,7 @@ mod wmi_hotfixes;
 mod products;
 mod wmi_shares;
 mod wmi_network_adapters;
+mod wmi_local_accounts;
 
 
 pub trait SystemReaderInterface {
@@ -51,6 +53,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_hotfixes_info(&self)-> Option<String>;
     fn get_wmi_shares_info(&self)-> Option<String>;
     fn get_wmi_network_adapters_info(&self)-> Option<String>;
+    fn get_wmi_local_accounts_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -166,10 +169,16 @@ impl SystemReaderInterface for SystemReader {
 
     fn get_wmi_network_adapters_info(&self)-> Option<String> {
         let output = Command::new("wmic")
-            .args(&["nicconfig",
-                "get", "/format:list"]).output().ok()?;
+            .args(&["nicconfig", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
+
+    fn get_wmi_local_accounts_info(&self)-> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["useraccount", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+
 }
 
 pub struct SystemInfo {
@@ -189,6 +198,7 @@ pub struct SystemInfo {
     pub products: Vec<Products>,
     pub wmi_shares: Vec<WmiShares>,
     pub wmi_network_adapters: Vec<WmiNetworkAdapters>,
+    pub wmi_local_accounts : Vec<WmiLocalAccounts>,
 }
 
 impl SystemInfo {
@@ -212,6 +222,7 @@ impl SystemInfo {
             products: Products::get_products_info(),
             wmi_shares: WmiShares::get_shares_info(system_reader.borrow()),
             wmi_network_adapters: WmiNetworkAdapters::get_netwok_adapters_info(system_reader.borrow()),
+            wmi_local_accounts : WmiLocalAccounts::get_local_accounts_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -233,6 +244,7 @@ impl SystemInfo {
             "products": self.products,
             "wmi_shares" : self.wmi_shares,
             "wmi_network_adapters" : self.wmi_network_adapters,
+            "wmi_local_accounts" : self.wmi_local_accounts,
         })).unwrap()
     }
 }
@@ -297,6 +309,10 @@ mod tests {
 
         fn get_wmi_network_adapters_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-network-adapters.txt")))
+        }
+
+        fn get_wmi_local_accounts_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-local-accounts.txt")))
         }
     }
 
@@ -480,6 +496,19 @@ mod tests {
         assert_eq!(_wmi_network_adapter.unwrap().ip_enabled,"TRUE");
         assert_eq!(_wmi_network_adapter.unwrap().ip_subnet,vec!["255.255.255.0", "64"]);
         assert_eq!(_wmi_network_adapter.unwrap().mac_address,"FF:FF:FF:FF:FF:FF");
+
+        //wmi-local-accounts
+        let _wmi_local_account = &system_info.wmi_local_accounts.get(0);
+        assert_eq!(_wmi_local_account.unwrap().account_type,"Server trust account");
+        assert_eq!(_wmi_local_account.unwrap().caption,"bipbip\\Acc");
+        assert_eq!(_wmi_local_account.unwrap().description,"A server account");
+        assert_eq!(_wmi_local_account.unwrap()._domain,"bipbip1010");
+        assert_eq!(_wmi_local_account.unwrap().local_account,"TRUE");
+        assert_eq!(_wmi_local_account.unwrap().name,"UtilityAccount");
+        assert_eq!(_wmi_local_account.unwrap().sid,"S-0-0-11-1111111111-111111111-111111111-111");
+        assert_eq!(_wmi_local_account.unwrap().sid_type,"1");
+        assert_eq!(_wmi_local_account.unwrap().status,"Degraded");
+        assert_eq!(system_info.wmi_local_accounts.len(),2);
 
     }
 }
