@@ -178,6 +178,23 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        "wmi_local_accounts" => {
+            #[cfg(target_os = "windows")]
+            for local_account in &system_info.wmi_local_accounts {
+                println!("AccountType: {}", local_account.account_type);
+                println!("Caption: {}", local_account.caption);
+                println!("Description: {}", local_account.description);
+                println!("Domain: {}", local_account._domain);
+                println!("Local Account: {:?}", local_account.local_account);
+                println!("Name: {}", local_account.name);
+                println!("SID: {}", local_account.sid);
+                println!("SID Type: {}", local_account.sid_type);
+                println!("Status: {}", local_account.status);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
         _ => {}
     }
 }

@@ -247,3 +247,16 @@ pub struct WmiShares {
     pub _type: String,
     pub allow_maximum: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiLocalAccounts {
+    pub account_type: String,
+    pub caption: String,
+    pub description: String,
+    pub _domain: String,
+    pub local_account: String,
+    pub name: String,
+    pub sid: String,
+    pub sid_type: String,
+    pub status: String,
+}
