@@ -19,41 +19,40 @@ fn main() {
     let table = matches.value_of("table").unwrap_or("").to_string();
 
     match table.as_str() {
-        "os_version" => {
+        "wmi_os_version" => {
             #[cfg(target_os = "windows")]
             {
                 println!("Operating System");
-                println!("  Platform: {} ", system_info.os_version.platform);
-                println!("  BuildNumber: {} ", system_info.os_version.build_number);
-                println!("  CSName: {}", system_info.os_version.csname);
-                println!("  Caption: {} ", system_info.os_version.caption);
-                println!("  FreePhysicalMemory: {} ", system_info.os_version.free_physical_mem);
-                println!("  FreeVirtualMemory: {} ", system_info.os_version.free_virtual_mem);
+                println!("  Platform: {} ", system_info.wmi_os_version.platform);
+                println!("  BuildNumber: {} ", system_info.wmi_os_version.build_number);
+                println!("  CSName: {}", system_info.wmi_os_version.csname);
+                println!("  Caption: {} ", system_info.wmi_os_version.caption);
+                println!("  FreePhysicalMemory: {} ", system_info.wmi_os_version.free_physical_mem);
+                println!("  FreeVirtualMemory: {} ", system_info.wmi_os_version.free_virtual_mem);
                 println!(
                     "  Version: {} Major: {} Minor: {}",
-                    system_info.os_version.version, system_info.os_version.major, system_info.os_version.minor
+                    system_info.wmi_os_version.version, system_info.wmi_os_version.major, system_info.wmi_os_version.minor
                 );
-                println!("  Manufacturer: {} ", system_info.os_version.manufacturer);
-                println!("  Name: {} ", system_info.os_version.name);
-                println!("  ServicePackMajorVersion: {} ", system_info.os_version.service_pack_major);
-                println!("  ServicePackMinorVersion: {} ", system_info.os_version.service_pack_minor);
-                println!("  SizeStoredInPagingFiles: {} ", system_info.os_version.size_stored_in_paging_file);
-                println!("  TotalVirtualMemorySize: {} ", system_info.os_version.total_virtual_mem_size);
-                println!("  TotalVisibleMemorySize: {} ", system_info.os_version.total_visible_mem_size);
-                println!("  WindowsDirectory: {} ", system_info.os_version.win_directory);
+                println!("  Manufacturer: {} ", system_info.wmi_os_version.manufacturer);
+                println!("  Name: {} ", system_info.wmi_os_version.name);
+                println!("  ServicePackMajorVersion: {} ", system_info.wmi_os_version.service_pack_major);
+                println!("  ServicePackMinorVersion: {} ", system_info.wmi_os_version.service_pack_minor);
+                println!("  SizeStoredInPagingFiles: {} ", system_info.wmi_os_version.size_stored_in_paging_file);
+                println!("  TotalVirtualMemorySize: {} ", system_info.wmi_os_version.total_virtual_mem_size);
+                println!("  TotalVisibleMemorySize: {} ", system_info.wmi_os_version.total_visible_mem_size);
+                println!("  WindowsDirectory: {} ", system_info.wmi_os_version.win_directory);
             }
-
             #[cfg(not(windows))]
-            {
-                println!("Operating System");
-                println!("  Platform: {} ", system_info.os_version.platform);
-                println!("  Name: {}", system_info.os_version.name);
-                println!(
-                    "  Version: {} Major: {} Minor: {}",
-                    system_info.os_version.version, system_info.os_version.major, system_info.os_version.minor
-                );
-            }
-
+            println!("Not implemented!");
+        },
+        "os_version" => {
+            println!("Operating System");
+            println!("  Platform: {} ", system_info.os_version.platform);
+            println!("  Name: {}", system_info.os_version.name);
+            println!(
+                "  Version: {} Major: {} Minor: {}",
+                system_info.os_version.version, system_info.os_version.major, system_info.os_version.minor
+            );
         },
         "computer_info" => {
             #[cfg(target_os = "windows")]

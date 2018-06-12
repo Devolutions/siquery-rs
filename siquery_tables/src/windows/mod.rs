@@ -10,6 +10,7 @@ use tables::{
     InterfaceAddress,
     InterfaceDetails,
     LogicalDrive,
+    OsVersion,
     WmiOsVersion,
     WmiComputerInfo,
     Uptime,
@@ -27,6 +28,7 @@ use std::env;
 mod interface_address;
 mod interface_details;
 mod logical_drive;
+mod os_version;
 mod wmi_os_version;
 mod wmi_computer_info;
 mod uptime;
@@ -41,6 +43,7 @@ mod wmi_bios;
 
 
 pub trait SystemReaderInterface {
+    fn get_os_info(&self) -> Option<String>;
     fn get_wmi_os_info(&self) -> Option<String>;
     fn get_wmi_cpu_info(&self) -> Option<String>;
     fn get_wmi_computer_info(&self) -> Option<String>;
@@ -68,6 +71,12 @@ impl SystemReader {
 }
 
 impl SystemReaderInterface for SystemReader {
+
+    fn get_os_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["os", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 
     fn get_wmi_os_info(&self) -> Option<String> {
         let output = Command::new("wmic")
@@ -193,7 +202,8 @@ impl SystemReaderInterface for SystemReader {
 pub struct SystemInfo {
     system_reader: Box<SystemReaderInterface>,
     pub system_info: WmiComputerInfo,
-    pub os_version: WmiOsVersion,
+    pub wmi_os_version: WmiOsVersion,
+    pub os_version: OsVersion,
     pub logical_drives: Vec<LogicalDrive>,
     pub interface_addresses: Vec<InterfaceAddress>,
     pub interface_details: Vec<InterfaceDetails>,
@@ -216,7 +226,8 @@ impl SystemInfo {
 
         SystemInfo {
             system_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
-            os_version: WmiOsVersion::new(system_reader.borrow()),
+            wmi_os_version: WmiOsVersion::new(system_reader.borrow()),
+            os_version: OsVersion::new(system_reader.borrow()),
             logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
             interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
@@ -239,6 +250,7 @@ impl SystemInfo {
     pub fn to_json(&self) -> String {
         serde_json::to_string_pretty(&json!({
             "system_info": self.system_info,
+            "wmi_os_version" : self.wmi_os_version,
             "os_version" : self.os_version,
             "logical_drives" : self.logical_drives,
             "interface_addresses" : self.interface_addresses,
@@ -266,8 +278,12 @@ mod tests {
     struct MockSystemReader{}
 
     impl SystemReaderInterface for MockSystemReader {
-        fn get_wmi_os_info(&self) -> Option<String> {
+        fn get_os_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-osinfo.txt")))
+        }
+
+        fn get_wmi_os_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-os-version.txt")))
         }
 
         fn get_wmi_cpu_info(&self) -> Option<String> {
@@ -384,25 +400,31 @@ mod tests {
         assert_eq!(system_info.system_info.number_of_processors, "18");
         assert_eq!(system_info.system_info.system_type, "x128-based PC");
 
+        // wmi_os_version
+        assert_eq!(system_info.wmi_os_version.platform, "Windows");
+        assert_eq!(system_info.wmi_os_version.csname, "bipbip123");
+        assert_eq!(system_info.wmi_os_version.version, "10.10.16299");
+        assert_eq!(system_info.wmi_os_version.major, "10");
+        assert_eq!(system_info.wmi_os_version.minor, "10");
+        assert_eq!(system_info.wmi_os_version.build_number, "9999");
+        assert_eq!(system_info.wmi_os_version.caption, "describe something here");
+        assert_eq!(system_info.wmi_os_version.free_physical_mem, "10138896");
+        assert_eq!(system_info.wmi_os_version.free_virtual_mem, "10900164");
+        assert_eq!(system_info.wmi_os_version.manufacturer, "Microsoft Corporation");
+        assert_eq!(system_info.wmi_os_version.name, "Microsoft Windows 10 Home");
+        assert_eq!(system_info.wmi_os_version.service_pack_major, "0");
+        assert_eq!(system_info.wmi_os_version.service_pack_minor, "0");
+        assert_eq!(system_info.wmi_os_version.size_stored_in_paging_file, "2490368");
+        assert_eq!(system_info.wmi_os_version.total_virtual_mem_size, "19134092");
+        assert_eq!(system_info.wmi_os_version.total_visible_mem_size, "16643724");
+        assert_eq!(system_info.wmi_os_version.win_directory, "C:\\WINDOWS");
+
         // os_version
         assert_eq!(system_info.os_version.platform, "Windows");
-        assert_eq!(system_info.os_version.csname, "bipbip123");
-        assert_eq!(system_info.os_version.version, "10.10.16299");
-        assert_eq!(system_info.os_version.major, "10");
-        assert_eq!(system_info.os_version.minor, "10");
-        assert_eq!(system_info.os_version.build_number, "9999");
-        assert_eq!(system_info.os_version.caption, "describe something here");
-        assert_eq!(system_info.os_version.free_physical_mem, "10138896");
-        assert_eq!(system_info.os_version.free_virtual_mem, "10900164");
-        assert_eq!(system_info.os_version.manufacturer, "Microsoft Corporation");
-        assert_eq!(system_info.os_version.name, "Microsoft Windows 10 Home");
-        assert_eq!(system_info.os_version.service_pack_major, "0");
-        assert_eq!(system_info.os_version.service_pack_minor, "0");
-        assert_eq!(system_info.os_version.size_stored_in_paging_file, "2490368");
-        assert_eq!(system_info.os_version.total_virtual_mem_size, "19134092");
-        assert_eq!(system_info.os_version.total_visible_mem_size, "16643724");
-        assert_eq!(system_info.os_version.win_directory, "C:\\WINDOWS");
-
+        assert_eq!(system_info.os_version.name, "Microsoft Windows 10 Pro");
+        assert_eq!(system_info.os_version.version, "10.0.16299");
+        assert_eq!(system_info.os_version.major, 10);
+        assert_eq!(system_info.os_version.minor, 0);
 
         // logical_drives
         assert_eq!(system_info.logical_drives.len(), 2);

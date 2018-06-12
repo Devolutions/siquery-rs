@@ -43,7 +43,6 @@ pub struct SystemInfoData {
     pub physical_memory: u64,
 }
 
-#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize)]
 pub struct WmiOsVersion {
     pub build_number: String,
@@ -65,7 +64,6 @@ pub struct WmiOsVersion {
     pub win_directory: String,
 }
 
-#[cfg(not(windows))]
 #[derive(Serialize, Deserialize)]
 pub struct OsVersion {
     pub name: String,
