@@ -243,6 +243,18 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        "wmi_motherboard"  =>{
+            #[cfg(target_os = "windows")]
+            let motherboard_info = &system_info.wmi_motherboard;
+            println!("Name: {}", motherboard_info.name);
+            println!("Manufacturer: {}", motherboard_info.manufacturer);
+            println!("Product: {}", motherboard_info.product);
+            println!("Serial Number: {}", motherboard_info.serial_number);
+            println!("Version: {}", motherboard_info.version);
+
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
         _ => {}
     }
 }

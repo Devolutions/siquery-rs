@@ -1,5 +1,5 @@
 Caption=1.23.3
-Manufacturer=McDonald inc.
+Manufacturer=Lucerne Publishing
 ReleaseDate=20180126
 SerialNumber=AAAAAAAA
 SMBIOSBIOSVersion=1.23.3

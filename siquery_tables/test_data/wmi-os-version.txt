@@ -1,12 +1,12 @@
 Caption=Microsoft Windows 10 Pro
 Version=10.10.16299
 BuildNumber=9999
-CSName=bipbip123
+CSName=Olympia
 Caption=describe something here
 FreePhysicalMemory=10138896
 FreeVirtualMemory=10900164
-Manufacturer=Microsoft Corporation
-Name=Microsoft Windows 10 Home
+Manufacturer=Wide World Importers
+Name=Wide World Importers 10 Home
 ServicePackMajorVersion=0
 ServicePackMinorVersion=0
 SizeStoredInPagingFiles=2490368

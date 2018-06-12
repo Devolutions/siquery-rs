@@ -1,6 +1,6 @@
-Name=bipbip123
+Name=Lucerne Publishing
 Domain=STANDALONE
-Manufacturer=Pizza Hut
-Model=IPHONE GALAXY X
+Manufacturer=Lucerne Publishing
+Model=TailSpin Toys
 NumberOfProcessors=18
 SystemType=x128-based PC

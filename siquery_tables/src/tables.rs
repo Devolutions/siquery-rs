@@ -300,3 +300,12 @@ pub struct WmiBios {
     pub serial_number: String,
     pub smbios_version: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiMotherboard {
+    pub name: String,
+    pub manufacturer: String,
+    pub product: String,
+    pub serial_number: String,
+    pub version: String,
+}
