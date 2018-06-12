@@ -103,7 +103,6 @@ fn main() {
         "uptime" => {
             println!("{:?}", &system_info.uptime.unwrap());
         }
-
         "wmi_printers" => {
             #[cfg(target_os = "windows")]
             for printer in &system_info.wmi_printers {
@@ -131,7 +130,6 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-
         "wmi_services" => {
             #[cfg(target_os = "windows")]
             for service in &system_info.wmi_services {
@@ -233,6 +231,19 @@ fn main() {
             }
             #[cfg(not(windows))]
             println!("Not implemented!");
+        }
+        "wmi_bios" =>{
+            #[cfg(target_os = "windows")]
+            let bios_info = &system_info.wmi_bios;
+            println!("Caption: {}", bios_info.caption);
+            println!("Manufacturer: {}", bios_info.manufacturer);
+            println!("Release Date: {}", bios_info.release_date);
+            println!("Serial Number: {}", bios_info.serial_number);
+            println!("SMBIOS BIOS Version: {}", bios_info.smbios_version);
+
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+
         }
         _ => {}
     }

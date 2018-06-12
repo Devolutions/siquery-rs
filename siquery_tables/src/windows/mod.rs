@@ -20,6 +20,7 @@ use tables::{
     WmiShares,
     WmiNetworkAdapters,
     WmiLocalAccounts,
+    WmiBios,
 };
 use std::env;
 
@@ -36,6 +37,7 @@ mod products;
 mod wmi_shares;
 mod wmi_network_adapters;
 mod wmi_local_accounts;
+mod wmi_bios;
 
 
 pub trait SystemReaderInterface {
@@ -54,6 +56,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_shares_info(&self)-> Option<String>;
     fn get_wmi_network_adapters_info(&self)-> Option<String>;
     fn get_wmi_local_accounts_info(&self)-> Option<String>;
+    fn get_wmi_bios_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -179,6 +182,12 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
+    fn get_wmi_bios_info(&self)-> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["bios", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+
 }
 
 pub struct SystemInfo {
@@ -199,6 +208,7 @@ pub struct SystemInfo {
     pub wmi_shares: Vec<WmiShares>,
     pub wmi_network_adapters: Vec<WmiNetworkAdapters>,
     pub wmi_local_accounts : Vec<WmiLocalAccounts>,
+    pub wmi_bios: WmiBios,
 }
 
 impl SystemInfo {
@@ -221,6 +231,7 @@ impl SystemInfo {
             wmi_shares: WmiShares::get_shares_info(system_reader.borrow()),
             wmi_network_adapters: WmiNetworkAdapters::get_netwok_adapters_info(system_reader.borrow()),
             wmi_local_accounts : WmiLocalAccounts::get_local_accounts_info(system_reader.borrow()),
+            wmi_bios: WmiBios::get_bios_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -243,6 +254,7 @@ impl SystemInfo {
             "wmi_shares" : self.wmi_shares,
             "wmi_network_adapters" : self.wmi_network_adapters,
             "wmi_local_accounts" : self.wmi_local_accounts,
+            "wmi_bios" : self.wmi_bios,
         })).unwrap()
     }
 }
@@ -311,6 +323,10 @@ mod tests {
 
         fn get_wmi_local_accounts_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-local-accounts.txt")))
+        }
+
+        fn get_wmi_bios_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-bios.txt")))
         }
     }
 
@@ -509,6 +525,14 @@ mod tests {
         assert_eq!(_wmi_local_account.unwrap().sid_type,"1");
         assert_eq!(_wmi_local_account.unwrap().status,"Degraded");
         assert_eq!(system_info.wmi_local_accounts.len(),2);
+
+        //wmi-bios
+        let bios_info = &system_info.wmi_bios;
+        assert_eq!(bios_info.caption,"1.23.3");
+        assert_eq!(bios_info.manufacturer,"Dell Inc.");
+        assert_eq!(bios_info.release_date,"20180126");
+        assert_eq!(bios_info.serial_number,"J7VG3F2");
+        assert_eq!(bios_info.smbios_version,"1.23.3");
 
     }
 }

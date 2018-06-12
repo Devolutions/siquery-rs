@@ -1,0 +1,5 @@
+Caption=1.23.3
+Manufacturer=Dell Inc.
+ReleaseDate=20180126
+SerialNumber=J7VG3F2
+SMBIOSBIOSVersion=1.23.3

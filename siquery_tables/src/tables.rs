@@ -295,3 +295,12 @@ pub struct WmiLocalAccounts {
     pub sid_type: String,
     pub status: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiBios {
+    pub caption : String,
+    pub manufacturer: String,
+    pub release_date: String,
+    pub serial_number: String,
+    pub smbios_version: String,
+}
