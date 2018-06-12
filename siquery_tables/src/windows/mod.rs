@@ -11,6 +11,8 @@ use tables::{
     InterfaceDetails,
     LogicalDrive,
     OsVersion,
+    WmiOsVersion,
+    SystemInfoData,
     WmiComputerInfo,
     Uptime,
     WmiPrinters,
@@ -20,6 +22,8 @@ use tables::{
     WmiShares,
     WmiNetworkAdapters,
     WmiLocalAccounts,
+    WmiBios,
+    WmiMotherboard,
 };
 use std::env;
 
@@ -27,6 +31,8 @@ mod interface_address;
 mod interface_details;
 mod logical_drive;
 mod os_version;
+mod system_info;
+mod wmi_os_version;
 mod wmi_computer_info;
 mod uptime;
 mod wmi_printers;
@@ -36,9 +42,13 @@ mod products;
 mod wmi_shares;
 mod wmi_network_adapters;
 mod wmi_local_accounts;
+mod wmi_bios;
+mod wmi_motherboard;
 
 
 pub trait SystemReaderInterface {
+    fn get_os_info(&self) -> Option<String>;
+    fn get_wmi_system_info(&self) -> Option<String>;
     fn get_wmi_os_info(&self) -> Option<String>;
     fn get_wmi_cpu_info(&self) -> Option<String>;
     fn get_wmi_computer_info(&self) -> Option<String>;
@@ -54,6 +64,8 @@ pub trait SystemReaderInterface {
     fn get_wmi_shares_info(&self)-> Option<String>;
     fn get_wmi_network_adapters_info(&self)-> Option<String>;
     fn get_wmi_local_accounts_info(&self)-> Option<String>;
+    fn get_wmi_bios_info(&self)-> Option<String>;
+    fn get_wmi_motherboard_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -66,6 +78,12 @@ impl SystemReader {
 
 impl SystemReaderInterface for SystemReader {
 
+    fn get_os_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["os", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+
     fn get_wmi_os_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["os", "get", "/format:list"]).output().ok()?;
@@ -75,6 +93,12 @@ impl SystemReaderInterface for SystemReader {
     fn get_wmi_cpu_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["cpu", "get", "Name,NumberOfLogicalProcessors", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+
+    fn get_wmi_system_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["computersystem", "get", "Caption,TotalPhysicalMemory", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
@@ -179,11 +203,25 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
+    fn get_wmi_bios_info(&self)-> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["bios", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+
+    fn get_wmi_motherboard_info(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["baseboard", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+
 }
 
 pub struct SystemInfo {
     system_reader: Box<SystemReaderInterface>,
-    pub system_info: WmiComputerInfo,
+    pub system_info: SystemInfoData,
+    pub wmi_computer_info: WmiComputerInfo,
+    pub wmi_os_version: WmiOsVersion,
     pub os_version: OsVersion,
     pub logical_drives: Vec<LogicalDrive>,
     pub interface_addresses: Vec<InterfaceAddress>,
@@ -199,13 +237,19 @@ pub struct SystemInfo {
     pub wmi_shares: Vec<WmiShares>,
     pub wmi_network_adapters: Vec<WmiNetworkAdapters>,
     pub wmi_local_accounts : Vec<WmiLocalAccounts>,
+    pub wmi_bios: WmiBios,
+    pub wmi_motherboard: WmiMotherboard,
 }
 
 impl SystemInfo {
     pub fn new(system_reader: Box<SystemReaderInterface>) -> SystemInfo {
+        let mut system_info_data = SystemInfoData::new();
+        system_info_data.update(system_reader.borrow());
 
         SystemInfo {
-            system_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
+            system_info: system_info_data,
+            wmi_computer_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
+            wmi_os_version: WmiOsVersion::new(system_reader.borrow()),
             os_version: OsVersion::new(system_reader.borrow()),
             logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
@@ -221,6 +265,8 @@ impl SystemInfo {
             wmi_shares: WmiShares::get_shares_info(system_reader.borrow()),
             wmi_network_adapters: WmiNetworkAdapters::get_netwok_adapters_info(system_reader.borrow()),
             wmi_local_accounts : WmiLocalAccounts::get_local_accounts_info(system_reader.borrow()),
+            wmi_bios: WmiBios::get_bios_info(system_reader.borrow()),
+            wmi_motherboard: WmiMotherboard::get_motherboard_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -228,6 +274,8 @@ impl SystemInfo {
     pub fn to_json(&self) -> String {
         serde_json::to_string_pretty(&json!({
             "system_info": self.system_info,
+            "wmi_computer_info": self.system_info,
+            "wmi_os_version" : self.wmi_os_version,
             "os_version" : self.os_version,
             "logical_drives" : self.logical_drives,
             "interface_addresses" : self.interface_addresses,
@@ -243,6 +291,8 @@ impl SystemInfo {
             "wmi_shares" : self.wmi_shares,
             "wmi_network_adapters" : self.wmi_network_adapters,
             "wmi_local_accounts" : self.wmi_local_accounts,
+            "wmi_bios" : self.wmi_bios,
+            "wmi_motherboard" : self.wmi_motherboard,
         })).unwrap()
     }
 }
@@ -254,12 +304,20 @@ mod tests {
     struct MockSystemReader{}
 
     impl SystemReaderInterface for MockSystemReader {
-        fn get_wmi_os_info(&self) -> Option<String> {
+        fn get_os_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-osinfo.txt")))
+        }
+
+        fn get_wmi_os_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-os-version.txt")))
         }
 
         fn get_wmi_cpu_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-cpuinfo.txt")))
+        }
+
+        fn get_wmi_system_info(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-system-info.txt")))
         }
 
         fn get_wmi_computer_info(&self) -> Option<String> {
@@ -312,6 +370,14 @@ mod tests {
         fn get_wmi_local_accounts_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-local-accounts.txt")))
         }
+
+        fn get_wmi_bios_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-bios.txt")))
+        }
+
+        fn get_wmi_motherboard_info(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-motherboard-info.txt")))
+        }
     }
 
     #[test]
@@ -360,33 +426,45 @@ mod tests {
         assert_eq!(system_info.etc_hosts.get(4).unwrap().hostnames, "example.net");
         assert_eq!(system_info.etc_hosts.len(), 5);
 
+        // wmi_computer_info
+        assert_eq!(system_info.wmi_computer_info.computer_name, "Lucerne Publishing");
+        assert_eq!(system_info.wmi_computer_info.domain, "STANDALONE");
+        assert_eq!(system_info.wmi_computer_info.manufacturer, "Lucerne Publishing");
+        assert_eq!(system_info.wmi_computer_info.model, "TailSpin Toys");
+        assert_eq!(system_info.wmi_computer_info.number_of_processors, "18");
+        assert_eq!(system_info.wmi_computer_info.system_type, "x128-based PC");
+
         // system_info
-        assert_eq!(system_info.system_info.computer_name, "bipbip123");
-        assert_eq!(system_info.system_info.domain, "STANDALONE");
-        assert_eq!(system_info.system_info.manufacturer, "Pizza Hut");
-        assert_eq!(system_info.system_info.model, "IPHONE GALAXY X");
-        assert_eq!(system_info.system_info.number_of_processors, "18");
-        assert_eq!(system_info.system_info.system_type, "x128-based PC");
+        assert_eq!(system_info.system_info.computer_name, "galaxy500");
+        assert_eq!(system_info.system_info.cpu_logical_cores, 4);
+        assert_eq!(system_info.system_info.cpu_brand, "Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz");
+        assert_eq!(system_info.system_info.physical_memory, 17043189760);
+
+        // wmi_os_version
+        assert_eq!(system_info.wmi_os_version.platform, "Windows");
+        assert_eq!(system_info.wmi_os_version.csname, "Olympia");
+        assert_eq!(system_info.wmi_os_version.version, "10.10.16299");
+        assert_eq!(system_info.wmi_os_version.major, "10");
+        assert_eq!(system_info.wmi_os_version.minor, "10");
+        assert_eq!(system_info.wmi_os_version.build_number, "9999");
+        assert_eq!(system_info.wmi_os_version.caption, "describe something here");
+        assert_eq!(system_info.wmi_os_version.free_physical_mem, "10138896");
+        assert_eq!(system_info.wmi_os_version.free_virtual_mem, "10900164");
+        assert_eq!(system_info.wmi_os_version.manufacturer, "Wide World Importers");
+        assert_eq!(system_info.wmi_os_version.name, "Wide World Importers 10 Home");
+        assert_eq!(system_info.wmi_os_version.service_pack_major, "0");
+        assert_eq!(system_info.wmi_os_version.service_pack_minor, "0");
+        assert_eq!(system_info.wmi_os_version.size_stored_in_paging_file, "2490368");
+        assert_eq!(system_info.wmi_os_version.total_virtual_mem_size, "19134092");
+        assert_eq!(system_info.wmi_os_version.total_visible_mem_size, "16643724");
+        assert_eq!(system_info.wmi_os_version.win_directory, "C:\\WINDOWS");
 
         // os_version
         assert_eq!(system_info.os_version.platform, "Windows");
-        assert_eq!(system_info.os_version.csname, "bipbip123");
-        assert_eq!(system_info.os_version.version, "10.10.16299");
-        assert_eq!(system_info.os_version.major, "10");
-        assert_eq!(system_info.os_version.minor, "10");
-        assert_eq!(system_info.os_version.build_number, "9999");
-        assert_eq!(system_info.os_version.caption, "describe something here");
-        assert_eq!(system_info.os_version.free_physical_mem, "10138896");
-        assert_eq!(system_info.os_version.free_virtual_mem, "10900164");
-        assert_eq!(system_info.os_version.manufacturer, "Microsoft Corporation");
-        assert_eq!(system_info.os_version.name, "Microsoft Windows 10 Home");
-        assert_eq!(system_info.os_version.service_pack_major, "0");
-        assert_eq!(system_info.os_version.service_pack_minor, "0");
-        assert_eq!(system_info.os_version.size_stored_in_paging_file, "2490368");
-        assert_eq!(system_info.os_version.total_virtual_mem_size, "19134092");
-        assert_eq!(system_info.os_version.total_visible_mem_size, "16643724");
-        assert_eq!(system_info.os_version.win_directory, "C:\\WINDOWS");
-
+        assert_eq!(system_info.os_version.name, "Microsoft Windows 10 Pro");
+        assert_eq!(system_info.os_version.version, "10.0.16299");
+        assert_eq!(system_info.os_version.major, 10);
+        assert_eq!(system_info.os_version.minor, 0);
 
         // logical_drives
         assert_eq!(system_info.logical_drives.len(), 2);
@@ -509,6 +587,22 @@ mod tests {
         assert_eq!(_wmi_local_account.unwrap().sid_type,"1");
         assert_eq!(_wmi_local_account.unwrap().status,"Degraded");
         assert_eq!(system_info.wmi_local_accounts.len(),2);
+
+        //wmi-bios
+        let bios_info = &system_info.wmi_bios;
+        assert_eq!(bios_info.caption,"1.23.3");
+        assert_eq!(bios_info.manufacturer,"Lucerne Publishing");
+        assert_eq!(bios_info.release_date,"20180126");
+        assert_eq!(bios_info.serial_number,"AAAAAAAA");
+        assert_eq!(bios_info.smbios_version,"1.23.3");
+
+        //wmi_motherboard
+        let motherboard_info = &system_info.wmi_motherboard;
+        assert_eq!(motherboard_info.name,"Base Board");
+        assert_eq!(motherboard_info.manufacturer," The Phone Company");
+        assert_eq!(motherboard_info.product," 958B84C99");
+        assert_eq!(motherboard_info.serial_number," /D8D8DH2/ETFSC0070C000T/");
+        assert_eq!(motherboard_info.version," A11");
 
     }
 }

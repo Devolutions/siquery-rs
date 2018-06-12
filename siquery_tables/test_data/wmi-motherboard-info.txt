@@ -1,0 +1,5 @@
+Name=Base Board
+Manufacturer= The Phone Company
+Product= 958B84C99
+SerialNumber= /D8D8DH2/ETFSC0070C000T/
+Version= A11

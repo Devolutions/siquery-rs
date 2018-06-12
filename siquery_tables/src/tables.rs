@@ -34,7 +34,6 @@ pub struct WmiComputerInfo {
     pub system_type: String,
 }
 
-#[cfg(not(windows))]
 #[derive(Serialize)]
 pub struct SystemInfoData {
     pub computer_name: String,
@@ -43,9 +42,8 @@ pub struct SystemInfoData {
     pub physical_memory: u64,
 }
 
-#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize)]
-pub struct OsVersion {
+pub struct WmiOsVersion {
     pub build_number: String,
     pub csname: String,
     pub caption: String,
@@ -65,7 +63,6 @@ pub struct OsVersion {
     pub win_directory: String,
 }
 
-#[cfg(not(windows))]
 #[derive(Serialize, Deserialize)]
 pub struct OsVersion {
     pub name: String,
@@ -196,7 +193,6 @@ pub struct WmiHotfixes {
     pub installed_on : String,
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Products {
     pub install_date: String,
@@ -294,4 +290,22 @@ pub struct WmiLocalAccounts {
     pub sid: String,
     pub sid_type: String,
     pub status: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiBios {
+    pub caption : String,
+    pub manufacturer: String,
+    pub release_date: String,
+    pub serial_number: String,
+    pub smbios_version: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiMotherboard {
+    pub name: String,
+    pub manufacturer: String,
+    pub product: String,
+    pub serial_number: String,
+    pub version: String,
 }

@@ -19,61 +19,60 @@ fn main() {
     let table = matches.value_of("table").unwrap_or("").to_string();
 
     match table.as_str() {
-        "os_version" => {
+        "wmi_os_version" => {
             #[cfg(target_os = "windows")]
             {
                 println!("Operating System");
-                println!("  Platform: {} ", system_info.os_version.platform);
-                println!("  BuildNumber: {} ", system_info.os_version.build_number);
-                println!("  CSName: {}", system_info.os_version.csname);
-                println!("  Caption: {} ", system_info.os_version.caption);
-                println!("  FreePhysicalMemory: {} ", system_info.os_version.free_physical_mem);
-                println!("  FreeVirtualMemory: {} ", system_info.os_version.free_virtual_mem);
+                println!("  Platform: {} ", system_info.wmi_os_version.platform);
+                println!("  BuildNumber: {} ", system_info.wmi_os_version.build_number);
+                println!("  CSName: {}", system_info.wmi_os_version.csname);
+                println!("  Caption: {} ", system_info.wmi_os_version.caption);
+                println!("  FreePhysicalMemory: {} ", system_info.wmi_os_version.free_physical_mem);
+                println!("  FreeVirtualMemory: {} ", system_info.wmi_os_version.free_virtual_mem);
                 println!(
                     "  Version: {} Major: {} Minor: {}",
-                    system_info.os_version.version, system_info.os_version.major, system_info.os_version.minor
+                    system_info.wmi_os_version.version, system_info.wmi_os_version.major, system_info.wmi_os_version.minor
                 );
-                println!("  Manufacturer: {} ", system_info.os_version.manufacturer);
-                println!("  Name: {} ", system_info.os_version.name);
-                println!("  ServicePackMajorVersion: {} ", system_info.os_version.service_pack_major);
-                println!("  ServicePackMinorVersion: {} ", system_info.os_version.service_pack_minor);
-                println!("  SizeStoredInPagingFiles: {} ", system_info.os_version.size_stored_in_paging_file);
-                println!("  TotalVirtualMemorySize: {} ", system_info.os_version.total_virtual_mem_size);
-                println!("  TotalVisibleMemorySize: {} ", system_info.os_version.total_visible_mem_size);
-                println!("  WindowsDirectory: {} ", system_info.os_version.win_directory);
+                println!("  Manufacturer: {} ", system_info.wmi_os_version.manufacturer);
+                println!("  Name: {} ", system_info.wmi_os_version.name);
+                println!("  ServicePackMajorVersion: {} ", system_info.wmi_os_version.service_pack_major);
+                println!("  ServicePackMinorVersion: {} ", system_info.wmi_os_version.service_pack_minor);
+                println!("  SizeStoredInPagingFiles: {} ", system_info.wmi_os_version.size_stored_in_paging_file);
+                println!("  TotalVirtualMemorySize: {} ", system_info.wmi_os_version.total_virtual_mem_size);
+                println!("  TotalVisibleMemorySize: {} ", system_info.wmi_os_version.total_visible_mem_size);
+                println!("  WindowsDirectory: {} ", system_info.wmi_os_version.win_directory);
             }
-
             #[cfg(not(windows))]
-            {
-                println!("Operating System");
-                println!("  Platform: {} ", system_info.os_version.platform);
-                println!("  Name: {}", system_info.os_version.name);
-                println!(
-                    "  Version: {} Major: {} Minor: {}",
-                    system_info.os_version.version, system_info.os_version.major, system_info.os_version.minor
-                );
-            }
-
+            println!("Not implemented!");
         },
-        "computer_info" => {
+        "os_version" => {
+            println!("Operating System");
+            println!("  Platform: {} ", system_info.os_version.platform);
+            println!("  Name: {}", system_info.os_version.name);
+            println!(
+                "  Version: {} Major: {} Minor: {}",
+                system_info.os_version.version, system_info.os_version.major, system_info.os_version.minor
+            );
+        },
+        "wmi_computer_info" => {
             #[cfg(target_os = "windows")]
-            println!("Name: {}", system_info.system_info.computer_name);
-            println!("Domain: {}", system_info.system_info.domain);
-            println!("Manufacturer: {}", system_info.system_info.manufacturer);
-            println!("Model: {}", system_info.system_info.model);
-            println!("NumberOfProcessors: {}", system_info.system_info.number_of_processors);
-            println!("SystemType: {}", system_info.system_info.system_type);
+            println!("Name: {}", system_info.wmi_computer_info.computer_name);
+            println!("Domain: {}", system_info.wmi_computer_info.domain);
+            println!("Manufacturer: {}", system_info.wmi_computer_info.manufacturer);
+            println!("Model: {}", system_info.wmi_computer_info.model);
+            println!("NumberOfProcessors: {}", system_info.wmi_computer_info.number_of_processors);
+            println!("SystemType: {}", system_info.wmi_computer_info.system_type);
 
             #[cfg(not(windows))]
-            {
-                println!("Cpu brand: {}", system_info.system_info.cpu_brand);
-                println!("Cpu cores: {}", system_info.system_info.cpu_logical_cores);
-                println!(
-                    "Physical memory: {} bytes",
-                    system_info.system_info.physical_memory
-                );
-            }
-
+            println!("Not implemented!");
+        },
+        "system_info" => {
+            println!("Cpu brand: {}", system_info.system_info.cpu_brand);
+            println!("Cpu cores: {}", system_info.system_info.cpu_logical_cores);
+            println!(
+                "Physical memory: {} bytes",
+                system_info.system_info.physical_memory
+            );
         },
         "logical_drives" => {
             println!("Logical Drives");
@@ -103,7 +102,6 @@ fn main() {
         "uptime" => {
             println!("{:?}", &system_info.uptime.unwrap());
         }
-
         "wmi_printers" => {
             #[cfg(target_os = "windows")]
             for printer in &system_info.wmi_printers {
@@ -131,7 +129,6 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-
         "wmi_services" => {
             #[cfg(target_os = "windows")]
             for service in &system_info.wmi_services {
@@ -231,6 +228,30 @@ fn main() {
                 println!("Status: {}", local_account.status);
                 println!("----------------------------------------------------------------");
             }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+        "wmi_bios" =>{
+            #[cfg(target_os = "windows")]
+            let bios_info = &system_info.wmi_bios;
+            println!("Caption: {}", bios_info.caption);
+            println!("Manufacturer: {}", bios_info.manufacturer);
+            println!("Release Date: {}", bios_info.release_date);
+            println!("Serial Number: {}", bios_info.serial_number);
+            println!("SMBIOS BIOS Version: {}", bios_info.smbios_version);
+
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+        "wmi_motherboard"  =>{
+            #[cfg(target_os = "windows")]
+            let motherboard_info = &system_info.wmi_motherboard;
+            println!("Name: {}", motherboard_info.name);
+            println!("Manufacturer: {}", motherboard_info.manufacturer);
+            println!("Product: {}", motherboard_info.product);
+            println!("Serial Number: {}", motherboard_info.serial_number);
+            println!("Version: {}", motherboard_info.version);
+
             #[cfg(not(windows))]
             println!("Not implemented!");
         }

@@ -1,0 +1,16 @@
+Caption=Microsoft Windows 10 Pro
+Version=10.10.16299
+BuildNumber=9999
+CSName=Olympia
+Caption=describe something here
+FreePhysicalMemory=10138896
+FreeVirtualMemory=10900164
+Manufacturer=Wide World Importers
+Name=Wide World Importers 10 Home
+ServicePackMajorVersion=0
+ServicePackMinorVersion=0
+SizeStoredInPagingFiles=2490368
+TotalVirtualMemorySize=19134092
+TotalVisibleMemorySize=16643724
+WindowsDirectory=C:\WINDOWS
+
