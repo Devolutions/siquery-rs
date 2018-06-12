@@ -1,5 +1,5 @@
 Caption=1.23.3
-Manufacturer=Dell Inc.
+Manufacturer=McDonald inc.
 ReleaseDate=20180126
-SerialNumber=J7VG3F2
+SerialNumber=AAAAAAAA
 SMBIOSBIOSVersion=1.23.3

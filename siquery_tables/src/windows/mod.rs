@@ -529,9 +529,9 @@ mod tests {
         //wmi-bios
         let bios_info = &system_info.wmi_bios;
         assert_eq!(bios_info.caption,"1.23.3");
-        assert_eq!(bios_info.manufacturer,"Dell Inc.");
+        assert_eq!(bios_info.manufacturer,"McDonald inc.");
         assert_eq!(bios_info.release_date,"20180126");
-        assert_eq!(bios_info.serial_number,"J7VG3F2");
+        assert_eq!(bios_info.serial_number,"AAAAAAAA");
         assert_eq!(bios_info.smbios_version,"1.23.3");
 
     }

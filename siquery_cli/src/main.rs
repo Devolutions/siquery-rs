@@ -243,7 +243,6 @@ fn main() {
 
             #[cfg(not(windows))]
             println!("Not implemented!");
-
         }
         _ => {}
     }
