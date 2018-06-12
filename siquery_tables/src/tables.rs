@@ -45,7 +45,7 @@ pub struct SystemInfoData {
 
 #[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize)]
-pub struct OsVersion {
+pub struct WmiOsVersion {
     pub build_number: String,
     pub csname: String,
     pub caption: String,
@@ -195,7 +195,6 @@ pub struct WmiHotfixes {
     pub installed_by : String,
     pub installed_on : String,
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Products {

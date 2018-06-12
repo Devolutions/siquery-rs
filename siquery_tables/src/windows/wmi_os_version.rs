@@ -1,11 +1,11 @@
-use tables::OsVersion;
+use tables::WmiOsVersion;
 use utils;
 use windows::SystemReaderInterface;
 
-impl OsVersion {
-    pub(crate) fn new(system_reader: &SystemReaderInterface) -> OsVersion {
+impl WmiOsVersion {
+    pub(crate) fn new(system_reader: &SystemReaderInterface) -> WmiOsVersion {
 
-        let mut os_version = OsVersion {
+        let mut os_version = WmiOsVersion {
             csname: String::new(),
             platform: String::from("Windows"),
             version: String::new(),

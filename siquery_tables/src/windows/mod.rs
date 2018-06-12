@@ -10,7 +10,7 @@ use tables::{
     InterfaceAddress,
     InterfaceDetails,
     LogicalDrive,
-    OsVersion,
+    WmiOsVersion,
     WmiComputerInfo,
     Uptime,
     WmiPrinters,
@@ -27,7 +27,7 @@ use std::env;
 mod interface_address;
 mod interface_details;
 mod logical_drive;
-mod os_version;
+mod wmi_os_version;
 mod wmi_computer_info;
 mod uptime;
 mod wmi_printers;
@@ -193,7 +193,7 @@ impl SystemReaderInterface for SystemReader {
 pub struct SystemInfo {
     system_reader: Box<SystemReaderInterface>,
     pub system_info: WmiComputerInfo,
-    pub os_version: OsVersion,
+    pub os_version: WmiOsVersion,
     pub logical_drives: Vec<LogicalDrive>,
     pub interface_addresses: Vec<InterfaceAddress>,
     pub interface_details: Vec<InterfaceDetails>,
@@ -216,7 +216,7 @@ impl SystemInfo {
 
         SystemInfo {
             system_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
-            os_version: OsVersion::new(system_reader.borrow()),
+            os_version: WmiOsVersion::new(system_reader.borrow()),
             logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
             interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
