@@ -55,7 +55,7 @@ fn main() {
             }
 
         },
-        "system_info" => {
+        "computer_info" => {
             #[cfg(target_os = "windows")]
             println!("Name: {}", system_info.system_info.computer_name);
             println!("Domain: {}", system_info.system_info.domain);

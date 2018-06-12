@@ -1,2 +1,6 @@
-Caption=galaxy500
-TotalPhysicalMemory=17043189760
+Name=bipbip123
+Domain=STANDALONE
+Manufacturer=Pizza Hut
+Model=IPHONE GALAXY X
+NumberOfProcessors=18
+SystemType=x128-based PC

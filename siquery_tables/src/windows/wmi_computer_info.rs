@@ -1,10 +1,10 @@
 use utils;
-use tables::SystemInfoData;
+use tables::WmiComputerInfo;
 use windows::SystemReaderInterface;
 
-impl SystemInfoData {
-    pub fn new() -> SystemInfoData {
-        SystemInfoData {
+impl WmiComputerInfo {
+    pub fn new() -> WmiComputerInfo {
+        WmiComputerInfo {
             computer_name: String::new(),
             domain: String::new(),
             manufacturer: String::new(),
@@ -14,8 +14,8 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn get_system_info(system_reader: &SystemReaderInterface) -> SystemInfoData {
-        let mut computer = SystemInfoData::new();
+    pub(crate) fn get_system_info(system_reader: &SystemReaderInterface) -> WmiComputerInfo {
+        let mut computer = WmiComputerInfo::new();
 
         if let Some(computer_info) = system_reader.get_wmi_computer_info() {
 

@@ -11,7 +11,7 @@ use tables::{
     InterfaceDetails,
     LogicalDrive,
     OsVersion,
-    SystemInfoData,
+    WmiComputerInfo,
     Uptime,
     WmiPrinters,
     WmiServices,
@@ -27,7 +27,7 @@ mod interface_address;
 mod interface_details;
 mod logical_drive;
 mod os_version;
-mod system_info;
+mod wmi_computer_info;
 mod uptime;
 mod wmi_printers;
 mod wmi_services;
@@ -183,7 +183,7 @@ impl SystemReaderInterface for SystemReader {
 
 pub struct SystemInfo {
     system_reader: Box<SystemReaderInterface>,
-    pub system_info: SystemInfoData,
+    pub system_info: WmiComputerInfo,
     pub os_version: OsVersion,
     pub logical_drives: Vec<LogicalDrive>,
     pub interface_addresses: Vec<InterfaceAddress>,
@@ -205,7 +205,7 @@ impl SystemInfo {
     pub fn new(system_reader: Box<SystemReaderInterface>) -> SystemInfo {
 
         SystemInfo {
-            system_info: SystemInfoData::get_system_info(system_reader.borrow()),
+            system_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
             os_version: OsVersion::new(system_reader.borrow()),
             logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
@@ -361,10 +361,12 @@ mod tests {
         assert_eq!(system_info.etc_hosts.len(), 5);
 
         // system_info
-        assert_eq!(system_info.system_info.computer_name, "galaxy500");
-        assert_eq!(system_info.system_info.cpu_logical_cores, 4);
-        assert_eq!(system_info.system_info.cpu_brand, "Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz");
-        assert_eq!(system_info.system_info.physical_memory, 17043189760);
+        assert_eq!(system_info.system_info.computer_name, "bipbip123");
+        assert_eq!(system_info.system_info.domain, "STANDALONE");
+        assert_eq!(system_info.system_info.manufacturer, "Pizza Hut");
+        assert_eq!(system_info.system_info.model, "IPHONE GALAXY X");
+        assert_eq!(system_info.system_info.number_of_processors, "18");
+        assert_eq!(system_info.system_info.system_type, "x128-based PC");
 
         // os_version
         assert_eq!(system_info.os_version.platform, "Windows");

@@ -25,7 +25,7 @@ pub struct EtcServices {
 
 #[cfg(target_os = "windows")]
 #[derive(Serialize)]
-pub struct SystemInfoData {
+pub struct WmiComputerInfo {
     pub computer_name: String,
     pub domain: String,
     pub manufacturer: String,
