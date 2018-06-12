@@ -309,3 +309,24 @@ pub struct WmiMotherboard {
     pub serial_number: String,
     pub version: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiProcessor{
+    pub address_width: String,
+    pub cpu_satus: String,
+    pub current_clock_speed: String,
+    pub current_voltage: String,
+    pub description: String,
+    pub external_clock: String,
+    pub hyper_threading_enabled: String,
+    pub l2_cache_size: String,
+    pub l2_cache_speed: String,
+    pub l3_cache_size: String,
+    pub l3_cache_speed: String,
+    pub manufacturer: String,
+    pub max_clock_speed: String,
+    pub name: String,
+    pub number_of_cores: String,
+    pub number_of_logical_processors: String,
+    pub socket_designation: String,
+}

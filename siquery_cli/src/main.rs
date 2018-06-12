@@ -255,6 +255,31 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        "wmi_processor"  =>{
+            #[cfg(target_os = "windows")]
+            let processor_info = &system_info.wmi_processor;
+            println!("Name: {}", processor_info.name);
+            println!("Address width: {}", processor_info.address_width);
+            println!("Cpu status: {}", processor_info.cpu_satus);
+            println!("Current clock speed: {} Mhz", processor_info.current_clock_speed);
+            println!("Current voltage: {}", processor_info.current_voltage);
+            println!("Description: {}", processor_info.description);
+            println!("External clock: {} Mhz", processor_info.external_clock);
+            println!("Hyper threading enabled: {}", processor_info.hyper_threading_enabled);
+            println!("L2 cache size: {}", processor_info.l2_cache_size);
+            println!("L2 cache speed: {}", processor_info.l2_cache_speed);
+            println!("L3 cache size: {}", processor_info.l3_cache_size);
+            println!("L3 cache speed: {}", processor_info.l3_cache_speed);
+            println!("Manufacturer: {}", processor_info.manufacturer);
+            println!("Max clock speed: {} Mhz", processor_info.max_clock_speed);
+            println!("Number of cores: {}", processor_info.number_of_cores);
+            println!("Number of logical processors: {}", processor_info.number_of_logical_processors);
+            println!("Socket designation: {}", processor_info.socket_designation);
+
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+
         _ => {}
     }
 }
