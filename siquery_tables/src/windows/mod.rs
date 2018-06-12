@@ -25,6 +25,7 @@ use tables::{
     WmiBios,
     WmiMotherboard,
     WmiProcessor,
+    WmiMemory,
 };
 use std::env;
 
@@ -46,7 +47,7 @@ mod wmi_local_accounts;
 mod wmi_bios;
 mod wmi_motherboard;
 mod wmi_processor;
-
+mod wmi_physical_memory;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
@@ -69,6 +70,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_bios_info(&self)-> Option<String>;
     fn get_wmi_motherboard_info(&self)-> Option<String>;
     fn get_wmi_processor_info(&self)-> Option<String>;
+    fn get_wmi_physical_memory(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -224,6 +226,12 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
+    fn get_wmi_physical_memory(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["memorychip", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+
 }
 
 pub struct SystemInfo {
@@ -249,6 +257,7 @@ pub struct SystemInfo {
     pub wmi_bios: WmiBios,
     pub wmi_motherboard: WmiMotherboard,
     pub wmi_processor: WmiProcessor,
+    pub wmi_physical_memory: Vec<WmiMemory>,
 }
 
 impl SystemInfo {
@@ -278,6 +287,7 @@ impl SystemInfo {
             wmi_bios: WmiBios::get_bios_info(system_reader.borrow()),
             wmi_motherboard: WmiMotherboard::get_motherboard_info(system_reader.borrow()),
             wmi_processor: WmiProcessor::get_processor_info(system_reader.borrow()),
+            wmi_physical_memory: WmiMemory::get_physical_memory_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -305,6 +315,7 @@ impl SystemInfo {
             "wmi_bios" : self.wmi_bios,
             "wmi_motherboard" : self.wmi_motherboard,
             "wmi_processor" : self.wmi_processor,
+            "wmi_physical_memory" : self.wmi_physical_memory,
         })).unwrap()
     }
 }
@@ -393,6 +404,10 @@ mod tests {
 
         fn get_wmi_processor_info(&self)-> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-processor.txt")))
+        }
+
+        fn get_wmi_physical_memory(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-physical-memory.txt")))
         }
     }
 
@@ -639,5 +654,20 @@ mod tests {
         assert_eq!(processor_info.number_of_cores,"2");
         assert_eq!(processor_info.number_of_logical_processors,"2");
         assert_eq!(processor_info.socket_designation,"U4E2");
+
+        //wmi_physical_memory
+        let physical_memory = &system_info.wmi_physical_memory.get(0);
+        assert_eq!(physical_memory.unwrap().name,"Physical Memory");
+        assert_eq!(physical_memory.unwrap().bank_label,"BANK 0");
+        assert_eq!(physical_memory.unwrap().capacity,"17179869184 bytes");
+        assert_eq!(physical_memory.unwrap().description,"Physical Memory");
+        assert_eq!(physical_memory.unwrap().device_locator,"DIMM A");
+        assert_eq!(physical_memory.unwrap().form_factor,"12");
+        assert_eq!(physical_memory.unwrap().interleave_data_depth,"0");
+        assert_eq!(physical_memory.unwrap().interleave_position,"0");
+        assert_eq!(physical_memory.unwrap().manufacturer,"Fabrikam, Inc.");
+        assert_eq!(physical_memory.unwrap().memory_type,"0");
+        assert_eq!(physical_memory.unwrap().serial_number,"91A92B93C");
+        assert_eq!(physical_memory.unwrap().speed,"2400");
     }
 }
