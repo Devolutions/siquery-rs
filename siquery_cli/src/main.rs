@@ -54,25 +54,25 @@ fn main() {
                 system_info.os_version.version, system_info.os_version.major, system_info.os_version.minor
             );
         },
-        "computer_info" => {
+        "wmi_computer_info" => {
             #[cfg(target_os = "windows")]
-            println!("Name: {}", system_info.system_info.computer_name);
-            println!("Domain: {}", system_info.system_info.domain);
-            println!("Manufacturer: {}", system_info.system_info.manufacturer);
-            println!("Model: {}", system_info.system_info.model);
-            println!("NumberOfProcessors: {}", system_info.system_info.number_of_processors);
-            println!("SystemType: {}", system_info.system_info.system_type);
+            println!("Name: {}", system_info.wmi_computer_info.computer_name);
+            println!("Domain: {}", system_info.wmi_computer_info.domain);
+            println!("Manufacturer: {}", system_info.wmi_computer_info.manufacturer);
+            println!("Model: {}", system_info.wmi_computer_info.model);
+            println!("NumberOfProcessors: {}", system_info.wmi_computer_info.number_of_processors);
+            println!("SystemType: {}", system_info.wmi_computer_info.system_type);
 
             #[cfg(not(windows))]
-            {
-                println!("Cpu brand: {}", system_info.system_info.cpu_brand);
-                println!("Cpu cores: {}", system_info.system_info.cpu_logical_cores);
-                println!(
-                    "Physical memory: {} bytes",
-                    system_info.system_info.physical_memory
-                );
-            }
-
+            println!("Not implemented!");
+        },
+        "system_info" => {
+            println!("Cpu brand: {}", system_info.system_info.cpu_brand);
+            println!("Cpu cores: {}", system_info.system_info.cpu_logical_cores);
+            println!(
+                "Physical memory: {} bytes",
+                system_info.system_info.physical_memory
+            );
         },
         "logical_drives" => {
             println!("Logical Drives");

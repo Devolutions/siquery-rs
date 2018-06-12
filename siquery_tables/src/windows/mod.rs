@@ -12,6 +12,7 @@ use tables::{
     LogicalDrive,
     OsVersion,
     WmiOsVersion,
+    SystemInfoData,
     WmiComputerInfo,
     Uptime,
     WmiPrinters,
@@ -29,6 +30,7 @@ mod interface_address;
 mod interface_details;
 mod logical_drive;
 mod os_version;
+mod system_info;
 mod wmi_os_version;
 mod wmi_computer_info;
 mod uptime;
@@ -44,6 +46,7 @@ mod wmi_bios;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
+    fn get_wmi_system_info(&self) -> Option<String>;
     fn get_wmi_os_info(&self) -> Option<String>;
     fn get_wmi_cpu_info(&self) -> Option<String>;
     fn get_wmi_computer_info(&self) -> Option<String>;
@@ -87,6 +90,12 @@ impl SystemReaderInterface for SystemReader {
     fn get_wmi_cpu_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["cpu", "get", "Name,NumberOfLogicalProcessors", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+
+    fn get_wmi_system_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["computersystem", "get", "Caption,TotalPhysicalMemory", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
@@ -201,7 +210,8 @@ impl SystemReaderInterface for SystemReader {
 
 pub struct SystemInfo {
     system_reader: Box<SystemReaderInterface>,
-    pub system_info: WmiComputerInfo,
+    pub system_info: SystemInfoData,
+    pub wmi_computer_info: WmiComputerInfo,
     pub wmi_os_version: WmiOsVersion,
     pub os_version: OsVersion,
     pub logical_drives: Vec<LogicalDrive>,
@@ -223,9 +233,12 @@ pub struct SystemInfo {
 
 impl SystemInfo {
     pub fn new(system_reader: Box<SystemReaderInterface>) -> SystemInfo {
+        let mut system_info_data = SystemInfoData::new();
+        system_info_data.update(system_reader.borrow());
 
         SystemInfo {
-            system_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
+            system_info: system_info_data,
+            wmi_computer_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
             wmi_os_version: WmiOsVersion::new(system_reader.borrow()),
             os_version: OsVersion::new(system_reader.borrow()),
             logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
@@ -250,6 +263,7 @@ impl SystemInfo {
     pub fn to_json(&self) -> String {
         serde_json::to_string_pretty(&json!({
             "system_info": self.system_info,
+            "wmi_computer_info": self.system_info,
             "wmi_os_version" : self.wmi_os_version,
             "os_version" : self.os_version,
             "logical_drives" : self.logical_drives,
@@ -288,6 +302,10 @@ mod tests {
 
         fn get_wmi_cpu_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-cpuinfo.txt")))
+        }
+
+        fn get_wmi_system_info(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-system-info.txt")))
         }
 
         fn get_wmi_computer_info(&self) -> Option<String> {
@@ -392,13 +410,19 @@ mod tests {
         assert_eq!(system_info.etc_hosts.get(4).unwrap().hostnames, "example.net");
         assert_eq!(system_info.etc_hosts.len(), 5);
 
+        // computer_info
+        assert_eq!(system_info.wmi_computer_info.computer_name, "bipbip123");
+        assert_eq!(system_info.wmi_computer_info.domain, "STANDALONE");
+        assert_eq!(system_info.wmi_computer_info.manufacturer, "Pizza Hut");
+        assert_eq!(system_info.wmi_computer_info.model, "IPHONE GALAXY X");
+        assert_eq!(system_info.wmi_computer_info.number_of_processors, "18");
+        assert_eq!(system_info.wmi_computer_info.system_type, "x128-based PC");
+
         // system_info
-        assert_eq!(system_info.system_info.computer_name, "bipbip123");
-        assert_eq!(system_info.system_info.domain, "STANDALONE");
-        assert_eq!(system_info.system_info.manufacturer, "Pizza Hut");
-        assert_eq!(system_info.system_info.model, "IPHONE GALAXY X");
-        assert_eq!(system_info.system_info.number_of_processors, "18");
-        assert_eq!(system_info.system_info.system_type, "x128-based PC");
+        assert_eq!(system_info.system_info.computer_name, "galaxy500");
+        assert_eq!(system_info.system_info.cpu_logical_cores, 4);
+        assert_eq!(system_info.system_info.cpu_brand, "Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz");
+        assert_eq!(system_info.system_info.physical_memory, 17043189760);
 
         // wmi_os_version
         assert_eq!(system_info.wmi_os_version.platform, "Windows");

@@ -1,0 +1,2 @@
+Caption=galaxy500
+TotalPhysicalMemory=17043189760
