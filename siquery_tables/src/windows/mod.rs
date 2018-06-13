@@ -28,6 +28,7 @@ use tables::{
     WmiMemory,
     WmiSound,
     WmiVideo,
+    WmiMonitors,
 };
 use std::env;
 
@@ -52,6 +53,7 @@ mod wmi_processor;
 mod wmi_physical_memory;
 mod wmi_sound;
 mod wmi_video;
+mod wmi_monitors;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
@@ -77,6 +79,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_physical_memory(&self)-> Option<String>;
     fn get_wmi_sound_info(&self)-> Option<String>;
     fn get_wmi_video_info(&self)-> Option<String>;
+    fn get_wmi_monitor_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -249,6 +252,12 @@ impl SystemReaderInterface for SystemReader {
             .args(&["path","win32_VideoController", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
+
+    fn get_wmi_monitor_info(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["desktopmonitor", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 }
 
 pub struct SystemInfo {
@@ -277,6 +286,7 @@ pub struct SystemInfo {
     pub wmi_physical_memory: Vec<WmiMemory>,
     pub wmi_sound: Vec<WmiSound>,
     pub wmi_video: Vec<WmiVideo>,
+    pub wmi_monitors: Vec<WmiMonitors>,
 }
 
 impl SystemInfo {
@@ -309,6 +319,7 @@ impl SystemInfo {
             wmi_physical_memory: WmiMemory::get_physical_memory_info(system_reader.borrow()),
             wmi_sound: WmiSound::get_sound_info(system_reader.borrow()),
             wmi_video: WmiVideo::get_video_info(system_reader.borrow()),
+            wmi_monitors: WmiMonitors::get_monitors_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -339,6 +350,7 @@ impl SystemInfo {
             "wmi_physical_memory" : self.wmi_physical_memory,
             "wmi_sound" : self.wmi_sound,
             "wmi_video" : self.wmi_video,
+            "wmi_monitors" : self.wmi_monitors,
         })).unwrap()
     }
 }
@@ -439,6 +451,10 @@ mod tests {
 
         fn get_wmi_video_info(&self)-> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-video.txt")))
+        }
+
+        fn get_wmi_monitor_info(&self)-> Option<String>{
+            Some(String::from(include_str!("../../test_data/wmi-monitors.txt")))
         }
     }
 
@@ -723,5 +739,16 @@ mod tests {
         assert_eq!(video_info.unwrap().status,"OK");
         assert_eq!(video_info.unwrap().video_architecture,"MDA");
         assert_eq!(video_info.unwrap().video_memory_type,"WRAM");
+
+        //wmi_monitors
+        assert_eq!(system_info.wmi_monitors.len(), 3);
+
+        let monitor_info = &system_info.wmi_monitors.get(0);
+        assert_eq!(monitor_info.unwrap().name,"Default Monitor");
+        assert_eq!(monitor_info.unwrap().availability,"In Test");
+        assert_eq!(monitor_info.unwrap().bandwidth, 0);
+        assert_eq!(monitor_info.unwrap().screen_height, 1080);
+        assert_eq!(monitor_info.unwrap().screen_width, 1920);
+        assert_eq!(monitor_info.unwrap().manufacturer,"");
     }
 }

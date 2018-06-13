@@ -1,0 +1,20 @@
+Name=Default Monitor
+Availability=5
+Bandwidth=0
+ScreenHeight=1080
+ScreenWidth=1920
+MonitorManufacturer=
+
+Name=Default Monitor
+Availability=3
+Bandwidth=0
+ScreenHeight=1080
+ScreenWidth=1920
+MonitorManufacturer=
+
+Name=Default Monitor
+Availability=3
+Bandwidth=0
+ScreenHeight=1080
+ScreenWidth=1920
+MonitorManufacturer=

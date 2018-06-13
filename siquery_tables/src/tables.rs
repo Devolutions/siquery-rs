@@ -370,3 +370,13 @@ pub struct WmiVideo{
     pub video_architecture: String,
     pub video_memory_type: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiMonitors{
+    pub name: String,
+    pub availability: String,
+    pub bandwidth: u64,
+    pub manufacturer: String,
+    pub screen_height: u64,
+    pub screen_width: u64,
+}
