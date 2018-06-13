@@ -1,0 +1,4 @@
+Name=Fabrikam Audio
+Manufacturer=Fabrikam, Inc.
+Status=OK
+DMABufferSize=256

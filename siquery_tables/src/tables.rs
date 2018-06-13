@@ -346,3 +346,12 @@ pub struct WmiMemory{
     pub serial_number: String,
     pub speed: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiSound{
+    pub name: String,
+    pub status: String,
+    pub manufacturer: String,
+    pub dma_buffer_size: String,
+}
+
