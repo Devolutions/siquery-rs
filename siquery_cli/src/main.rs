@@ -56,13 +56,14 @@ fn main() {
         },
         "wmi_computer_info" => {
             #[cfg(target_os = "windows")]
-            println!("Name: {}", system_info.wmi_computer_info.computer_name);
-            println!("Domain: {}", system_info.wmi_computer_info.domain);
-            println!("Manufacturer: {}", system_info.wmi_computer_info.manufacturer);
-            println!("Model: {}", system_info.wmi_computer_info.model);
-            println!("NumberOfProcessors: {}", system_info.wmi_computer_info.number_of_processors);
-            println!("SystemType: {}", system_info.wmi_computer_info.system_type);
-
+            {
+                println!("Name: {}", system_info.wmi_computer_info.computer_name);
+                println!("Domain: {}", system_info.wmi_computer_info.domain);
+                println!("Manufacturer: {}", system_info.wmi_computer_info.manufacturer);
+                println!("Model: {}", system_info.wmi_computer_info.model);
+                println!("NumberOfProcessors: {}", system_info.wmi_computer_info.number_of_processors);
+                println!("SystemType: {}", system_info.wmi_computer_info.system_type);
+            }
             #[cfg(not(windows))]
             println!("Not implemented!");
         },
@@ -298,18 +299,25 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-        "wmi_sound"  => {
+        "wmi_video"  =>{
             #[cfg(target_os = "windows")]
-                for sound_info in &system_info.wmi_sound{
-                println!("Name: {}", sound_info.name);
-                println!("Manufacturer: {}", sound_info.manufacturer);
-                println!("Status: {}", sound_info.status);
-                println!("DMABufferSize: {}", sound_info.dma_buffer_size);
+            for video_info in &system_info.wmi_video {
+                println!("Name: {}", video_info.name);
+                println!("Adapter compatibility: {}", video_info.adapter_compatibility);
+                println!("Adapter DAC Type: {}", video_info.adapter_dac_type);
+                println!("Adapter RAM: {} GB", video_info.adapter_ram);
+                println!("Availability: {}", video_info.availability);
+                println!("Driver Version: {}", video_info.driver_version);
+                println!("Installed Display Drivers: {:?}", video_info.installed_display_driver);
+                println!("Refresh Rate: {} mhz", video_info.refresh_rate);
+                println!("Video Mode Description: {}", video_info.screen_info);
+                println!("Status: {}", video_info.status);
+                println!("Video Architecture: {}", video_info.video_architecture);
+                println!("Video Memory Type: {}", video_info.video_memory_type);
                 println!("----------------------------------------------------------------");
             }
-
             #[cfg(not(windows))]
-                println!("Not implemented!");
+            println!("Not implemented!");
         }
         _ => {}
     }

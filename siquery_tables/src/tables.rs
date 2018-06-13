@@ -348,10 +348,17 @@ pub struct WmiMemory{
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiSound{
+pub struct WmiVideo{
     pub name: String,
+    pub adapter_compatibility: String,
+    pub adapter_dac_type: String,
+    pub adapter_ram: f32,
+    pub availability: String,
+    pub driver_version: String,
+    pub installed_display_driver: Vec<String>,
+    pub refresh_rate: String,
+    pub screen_info: String,
     pub status: String,
-    pub manufacturer: String,
-    pub dma_buffer_size: String,
+    pub video_architecture: String,
+    pub video_memory_type: String,
 }
-

@@ -1,0 +1,40 @@
+Name=Graphic Design Institute 940MX
+AdapterCompatibility=Graphic Design Institute
+AdapterDACType=Integrated RAMDAC
+AdapterRAM=2147483648
+Availability=16
+DriverVersion=23.21.13.9065
+InstalledDisplayDrivers=C:\\WINDOWS\\System32\\DriverStore\\FileRepository\\nvdm.inf_amd64_4338a5f43740bb8d\\nvldumdx.dll,C:\\WINDOWS\\System32\\DriverStore\\FileRepository\\nvdm.inf_amd64_4338a5f43740bb8d\\nvldumdx.dll
+MaxRefreshRate=60
+VideoModeDescription=1920 x 1080 x 4294967296 colors
+Status=OK
+VideoArchitecture=7
+VideoMemoryType=6
+
+Name=Graphic Design Institute 940MX
+AdapterCompatibility=Graphic Design Institute
+AdapterDACType=Integrated RAMDAC
+AdapterRAM=2147483648
+Availability=16
+DriverVersion=23.21.13.9065
+InstalledDisplayDrivers=C:\\WINDOWS\\System32\\DriverStore\\FileRepository\\nvdm.inf_amd64_4338a5f43740bb8d\\nvldumdx.dll,C:\\WINDOWS\\System32\\DriverStore\\FileRepository\\nvdm.inf_amd64_4338a5f43740bb8d\\nvldumdx.dll
+MaxRefreshRate=60
+VideoModeDescription=1920 x 1080 x 4294967296 colors
+Status=OK
+VideoArchitecture=7
+VideoMemoryType=6
+
+Name=Graphic Design Institute 940MX
+AdapterCompatibility=Graphic Design Institute
+AdapterDACType=Integrated RAMDAC
+AdapterRAM=2147483648
+Availability=16
+DriverVersion=23.21.13.9065
+InstalledDisplayDrivers=C:\\WINDOWS\\System32\\DriverStore\\FileRepository\\nvdm.inf_amd64_4338a5f43740bb8d\\nvldumdx.dll,C:\\WINDOWS\\System32\\DriverStore\\FileRepository\\nvdm.inf_amd64_4338a5f43740bb8d\\nvldumdx.dll
+MaxRefreshRate=60
+VideoModeDescription=1920 x 1080 x 4294967296 colors
+Status=OK
+VideoArchitecture=7
+VideoMemoryType=6
+
+

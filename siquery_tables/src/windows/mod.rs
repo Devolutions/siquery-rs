@@ -26,7 +26,7 @@ use tables::{
     WmiMotherboard,
     WmiProcessor,
     WmiMemory,
-    WmiSound,
+    WmiVideo,
 };
 use std::env;
 
@@ -49,7 +49,7 @@ mod wmi_bios;
 mod wmi_motherboard;
 mod wmi_processor;
 mod wmi_physical_memory;
-mod wmi_sound;
+mod wmi_video;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
@@ -73,7 +73,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_motherboard_info(&self)-> Option<String>;
     fn get_wmi_processor_info(&self)-> Option<String>;
     fn get_wmi_physical_memory(&self)-> Option<String>;
-    fn get_wmi_sound_info(&self)-> Option<String>;
+    fn get_wmi_video_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -235,9 +235,9 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_sound_info(&self)-> Option<String>{
+    fn get_wmi_video_info(&self)-> Option<String>{
         let output = Command::new("wmic")
-            .args(&["sounddev", "get", "/format:list"]).output().ok()?;
+            .args(&["path","win32_VideoController", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
@@ -267,7 +267,7 @@ pub struct SystemInfo {
     pub wmi_motherboard: WmiMotherboard,
     pub wmi_processor: WmiProcessor,
     pub wmi_physical_memory: Vec<WmiMemory>,
-    pub wmi_sound: Vec<WmiSound>,
+    pub wmi_video: Vec<WmiVideo>,
 }
 
 impl SystemInfo {
@@ -298,7 +298,7 @@ impl SystemInfo {
             wmi_motherboard: WmiMotherboard::get_motherboard_info(system_reader.borrow()),
             wmi_processor: WmiProcessor::get_processor_info(system_reader.borrow()),
             wmi_physical_memory: WmiMemory::get_physical_memory_info(system_reader.borrow()),
-            wmi_sound: WmiSound::get_sound_info(system_reader.borrow()),
+            wmi_video: WmiVideo::get_video_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -327,7 +327,7 @@ impl SystemInfo {
             "wmi_motherboard" : self.wmi_motherboard,
             "wmi_processor" : self.wmi_processor,
             "wmi_physical_memory" : self.wmi_physical_memory,
-            "wmi_sound" : self.wmi_sound,
+            "wmi_video" : self.wmi_video,
         })).unwrap()
     }
 }
@@ -422,8 +422,8 @@ mod tests {
             Some(String::from(include_str!("../../test_data/wmi-physical-memory.txt")))
         }
 
-        fn get_wmi_sound_info(&self)-> Option<String>{
-            Some(String::from(include_str!("../../test_data/wmi-sound.txt")))
+        fn get_wmi_video_info(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-video.txt")))
         }
     }
 
@@ -686,11 +686,20 @@ mod tests {
         assert_eq!(physical_memory.unwrap().serial_number,"91A92B93C");
         assert_eq!(physical_memory.unwrap().speed,"2400");
 
-        //wmi_sound
-        let sound_info = &system_info.wmi_sound.get(0);
-        assert_eq!(sound_info.unwrap().name,"Fabrikam Audio");
-        assert_eq!(sound_info.unwrap().manufacturer,"Fabrikam, Inc.");
-        assert_eq!(sound_info.unwrap().status,"OK");
-        assert_eq!(sound_info.unwrap().dma_buffer_size,"256");
+        //wmi_video
+        let video_info = &system_info.wmi_video.get(0);
+        assert_eq!(system_info.wmi_video.len(), 3);
+        assert_eq!(video_info.unwrap().name,"Graphic Design Institute 940MX");
+        assert_eq!(video_info.unwrap().adapter_compatibility,"Graphic Design Institute");
+        assert_eq!(video_info.unwrap().adapter_dac_type,"Integrated RAMDAC");
+        assert_eq!(video_info.unwrap().adapter_ram, 2.0);
+        assert_eq!(video_info.unwrap().availability,"Power Cycle");
+        assert_eq!(video_info.unwrap().driver_version,"23.21.13.9065");
+        assert_eq!(video_info.unwrap().installed_display_driver.len(), 2);
+        assert_eq!(video_info.unwrap().refresh_rate,"60");
+        assert_eq!(video_info.unwrap().screen_info,"1920 x 1080 x 4294967296 colors");
+        assert_eq!(video_info.unwrap().status,"OK");
+        assert_eq!(video_info.unwrap().video_architecture,"MDA");
+        assert_eq!(video_info.unwrap().video_memory_type,"WRAM");
     }
 }
