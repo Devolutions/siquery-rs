@@ -64,6 +64,7 @@ fn main() {
                 println!("NumberOfProcessors: {}", system_info.wmi_computer_info.number_of_processors);
                 println!("SystemType: {}", system_info.wmi_computer_info.system_type);
             }
+
             #[cfg(not(windows))]
             println!("Not implemented!");
         },
@@ -295,6 +296,18 @@ fn main() {
                 println!("Memory type: {}", physical_memory_info.memory_type);
                 println!("Serial number: {}", physical_memory_info.serial_number);
                 println!("Speed: {}", physical_memory_info.speed);
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+        "wmi_sound"  => {
+            #[cfg(target_os = "windows")]
+            for sound_info in &system_info.wmi_sound{
+                println!("Name: {}", sound_info.name);
+                println!("Manufacturer: {}", sound_info.manufacturer);
+                println!("Status: {}", sound_info.status);
+                println!("DMABufferSize: {}", sound_info.dma_buffer_size);
+                println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
             println!("Not implemented!");

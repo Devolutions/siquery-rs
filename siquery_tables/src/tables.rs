@@ -348,6 +348,14 @@ pub struct WmiMemory{
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct WmiSound{
+    pub name: String,
+    pub status: String,
+    pub manufacturer: String,
+    pub dma_buffer_size: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct WmiVideo{
     pub name: String,
     pub adapter_compatibility: String,
