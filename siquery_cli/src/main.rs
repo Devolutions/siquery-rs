@@ -280,6 +280,26 @@ fn main() {
             println!("Not implemented!");
         }
 
+        "wmi_physical_memory"  =>{
+            #[cfg(target_os = "windows")]
+            for physical_memory_info in &system_info.wmi_physical_memory {
+                println!("Name: {}", physical_memory_info.name);
+                println!("Bank label: {}", physical_memory_info.bank_label);
+                println!("Capacity: {} bytes", physical_memory_info.capacity);
+                println!("Description: {}", physical_memory_info.description);
+                println!("Device locator: {}", physical_memory_info.device_locator);
+                println!("Form factor: {}", physical_memory_info.form_factor);
+                println!("Interleave data depth: {}", physical_memory_info.interleave_data_depth);
+                println!("Interleave position: {}", physical_memory_info.interleave_position);
+                println!("Manufacturer: {}", physical_memory_info.manufacturer);
+                println!("Memory type: {}", physical_memory_info.memory_type);
+                println!("Serial number: {}", physical_memory_info.serial_number);
+                println!("Speed: {}", physical_memory_info.speed);
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+
         _ => {}
     }
 }

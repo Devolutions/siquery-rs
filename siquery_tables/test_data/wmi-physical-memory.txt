@@ -1,0 +1,12 @@
+Name=Physical Memory
+BankLabel=BANK 0
+Capacity=17179869184 bytes
+Description=Physical Memory
+DeviceLocator=DIMM A
+FormFactor=12
+InterleaveDataDepth=0
+InterleavePosition=0
+Manufacturer=Fabrikam, Inc.
+MemoryType=0
+SerialNumber=91A92B93C
+Speed=2400

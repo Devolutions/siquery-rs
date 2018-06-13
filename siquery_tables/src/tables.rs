@@ -330,3 +330,19 @@ pub struct WmiProcessor{
     pub number_of_logical_processors: String,
     pub socket_designation: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiMemory{
+    pub name: String,
+    pub bank_label: String,
+    pub capacity: String,
+    pub description: String,
+    pub device_locator: String,
+    pub form_factor: String,
+    pub interleave_data_depth: String,
+    pub interleave_position: String,
+    pub manufacturer: String,
+    pub memory_type: String,
+    pub serial_number: String,
+    pub speed: String,
+}
