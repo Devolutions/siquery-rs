@@ -279,7 +279,6 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-
         "wmi_physical_memory"  =>{
             #[cfg(target_os = "windows")]
             for physical_memory_info in &system_info.wmi_physical_memory {
@@ -299,7 +298,19 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        "wmi_sound"  => {
+            #[cfg(target_os = "windows")]
+                for sound_info in &system_info.wmi_sound{
+                println!("Name: {}", sound_info.name);
+                println!("Manufacturer: {}", sound_info.manufacturer);
+                println!("Status: {}", sound_info.status);
+                println!("DMABufferSize: {}", sound_info.dma_buffer_size);
+                println!("----------------------------------------------------------------");
+            }
 
+            #[cfg(not(windows))]
+                println!("Not implemented!");
+        }
         _ => {}
     }
 }
