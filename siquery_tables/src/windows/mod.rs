@@ -30,6 +30,7 @@ use tables::{
     WmiVideo,
     WmiMonitors,
     WmiKeyboard,
+    WmiPointingDevice,
 };
 use std::env;
 
@@ -56,6 +57,7 @@ mod wmi_sound;
 mod wmi_video;
 mod wmi_monitors;
 mod wmi_keyboard;
+mod wmi_pointing_device;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
@@ -83,6 +85,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_video_info(&self)-> Option<String>;
     fn get_wmi_monitor_info(&self)-> Option<String>;
     fn get_wmi_keyboard_info(&self)-> Option<String>;
+    fn get_wmi_pointing_device(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -267,6 +270,12 @@ impl SystemReaderInterface for SystemReader {
             .args(&["path","Win32_Keyboard", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
+
+    fn get_wmi_pointing_device(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["path","Win32_PointingDevice", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 }
 
 pub struct SystemInfo {
@@ -297,6 +306,7 @@ pub struct SystemInfo {
     pub wmi_video: Vec<WmiVideo>,
     pub wmi_monitors: Vec<WmiMonitors>,
     pub wmi_keyboard: Vec<WmiKeyboard>,
+    pub wmi_pointing_device: Vec<WmiPointingDevice>,
 }
 
 impl SystemInfo {
@@ -331,6 +341,7 @@ impl SystemInfo {
             wmi_video: WmiVideo::get_video_info(system_reader.borrow()),
             wmi_monitors: WmiMonitors::get_monitors_info(system_reader.borrow()),
             wmi_keyboard: WmiKeyboard::get_keyboard_info(system_reader.borrow()),
+            wmi_pointing_device: WmiPointingDevice::get_pointing_device_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -363,6 +374,7 @@ impl SystemInfo {
             "wmi_video" : self.wmi_video,
             "wmi_monitors" : self.wmi_monitors,
             "wmi_keyboard" : self.wmi_keyboard,
+            "Wmi_pointing_device" : self.wmi_pointing_device,
         })).unwrap()
     }
 }
@@ -471,6 +483,10 @@ mod tests {
 
         fn get_wmi_keyboard_info(&self)-> Option<String>{
             Some(String::from(include_str!("../../test_data/wmi-keyboard.txt")))
+        }
+
+        fn get_wmi_pointing_device(&self)-> Option<String>{
+            Some(String::from(include_str!("../../test_data/wmi-pointing-device.txt")))
         }
     }
 
@@ -775,5 +791,15 @@ mod tests {
         assert_eq!(keyboard_info.unwrap().description, "USB Input Device");
         assert_eq!(keyboard_info.unwrap().device_id, "USB\\VID_046D&amp;0&amp;0000");
         assert_eq!(keyboard_info.unwrap().status, "OK");
+
+        //wmi_pointing_device
+        assert_eq!(system_info.wmi_pointing_device.len(), 3);
+
+        let pointing_device_info = &system_info.wmi_pointing_device.get(0);
+        assert_eq!(pointing_device_info.unwrap().name,"PS/2 Compatible Mouse");
+        assert_eq!(pointing_device_info.unwrap().manufacturer,"Fabrikam, Inc.");
+        assert_eq!(pointing_device_info.unwrap().description, "PS/2 Compatible Mouse");
+        assert_eq!(pointing_device_info.unwrap().pointing_type, "Touch Screen");
+        assert_eq!(pointing_device_info.unwrap().status, "OK");
     }
 }

@@ -357,7 +357,19 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-
+        "wmi_pointing_device" => {
+            #[cfg(target_os = "windows")]
+             for pointing_device_info in &system_info.wmi_pointing_device{
+                println!("Name: {}", pointing_device_info.name);
+                println!("Manufacturer: {}", pointing_device_info.manufacturer);
+                println!("Description: {}", pointing_device_info.description);
+                println!("Pointing type: {}", pointing_device_info.pointing_type);
+                println!("Status: {}", pointing_device_info.status);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
         _ => {}
     }
 }

@@ -1,0 +1,17 @@
+Name=PS/2 Compatible Mouse
+Manufacturer=Fabrikam, Inc.
+Description=PS/2 Compatible Mouse
+PointingType=8
+Status=OK
+
+Name=PS/2 Compatible Mouse
+Manufacturer=Fabrikam, Inc.
+Description=PS/2 Compatible Mouse
+PointingType=8
+Status=OK
+
+Name=PS/2 Compatible Mouse
+Manufacturer=Fabrikam, Inc.
+Description=PS/2 Compatible Mouse
+PointingType=8
+Status=OK

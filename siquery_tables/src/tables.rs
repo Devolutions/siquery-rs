@@ -388,3 +388,12 @@ pub struct WmiKeyboard{
     pub device_id: String,
     pub status: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiPointingDevice{
+    pub name: String,
+    pub manufacturer: String,
+    pub description: String,
+    pub pointing_type: String,
+    pub status: String,
+}
