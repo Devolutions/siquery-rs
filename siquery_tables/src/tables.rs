@@ -380,3 +380,11 @@ pub struct WmiMonitors{
     pub screen_height: u64,
     pub screen_width: u64,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiKeyboard{
+    pub name: String,
+    pub description: String,
+    pub device_id: String,
+    pub status: String,
+}

@@ -174,8 +174,8 @@ fn main() {
         }
         "products" => {
             #[cfg(target_os = "windows")]
-            for product in &system_info.products{
-                println!("Name: {}",	product.name);
+            for product in &system_info.products {
+                println!("Name: {}", product.name);
                 println!("HelpLink: {}", product.help_link);
                 println!("InstallDate: {}", product.install_date);
                 println!("InstallLocation: {}", product.install_location);
@@ -188,8 +188,8 @@ fn main() {
         }
         "wmi_shares" => {
             #[cfg(target_os = "windows")]
-            for share in &system_info.wmi_shares{
-                println!("Name: {}",	share.name);
+            for share in &system_info.wmi_shares {
+                println!("Name: {}", share.name);
                 println!("caption: {}", share.caption);
                 println!("description: {}", share.description);
                 println!("Path: {}", share.path);
@@ -233,7 +233,7 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-        "wmi_bios" =>{
+        "wmi_bios" => {
             #[cfg(target_os = "windows")]
             let bios_info = &system_info.wmi_bios;
             println!("Caption: {}", bios_info.caption);
@@ -245,7 +245,7 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-        "wmi_motherboard"  =>{
+        "wmi_motherboard" => {
             #[cfg(target_os = "windows")]
             let motherboard_info = &system_info.wmi_motherboard;
             println!("Name: {}", motherboard_info.name);
@@ -257,7 +257,7 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-        "wmi_processor"  =>{
+        "wmi_processor" => {
             #[cfg(target_os = "windows")]
             let processor_info = &system_info.wmi_processor;
             println!("Name: {}", processor_info.name);
@@ -281,7 +281,7 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-        "wmi_physical_memory"  =>{
+        "wmi_physical_memory" => {
             #[cfg(target_os = "windows")]
             for physical_memory_info in &system_info.wmi_physical_memory {
                 println!("Name: {}", physical_memory_info.name);
@@ -300,9 +300,9 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-        "wmi_sound"  => {
+        "wmi_sound" => {
             #[cfg(target_os = "windows")]
-            for sound_info in &system_info.wmi_sound{
+            for sound_info in &system_info.wmi_sound {
                 println!("Name: {}", sound_info.name);
                 println!("Manufacturer: {}", sound_info.manufacturer);
                 println!("Status: {}", sound_info.status);
@@ -312,7 +312,7 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
-        "wmi_video"  =>{
+        "wmi_video" => {
             #[cfg(target_os = "windows")]
             for video_info in &system_info.wmi_video {
                 println!("Name: {}", video_info.name);
@@ -334,7 +334,7 @@ fn main() {
         }
         "wmi_monitors" => {
             #[cfg(target_os = "windows")]
-            for monitor_info in &system_info.wmi_monitors{
+            for monitor_info in &system_info.wmi_monitors {
                 println!("Name: {}", monitor_info.name);
                 println!("Availability: {}", monitor_info.availability);
                 println!("Bandwidth: {}", monitor_info.bandwidth);
@@ -346,6 +346,18 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        "wmi_keyboard" => {
+            for keyboard_info in &system_info.wmi_keyboard {
+                println!("Name: {}", keyboard_info.name);
+                println!("Description: {}", keyboard_info.description);
+                println!("Device id: {}", keyboard_info.device_id);
+                println!("Status: {}", keyboard_info.status);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
+
         _ => {}
     }
 }

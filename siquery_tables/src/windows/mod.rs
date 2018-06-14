@@ -29,6 +29,7 @@ use tables::{
     WmiSound,
     WmiVideo,
     WmiMonitors,
+    WmiKeyboard,
 };
 use std::env;
 
@@ -54,6 +55,7 @@ mod wmi_physical_memory;
 mod wmi_sound;
 mod wmi_video;
 mod wmi_monitors;
+mod wmi_keyboard;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
@@ -80,6 +82,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_sound_info(&self)-> Option<String>;
     fn get_wmi_video_info(&self)-> Option<String>;
     fn get_wmi_monitor_info(&self)-> Option<String>;
+    fn get_wmi_keyboard_info(&self)-> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -258,6 +261,12 @@ impl SystemReaderInterface for SystemReader {
             .args(&["desktopmonitor", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
+
+    fn get_wmi_keyboard_info(&self)-> Option<String>{
+        let output = Command::new("wmic")
+            .args(&["path","Win32_Keyboard", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 }
 
 pub struct SystemInfo {
@@ -287,6 +296,7 @@ pub struct SystemInfo {
     pub wmi_sound: Vec<WmiSound>,
     pub wmi_video: Vec<WmiVideo>,
     pub wmi_monitors: Vec<WmiMonitors>,
+    pub wmi_keyboard: Vec<WmiKeyboard>,
 }
 
 impl SystemInfo {
@@ -320,6 +330,7 @@ impl SystemInfo {
             wmi_sound: WmiSound::get_sound_info(system_reader.borrow()),
             wmi_video: WmiVideo::get_video_info(system_reader.borrow()),
             wmi_monitors: WmiMonitors::get_monitors_info(system_reader.borrow()),
+            wmi_keyboard: WmiKeyboard::get_keyboard_info(system_reader.borrow()),
             system_reader,
         }
     }
@@ -351,6 +362,7 @@ impl SystemInfo {
             "wmi_sound" : self.wmi_sound,
             "wmi_video" : self.wmi_video,
             "wmi_monitors" : self.wmi_monitors,
+            "wmi_keyboard" : self.wmi_keyboard,
         })).unwrap()
     }
 }
@@ -455,6 +467,10 @@ mod tests {
 
         fn get_wmi_monitor_info(&self)-> Option<String>{
             Some(String::from(include_str!("../../test_data/wmi-monitors.txt")))
+        }
+
+        fn get_wmi_keyboard_info(&self)-> Option<String>{
+            Some(String::from(include_str!("../../test_data/wmi-keyboard.txt")))
         }
     }
 
@@ -750,5 +766,14 @@ mod tests {
         assert_eq!(monitor_info.unwrap().screen_height, 1080);
         assert_eq!(monitor_info.unwrap().screen_width, 1920);
         assert_eq!(monitor_info.unwrap().manufacturer,"");
+
+        //wmi_monitors
+        assert_eq!(system_info.wmi_keyboard.len(), 2);
+
+        let keyboard_info = &system_info.wmi_keyboard.get(0);
+        assert_eq!(keyboard_info.unwrap().name, "Enhanced (101- or 102-key)");
+        assert_eq!(keyboard_info.unwrap().description, "USB Input Device");
+        assert_eq!(keyboard_info.unwrap().device_id, "USB\\VID_046D&amp;0&amp;0000");
+        assert_eq!(keyboard_info.unwrap().status, "OK");
     }
 }
