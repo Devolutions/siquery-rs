@@ -332,6 +332,20 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        "wmi_monitors" => {
+            #[cfg(target_os = "windows")]
+            for monitor_info in &system_info.wmi_monitors{
+                println!("Name: {}", monitor_info.name);
+                println!("Availability: {}", monitor_info.availability);
+                println!("Bandwidth: {}", monitor_info.bandwidth);
+                println!("Screen Height: {}", monitor_info.screen_height);
+                println!("Screen Width: {}", monitor_info.screen_width);
+                println!("Manufacturer: {}", monitor_info.manufacturer);
+                println!("----------------------------------------------------------------");
+            }
+            #[cfg(not(windows))]
+            println!("Not implemented!");
+        }
         _ => {}
     }
 }
