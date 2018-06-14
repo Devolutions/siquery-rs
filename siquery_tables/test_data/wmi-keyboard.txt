@@ -1,0 +1,10 @@
+Name=Enhanced (101- or 102-key)
+Description=USB Input Device
+DeviceID=USB\VID_046D&amp;0&amp;0000
+Status=OK
+
+Name=Enhanced (101- or 102-key)
+Description=Keyboard Device
+DeviceID=HID\INTC816&amp;0&amp;0000
+Status=OK
+
