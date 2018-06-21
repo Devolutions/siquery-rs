@@ -397,3 +397,19 @@ pub struct WmiPointingDevice{
     pub pointing_type: String,
     pub status: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProcessOpenSocketsRow {
+    pub pid: i64,
+    pub fd: i64,
+    pub socket: i64,
+    pub family: i32,
+    pub protocol: i32,
+    pub local_address: String,
+    pub remote_address: String,
+    pub local_port: i32,
+    pub remote_port: i32,
+    pub path: String,
+    pub state: String,
+    pub net_namespace: String,
+}

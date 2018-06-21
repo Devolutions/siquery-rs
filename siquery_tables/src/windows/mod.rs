@@ -31,6 +31,7 @@ use tables::{
     WmiMonitors,
     WmiKeyboard,
     WmiPointingDevice,
+    ProcessOpenSocketsRow,
 };
 use std::env;
 
@@ -58,6 +59,7 @@ mod wmi_video;
 mod wmi_monitors;
 mod wmi_keyboard;
 mod wmi_pointing_device;
+mod process_open_sockets;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
@@ -307,6 +309,7 @@ pub struct SystemInfo {
     pub wmi_monitors: Vec<WmiMonitors>,
     pub wmi_keyboard: Vec<WmiKeyboard>,
     pub wmi_pointing_device: Vec<WmiPointingDevice>,
+    pub process_open_sockets: Vec<ProcessOpenSocketsRow>,
 }
 
 impl SystemInfo {
@@ -342,6 +345,7 @@ impl SystemInfo {
             wmi_monitors: WmiMonitors::get_monitors_info(system_reader.borrow()),
             wmi_keyboard: WmiKeyboard::get_keyboard_info(system_reader.borrow()),
             wmi_pointing_device: WmiPointingDevice::get_pointing_device_info(system_reader.borrow()),
+            process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
             system_reader,
         }
     }
@@ -375,6 +379,7 @@ impl SystemInfo {
             "wmi_monitors" : self.wmi_monitors,
             "wmi_keyboard" : self.wmi_keyboard,
             "Wmi_pointing_device" : self.wmi_pointing_device,
+            "process_open_sockets" : self.process_open_sockets,
         })).unwrap()
     }
 }

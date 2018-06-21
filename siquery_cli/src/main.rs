@@ -370,6 +370,19 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        "process_open_sockets" => {
+            #[cfg(target_os = "linux")]
+                for entry in &system_info.process_open_sockets {
+                println!("{:?}", entry);
+            }
+            #[cfg(target_os = "windows")] {
+                for entry in &system_info.process_open_sockets {
+                    println!("{:?}", entry);
+                }
+            }
+            #[cfg(any(not(linux), not(windows)))]
+                println!("Not implemented!");
+        }
         _ => {}
     }
 }

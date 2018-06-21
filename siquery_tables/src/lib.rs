@@ -31,6 +31,8 @@ cfg_if! {
         pub use macos as sys;
     } else if #[cfg(target_os = "windows")] {
         extern crate kernel32;
+        #[macro_use]
+        extern crate winapi;
 
         pub mod windows;
         pub use windows as sys;
