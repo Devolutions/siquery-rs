@@ -77,9 +77,9 @@ impl ProcessOpenSocketsRow {
         ns: &str
     ) -> Option<Vec<InternalBasicSocketInfo>> {
         let mut socket_info: Vec<InternalBasicSocketInfo> = Vec::new();
-        let mut buff = File::open(file_path).ok()?;
+        let mut _buff = File::open(file_path).ok()?;
         let mut file_contents = String::new();
-        buff.read_to_string(&mut file_contents);
+        _buff.read_to_string(&mut file_contents);
         let mut lines = file_contents.lines();
 
         if lines.nth(0)?.contains(expected_format) {

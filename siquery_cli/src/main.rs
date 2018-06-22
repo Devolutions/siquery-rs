@@ -399,12 +399,12 @@ fn main() {
                 println!("Not implemented!");
         }
         "process_memory_map" => {
-/*            #[cfg(target_os = "linux")]
+            #[cfg(target_os = "linux")]
                 for pid in &system_info.process_memory_map {
                 for entry in pid {
                     println!("{:?}", entry);
                 }
-            }*/
+            }
             #[cfg(target_os = "windows")]
                 for pid in &system_info.process_memory_map {
                 for entry in pid {

@@ -156,7 +156,7 @@ impl ProcessEnvsRow {
         let mut table: Vec<ProcessEnvsRow> = Vec::new();
         let attr = ProcessesRow::get_proc_attr("environ", pid);
         let mut content = String::new();
-        let result = File::open(attr).ok()?.read_to_string(&mut content);
+        let _result = File::open(attr).ok()?.read_to_string(&mut content);
         let buff = content.to_owned();
         // Read a NULL delimited string
         let lines: Vec<_> = buff.split("\0").collect();

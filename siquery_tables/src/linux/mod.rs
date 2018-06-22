@@ -26,6 +26,8 @@ use tables::{
     Uptime,
     ProcessOpenSocketsRow,
     ProcessesRow,
+    ProcessMemoryMapRow,
+    ProcessEnvsRow,
 };
 use utils;
 
@@ -127,6 +129,8 @@ pub struct SystemInfo {
     pub uptime: Result<Uptime, String>,
     pub process_open_sockets: Vec<ProcessOpenSocketsRow>,
     pub processes: Vec<ProcessesRow>,
+    pub process_memory_map: Vec<Vec<ProcessMemoryMapRow>>,
+    pub process_envs: Vec<Vec<ProcessEnvsRow>>,
 }
 
 impl SystemInfo {
@@ -146,6 +150,8 @@ impl SystemInfo {
             uptime: Uptime::get_uptime(),
             process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
             processes: ProcessesRow::gen_processes_table(),
+            process_memory_map: ProcessMemoryMapRow::gen_process_map(),
+            process_envs: ProcessEnvsRow::gen_proc_environ_table(),
             system_reader,
         }
     }
@@ -162,6 +168,8 @@ impl SystemInfo {
             "etc_services" : self.etc_services,
             "uptime" : self.uptime,
             "process_open_sockets" : self.process_open_sockets,
+            "process_memory_map" : self.process_memory_map,
+            "process_envs" : self.process_envs,
         })).unwrap()
     }
 }
