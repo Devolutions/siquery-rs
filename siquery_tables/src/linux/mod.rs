@@ -11,6 +11,8 @@ mod logical_drive;
 mod os_version;
 mod system_info;
 mod uptime;
+mod process_open_sockets;
+mod processes;
 
 use tables::{
     InterfaceAddress,
@@ -22,6 +24,8 @@ use tables::{
     EtcProtocols,
     EtcServices,
     Uptime,
+    ProcessOpenSocketsRow,
+    ProcessesRow,
 };
 use utils;
 
@@ -121,6 +125,8 @@ pub struct SystemInfo {
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
     pub uptime: Result<Uptime, String>,
+    pub process_open_sockets: Vec<ProcessOpenSocketsRow>,
+    pub processes: Vec<ProcessesRow>,
 }
 
 impl SystemInfo {
@@ -138,6 +144,8 @@ impl SystemInfo {
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
+            process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
+            processes: ProcessesRow::gen_processes_table(),
             system_reader,
         }
     }
@@ -152,7 +160,8 @@ impl SystemInfo {
             "etc_hosts" : self.etc_hosts,
             "etc_protocols" : self.etc_protocols,
             "etc_services" : self.etc_services,
-            "uptime" : self.uptime
+            "uptime" : self.uptime,
+            "process_open_sockets" : self.process_open_sockets,
         })).unwrap()
     }
 }

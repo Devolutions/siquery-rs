@@ -463,3 +463,10 @@ pub struct ProcessMemoryMapRow {
     pub path: String,
     pub pseudo: i32,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProcessEnvsRow {
+    pub pid: i32,
+    pub key: String,
+    pub value: String,
+}

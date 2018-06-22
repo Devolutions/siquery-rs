@@ -233,8 +233,8 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        #[cfg(target_os = "windows")]
         "wmi_bios" => {
-            #[cfg(target_os = "windows")]
             let bios_info = &system_info.wmi_bios;
             println!("Caption: {}", bios_info.caption);
             println!("Manufacturer: {}", bios_info.manufacturer);
@@ -245,8 +245,8 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        #[cfg(target_os = "windows")]
         "wmi_motherboard" => {
-            #[cfg(target_os = "windows")]
             let motherboard_info = &system_info.wmi_motherboard;
             println!("Name: {}", motherboard_info.name);
             println!("Manufacturer: {}", motherboard_info.manufacturer);
@@ -257,8 +257,8 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        #[cfg(target_os = "windows")]
         "wmi_processor" => {
-            #[cfg(target_os = "windows")]
             let processor_info = &system_info.wmi_processor;
             println!("Name: {}", processor_info.name);
             println!("Address width: {}", processor_info.address_width);
@@ -346,6 +346,7 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        #[cfg(target_os = "windows")]
         "wmi_keyboard" => {
             for keyboard_info in &system_info.wmi_keyboard {
                 println!("Name: {}", keyboard_info.name);
@@ -357,8 +358,8 @@ fn main() {
             #[cfg(not(windows))]
             println!("Not implemented!");
         }
+        #[cfg(target_os = "windows")]
         "wmi_pointing_device" => {
-            #[cfg(target_os = "windows")]
              for pointing_device_info in &system_info.wmi_pointing_device{
                 println!("Name: {}", pointing_device_info.name);
                 println!("Manufacturer: {}", pointing_device_info.manufacturer);
@@ -398,12 +399,12 @@ fn main() {
                 println!("Not implemented!");
         }
         "process_memory_map" => {
-            #[cfg(target_os = "linux")]
+/*            #[cfg(target_os = "linux")]
                 for pid in &system_info.process_memory_map {
                 for entry in pid {
                     println!("{:?}", entry);
                 }
-            }
+            }*/
             #[cfg(target_os = "windows")]
                 for pid in &system_info.process_memory_map {
                 for entry in pid {
