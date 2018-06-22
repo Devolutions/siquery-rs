@@ -383,6 +383,20 @@ fn main() {
             #[cfg(any(not(linux), not(windows)))]
                 println!("Not implemented!");
         }
+        "processes" => {
+            #[cfg(target_os = "linux")]
+                for process in &system_info.processes {
+                println!("{:?}", &process);
+                println!("");
+            }
+            #[cfg(target_os = "windows")]
+                for process in &system_info.processes {
+                println!("{:?}", process);
+                println!("");
+            }
+            #[cfg(not(linux))]
+                println!("Not implemented!");
+        }
         _ => {}
     }
 }
