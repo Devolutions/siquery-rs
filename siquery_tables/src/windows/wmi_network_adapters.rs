@@ -288,12 +288,12 @@ impl WmiNetworkAdapters {
 }
 
 fn add_formatted_entry(s: &mut String, v: &mut Vec<String>){
-/*    s.retain(|c| c != '"');
+    s.retain(|c| c != '"');
     s.retain(|c| c != '{');
     s.retain(|c| c != '}');
     s.retain(|c| c != ']');
     s.retain(|c| c != '[');
-    s.retain(|c| c != ' ');*/
+    s.retain(|c| c != ' ');
 
     let p: Vec<_> = s.split(',').collect();
 
