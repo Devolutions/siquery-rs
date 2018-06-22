@@ -20,7 +20,6 @@ use winapi::shared::minwindef::FALSE;
 use winapi::shared::ntdef::HANDLE;
 use winapi::um::libloaderapi::*;
 use winapi::um::securitybaseapi::*;
-use std::path::Path;
 
 impl ProcessesRow {
     pub fn new () -> ProcessesRow{

@@ -450,3 +450,16 @@ pub struct ProcessesRow {
     pub user_namespace: String,
     pub uts_namespace: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProcessMemoryMapRow {
+    pub pid: i32,
+    pub start: String,
+    pub end: String,
+    pub permissions: String,
+    pub offset: i64,
+    pub device: String,
+    pub inode: i32,
+    pub path: String,
+    pub pseudo: i32,
+}

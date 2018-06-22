@@ -32,7 +32,8 @@ use tables::{
     WmiKeyboard,
     WmiPointingDevice,
     ProcessOpenSocketsRow,
-    ProcessesRow
+    ProcessesRow,
+    ProcessMemoryMapRow,
 };
 use std::env;
 
@@ -62,6 +63,7 @@ mod wmi_keyboard;
 mod wmi_pointing_device;
 mod process_open_sockets;
 mod processes;
+mod process_memory_map;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
@@ -320,6 +322,7 @@ pub struct SystemInfo {
     pub wmi_pointing_device: Vec<WmiPointingDevice>,
     pub process_open_sockets: Vec<ProcessOpenSocketsRow>,
     pub processes: Vec<ProcessesRow>,
+    pub process_memory_map : Vec<Vec<ProcessMemoryMapRow>>,
 }
 
 impl SystemInfo {
@@ -357,6 +360,7 @@ impl SystemInfo {
             wmi_pointing_device: WmiPointingDevice::get_pointing_device_info(system_reader.borrow()),
             process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
             processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
+            process_memory_map: ProcessMemoryMapRow::gen_memory_map_table(),
             system_reader,
         }
     }
