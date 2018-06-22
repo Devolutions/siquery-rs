@@ -31,6 +31,9 @@ use tables::{
     WmiMonitors,
     WmiKeyboard,
     WmiPointingDevice,
+    ProcessOpenSocketsRow,
+    ProcessesRow,
+    ProcessMemoryMapRow,
 };
 use std::env;
 
@@ -58,6 +61,9 @@ mod wmi_video;
 mod wmi_monitors;
 mod wmi_keyboard;
 mod wmi_pointing_device;
+mod process_open_sockets;
+mod processes;
+mod process_memory_map;
 
 pub trait SystemReaderInterface {
     fn get_os_info(&self) -> Option<String>;
@@ -86,6 +92,7 @@ pub trait SystemReaderInterface {
     fn get_wmi_monitor_info(&self)-> Option<String>;
     fn get_wmi_keyboard_info(&self)-> Option<String>;
     fn get_wmi_pointing_device(&self)-> Option<String>;
+    fn get_wmi_process_info(&self) -> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -276,6 +283,12 @@ impl SystemReaderInterface for SystemReader {
             .args(&["path","Win32_PointingDevice", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
+
+    fn get_wmi_process_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["path","Win32_Process", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
 }
 
 pub struct SystemInfo {
@@ -307,6 +320,9 @@ pub struct SystemInfo {
     pub wmi_monitors: Vec<WmiMonitors>,
     pub wmi_keyboard: Vec<WmiKeyboard>,
     pub wmi_pointing_device: Vec<WmiPointingDevice>,
+    pub process_open_sockets: Vec<ProcessOpenSocketsRow>,
+    pub processes: Vec<ProcessesRow>,
+    pub process_memory_map : Vec<Vec<ProcessMemoryMapRow>>,
 }
 
 impl SystemInfo {
@@ -342,6 +358,9 @@ impl SystemInfo {
             wmi_monitors: WmiMonitors::get_monitors_info(system_reader.borrow()),
             wmi_keyboard: WmiKeyboard::get_keyboard_info(system_reader.borrow()),
             wmi_pointing_device: WmiPointingDevice::get_pointing_device_info(system_reader.borrow()),
+            process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
+            processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
+            process_memory_map: ProcessMemoryMapRow::gen_memory_map_table(),
             system_reader,
         }
     }
@@ -375,6 +394,8 @@ impl SystemInfo {
             "wmi_monitors" : self.wmi_monitors,
             "wmi_keyboard" : self.wmi_keyboard,
             "Wmi_pointing_device" : self.wmi_pointing_device,
+            "process_open_sockets" : self.process_open_sockets,
+            "processes" : self.processes,
         })).unwrap()
     }
 }
@@ -487,6 +508,10 @@ mod tests {
 
         fn get_wmi_pointing_device(&self)-> Option<String>{
             Some(String::from(include_str!("../../test_data/wmi-pointing-device.txt")))
+        }
+
+        fn get_wmi_process_info(&self) -> Option<String> {
+
         }
     }
 

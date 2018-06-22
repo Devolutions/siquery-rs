@@ -16,17 +16,17 @@ impl Uptime {
         };
 
         let mut info: libc::sysinfo = unsafe { mem::zeroed() };
-        let mut t = unsafe { libc::sysinfo(&mut info) };
+        let mut _t = unsafe { libc::sysinfo(&mut info) };
 
-        t = info.uptime as i32;
+        _t = info.uptime as i32;
 
         let mut remaining_time = 0;
         let sec_to_days_converter = 60 * 60 * 24;
         let sec_to_hours_converter = 60 * 60;
         let sec_to_minutes_converter = 60;
 
-        if let Some(get_days) = Some(t / sec_to_days_converter){
-            remaining_time = t - (get_days * sec_to_days_converter);
+        if let Some(get_days) = Some(_t / sec_to_days_converter){
+            remaining_time = _t - (get_days * sec_to_days_converter);
             upt.days = get_days as u64;
         }
 
@@ -44,7 +44,7 @@ impl Uptime {
             upt.seconds = get_seconds as u64;
         }
 
-        upt.total_seconds = t as f64;
+        upt.total_seconds = _t as f64;
 
         Ok(upt)
     }

@@ -397,3 +397,76 @@ pub struct WmiPointingDevice{
     pub pointing_type: String,
     pub status: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProcessOpenSocketsRow {
+    pub pid: i64,
+    pub fd: i64,
+    pub socket: i64,
+    pub family: i32,
+    pub protocol: i32,
+    pub local_address: String,
+    pub remote_address: String,
+    pub local_port: i32,
+    pub remote_port: i32,
+    pub path: String,
+    pub state: String,
+    pub net_namespace: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProcessesRow {
+    pub pid: i64,
+    pub name: String,
+    pub path: String,
+    pub cmdline: String,
+    pub state: String,
+    pub cwd: String,
+    pub root: String,
+    pub uid: i64,
+    pub gid: i64,
+    pub euid: i64,
+    pub egid: i64,
+    pub suid: i64,
+    pub sgid: i64,
+    pub on_disk: i32,
+    pub wired_size: i64,
+    pub resident_size: i64,
+    pub total_size: i64,
+    pub user_time: i64,
+    pub system_time: i64,
+    pub disk_bytes_read: i64,
+    pub disk_bytes_written: i64,
+    pub start_time: i64,
+    pub parent: i64,
+    pub pgroup: i64,
+    pub threads: i32,
+    pub nice: i32,
+    pub is_elevated_token: i32,
+    pub cgroup_namespace: String,
+    pub ipc_namespace: String,
+    pub mnt_namespace: String,
+    pub net_namespace: String,
+    pub pid_namespace: String,
+    pub user_namespace: String,
+    pub uts_namespace: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProcessMemoryMapRow {
+    pub pid: i32,
+    pub start: String,
+    pub end: String,
+    pub permissions: String,
+    pub offset: i64,
+    pub device: String,
+    pub inode: i32,
+    pub path: String,
+    pub pseudo: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProcessEnvsRow {
+    pub pid: i32,
+    pub key: String,
+    pub value: String,
+}
