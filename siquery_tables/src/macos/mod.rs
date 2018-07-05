@@ -8,6 +8,7 @@ use serde_json;
 mod os_version;
 mod system_info;
 mod uptime;
+mod processes;
 
 use tables::{
     LogicalDrive,
@@ -17,6 +18,8 @@ use tables::{
     EtcProtocols,
     EtcServices,
     Uptime,
+    ProcessesRow,
+    ProcessEnvsRow,
 };
 use utils;
 
@@ -100,6 +103,8 @@ pub struct SystemInfo {
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
     pub uptime: Result<Uptime, String>,
+    pub processes: Vec<ProcessesRow>,
+    pub process_envs: Vec<ProcessEnvsRow>,
 }
 
 impl SystemInfo {
@@ -115,6 +120,8 @@ impl SystemInfo {
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
+            processes: ProcessesRow::gen_processes_table(),
+            process_envs: ProcessEnvsRow::gen_process_envs_table(),
             system_reader,
         }
     }
@@ -127,7 +134,9 @@ impl SystemInfo {
             "etc_hosts" : self.etc_hosts,
             "etc_protocols" : self.etc_protocols,
             "etc_services" : self.etc_services,
-            "uptime" : self.uptime
+            "uptime" : self.uptime,
+            "processes" : self.processes,
+            "process_envs" : self.process_envs,
         })).unwrap()
     }
 }

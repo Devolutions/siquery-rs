@@ -21,6 +21,7 @@ version = "0.3.2"
 [target.'cfg(target_os = "macos")'.dependencies]
 plist-rs = "0.1.0"
 uname = "0.1.1"
+byteorder = "1.2.3"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 kernel32-sys = "0.2"
