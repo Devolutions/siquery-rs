@@ -21,29 +21,29 @@ fn main() {
     match table.as_str() {
         "wmi_os_version" => {
             #[cfg(target_os = "windows")]
-            {
-                println!("Operating System");
-                println!("  Platform: {} ", system_info.wmi_os_version.platform);
-                println!("  BuildNumber: {} ", system_info.wmi_os_version.build_number);
-                println!("  CSName: {}", system_info.wmi_os_version.csname);
-                println!("  Caption: {} ", system_info.wmi_os_version.caption);
-                println!("  FreePhysicalMemory: {} ", system_info.wmi_os_version.free_physical_mem);
-                println!("  FreeVirtualMemory: {} ", system_info.wmi_os_version.free_virtual_mem);
-                println!(
-                    "  Version: {} Major: {} Minor: {}",
-                    system_info.wmi_os_version.version, system_info.wmi_os_version.major, system_info.wmi_os_version.minor
-                );
-                println!("  Manufacturer: {} ", system_info.wmi_os_version.manufacturer);
-                println!("  Name: {} ", system_info.wmi_os_version.name);
-                println!("  ServicePackMajorVersion: {} ", system_info.wmi_os_version.service_pack_major);
-                println!("  ServicePackMinorVersion: {} ", system_info.wmi_os_version.service_pack_minor);
-                println!("  SizeStoredInPagingFiles: {} ", system_info.wmi_os_version.size_stored_in_paging_file);
-                println!("  TotalVirtualMemorySize: {} ", system_info.wmi_os_version.total_virtual_mem_size);
-                println!("  TotalVisibleMemorySize: {} ", system_info.wmi_os_version.total_visible_mem_size);
-                println!("  WindowsDirectory: {} ", system_info.wmi_os_version.win_directory);
-            }
+                {
+                    println!("Operating System");
+                    println!("  Platform: {} ", system_info.wmi_os_version.platform);
+                    println!("  BuildNumber: {} ", system_info.wmi_os_version.build_number);
+                    println!("  CSName: {}", system_info.wmi_os_version.csname);
+                    println!("  Caption: {} ", system_info.wmi_os_version.caption);
+                    println!("  FreePhysicalMemory: {} ", system_info.wmi_os_version.free_physical_mem);
+                    println!("  FreeVirtualMemory: {} ", system_info.wmi_os_version.free_virtual_mem);
+                    println!(
+                        "  Version: {} Major: {} Minor: {}",
+                        system_info.wmi_os_version.version, system_info.wmi_os_version.major, system_info.wmi_os_version.minor
+                    );
+                    println!("  Manufacturer: {} ", system_info.wmi_os_version.manufacturer);
+                    println!("  Name: {} ", system_info.wmi_os_version.name);
+                    println!("  ServicePackMajorVersion: {} ", system_info.wmi_os_version.service_pack_major);
+                    println!("  ServicePackMinorVersion: {} ", system_info.wmi_os_version.service_pack_minor);
+                    println!("  SizeStoredInPagingFiles: {} ", system_info.wmi_os_version.size_stored_in_paging_file);
+                    println!("  TotalVirtualMemorySize: {} ", system_info.wmi_os_version.total_virtual_mem_size);
+                    println!("  TotalVisibleMemorySize: {} ", system_info.wmi_os_version.total_visible_mem_size);
+                    println!("  WindowsDirectory: {} ", system_info.wmi_os_version.win_directory);
+                }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         },
         "os_version" => {
             println!("Operating System");
@@ -56,17 +56,17 @@ fn main() {
         },
         "wmi_computer_info" => {
             #[cfg(target_os = "windows")]
-            {
-                println!("Name: {}", system_info.wmi_computer_info.computer_name);
-                println!("Domain: {}", system_info.wmi_computer_info.domain);
-                println!("Manufacturer: {}", system_info.wmi_computer_info.manufacturer);
-                println!("Model: {}", system_info.wmi_computer_info.model);
-                println!("NumberOfProcessors: {}", system_info.wmi_computer_info.number_of_processors);
-                println!("SystemType: {}", system_info.wmi_computer_info.system_type);
-            }
+                {
+                    println!("Name: {}", system_info.wmi_computer_info.computer_name);
+                    println!("Domain: {}", system_info.wmi_computer_info.domain);
+                    println!("Manufacturer: {}", system_info.wmi_computer_info.manufacturer);
+                    println!("Model: {}", system_info.wmi_computer_info.model);
+                    println!("NumberOfProcessors: {}", system_info.wmi_computer_info.number_of_processors);
+                    println!("SystemType: {}", system_info.wmi_computer_info.system_type);
+                }
 
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         },
         "system_info" => {
             println!("Cpu brand: {}", system_info.system_info.cpu_brand);
@@ -106,7 +106,7 @@ fn main() {
         }
         "wmi_printers" => {
             #[cfg(target_os = "windows")]
-            for printer in &system_info.wmi_printers {
+                for printer in &system_info.wmi_printers {
                 println!("Printer name : {:?}", &printer.name);
                 println!("Attributes : {:?}", &printer.attributes);
                 println!("Caption : {:?}", &printer.caption);
@@ -129,11 +129,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_services" => {
             #[cfg(target_os = "windows")]
-            for service in &system_info.wmi_services {
+                for service in &system_info.wmi_services {
                 println!("AcceptPause: {:?}", &service.accept_pause);
                 println!("AcceptStop: {:?}", &service.accept_stop);
                 println!("Caption: {:?}", &service.caption);
@@ -156,11 +156,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_hotfixes" => {
             #[cfg(target_os = "windows")]
-            for hotfix in &system_info.wmi_hotfixes {
+                for hotfix in &system_info.wmi_hotfixes {
                 println!("Caption: {:?}", &hotfix.caption);
                 println!("CSName: {:?}", &hotfix.csname);
                 println!("Description: {:?}", &hotfix.description);
@@ -170,11 +170,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "products" => {
             #[cfg(target_os = "windows")]
-            for product in &system_info.products {
+                for product in &system_info.products {
                 println!("Name: {}", product.name);
                 println!("HelpLink: {}", product.help_link);
                 println!("InstallDate: {}", product.install_date);
@@ -184,11 +184,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_shares" => {
             #[cfg(target_os = "windows")]
-            for share in &system_info.wmi_shares {
+                for share in &system_info.wmi_shares {
                 println!("Name: {}", share.name);
                 println!("caption: {}", share.caption);
                 println!("description: {}", share.description);
@@ -199,11 +199,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_network_adapters" => {
             #[cfg(target_os = "windows")]
-            for network_adapter in &system_info.wmi_network_adapters {
+                for network_adapter in &system_info.wmi_network_adapters {
                 println!("Description: {}", network_adapter.description);
                 println!("DatabasePath: {}", network_adapter.database_path);
                 println!("DHCPEnabled: {}", network_adapter.dhcp_enabled);
@@ -214,11 +214,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_local_accounts" => {
             #[cfg(target_os = "windows")]
-            for local_account in &system_info.wmi_local_accounts {
+                for local_account in &system_info.wmi_local_accounts {
                 println!("AccountType: {}", local_account.account_type);
                 println!("Caption: {}", local_account.caption);
                 println!("Description: {}", local_account.description);
@@ -231,7 +231,7 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         #[cfg(target_os = "windows")]
         "wmi_bios" => {
@@ -243,7 +243,7 @@ fn main() {
             println!("SMBIOS BIOS Version: {}", bios_info.smbios_version);
 
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         #[cfg(target_os = "windows")]
         "wmi_motherboard" => {
@@ -255,7 +255,7 @@ fn main() {
             println!("Version: {}", motherboard_info.version);
 
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         #[cfg(target_os = "windows")]
         "wmi_processor" => {
@@ -279,11 +279,11 @@ fn main() {
             println!("Socket designation: {}", processor_info.socket_designation);
 
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_physical_memory" => {
             #[cfg(target_os = "windows")]
-            for physical_memory_info in &system_info.wmi_physical_memory {
+                for physical_memory_info in &system_info.wmi_physical_memory {
                 println!("Name: {}", physical_memory_info.name);
                 println!("Bank label: {}", physical_memory_info.bank_label);
                 println!("Capacity: {} bytes", physical_memory_info.capacity);
@@ -298,11 +298,11 @@ fn main() {
                 println!("Speed: {}", physical_memory_info.speed);
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_sound" => {
             #[cfg(target_os = "windows")]
-            for sound_info in &system_info.wmi_sound {
+                for sound_info in &system_info.wmi_sound {
                 println!("Name: {}", sound_info.name);
                 println!("Manufacturer: {}", sound_info.manufacturer);
                 println!("Status: {}", sound_info.status);
@@ -310,11 +310,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_video" => {
             #[cfg(target_os = "windows")]
-            for video_info in &system_info.wmi_video {
+                for video_info in &system_info.wmi_video {
                 println!("Name: {}", video_info.name);
                 println!("Adapter compatibility: {}", video_info.adapter_compatibility);
                 println!("Adapter DAC Type: {}", video_info.adapter_dac_type);
@@ -330,11 +330,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "wmi_monitors" => {
             #[cfg(target_os = "windows")]
-            for monitor_info in &system_info.wmi_monitors {
+                for monitor_info in &system_info.wmi_monitors {
                 println!("Name: {}", monitor_info.name);
                 println!("Availability: {}", monitor_info.availability);
                 println!("Bandwidth: {}", monitor_info.bandwidth);
@@ -344,7 +344,7 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         #[cfg(target_os = "windows")]
         "wmi_keyboard" => {
@@ -356,11 +356,11 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         #[cfg(target_os = "windows")]
         "wmi_pointing_device" => {
-             for pointing_device_info in &system_info.wmi_pointing_device{
+            for pointing_device_info in &system_info.wmi_pointing_device{
                 println!("Name: {}", pointing_device_info.name);
                 println!("Manufacturer: {}", pointing_device_info.manufacturer);
                 println!("Description: {}", pointing_device_info.description);
@@ -369,7 +369,7 @@ fn main() {
                 println!("----------------------------------------------------------------");
             }
             #[cfg(not(windows))]
-            println!("Not implemented!");
+                println!("Not implemented!");
         }
         "process_open_sockets" => {
             #[cfg(target_os = "linux")]
@@ -395,8 +395,11 @@ fn main() {
                 println!("{:?}", process);
                 println!("");
             }
-            #[cfg(not(linux))]
-                println!("Not implemented!");
+            #[cfg(target_os = "macos")]
+                for process in &system_info.processes {
+                println!("{:?}", process);
+                println!("");
+            }
         }
         "process_memory_map" => {
             #[cfg(target_os = "linux")]
@@ -412,6 +415,22 @@ fn main() {
                 }
             }
             #[cfg(any(not(linux), not(windows)))]
+                println!("Not implemented!");
+        }
+        "process_envs" => {
+            #[cfg(target_os = "windows")] {
+                for process in &system_info.process_envs {
+                    println!("{:?}", process);
+                    println!("");
+                }
+            }
+            #[cfg(target_os = "macos")] {
+                for process in &system_info.process_envs {
+                    println!("{:?}", process);
+                    println!("");
+                }
+            }
+            #[cfg(any(not(macos), not(windows)))]
                 println!("Not implemented!");
         }
         _ => {}

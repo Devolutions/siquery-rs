@@ -26,6 +26,7 @@ cfg_if! {
         extern crate plist;
         extern crate uname;
         extern crate libc;
+        extern crate byteorder;
 
         pub mod macos;
         pub use macos as sys;
