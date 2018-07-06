@@ -5,10 +5,33 @@ extern crate siquery;
 
 use clap::App;
 
+use std::borrow::Borrow;
+
 use siquery::SystemInfo;
-use siquery::sys::SystemReader;
+use siquery::sys::{SystemReader, SystemReaderInterface};
+
+use siquery::tables::{
+    EtcHosts,
+    EtcProtocols,
+    EtcServices,
+};
+
+fn test_main() {
+    let system_reader: Box<SystemReaderInterface> = Box::new(SystemReader::new());
+    let etc_hosts = EtcHosts::get_hosts(system_reader.borrow());
+    let etc_protocols = EtcProtocols::get_protocols(system_reader.borrow());
+    let etc_services = EtcServices::get_services(system_reader.borrow());
+
+    let cols = EtcHosts::COLUMN_NAMES;
+
+    for col in cols.iter() {
+        //println!("{}", col);
+    }
+}
 
 fn main() {
+    test_main();
+
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();

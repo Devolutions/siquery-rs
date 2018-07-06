@@ -21,6 +21,8 @@ lazy_static! {
 
 impl EtcServices {
 
+    pub const COLUMN_NAMES: &'static [&'static str] = &["name", "port", "protocol", "aliases", "comment"];
+
     pub(crate) fn new() -> EtcServices {
         EtcServices {
             name: String::new(),

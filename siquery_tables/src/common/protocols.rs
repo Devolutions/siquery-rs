@@ -20,7 +20,10 @@ lazy_static! {
 }
 
 impl EtcProtocols {
-    pub(crate) fn new() -> EtcProtocols {
+
+    pub const COLUMN_NAMES: &'static [&'static str] = &["name", "number", "alias", "comment"];
+
+    pub fn new() -> EtcProtocols {
         EtcProtocols {
             name: String::new(),
             number: 0,

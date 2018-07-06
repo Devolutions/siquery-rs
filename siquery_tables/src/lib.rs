@@ -12,7 +12,7 @@ extern crate lazy_static;
 extern crate time;
 
 mod common;
-mod tables;
+pub mod tables;
 mod utils;
 
 cfg_if! {
