@@ -11,6 +11,7 @@ use siquery::SystemInfo;
 use siquery::sys::{SystemReader, SystemReaderInterface};
 
 use siquery::tables::{
+    Table,
     EtcHosts,
     EtcProtocols,
     EtcServices,
@@ -22,10 +23,13 @@ fn test_main() {
     let etc_protocols = EtcProtocols::get_protocols(system_reader.borrow());
     let etc_services = EtcServices::get_services(system_reader.borrow());
 
-    let cols = EtcHosts::COLUMN_NAMES;
+    let table = etc_hosts;
+    let cols = table.column_names();
 
-    for col in cols.iter() {
-        //println!("{}", col);
+    for row in table.iter() {
+        for col in cols.iter() {
+            println!("{} = {}", col, row.get(col));
+        }
     }
 }
 

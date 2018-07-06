@@ -1,9 +1,40 @@
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 
+pub trait Table {
+    const COLUMN_NAMES: &'static [&'static str];
+
+    fn column_names(&self) -> &'static [&'static str] {
+        Self::COLUMN_NAMES
+    }
+
+    fn get(&self, name: &str) -> String;
+}
+
+impl<T: Table> Table for Vec<T> {
+    const COLUMN_NAMES: &'static [&'static str] = T::COLUMN_NAMES;
+
+    fn get(&self, name: &str) -> String {
+        unimplemented!()
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EtcHosts {
     pub address: String,
     pub hostnames: String,
+}
+
+impl Table for EtcHosts {
+    const COLUMN_NAMES: &'static [&'static str] = &["address", "hostnames"];
+
+    fn get(&self, name: &str) -> String {
+        let value = match name {
+            "address" => self.address.clone(),
+            "hostnames" => self.hostnames.clone(),
+            _ => "".to_string()
+        };
+        value
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -14,6 +45,21 @@ pub struct EtcProtocols {
     pub comment: String,
 }
 
+impl Table for EtcProtocols {
+    const COLUMN_NAMES: &'static [&'static str] = &["name", "number", "alias", "comment"];
+
+    fn get(&self, name: &str) -> String {
+        let value = match name {
+            "name" => self.name.clone(),
+            "number" => self.number.to_string(),
+            "alias" => self.alias.clone(),
+            "comment" => self.comment.clone(),
+            _ => "".to_string()
+        };
+        value
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EtcServices {
     pub name: String,
@@ -21,6 +67,22 @@ pub struct EtcServices {
     pub protocol: String,
     pub aliases: String,
     pub comment: String,
+}
+
+impl Table for EtcServices {
+    const COLUMN_NAMES: &'static [&'static str] = &["name", "port", "protocol", "aliases", "comment"];
+
+    fn get(&self, name: &str) -> String {
+        let value = match name {
+            "name" => self.name.clone(),
+            "port" => self.port.to_string(),
+            "protocol" => self.protocol.clone(),
+            "aliases" => self.aliases.clone(),
+            "comment" => self.comment.clone(),
+            _ => "".to_string()
+        };
+        value
+    }
 }
 
 #[cfg(target_os = "windows")]

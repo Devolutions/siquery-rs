@@ -17,11 +17,7 @@ lazy_static! {
     static ref HOSTS_FILE_REGEX: Regex = Regex::new(r"(?m)^([^#]*)").unwrap();
 }
 
-//const BROWSERS: &[&str] = &["firefox", "chrome"];
-
 impl EtcHosts {
-
-    pub const COLUMN_NAMES: &'static [&'static str] = &["address", "hostnames"];
 
     pub fn get_hosts(system_reader: &SystemReaderInterface) -> Vec<EtcHosts> {
         let mut hosts: Vec<EtcHosts> = Vec::new();

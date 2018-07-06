@@ -21,8 +21,6 @@ lazy_static! {
 
 impl EtcProtocols {
 
-    pub const COLUMN_NAMES: &'static [&'static str] = &["name", "number", "alias", "comment"];
-
     pub fn new() -> EtcProtocols {
         EtcProtocols {
             name: String::new(),
