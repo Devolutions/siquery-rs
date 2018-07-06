@@ -12,8 +12,8 @@ extern crate lazy_static;
 extern crate time;
 
 mod common;
-pub mod tables;
 mod utils;
+pub mod tables;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {

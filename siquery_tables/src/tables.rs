@@ -8,6 +8,7 @@ pub trait Table {
     }
 
     fn get(&self, name: &str) -> String;
+    fn get_id(&self, name: &str) -> u32;
 }
 
 impl<T: Table> Table for Vec<T> {
@@ -16,28 +17,45 @@ impl<T: Table> Table for Vec<T> {
     fn get(&self, name: &str) -> String {
         unimplemented!()
     }
+
+    fn get_id(&self, name: &str) -> u32 {
+        unimplemented!()
+    }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcHosts {
     pub address: String,
     pub hostnames: String,
 }
 
+impl EtcHosts {
+    const ADDRESS_ID: u32 = 0x00000001;
+    const HOSTNAMES_ID: u32 = 0x00000002;
+}
+
 impl Table for EtcHosts {
-    const COLUMN_NAMES: &'static [&'static str] = &["address", "hostnames"];
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "address", "hostnames"];
 
     fn get(&self, name: &str) -> String {
-        let value = match name {
+        match name {
             "address" => self.address.clone(),
             "hostnames" => self.hostnames.clone(),
             _ => "".to_string()
-        };
-        value
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u32 {
+        match name {
+            "address" => Self::ADDRESS_ID as u32,
+            "hostnames" => Self::HOSTNAMES_ID as u32,
+            _ => 0
+        }
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcProtocols {
     pub name: String,
     pub number: u16,
@@ -45,8 +63,17 @@ pub struct EtcProtocols {
     pub comment: String,
 }
 
+#[allow(non_upper_case_globals)]
+impl EtcProtocols {
+    const NAME_ID: u32 = 0x00000001;
+    const NUMBER_ID: u32 = 0x00000002;
+    const ALIAS_ID: u32 = 0x00000004;
+    const COMMENT_ID: u32 = 0x00000008;
+}
+
 impl Table for EtcProtocols {
-    const COLUMN_NAMES: &'static [&'static str] = &["name", "number", "alias", "comment"];
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "name", "number", "alias", "comment"];
 
     fn get(&self, name: &str) -> String {
         let value = match name {
@@ -58,9 +85,19 @@ impl Table for EtcProtocols {
         };
         value
     }
+
+    fn get_id(&self, name: &str) -> u32 {
+        match name {
+            "name" => Self::NAME_ID as u32,
+            "number" => Self::NUMBER_ID as u32,
+            "alias" => Self::ALIAS_ID as u32,
+            "comment" => Self::COMMENT_ID as u32,
+            _ => 0,
+        }
+    }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcServices {
     pub name: String,
     pub port: u16,
@@ -69,19 +106,39 @@ pub struct EtcServices {
     pub comment: String,
 }
 
+#[allow(non_upper_case_globals)]
+impl EtcServices {
+    const NAME_ID: u32 = 0x00000001;
+    const PORT_ID: u32 = 0x00000002;
+    const PROTOCOL_ID: u32 = 0x00000004;
+    const ALIASES_ID: u32 = 0x00000008;
+    const COMMENT_ID: u32 = 0x00000010;
+}
+
 impl Table for EtcServices {
-    const COLUMN_NAMES: &'static [&'static str] = &["name", "port", "protocol", "aliases", "comment"];
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "name", "port", "protocol", "aliases", "comment"];
 
     fn get(&self, name: &str) -> String {
-        let value = match name {
+        match name {
             "name" => self.name.clone(),
             "port" => self.port.to_string(),
             "protocol" => self.protocol.clone(),
             "aliases" => self.aliases.clone(),
             "comment" => self.comment.clone(),
             _ => "".to_string()
-        };
-        value
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u32 {
+        match name {
+            "name" => Self::NAME_ID as u32,
+            "port" => Self::PORT_ID as u32,
+            "protocol" => Self::PROTOCOL_ID as u32,
+            "aliases" => Self::ALIASES_ID as u32,
+            "comment" => Self::COMMENT_ID as u32,
+            _ => 0
+        }
     }
 }
 
