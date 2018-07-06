@@ -13,6 +13,7 @@ extern crate time;
 
 mod common;
 mod utils;
+pub mod query;
 pub mod tables;
 
 cfg_if! {

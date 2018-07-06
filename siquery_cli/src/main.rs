@@ -3,70 +3,17 @@ extern crate clap;
 
 extern crate siquery;
 
-use clap::App;
-
-use std::borrow::Borrow;
-
 use siquery::SystemInfo;
-use siquery::sys::{SystemReader, SystemReaderInterface};
+use siquery::sys::SystemReader;
+use siquery::query::query_table;
 
-use siquery::tables::{
-    Table,
-    Dummy,
-    EtcHosts,
-    EtcProtocols,
-    EtcServices,
-};
-
-fn test_gen_table<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
-    let mut res: Vec<Vec<String>> = Vec::new();
-
-    let cols = table.column_names();
-    let mut hdr: Vec<String> = Vec::new();
-    for col in cols.iter() {
-        hdr.push(col.to_string());
-    }
-
-    //res.push(hdr);
-
-    for tab in table.iter() {
-        let mut row: Vec<String> = Vec::new();
-        for col in cols.iter() {
-            row.push(tab.get(col));
-        }
-        res.push(row);
-    }
-    res
-}
-
-fn test_query_table(name: &str) -> Vec<Vec<String>> {
-    let system_reader: Box<SystemReaderInterface> = Box::new(SystemReader::new());
-    let res = match name {
-        "etc_hosts" => {
-            let table = EtcHosts::get_hosts(system_reader.borrow());
-            test_gen_table(&table)
-        },
-        "etc_protocols" => {
-            let table = EtcProtocols::get_protocols(system_reader.borrow());
-            test_gen_table(&table)
-        },
-        "etc_services" => {
-            let table = EtcServices::get_services(system_reader.borrow());
-            test_gen_table(&table)
-        },
-        _ => {
-            let table: Vec<Dummy> = Vec::new();
-            test_gen_table(&table)
-        }
-    };
-    res
-}
+use clap::App;
 
 fn test_main() {
     let tables = &["etc_hosts", "etc_services"];
 
     for table in tables.iter() {
-        let res = test_query_table(table);
+        let res = query_table(table);
 
         for row in res.iter() {
             println!("{:?}", row);
@@ -75,7 +22,7 @@ fn test_main() {
 }
 
 fn main() {
-    test_main();
+    //test_main();
 
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
