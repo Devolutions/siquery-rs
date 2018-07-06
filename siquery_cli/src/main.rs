@@ -12,23 +12,64 @@ use siquery::sys::{SystemReader, SystemReaderInterface};
 
 use siquery::tables::{
     Table,
+    Dummy,
     EtcHosts,
     EtcProtocols,
     EtcServices,
 };
 
-fn test_main() {
-    let system_reader: Box<SystemReaderInterface> = Box::new(SystemReader::new());
-    let etc_hosts = EtcHosts::get_hosts(system_reader.borrow());
-    let etc_protocols = EtcProtocols::get_protocols(system_reader.borrow());
-    let etc_services = EtcServices::get_services(system_reader.borrow());
+fn test_gen_table<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
+    let mut res: Vec<Vec<String>> = Vec::new();
 
-    let table = etc_hosts;
     let cols = table.column_names();
+    let mut hdr: Vec<String> = Vec::new();
+    for col in cols.iter() {
+        hdr.push(col.to_string());
+    }
 
-    for row in table.iter() {
+    //res.push(hdr);
+
+    for tab in table.iter() {
+        let mut row: Vec<String> = Vec::new();
         for col in cols.iter() {
-            println!("{} = {}", col, row.get(col));
+            row.push(tab.get(col));
+        }
+        res.push(row);
+    }
+    res
+}
+
+fn test_query_table(name: &str) -> Vec<Vec<String>> {
+    let system_reader: Box<SystemReaderInterface> = Box::new(SystemReader::new());
+    let res = match name {
+        "etc_hosts" => {
+            let table = EtcHosts::get_hosts(system_reader.borrow());
+            test_gen_table(&table)
+        },
+        "etc_protocols" => {
+            let table = EtcProtocols::get_protocols(system_reader.borrow());
+            test_gen_table(&table)
+        },
+        "etc_services" => {
+            let table = EtcServices::get_services(system_reader.borrow());
+            test_gen_table(&table)
+        },
+        _ => {
+            let table: Vec<Dummy> = Vec::new();
+            test_gen_table(&table)
+        }
+    };
+    res
+}
+
+fn test_main() {
+    let tables = &["etc_hosts", "etc_services"];
+
+    for table in tables.iter() {
+        let res = test_query_table(table);
+
+        for row in res.iter() {
+            println!("{:?}", row);
         }
     }
 }

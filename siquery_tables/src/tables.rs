@@ -24,6 +24,31 @@ impl<T: Table> Table for Vec<T> {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Dummy {
+
+}
+
+impl Dummy {
+
+}
+
+impl Table for Dummy {
+    const COLUMN_NAMES: &'static [&'static str] = &[];
+
+    fn get(&self, name: &str) -> String {
+        match name {
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u32 {
+        match name {
+            _ => 0
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcHosts {
     pub address: String,
     pub hostnames: String,
