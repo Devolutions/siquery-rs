@@ -102,33 +102,33 @@ impl ProcessesRow {
         let proc_ns = SimpleProcNs::read_full_proc_namespace(pid).unwrap_or(SimpleProcNs::new());
 
         ProcessesRow {
-            pid: pid.parse::<i64>().unwrap_or(-1),
+            pid: pid.parse::<i64>().unwrap_or(-2),
             name: proc_stat.name,
             path: ProcessesRow::read_proc_link("exe", pid),
             cmdline: ProcessesRow::read_proc_cmdline(pid).replace("\0", " "),
             state: proc_stat.state,
             cwd: ProcessesRow::read_proc_link("cwd", pid),
             root: ProcessesRow::read_proc_link("root", pid),
-            uid: proc_stat.real_uid.parse::<i64>().unwrap_or(-1),
-            gid: proc_stat.real_gid.parse::<i64>().unwrap_or(-1),
-            euid: proc_stat.effective_uid.parse::<i64>().unwrap_or(-1),
-            egid: proc_stat.effective_gid.parse::<i64>().unwrap_or(-1),
-            suid: proc_stat.saved_uid.parse::<i64>().unwrap_or(-1),
-            sgid: proc_stat.saved_gid.parse::<i64>().unwrap_or(-1),
-            on_disk: -1,    //TODO
+            uid: proc_stat.real_uid.parse::<i64>().unwrap_or(0),
+            gid: proc_stat.real_gid.parse::<i64>().unwrap_or(0),
+            euid: proc_stat.effective_uid.parse::<i64>().unwrap_or(0),
+            egid: proc_stat.effective_gid.parse::<i64>().unwrap_or(0),
+            suid: proc_stat.saved_uid.parse::<i64>().unwrap_or(0),
+            sgid: proc_stat.saved_gid.parse::<i64>().unwrap_or(0),
+            on_disk: -2,    //TODO
             wired_size: 0,    // No support for unpagable counters in linux
-            resident_size: proc_stat.resident_size.parse::<i64>().unwrap_or(-1),
-            total_size:  proc_stat.total_size.parse::<i64>().unwrap_or(-1),
-            user_time: proc_stat.user_time.parse::<i64>().unwrap_or(-1),
-            system_time: proc_stat.system_time.parse::<i64>().unwrap_or(-1),
-            disk_bytes_read: proc_io.read_bytes.parse::<i64>().unwrap_or(-1),
-            disk_bytes_written: -1, //TODO proc_io.write_bytes + proc_io.cancelled_write_bytes,
-            start_time: proc_stat.start_time.parse::<i64>().unwrap_or(-1),
-            parent: proc_stat.parent.parse::<i64>().unwrap_or(-1),
-            pgroup: proc_stat.group.parse::<i64>().unwrap_or(-1),
-            threads: proc_stat.threads.parse::<i32>().unwrap_or(-1),
-            nice: proc_stat.nice.parse::<i32>().unwrap_or(-1),
-            is_elevated_token: 0,   //TODO
+            resident_size: proc_stat.resident_size.parse::<i64>().unwrap_or(0),
+            total_size:  proc_stat.total_size.parse::<i64>().unwrap_or(0),
+            user_time: proc_stat.user_time.parse::<i64>().unwrap_or(0),
+            system_time: proc_stat.system_time.parse::<i64>().unwrap_or(0),
+            disk_bytes_read: proc_io.read_bytes.parse::<i64>().unwrap_or(0),
+            disk_bytes_written: proc_io.write_bytes.parse::<i64>().unwrap_or(0) +  proc_io.cancelled_write_bytes.parse::<i64>().unwrap_or(0),
+            start_time: proc_stat.start_time.parse::<i64>().unwrap_or(0),
+            parent: proc_stat.parent.parse::<i64>().unwrap_or(0),
+            pgroup: proc_stat.group.parse::<i64>().unwrap_or(0),
+            threads: proc_stat.threads.parse::<i32>().unwrap_or(0),
+            nice: proc_stat.nice.parse::<i32>().unwrap_or(0),
+            is_elevated_token: 0,   // NA for linux
             cgroup_namespace: proc_ns.cgroup_namespace,
             ipc_namespace: proc_ns.ipc_namespace,
             mnt_namespace: proc_ns.mnt_namespace,
@@ -175,11 +175,11 @@ impl ProcessEnvsRow {
         Some(table)
     }
 
-    pub fn gen_proc_environ_table() -> Vec<Vec<ProcessEnvsRow>> {
+    pub fn gen_proc_environ_table() -> Vec<ProcessEnvsRow> {
         let pid_list = get_proc_list();
-        let mut table: Vec<Vec<ProcessEnvsRow>> = Vec::new();
+        let mut table: Vec<ProcessEnvsRow> = Vec::new();
         for pid in pid_list.iter() {
-            table.push(ProcessEnvsRow::gen_proc_environ_row (pid).unwrap_or_else(|| Vec::new()));
+            table.append(&mut ProcessEnvsRow::gen_proc_environ_row (pid).unwrap_or_else(|| Vec::new()));
         }
         table
     }
@@ -228,7 +228,7 @@ impl ProcessMemoryMapRow {
                 if fields.len() == 6 {
                     struct_buffer.path = fields[5].to_owned();
                 }
-                if (struct_buffer.inode == 0) && (struct_buffer.path == "".to_owned()) {       //hoe to set it so that it's set to 1 only when inode and path differ?
+                if (struct_buffer.inode == 0) && (struct_buffer.path == "".to_owned()) {
                     struct_buffer.pseudo = 0;
                 }
             }
@@ -237,11 +237,11 @@ impl ProcessMemoryMapRow {
         Some(table_row)
     }
 
-    pub fn gen_process_map () -> Vec<Vec<ProcessMemoryMapRow>> {
+    pub fn gen_process_map () -> Vec<ProcessMemoryMapRow> {
         let pid_list = get_proc_list();
-        let mut table: Vec<Vec<ProcessMemoryMapRow>> = Vec::new();
+        let mut table: Vec<ProcessMemoryMapRow> = Vec::new();
         for pid in pid_list.iter() {
-            table.push(ProcessMemoryMapRow::gen_process_map_internal (pid).unwrap_or_else(|| Vec::new()));
+            table.append(&mut ProcessMemoryMapRow::gen_process_map_internal (pid).unwrap_or_else(|| Vec::new()));
         }
         table
     }
@@ -326,7 +326,6 @@ impl SimpleProcStat {
         let buff: Vec<_> = stat_content.split(')').collect();
         if buff.len() >= 1 {
             let stat_info_extract: Vec<_> = buff[1].split_whitespace().collect();
-            //what is the required value here???        //!\\
             if stat_info_extract.len() >= 18 {
                 proc_stat.state = stat_info_extract[0].to_owned();
                 proc_stat.parent = stat_info_extract[1].to_owned();
@@ -335,12 +334,12 @@ impl SimpleProcStat {
                 proc_stat.system_time = stat_info_extract[12].to_owned();
                 proc_stat.nice = stat_info_extract[16].to_owned();
                 proc_stat.threads = stat_info_extract[17].to_owned();
-                proc_stat.start_time = stat_info_extract[19].to_owned(); //.or_else(proc_stat.start_time="-1".to_string()).to_owned();
+                proc_stat.start_time = stat_info_extract[19].to_owned();
             }
         }
         proc_stat
     }
-}   //could be implemented in ProcessesRow
+}
 
 impl SimpleProcIo {
     pub(crate) fn new() -> SimpleProcIo {
@@ -374,7 +373,7 @@ impl SimpleProcIo {
         }
         proc_io
     }
-}     //could be implemented in ProcessesRow
+}
 
 impl SimpleProcNs {
 
