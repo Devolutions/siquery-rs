@@ -384,8 +384,9 @@ fn main() {
                 }
                 println!("This table contains {:?} entries.", system_info.process_open_sockets.len());
             }
-            #[cfg(any(not(linux), not(windows)))]
-                println!("Not implemented!");
+            #[cfg(all(not(target_os = "linux"), not(target_os = "windows")))] {
+                println!("Not implemented for your OS.");
+            }
         }
         "processes" => {
             #[cfg(target_os = "linux")] {
@@ -405,6 +406,9 @@ fn main() {
                     println!("{:?}", process);
                 }
                 println!("This table contains {:?} entries.", system_info.processes.len());
+            }
+            #[cfg(all(not(target_os = "linux"), not(target_os = "windows"), not (target_os = "macos")))] {
+                println!("Not implemented for your OS.");
             }
         }
         "process_memory_map" => {
@@ -426,8 +430,9 @@ fn main() {
                 println!("This table contains {:?} entries.", system_info.process_memory_map.len());
             }
 
-            #[cfg(any(not(linux), not(windows)))]
-                println!("Not implemented!");
+            #[cfg(all(not(target_os = "linux"), not(target_os = "windows")))] {
+                println!("Not implemented for your OS.");
+            }
         }
         "process_envs" => {
             #[cfg(target_os = "linux")] {
@@ -442,8 +447,9 @@ fn main() {
                 }
                 println!("This table contains {:?} entries.", system_info.process_envs.len());
             }
-            #[cfg(any(not(macos), not(linux)))]
-                println!("Not implemented!");
+            #[cfg(all(not(target_os = "macos"), not(target_os = "linux")))] {
+                println!("Not implemented for your OS.");
+            }
         }
         _ => {}
     }
