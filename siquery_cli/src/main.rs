@@ -372,65 +372,77 @@ fn main() {
                 println!("Not implemented!");
         }
         "process_open_sockets" => {
-            #[cfg(target_os = "linux")]
+            #[cfg(target_os = "linux")] {
                 for entry in &system_info.process_open_sockets {
-                println!("{:?}", entry);
+                    println!("{:?}", entry);
+                }
+                println!("This table contains {:?} entries.", system_info.process_open_sockets.len());
             }
             #[cfg(target_os = "windows")] {
                 for entry in &system_info.process_open_sockets {
                     println!("{:?}", entry);
                 }
+                println!("This table contains {:?} entries.", system_info.process_open_sockets.len());
             }
             #[cfg(any(not(linux), not(windows)))]
                 println!("Not implemented!");
         }
         "processes" => {
-            #[cfg(target_os = "linux")]
+            #[cfg(target_os = "linux")] {
                 for process in &system_info.processes {
-                println!("{:?}", &process);
-                println!("");
+                    println!("{:?}", &process);
+                }
+                println!("This table contains {:?} entries.", system_info.processes.len());
             }
-            #[cfg(target_os = "windows")]
+            #[cfg(target_os = "windows")] {
                 for process in &system_info.processes {
-                println!("{:?}", process);
-                println!("");
+                    println!("{:?}", process);
+                }
+                println!("This table contains {:?} entries.", system_info.processes.len());
             }
-            #[cfg(target_os = "macos")]
+            #[cfg(target_os = "macos")] {
                 for process in &system_info.processes {
-                println!("{:?}", process);
-                println!("");
+                    println!("{:?}", process);
+                }
+                println!("This table contains {:?} entries.", system_info.processes.len());
             }
         }
         "process_memory_map" => {
-            #[cfg(target_os = "linux")]
+            #[cfg(target_os = "linux")] {
                 for pid in &system_info.process_memory_map {
-                for entry in pid {
-                    println!("{:?}", entry);
+                    for entry in pid {
+                        println!("{:?}", entry);
+                    }
                 }
+                println!("This table contains {:?} entries.", system_info.process_memory_map.len());
             }
-            #[cfg(target_os = "windows")]
+
+            #[cfg(target_os = "windows")] {
                 for pid in &system_info.process_memory_map {
-                for entry in pid {
-                    println!("{:?}", entry);
+                    for entry in pid {
+                        println!("{:?}", entry);
+                    }
                 }
+                println!("This table contains {:?} entries.", system_info.process_memory_map.len());
             }
+
             #[cfg(any(not(linux), not(windows)))]
                 println!("Not implemented!");
         }
         "process_envs" => {
-            #[cfg(target_os = "windows")] {
+            #[cfg(target_os = "linux")] {
                 for process in &system_info.process_envs {
                     println!("{:?}", process);
-                    println!("");
                 }
+                println!("This table contains {:?} entries.", system_info.process_envs.len());
             }
             #[cfg(target_os = "macos")] {
                 for process in &system_info.process_envs {
                     println!("{:?}", process);
-                    println!("");
                 }
+                println!("This table contains {:?} entries.", system_info.process_envs.len());
             }
-            #[cfg(any(not(macos), not(windows)))]
+            #[cfg(any(not(macos), not(linux)))]
                 println!("Not implemented!");
         }
         _ => {}
