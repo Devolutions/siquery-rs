@@ -1,4 +1,5 @@
 use serde::ser::{Serialize, SerializeStruct, Serializer};
+use std::ops::BitAnd;
 
 pub trait Table {
     const COLUMN_NAMES: &'static [&'static str];
@@ -7,41 +8,46 @@ pub trait Table {
         Self::COLUMN_NAMES
     }
 
-    fn get(&self, name: &str) -> String;
-    fn get_id(&self, name: &str) -> u32;
+    fn get_by_name(&self, name: &str) -> String;
+    fn get_by_id(&self, id: u64) -> String;
+    fn get_id(&self, name: &str) -> u64;
 }
 
 impl<T: Table> Table for Vec<T> {
     const COLUMN_NAMES: &'static [&'static str] = T::COLUMN_NAMES;
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         unimplemented!()
     }
-
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        unimplemented!()
+    }
+    fn get_id(&self, name: &str) -> u64 {
         unimplemented!()
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Dummy {
+pub struct Dummy {}
 
-}
-
-impl Dummy {
-
-}
+impl Dummy {}
 
 impl Table for Dummy {
     const COLUMN_NAMES: &'static [&'static str] = &[];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             _ => "".to_string()
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
             _ => 0
         }
@@ -63,7 +69,7 @@ impl Table for EtcHosts {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "address", "hostnames"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "address" => self.address.clone(),
             "hostnames" => self.hostnames.clone(),
@@ -71,10 +77,18 @@ impl Table for EtcHosts {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            ADDRESS_ID => self.address.clone(),
+            HOSTNAMES_ID => self.hostnames.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "address" => Self::ADDRESS_ID as u32,
-            "hostnames" => Self::HOSTNAMES_ID as u32,
+            "address" => Self::ADDRESS_ID as u64,
+            "hostnames" => Self::HOSTNAMES_ID as u64,
             _ => 0
         }
     }
@@ -90,17 +104,17 @@ pub struct EtcProtocols {
 
 #[allow(non_upper_case_globals)]
 impl EtcProtocols {
-    const NAME_ID: u32 = 0x00000001;
-    const NUMBER_ID: u32 = 0x00000002;
-    const ALIAS_ID: u32 = 0x00000004;
-    const COMMENT_ID: u32 = 0x00000008;
+    const NAME_ID: u64 = 0x00000001;
+    const NUMBER_ID: u64 = 0x00000002;
+    const ALIAS_ID: u64 = 0x00000004;
+    const COMMENT_ID: u64 = 0x00000008;
 }
 
 impl Table for EtcProtocols {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name", "number", "alias", "comment"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         let value = match name {
             "name" => self.name.clone(),
             "number" => self.number.to_string(),
@@ -111,12 +125,22 @@ impl Table for EtcProtocols {
         value
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::NUMBER_ID => self.number.to_string(),
+            Self::ALIAS_ID => self.alias.clone(),
+            Self::COMMENT_ID => self.comment.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "number" => Self::NUMBER_ID as u32,
-            "alias" => Self::ALIAS_ID as u32,
-            "comment" => Self::COMMENT_ID as u32,
+            "name" => Self::NAME_ID,
+            "number" => Self::NUMBER_ID,
+            "alias" => Self::ALIAS_ID,
+            "comment" => Self::COMMENT_ID,
             _ => 0,
         }
     }
@@ -133,18 +157,18 @@ pub struct EtcServices {
 
 #[allow(non_upper_case_globals)]
 impl EtcServices {
-    const NAME_ID: u32 = 0x00000001;
-    const PORT_ID: u32 = 0x00000002;
-    const PROTOCOL_ID: u32 = 0x00000004;
-    const ALIASES_ID: u32 = 0x00000008;
-    const COMMENT_ID: u32 = 0x00000010;
+    const NAME_ID: u64 = 0x00000001;
+    const PORT_ID: u64 = 0x00000002;
+    const PROTOCOL_ID: u64 = 0x00000004;
+    const ALIASES_ID: u64 = 0x00000008;
+    const COMMENT_ID: u64 = 0x00000010;
 }
 
 impl Table for EtcServices {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name", "port", "protocol", "aliases", "comment"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "port" => self.port.to_string(),
@@ -155,13 +179,24 @@ impl Table for EtcServices {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::PORT_ID => self.port.to_string(),
+            Self::PROTOCOL_ID => self.protocol.clone(),
+            Self::ALIASES_ID => self.aliases.clone(),
+            Self::COMMENT_ID => self.comment.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "port" => Self::PORT_ID as u32,
-            "protocol" => Self::PROTOCOL_ID as u32,
-            "aliases" => Self::ALIASES_ID as u32,
-            "comment" => Self::COMMENT_ID as u32,
+            "name" => Self::NAME_ID,
+            "port" => Self::PORT_ID,
+            "protocol" => Self::PROTOCOL_ID,
+            "aliases" => Self::ALIASES_ID,
+            "comment" => Self::COMMENT_ID,
             _ => 0
         }
     }
@@ -181,20 +216,25 @@ pub struct WmiComputerInfo {
 #[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl WmiComputerInfo {
-    const COMPUTER_NAME_ID: u32 = 0x00000001;
-    const DOMAIN_ID: u32 = 0x00000002;
-    const MANUFACTURER_ID: u32 = 0x00000004;
-    const MODEL_ID: u32 = 0x00000008;
-    const NUMBER_OF_PROCESSORS_ID: u32 = 0x00000010;
-    const SYSTEM_TYPE_ID: u32 = 0x00000020;
+    const COMPUTER_NAME_ID: u64 = 0x00000001;
+    const DOMAIN_ID: u64 = 0x00000002;
+    const MANUFACTURER_ID: u64 = 0x00000004;
+    const MODEL_ID: u64 = 0x00000008;
+    const NUMBER_OF_PROCESSORS_ID: u64 = 0x00000010;
+    const SYSTEM_TYPE_ID: u64 = 0x00000020;
 }
 
 #[cfg(target_os = "windows")]
 impl Table for WmiComputerInfo {
     const COLUMN_NAMES: &'static [&'static str] = &[
-        "computer_name", "domain", "manufacturer", "model", "number_of_processors", "system_type"];
+        "computer_name",
+        "domain",
+        "manufacturer",
+        "model",
+        "number_of_processors",
+        "system_type"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "computer_name" => self.computer_name.clone(),
             "domain" => self.domain.to_string(),
@@ -206,14 +246,26 @@ impl Table for WmiComputerInfo {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::COMPUTER_NAME_ID => self.computer_name.clone(),
+            Self::DOMAIN_ID => self.domain.to_string(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::MODEL_ID => self.model.clone(),
+            Self::NUMBER_OF_PROCESSORS_ID => self.number_of_processors.clone(),
+            Self::SYSTEM_TYPE_ID => self.system_type.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "computer_name" => Self::COMPUTER_NAME_ID as u32,
-            "domain" => Self::DOMAIN_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "model" => Self::MODEL_ID as u32,
-            "number_of_processors" => Self::NUMBER_OF_PROCESSORS_ID as u32,
-            "system_type" => Self::SYSTEM_TYPE_ID as u32,
+            "computer_name" => Self::COMPUTER_NAME_ID,
+            "domain" => Self::DOMAIN_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "model" => Self::MODEL_ID,
+            "number_of_processors" => Self::NUMBER_OF_PROCESSORS_ID,
+            "system_type" => Self::SYSTEM_TYPE_ID,
             _ => 0
         }
     }
@@ -229,17 +281,20 @@ pub struct SystemInfoData {
 
 #[allow(non_upper_case_globals)]
 impl SystemInfoData {
-    const COMPUTER_NAME_ID: u32 = 0x00000001;
-    const CPU_BRAND_ID: u32 = 0x00000002;
-    const CPU_LOGICAL_CORES_ID: u32 = 0x00000004;
-    const PHYSICAL_MEMORY_ID: u32 = 0x00000008;
+    const COMPUTER_NAME_ID: u64 = 0x00000001;
+    const CPU_BRAND_ID: u64 = 0x00000002;
+    const CPU_LOGICAL_CORES_ID: u64 = 0x00000004;
+    const PHYSICAL_MEMORY_ID: u64 = 0x00000008;
 }
 
 impl Table for SystemInfoData {
     const COLUMN_NAMES: &'static [&'static str] = &[
-        "computer_name", "cpu_brand", "cpu_logical_cores", "physical_memory"];
+        "computer_name",
+        "cpu_brand",
+        "cpu_logical_cores",
+        "physical_memory"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "computer_name" => self.computer_name.clone(),
             "cpu_brand" => self.cpu_brand.clone(),
@@ -249,12 +304,22 @@ impl Table for SystemInfoData {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::COMPUTER_NAME_ID => self.computer_name.clone(),
+            Self::CPU_BRAND_ID => self.cpu_brand.clone(),
+            Self::CPU_LOGICAL_CORES_ID => self.cpu_logical_cores.to_string(),
+            Self::PHYSICAL_MEMORY_ID => self.physical_memory.to_string(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "computer_name" => Self::COMPUTER_NAME_ID as u32,
-            "cpu_brand" => Self::CPU_BRAND_ID as u32,
-            "cpu_logical_cores" => Self::CPU_LOGICAL_CORES_ID as u32,
-            "physical_memory" => Self::PHYSICAL_MEMORY_ID as u32,
+            "computer_name" => Self::COMPUTER_NAME_ID,
+            "cpu_brand" => Self::CPU_BRAND_ID,
+            "cpu_logical_cores" => Self::CPU_LOGICAL_CORES_ID,
+            "physical_memory" => Self::PHYSICAL_MEMORY_ID,
             _ => 0
         }
     }
@@ -285,23 +350,23 @@ pub struct WmiOsVersion {
 #[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl WmiOsVersion {
-    const BUILDER_NUMBER_ID: u32 = 0x00000001;
-    const CSNAME_ID: u32 = 0x00000002;
-    const CAPTION_ID: u32 = 0x00000004;
-    const FREE_PHYSICAL_MEMORY_ID: u32 = 0x00000008;
-    const FREE_VIRTUAL_MEMORY_ID: u32 = 0x00000010;
-    const PLATFORM_ID: u32 = 0x00000020;
-    const VERSION_ID: u32 = 0x00000040;
-    const MAJOR_ID: u32 = 0x00000080;
-    const MANUFACTURER_ID: u32 = 0x00000100;
-    const MINOR_ID: u32 = 0x00000200;
-    const NAME_ID: u32 = 0x00000400;
-    const SERVICE_PACK_MAJOR_ID: u32 = 0x00000800;
-    const SERVICE_PACK_MINOR_ID: u32 = 0x00001000;
-    const SIZE_STORED_IN_PAGING_FILE_ID: u32 = 0x00002000;
-    const TOTAL_VIRTUAL_MEM_SIZE_ID: u32 = 0x00004000;
-    const TOTAL_VISIBLE_MEM_SIZE_ID: u32 = 0x00008000;
-    const WIN_DIRECTORY_ID: u32 = 0x00010000;
+    const BUILDER_NUMBER_ID: u64 = 0x00000001;
+    const CSNAME_ID: u64 = 0x00000002;
+    const CAPTION_ID: u64 = 0x00000004;
+    const FREE_PHYSICAL_MEMORY_ID: u64 = 0x00000008;
+    const FREE_VIRTUAL_MEMORY_ID: u64 = 0x00000010;
+    const PLATFORM_ID: u64 = 0x00000020;
+    const VERSION_ID: u64 = 0x00000040;
+    const MAJOR_ID: u64 = 0x00000080;
+    const MANUFACTURER_ID: u64 = 0x00000100;
+    const MINOR_ID: u64 = 0x00000200;
+    const NAME_ID: u64 = 0x00000400;
+    const SERVICE_PACK_MAJOR_ID: u64 = 0x00000800;
+    const SERVICE_PACK_MINOR_ID: u64 = 0x00001000;
+    const SIZE_STORED_IN_PAGING_FILE_ID: u64 = 0x00002000;
+    const TOTAL_VIRTUAL_MEM_SIZE_ID: u64 = 0x00004000;
+    const TOTAL_VISIBLE_MEM_SIZE_ID: u64 = 0x00008000;
+    const WIN_DIRECTORY_ID: u64 = 0x00010000;
 }
 
 impl Table for WmiOsVersion {
@@ -324,7 +389,7 @@ impl Table for WmiOsVersion {
         "total_visible_mem_size",
         "win_directory"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "build_number" => self.build_number.clone(),
             "csname" => self.csname.to_string(),
@@ -347,25 +412,48 @@ impl Table for WmiOsVersion {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::BUILDER_NUMBER_ID => self.build_number.clone(),
+            Self::CSNAME_ID => self.csname.to_string(),
+            Self::CAPTION_ID => self.caption.clone(),
+            Self::FREE_PHYSICAL_MEMORY_ID => self.free_physical_mem.clone(),
+            Self::FREE_VIRTUAL_MEMORY_ID => self.free_virtual_mem.clone(),
+            Self::PLATFORM_ID => self.platform.clone(),
+            Self::VERSION_ID => self.version.to_string(),
+            Self::MAJOR_ID => self.major.clone(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::MINOR_ID => self.minor.clone(),
+            Self::NAME_ID => self.name.to_string(),
+            Self::SERVICE_PACK_MAJOR_ID => self.service_pack_major.clone(),
+            Self::SERVICE_PACK_MINOR_ID => self.service_pack_minor.clone(),
+            Self::SIZE_STORED_IN_PAGING_FILE_ID => self.size_stored_in_paging_file.clone(),
+            Self::TOTAL_VIRTUAL_MEM_SIZE_ID => self.total_virtual_mem_size.to_string(),
+            Self::TOTAL_VISIBLE_MEM_SIZE_ID => self.total_visible_mem_size.clone(),
+            Self::WIN_DIRECTORY_ID => self.win_directory.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "build_number" => Self::BUILDER_NUMBER_ID as u32,
-            "csname" => Self::CSNAME_ID as u32,
-            "caption" => Self::CAPTION_ID as u32,
-            "free_physical_mem" => Self::FREE_PHYSICAL_MEMORY_ID as u32,
-            "free_virtual_mem" => Self::FREE_VIRTUAL_MEMORY_ID as u32,
-            "platform" => Self::PLATFORM_ID as u32,
-            "version" => Self::VERSION_ID as u32,
-            "major" => Self::MAJOR_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "minor" => Self::MINOR_ID as u32,
-            "name" => Self::NAME_ID as u32,
-            "service_pack_major" => Self::SERVICE_PACK_MAJOR_ID as u32,
-            "service_pack_minor" => Self::SERVICE_PACK_MINOR_ID as u32,
-            "size_stored_in_paging_file" => Self::SIZE_STORED_IN_PAGING_FILE_ID as u32,
-            "total_virtual_mem_size" => Self::TOTAL_VIRTUAL_MEM_SIZE_ID as u32,
-            "total_visible_mem_size" => Self::TOTAL_VISIBLE_MEM_SIZE_ID as u32,
-            "win_directory" => Self::WIN_DIRECTORY_ID as u32,
+            "build_number" => Self::BUILDER_NUMBER_ID,
+            "csname" => Self::CSNAME_ID,
+            "caption" => Self::CAPTION_ID,
+            "free_physical_mem" => Self::FREE_PHYSICAL_MEMORY_ID,
+            "free_virtual_mem" => Self::FREE_VIRTUAL_MEMORY_ID,
+            "platform" => Self::PLATFORM_ID,
+            "version" => Self::VERSION_ID,
+            "major" => Self::MAJOR_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "minor" => Self::MINOR_ID,
+            "name" => Self::NAME_ID,
+            "service_pack_major" => Self::SERVICE_PACK_MAJOR_ID,
+            "service_pack_minor" => Self::SERVICE_PACK_MINOR_ID,
+            "size_stored_in_paging_file" => Self::SIZE_STORED_IN_PAGING_FILE_ID,
+            "total_virtual_mem_size" => Self::TOTAL_VIRTUAL_MEM_SIZE_ID,
+            "total_visible_mem_size" => Self::TOTAL_VISIBLE_MEM_SIZE_ID,
+            "win_directory" => Self::WIN_DIRECTORY_ID,
             _ => 0
         }
     }
@@ -382,22 +470,22 @@ pub struct OsVersion {
 
 #[allow(non_upper_case_globals)]
 impl OsVersion {
-    const NAME_ID: u32 = 0x00000001;
-    const PLATFORM_ID: u32 = 0x00000002;
-    const VERSION_ID: u32 = 0x00000004;
-    const MAJOR_ID: u32 = 0x00000008;
-    const MINOR_ID: u32 = 0x00000010;
+    const NAME_ID: u64 = 0x00000001;
+    const PLATFORM_ID: u64 = 0x00000002;
+    const VERSION_ID: u64 = 0x00000004;
+    const MAJOR_ID: u64 = 0x00000008;
+    const MINOR_ID: u64 = 0x00000010;
 }
 
 impl Table for OsVersion {
     const COLUMN_NAMES: &'static [&'static str] = &[
-    "name",
-    "platform",
-    "version",
-    "major",
-    "minor"];
+        "name",
+        "platform",
+        "version",
+        "major",
+        "minor"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "platform" => self.platform.clone(),
@@ -408,13 +496,24 @@ impl Table for OsVersion {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::PLATFORM_ID => self.platform.clone(),
+            Self::VERSION_ID => self.version.clone(),
+            Self::MAJOR_ID => self.major.to_string(),
+            Self::MINOR_ID => self.minor.to_string(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "platform" => Self::PLATFORM_ID as u32,
-            "version" => Self::VERSION_ID as u32,
-            "major" => Self::MAJOR_ID as u32,
-            "minor" => Self::MINOR_ID as u32,
+            "name" => Self::NAME_ID,
+            "platform" => Self::PLATFORM_ID,
+            "version" => Self::VERSION_ID,
+            "major" => Self::MAJOR_ID,
+            "minor" => Self::MINOR_ID,
             _ => 0
         }
     }
@@ -431,11 +530,11 @@ pub struct LogicalDrive {
 
 #[allow(non_upper_case_globals)]
 impl LogicalDrive {
-    const DEVICE_ID: u32 = 0x00000001;
-    const DRIVE_TYPE_ID: u32 = 0x00000002;
-    const FREE_SPACE_ID: u32 = 0x00000004;
-    const SIZE_ID: u32 = 0x00000008;
-    const FILE_SYSTEM_ID: u32 = 0x00000010;
+    const DEVICE_ID: u64 = 0x00000001;
+    const DRIVE_TYPE_ID: u64 = 0x00000002;
+    const FREE_SPACE_ID: u64 = 0x00000004;
+    const SIZE_ID: u64 = 0x00000008;
+    const FILE_SYSTEM_ID: u64 = 0x00000010;
 }
 
 impl Table for LogicalDrive {
@@ -446,7 +545,7 @@ impl Table for LogicalDrive {
         "size",
         "file_system"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "device_id" => self.device_id.clone(),
             "drive_type" => self.drive_type.clone(),
@@ -457,13 +556,25 @@ impl Table for LogicalDrive {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::DEVICE_ID => self.device_id.clone(),
+            Self::DRIVE_TYPE_ID => self.drive_type.clone(),
+            Self::FREE_SPACE_ID => self.free_space.to_string(),
+            Self::SIZE_ID => self.size.to_string(),
+            Self::FILE_SYSTEM_ID => self.file_system.clone(),
+
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "device_id" => Self::DEVICE_ID as u32,
-            "drive_type" => Self::DRIVE_TYPE_ID as u32,
-            "free_space" => Self::FREE_SPACE_ID as u32,
-            "size" => Self::SIZE_ID as u32,
-            "file_system" => Self::FILE_SYSTEM_ID as u32,
+            "device_id" => Self::DEVICE_ID,
+            "drive_type" => Self::DRIVE_TYPE_ID,
+            "free_space" => Self::FREE_SPACE_ID,
+            "size" => Self::SIZE_ID,
+            "file_system" => Self::FILE_SYSTEM_ID,
             _ => 0
         }
     }
@@ -495,11 +606,11 @@ pub struct InterfaceAddress {
 
 #[allow(non_upper_case_globals)]
 impl InterfaceAddress {
-    const INTERFACE_ID: u32 = 0x00000001;
-    const ADDRESS_ID: u32 = 0x00000002;
-    const MASK_ID: u32 = 0x00000004;
-    const INTERFACE_TYPE_ID: u32 = 0x00000008;
-    const FRIENDLY_NAME_ID: u32 = 0x00000010;
+    const INTERFACE_ID: u64 = 0x00000001;
+    const ADDRESS_ID: u64 = 0x00000002;
+    const MASK_ID: u64 = 0x00000004;
+    const INTERFACE_TYPE_ID: u64 = 0x00000008;
+    const FRIENDLY_NAME_ID: u64 = 0x00000010;
 }
 
 impl Table for InterfaceAddress {
@@ -510,7 +621,7 @@ impl Table for InterfaceAddress {
         "interface_type",
         "friendly_name"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "interface" => self.interface.clone(),
             "address" => self.address.clone(),
@@ -521,13 +632,25 @@ impl Table for InterfaceAddress {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::INTERFACE_ID => self.interface.clone(),
+            Self::ADDRESS_ID => self.address.clone(),
+            Self::MASK_ID => self.mask.to_string(),
+            Self::INTERFACE_TYPE_ID => self.interface_type.to_string(),
+            Self::FRIENDLY_NAME_ID => self.friendly_name.clone(),
+
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "interface" => Self::INTERFACE_ID as u32,
-            "address" => Self::ADDRESS_ID as u32,
-            "mask" => Self::MASK_ID as u32,
-            "interface_type" => Self::INTERFACE_TYPE_ID as u32,
-            "friendly_name" => Self::FRIENDLY_NAME_ID as u32,
+            "interface" => Self::INTERFACE_ID,
+            "address" => Self::ADDRESS_ID,
+            "mask" => Self::MASK_ID,
+            "interface_type" => Self::INTERFACE_TYPE_ID,
+            "friendly_name" => Self::FRIENDLY_NAME_ID,
             _ => 0
         }
     }
@@ -558,10 +681,10 @@ pub struct InterfaceDetails {
 
 #[allow(non_upper_case_globals)]
 impl InterfaceDetails {
-    const INTERFACE_ID: u32 = 0x00000001;
-    const MAC_ID: u32 = 0x00000002;
-    const MTU_ID: u32 = 0x00000004;
-    const ENABLED_ID: u32 = 0x00000008;
+    const INTERFACE_ID: u64 = 0x00000001;
+    const MAC_ID: u64 = 0x00000002;
+    const MTU_ID: u64 = 0x00000004;
+    const ENABLED_ID: u64 = 0x00000008;
 }
 
 impl Table for InterfaceDetails {
@@ -569,9 +692,9 @@ impl Table for InterfaceDetails {
         "interface",
         "mac",
         "mtu",
-        "enabled",];
+        "enabled", ];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "interface" => self.interface.clone(),
             "mac" => self.mac.clone(),
@@ -581,12 +704,23 @@ impl Table for InterfaceDetails {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::INTERFACE_ID => self.interface.clone(),
+            Self::MAC_ID => self.mac.clone(),
+            Self::MTU_ID => self.mtu.to_string(),
+            Self::ENABLED_ID => self.enabled.to_string(),
+            _ => "".to_string()
+        }
+    }
+
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "interface" => Self::INTERFACE_ID as u32,
-            "mac" => Self::MAC_ID as u32,
-            "mtu" => Self::MTU_ID as u32,
-            "enabled" => Self::ENABLED_ID as u32,
+            "interface" => Self::INTERFACE_ID,
+            "mac" => Self::MAC_ID,
+            "mtu" => Self::MTU_ID,
+            "enabled" => Self::ENABLED_ID,
             _ => 0
         }
     }
@@ -603,11 +737,11 @@ pub struct Uptime {
 
 #[allow(non_upper_case_globals)]
 impl Uptime {
-    const DAYS_ID: u32 = 0x00000001;
-    const HOURS_ID: u32 = 0x00000002;
-    const MINUTES_ID: u32 = 0x00000004;
-    const SECONDS_ID: u32 = 0x00000008;
-    const TOTAL_SECONDS_ID: u32 = 0x00000010;
+    const DAYS_ID: u64 = 0x00000001;
+    const HOURS_ID: u64 = 0x00000002;
+    const MINUTES_ID: u64 = 0x00000004;
+    const SECONDS_ID: u64 = 0x00000008;
+    const TOTAL_SECONDS_ID: u64 = 0x00000010;
 }
 
 impl Table for Uptime {
@@ -616,9 +750,9 @@ impl Table for Uptime {
         "hours",
         "minutes",
         "seconds",
-        "total_seconds",];
+        "total_seconds", ];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "days" => self.days.to_string(),
             "hours" => self.hours.to_string(),
@@ -629,13 +763,24 @@ impl Table for Uptime {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::DAYS_ID => self.days.to_string(),
+            Self::HOURS_ID => self.hours.to_string(),
+            Self::MINUTES_ID => self.minutes.to_string(),
+            Self::SECONDS_ID => self.seconds.to_string(),
+            Self::TOTAL_SECONDS_ID => self.total_seconds.to_string(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "days" => Self::DAYS_ID as u32,
-            "hours" => Self::HOURS_ID as u32,
-            "minutes" => Self::MINUTES_ID as u32,
-            "seconds" => Self::SECONDS_ID as u32,
-            "total_seconds" => Self::TOTAL_SECONDS_ID as u32,
+            "days" => Self::DAYS_ID,
+            "hours" => Self::HOURS_ID,
+            "minutes" => Self::MINUTES_ID,
+            "seconds" => Self::SECONDS_ID,
+            "total_seconds" => Self::TOTAL_SECONDS_ID,
             _ => 0
         }
     }
@@ -666,29 +811,28 @@ pub struct WmiPrinters {
 
 #[allow(non_upper_case_globals)]
 impl WmiPrinters {
-    const ATTRIBUTES_ID: u32 = 0x00000001;
-    const CAPTION_ID: u32 = 0x00000002;
-    const CREATION_CLASS_ID: u32 = 0x00000004;
-    const DEVICE_ID: u32 = 0x00000008;
-    const DO_COMPLETE_FIRST_ID: u32 = 0x00000010;
-    const DRIVER_NAME_ID: u32 = 0x00000020;
-    const EXTENDED_PRINTER_STATUS_ID: u32 = 0x00000040;
-    const HORIZONTAL_RESOLUTION_ID: u32 = 0x00000080;
-    const LOCAL_ID: u32 = 0x00000100;
-    const NAME_ID: u32 = 0x00000200;
-    const PORT_NAME_ID: u32 = 0x00000400;
-    const PRINTER_STATUS_ID: u32 = 0x00000800;
-    const PRINT_JOB_DATA_TYPE_ID: u32 = 0x00001000;
-    const PRINT_PROCESSOR_ID: u32 = 0x00002000;
-    const PRIORITY_ID: u32 = 0x00004000;
-    const STATUS_ID: u32 = 0x00008000;
-    const SYSTEM_CREATION_CLASS_NAME_ID: u32 = 0x00010000;
-    const SYSTEM_NAME_ID: u32 = 0x00020000;
-    const VERTICAL_RESOLUTION_ID: u32 = 0x00040000;
+    const ATTRIBUTES_ID: u64 = 0x00000001;
+    const CAPTION_ID: u64 = 0x00000002;
+    const CREATION_CLASS_ID: u64 = 0x00000004;
+    const DEVICE_ID: u64 = 0x00000008;
+    const DO_COMPLETE_FIRST_ID: u64 = 0x00000010;
+    const DRIVER_NAME_ID: u64 = 0x00000020;
+    const EXTENDED_PRINTER_STATUS_ID: u64 = 0x00000040;
+    const HORIZONTAL_RESOLUTION_ID: u64 = 0x00000080;
+    const LOCAL_ID: u64 = 0x00000100;
+    const NAME_ID: u64 = 0x00000200;
+    const PORT_NAME_ID: u64 = 0x00000400;
+    const PRINTER_STATUS_ID: u64 = 0x00000800;
+    const PRINT_JOB_DATA_TYPE_ID: u64 = 0x00001000;
+    const PRINT_PROCESSOR_ID: u64 = 0x00002000;
+    const PRIORITY_ID: u64 = 0x00004000;
+    const STATUS_ID: u64 = 0x00008000;
+    const SYSTEM_CREATION_CLASS_NAME_ID: u64 = 0x00010000;
+    const SYSTEM_NAME_ID: u64 = 0x00020000;
+    const VERTICAL_RESOLUTION_ID: u64 = 0x00040000;
 }
 
 impl Table for WmiPrinters {
-
     const COLUMN_NAMES: &'static [&'static str] = &[
         "attributes",
         "caption",
@@ -710,7 +854,7 @@ impl Table for WmiPrinters {
         "system_name",
         "vertical_resolution"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "attributes" => self.attributes.clone(),
             "caption" => self.caption.clone(),
@@ -735,27 +879,52 @@ impl Table for WmiPrinters {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::ATTRIBUTES_ID => self.attributes.clone(),
+            Self::CAPTION_ID => self.caption.clone(),
+            Self::CREATION_CLASS_ID => self.creation_class_name.clone(),
+            Self::DEVICE_ID => self.device_id.clone(),
+            Self::DO_COMPLETE_FIRST_ID => self.do_complete_first.clone(),
+            Self::DRIVER_NAME_ID => self.driver_name.clone(),
+            Self::EXTENDED_PRINTER_STATUS_ID => self.extended_printer_status.clone(),
+            Self::HORIZONTAL_RESOLUTION_ID => self.horizontal_resolution.clone(),
+            Self::LOCAL_ID => self.local.clone(),
+            Self::NAME_ID => self.name.clone(),
+            Self::PORT_NAME_ID => self.port_name.clone(),
+            Self::PRINTER_STATUS_ID => self.printer_status.clone(),
+            Self::PRINT_JOB_DATA_TYPE_ID => self.print_job_data_type.clone(),
+            Self::PRINT_PROCESSOR_ID => self.print_processor.clone(),
+            Self::PRIORITY_ID => self.priority.clone(),
+            Self::STATUS_ID => self.status.clone(),
+            Self::SYSTEM_CREATION_CLASS_NAME_ID => self.system_creation_class_name.clone(),
+            Self::SYSTEM_NAME_ID => self.system_name.clone(),
+            Self::VERTICAL_RESOLUTION_ID => self.vertical_resolution.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "attributes" => Self::ATTRIBUTES_ID as u32,
-            "caption" => Self::CAPTION_ID as u32,
-            "creation_class_name" => Self::CREATION_CLASS_ID as u32,
-            "device_id" => Self::DEVICE_ID as u32,
-            "do_complete_first" => Self::DO_COMPLETE_FIRST_ID as u32,
-            "driver_name" => Self::DRIVER_NAME_ID as u32,
-            "extended_printer_status" => Self::EXTENDED_PRINTER_STATUS_ID as u32,
-            "horizontal_resolution" => Self::HORIZONTAL_RESOLUTION_ID as u32,
-            "local" => Self::LOCAL_ID as u32,
-            "name" => Self::NAME_ID as u32,
-            "port_name" => Self::PORT_NAME_ID as u32,
-            "printer_status" => Self::PRINTER_STATUS_ID as u32,
-            "print_job_data_type" => Self::PRINT_JOB_DATA_TYPE_ID as u32,
-            "print_processor" => Self::PRINT_PROCESSOR_ID as u32,
-            "priority" => Self::PRIORITY_ID as u32,
-            "status" => Self::STATUS_ID as u32,
-            "system_creation_class_name" => Self::SYSTEM_CREATION_CLASS_NAME_ID as u32,
-            "system_name" => Self::SYSTEM_NAME_ID as u32,
-            "vertical_resolution" => Self::VERTICAL_RESOLUTION_ID as u32,
+            "attributes" => Self::ATTRIBUTES_ID,
+            "caption" => Self::CAPTION_ID,
+            "creation_class_name" => Self::CREATION_CLASS_ID,
+            "device_id" => Self::DEVICE_ID,
+            "do_complete_first" => Self::DO_COMPLETE_FIRST_ID,
+            "driver_name" => Self::DRIVER_NAME_ID,
+            "extended_printer_status" => Self::EXTENDED_PRINTER_STATUS_ID,
+            "horizontal_resolution" => Self::HORIZONTAL_RESOLUTION_ID,
+            "local" => Self::LOCAL_ID,
+            "name" => Self::NAME_ID,
+            "port_name" => Self::PORT_NAME_ID,
+            "printer_status" => Self::PRINTER_STATUS_ID,
+            "print_job_data_type" => Self::PRINT_JOB_DATA_TYPE_ID,
+            "print_processor" => Self::PRINT_PROCESSOR_ID,
+            "priority" => Self::PRIORITY_ID,
+            "status" => Self::STATUS_ID,
+            "system_creation_class_name" => Self::SYSTEM_CREATION_CLASS_NAME_ID,
+            "system_name" => Self::SYSTEM_NAME_ID,
+            "vertical_resolution" => Self::VERTICAL_RESOLUTION_ID,
             _ => 0
         }
     }
@@ -786,25 +955,25 @@ pub struct WmiServices {
 
 #[allow(non_upper_case_globals)]
 impl WmiServices {
-    const ACCEPT_PAUSE_ID: u32 = 0x00000001;
-    const ACCEPT_STOP_ID: u32 = 0x00000002;
-    const CAPTION_ID: u32 = 0x00000004;
-    const CREATION_CLASS_NAME_ID: u32 = 0x00000008;
-    const DESCRIPTION_ID: u32 = 0x00000010;
-    const DESKTOP_INTERACT_ID: u32 = 0x00000020;
-    const DISPLAY_NAME_ID: u32 = 0x00000040;
-    const ERROR_CONTROL_ID: u32 = 0x00000080;
-    const EXIT_CODE_ID: u32 = 0x00000100;
-    const NAME_ID: u32 = 0x00000200;
-    const PATH_NAME_ID: u32 = 0x00000400;
-    const SERVICE_TYPE_ID: u32 = 0x00000800;
-    const STARTED_ID: u32 = 0x00001000;
-    const START_MODE_ID: u32 = 0x00002000;
-    const START_NAME_ID: u32 = 0x00004000;
-    const STATE_ID: u32 = 0x00008000;
-    const STATUS_ID: u32 = 0x00010000;
-    const SYSTEM_CREATION_CLASS_NAME_ID: u32 = 0x00020000;
-    const SYSTEM_NAME_ID: u32 = 0x00040000;
+    const ACCEPT_PAUSE_ID: u64 = 0x00000001;
+    const ACCEPT_STOP_ID: u64 = 0x00000002;
+    const CAPTION_ID: u64 = 0x00000004;
+    const CREATION_CLASS_NAME_ID: u64 = 0x00000008;
+    const DESCRIPTION_ID: u64 = 0x00000010;
+    const DESKTOP_INTERACT_ID: u64 = 0x00000020;
+    const DISPLAY_NAME_ID: u64 = 0x00000040;
+    const ERROR_CONTROL_ID: u64 = 0x00000080;
+    const EXIT_CODE_ID: u64 = 0x00000100;
+    const NAME_ID: u64 = 0x00000200;
+    const PATH_NAME_ID: u64 = 0x00000400;
+    const SERVICE_TYPE_ID: u64 = 0x00000800;
+    const STARTED_ID: u64 = 0x00001000;
+    const START_MODE_ID: u64 = 0x00002000;
+    const START_NAME_ID: u64 = 0x00004000;
+    const STATE_ID: u64 = 0x00008000;
+    const STATUS_ID: u64 = 0x00010000;
+    const SYSTEM_CREATION_CLASS_NAME_ID: u64 = 0x00020000;
+    const SYSTEM_NAME_ID: u64 = 0x00040000;
 }
 
 impl Table for WmiServices {
@@ -829,7 +998,7 @@ impl Table for WmiServices {
         "system_creation_class_name",
         "system_name"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "accept_pause" => self.accept_pause.clone(),
             "accept_stop" => self.accept_stop.clone(),
@@ -854,27 +1023,52 @@ impl Table for WmiServices {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::ACCEPT_PAUSE_ID => self.accept_pause.clone(),
+            Self::ACCEPT_STOP_ID => self.accept_stop.clone(),
+            Self::CAPTION_ID => self.caption.clone(),
+            Self::CREATION_CLASS_NAME_ID => self.creation_class_name.clone(),
+            Self::DESCRIPTION_ID => self.description.clone(),
+            Self::DESKTOP_INTERACT_ID => self.desktop_interact.clone(),
+            Self::DISPLAY_NAME_ID => self.display_name.clone(),
+            Self::ERROR_CONTROL_ID => self.error_control.clone(),
+            Self::EXIT_CODE_ID => self.exit_code.to_string(),
+            Self::NAME_ID => self.name.clone(),
+            Self::PATH_NAME_ID => self.path_name.clone(),
+            Self::SERVICE_TYPE_ID => self.service_type.clone(),
+            Self::STARTED_ID => self.started.clone(),
+            Self::START_MODE_ID => self.start_mode.clone(),
+            Self::START_NAME_ID => self.start_name.clone(),
+            Self::STATE_ID => self.state.clone(),
+            Self::STATUS_ID => self.status.clone(),
+            Self::SYSTEM_CREATION_CLASS_NAME_ID => self.system_creation_class_name.clone(),
+            Self::SYSTEM_NAME_ID => self.system_name.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "accept_pause" => Self::ACCEPT_PAUSE_ID as u32,
-            "accept_stop" => Self::ACCEPT_STOP_ID as u32,
-            "caption" => Self::CAPTION_ID as u32,
-            "creation_class_name" => Self::CREATION_CLASS_NAME_ID as u32,
-            "description" => Self::DESCRIPTION_ID as u32,
-            "desktop_interact" => Self::DESKTOP_INTERACT_ID as u32,
-            "display_name" => Self::DISPLAY_NAME_ID as u32,
-            "error_control" => Self::ERROR_CONTROL_ID as u32,
-            "exit_code" => Self::EXIT_CODE_ID as u32,
-            "name" => Self::NAME_ID as u32,
-            "path_name" => Self::PATH_NAME_ID as u32,
-            "service_type" => Self::SERVICE_TYPE_ID as u32,
-            "started" => Self::STARTED_ID as u32,
-            "start_mode" => Self::START_MODE_ID as u32,
-            "start_name" => Self::START_NAME_ID as u32,
-            "state" => Self::STATE_ID as u32,
-            "status" => Self::STATUS_ID as u32,
-            "system_creation_class_name" => Self::SYSTEM_CREATION_CLASS_NAME_ID as u32,
-            "system_name" => Self::SYSTEM_NAME_ID as u32,
+            "accept_pause" => Self::ACCEPT_PAUSE_ID,
+            "accept_stop" => Self::ACCEPT_STOP_ID,
+            "caption" => Self::CAPTION_ID,
+            "creation_class_name" => Self::CREATION_CLASS_NAME_ID,
+            "description" => Self::DESCRIPTION_ID,
+            "desktop_interact" => Self::DESKTOP_INTERACT_ID,
+            "display_name" => Self::DISPLAY_NAME_ID,
+            "error_control" => Self::ERROR_CONTROL_ID,
+            "exit_code" => Self::EXIT_CODE_ID,
+            "name" => Self::NAME_ID,
+            "path_name" => Self::PATH_NAME_ID,
+            "service_type" => Self::SERVICE_TYPE_ID,
+            "started" => Self::STARTED_ID,
+            "start_mode" => Self::START_MODE_ID,
+            "start_name" => Self::START_NAME_ID,
+            "state" => Self::STATE_ID,
+            "status" => Self::STATUS_ID,
+            "system_creation_class_name" => Self::SYSTEM_CREATION_CLASS_NAME_ID,
+            "system_name" => Self::SYSTEM_NAME_ID,
             _ => 0
         }
     }
@@ -886,18 +1080,18 @@ pub struct WmiHotfixes {
     pub csname: String,
     pub description: String,
     pub hotfix_id: String,
-    pub installed_by : String,
-    pub installed_on : String,
+    pub installed_by: String,
+    pub installed_on: String,
 }
 
 #[allow(non_upper_case_globals)]
 impl WmiHotfixes {
-    const CAPTION_ID: u32 = 0x00000001;
-    const CSNAME_ID: u32 = 0x00000002;
-    const DESCRIPTION_ID: u32 = 0x00000004;
-    const HOTFIX_ID: u32 = 0x00000008;
-    const INSTALLED_BY_ID: u32 = 0x00000010;
-    const INSTALLED_ON_ID: u32 = 0x00000020;
+    const CAPTION_ID: u64 = 0x00000001;
+    const CSNAME_ID: u64 = 0x00000002;
+    const DESCRIPTION_ID: u64 = 0x00000004;
+    const HOTFIX_ID: u64 = 0x00000008;
+    const INSTALLED_BY_ID: u64 = 0x00000010;
+    const INSTALLED_ON_ID: u64 = 0x00000020;
 }
 
 #[cfg(target_os = "windows")]
@@ -910,7 +1104,7 @@ impl Table for WmiHotfixes {
         "installed_by",
         "installed_ON"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "caption" => self.caption.clone(),
             "csname" => self.csname.clone(),
@@ -922,14 +1116,26 @@ impl Table for WmiHotfixes {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::CAPTION_ID => self.caption.clone(),
+            Self::CSNAME_ID => self.csname.clone(),
+            Self::DESCRIPTION_ID => self.description.clone(),
+            Self::HOTFIX_ID => self.hotfix_id.clone(),
+            Self::INSTALLED_BY_ID => self.installed_by.clone(),
+            Self::INSTALLED_ON_ID => self.installed_on.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "caption" => Self::CAPTION_ID as u32,
-            "csname" => Self::CSNAME_ID as u32,
-            "description" => Self::DESCRIPTION_ID as u32,
-            "hotfix_id" => Self::HOTFIX_ID as u32,
-            "installed_by" => Self::INSTALLED_BY_ID as u32,
-            "installed_on" => Self::INSTALLED_ON_ID as u32,
+            "caption" => Self::CAPTION_ID,
+            "csname" => Self::CSNAME_ID,
+            "description" => Self::DESCRIPTION_ID,
+            "hotfix_id" => Self::HOTFIX_ID,
+            "installed_by" => Self::INSTALLED_BY_ID,
+            "installed_on" => Self::INSTALLED_ON_ID,
             _ => 0
         }
     }
@@ -947,12 +1153,12 @@ pub struct Products {
 
 #[allow(non_upper_case_globals)]
 impl Products {
-    const INSTALL_DATE_ID: u32 = 0x00000001;
-    const INSTALL_LOCATION_ID: u32 = 0x00000002;
-    const HELP_LINK_ID: u32 = 0x00000004;
-    const NAME_ID: u32 = 0x00000008;
-    const VENDOR_ID: u32 = 0x00000010;
-    const VERSION_ID: u32 = 0x00000020;
+    const INSTALL_DATE_ID: u64 = 0x00000001;
+    const INSTALL_LOCATION_ID: u64 = 0x00000002;
+    const HELP_LINK_ID: u64 = 0x00000004;
+    const NAME_ID: u64 = 0x00000008;
+    const VENDOR_ID: u64 = 0x00000010;
+    const VERSION_ID: u64 = 0x00000020;
 }
 
 impl Table for Products {
@@ -964,7 +1170,7 @@ impl Table for Products {
         "vendor",
         "version"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "install_date" => self.install_date.clone(),
             "install_location" => self.install_location.clone(),
@@ -976,14 +1182,26 @@ impl Table for Products {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::INSTALL_DATE_ID => self.install_date.clone(),
+            Self::INSTALL_LOCATION_ID => self.install_location.clone(),
+            Self::HELP_LINK_ID => self.help_link.clone(),
+            Self::NAME_ID => self.name.clone(),
+            Self::VENDOR_ID => self.vendor.clone(),
+            Self::VERSION_ID => self.version.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "install_date" => Self::INSTALL_DATE_ID as u32,
-            "install_location" => Self::INSTALL_LOCATION_ID as u32,
-            "help_link" => Self::HELP_LINK_ID as u32,
-            "name" => Self::NAME_ID as u32,
-            "vendor" => Self::VENDOR_ID as u32,
-            "version" => Self::VERSION_ID as u32,
+            "install_date" => Self::INSTALL_DATE_ID,
+            "install_location" => Self::INSTALL_LOCATION_ID,
+            "help_link" => Self::HELP_LINK_ID,
+            "name" => Self::NAME_ID,
+            "vendor" => Self::VENDOR_ID,
+            "version" => Self::VERSION_ID,
             _ => 0
         }
     }
@@ -995,17 +1213,18 @@ pub struct WmiNetworkAdapters {
     pub database_path: String,
     pub dhcp_enabled: String,
     pub ip_address: Vec<String>,
+    pub ip_enabled: String,
     pub ip_subnet: Vec<String>,
     pub mac_address: String,
 }
 
 impl WmiNetworkAdapters {
-    const DESCRIPTION_ID: u32 = 0x00000001;
-    const DATE_BASE_PATH_ID: u32 = 0x00000002;
-    const DHCP_ENABLED_ID: u32 = 0x00000004;
-    const IP_ADDRESS_ID: u32 = 0x00000008;
-    const IP_SUBNET_ID: u32 = 0x00000010;
-    const MAC_ADDRESS_ID: u32 = 0x00000020;
+    const DESCRIPTION_ID: u64 = 0x00000001;
+    const DATE_BASE_PATH_ID: u64 = 0x00000002;
+    const DHCP_ENABLED_ID: u64 = 0x00000004;
+    const IP_ADDRESS_ID: u64 = 0x00000008;
+    const IP_SUBNET_ID: u64 = 0x00000010;
+    const MAC_ADDRESS_ID: u64 = 0x00000020;
 }
 
 impl Table for WmiNetworkAdapters {
@@ -1017,8 +1236,7 @@ impl Table for WmiNetworkAdapters {
         "ip_subnet",
         "mac_address"];
 
-    fn get(&self, name: &str) -> String {
-
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "description" => self.description.clone(),
             "database_path" => self.database_path.clone(),
@@ -1030,28 +1248,54 @@ impl Table for WmiNetworkAdapters {
                     ip_address_str.push_str("\t");
                 }
                 ip_address_str
-            },
+            }
             "ip_subnet" => {
                 let mut ip_subnet_str: String = "".to_owned();
-                for subnet in self.ip_subnet.iter()  {
+                for subnet in self.ip_subnet.iter() {
                     ip_subnet_str.push_str(&subnet);
                     ip_subnet_str.push_str("\t");
                 }
                 ip_subnet_str
-            },
+            }
             "mac_address" => self.mac_address.clone(),
             _ => "".to_string()
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::DESCRIPTION_ID => self.description.clone(),
+            Self::DATE_BASE_PATH_ID => self.database_path.clone(),
+            Self::DHCP_ENABLED_ID => self.dhcp_enabled.clone(),
+            Self::IP_ADDRESS_ID => {
+                let mut ip_address_str: String = "".to_owned();
+                for address in self.ip_address.iter() {
+                    ip_address_str.push_str(&address);
+                    ip_address_str.push_str("\t");
+                }
+                ip_address_str
+            }
+            Self::IP_SUBNET_ID => {
+                let mut ip_subnet_str: String = "".to_owned();
+                for subnet in self.ip_subnet.iter() {
+                    ip_subnet_str.push_str(&subnet);
+                    ip_subnet_str.push_str("\t");
+                }
+                ip_subnet_str
+            }
+            Self::MAC_ADDRESS_ID => self.mac_address.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "description" => Self::DESCRIPTION_ID as u32,
-            "database_path" => Self::DATE_BASE_PATH_ID as u32,
-            "dhcp_enabled" => Self::DHCP_ENABLED_ID as u32,
-            "ip_address" => Self::IP_ADDRESS_ID as u32,
-            "ip_subnet" => Self::IP_SUBNET_ID as u32,
-            "mac_address" => Self::MAC_ADDRESS_ID as u32,
+            "description" => Self::DESCRIPTION_ID,
+            "database_path" => Self::DATE_BASE_PATH_ID,
+            "dhcp_enabled" => Self::DHCP_ENABLED_ID,
+            "ip_address" => Self::IP_ADDRESS_ID,
+            "ip_subnet" => Self::IP_SUBNET_ID,
+            "mac_address" => Self::MAC_ADDRESS_ID,
             _ => 0
         }
     }
@@ -1069,13 +1313,13 @@ pub struct WmiShares {
 }
 
 impl WmiShares {
-    const CAPTION_ID: u32 = 0x00000001;
-    const DESCRIPTION_ID: u32 = 0x00000002;
-    const NAME_ID: u32 = 0x00000004;
-    const PATH_ID: u32 = 0x00000008;
-    const STATUS_ID: u32 = 0x00000010;
-    const TYPE_ID: u32 = 0x00000020;
-    const ALLOW_MAXIMUM_ID: u32 = 0x00000040;
+    const CAPTION_ID: u64 = 0x00000001;
+    const DESCRIPTION_ID: u64 = 0x00000002;
+    const NAME_ID: u64 = 0x00000004;
+    const PATH_ID: u64 = 0x00000008;
+    const STATUS_ID: u64 = 0x00000010;
+    const TYPE_ID: u64 = 0x00000020;
+    const ALLOW_MAXIMUM_ID: u64 = 0x00000040;
 }
 
 impl Table for WmiShares {
@@ -1088,7 +1332,7 @@ impl Table for WmiShares {
         "type",
         "allow_maximum"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "caption" => self.caption.clone(),
             "description" => self.description.clone(),
@@ -1101,15 +1345,28 @@ impl Table for WmiShares {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::CAPTION_ID => self.caption.clone(),
+            Self::DESCRIPTION_ID => self.description.clone(),
+            Self::NAME_ID => self.name.clone(),
+            Self::PATH_ID => self.path.clone(),
+            Self::STATUS_ID => self.status.clone(),
+            Self::TYPE_ID => self._type.clone(),
+            Self::ALLOW_MAXIMUM_ID => self.allow_maximum.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "caption" => Self::CAPTION_ID as u32,
-            "description" => Self::DESCRIPTION_ID as u32,
-            "name" => Self::NAME_ID as u32,
-            "path" => Self::PATH_ID as u32,
-            "status" => Self::STATUS_ID as u32,
-            "type" => Self::TYPE_ID as u32,
-            "allow_maximum" => Self::ALLOW_MAXIMUM_ID as u32,
+            "caption" => Self::CAPTION_ID,
+            "description" => Self::DESCRIPTION_ID,
+            "name" => Self::NAME_ID,
+            "path" => Self::PATH_ID,
+            "status" => Self::STATUS_ID,
+            "type" => Self::TYPE_ID,
+            "allow_maximum" => Self::ALLOW_MAXIMUM_ID,
             _ => 0
         }
     }
@@ -1129,15 +1386,15 @@ pub struct WmiLocalAccounts {
 }
 
 impl WmiLocalAccounts {
-    const ACCOUNT_TYPE_ID: u32 = 0x00000001;
-    const CAPTION_ID: u32 = 0x00000002;
-    const DESCRIPTION_ID: u32 = 0x00000004;
-    const DOMAIN_ID: u32 = 0x00000008;
-    const LOCAL_ACCOUNT_ID: u32 = 0x00000010;
-    const NAME_ID: u32 = 0x00000020;
-    const SID_ID: u32 = 0x00000040;
-    const SID_TYPE_ID: u32 = 0x00000080;
-    const STATUS_ID: u32 = 0x00000100;
+    const ACCOUNT_TYPE_ID: u64 = 0x00000001;
+    const CAPTION_ID: u64 = 0x00000002;
+    const DESCRIPTION_ID: u64 = 0x00000004;
+    const DOMAIN_ID: u64 = 0x00000008;
+    const LOCAL_ACCOUNT_ID: u64 = 0x00000010;
+    const NAME_ID: u64 = 0x00000020;
+    const SID_ID: u64 = 0x00000040;
+    const SID_TYPE_ID: u64 = 0x00000080;
+    const STATUS_ID: u64 = 0x00000100;
 }
 
 impl Table for WmiLocalAccounts {
@@ -1152,7 +1409,7 @@ impl Table for WmiLocalAccounts {
         "sid_type",
         "status"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "account_type" => self.account_type.clone(),
             "caption" => self.caption.clone(),
@@ -1167,17 +1424,32 @@ impl Table for WmiLocalAccounts {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::ACCOUNT_TYPE_ID => self.account_type.clone(),
+            Self::CAPTION_ID => self.caption.clone(),
+            Self::DESCRIPTION_ID => self.description.clone(),
+            Self::DOMAIN_ID => self._domain.clone(),
+            Self::LOCAL_ACCOUNT_ID => self.local_account.clone(),
+            Self::NAME_ID => self.name.clone(),
+            Self::SID_ID => self.sid.clone(),
+            Self::SID_TYPE_ID => self.sid_type.clone(),
+            Self::STATUS_ID => self.status.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "account_type" => Self::ACCOUNT_TYPE_ID as u32,
-            "caption" => Self::CAPTION_ID as u32,
-            "description" => Self::DESCRIPTION_ID as u32,
-            "domain" => Self::DOMAIN_ID as u32,
-            "local_account" => Self::LOCAL_ACCOUNT_ID as u32,
-            "name" => Self::NAME_ID as u32,
-            "sid" => Self::SID_ID as u32,
-            "sid_type" => Self::SID_TYPE_ID as u32,
-            "status" => Self::STATUS_ID as u32,
+            "account_type" => Self::ACCOUNT_TYPE_ID,
+            "caption" => Self::CAPTION_ID,
+            "description" => Self::DESCRIPTION_ID,
+            "domain" => Self::DOMAIN_ID,
+            "local_account" => Self::LOCAL_ACCOUNT_ID,
+            "name" => Self::NAME_ID,
+            "sid" => Self::SID_ID,
+            "sid_type" => Self::SID_TYPE_ID,
+            "status" => Self::STATUS_ID,
             _ => 0
         }
     }
@@ -1185,7 +1457,7 @@ impl Table for WmiLocalAccounts {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiBios {
-    pub caption : String,
+    pub caption: String,
     pub manufacturer: String,
     pub release_date: String,
     pub serial_number: String,
@@ -1193,11 +1465,11 @@ pub struct WmiBios {
 }
 
 impl WmiBios {
-    const CAPTION_ID: u32 = 0x00000001;
-    const MANUFACTURER_ID: u32 = 0x00000002;
-    const RELEASE_DATE_ID: u32 = 0x00000004;
-    const SERIAL_NUMBER_ID: u32 = 0x00000008;
-    const SMBIOS_VERSION_ID: u32 = 0x00000010;
+    const CAPTION_ID: u64 = 0x00000001;
+    const MANUFACTURER_ID: u64 = 0x00000002;
+    const RELEASE_DATE_ID: u64 = 0x00000004;
+    const SERIAL_NUMBER_ID: u64 = 0x00000008;
+    const SMBIOS_VERSION_ID: u64 = 0x00000010;
 }
 
 impl Table for WmiBios {
@@ -1208,7 +1480,7 @@ impl Table for WmiBios {
         "serial_number",
         "smbios_version"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "caption" => self.caption.clone(),
             "manufacturer" => self.manufacturer.clone(),
@@ -1219,13 +1491,24 @@ impl Table for WmiBios {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::CAPTION_ID => self.caption.clone(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::RELEASE_DATE_ID => self.release_date.clone(),
+            Self::SERIAL_NUMBER_ID => self.serial_number.clone(),
+            Self::SMBIOS_VERSION_ID => self.smbios_version.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "caption" => Self::CAPTION_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "release_date" => Self::RELEASE_DATE_ID as u32,
-            "serial_number" => Self::SERIAL_NUMBER_ID as u32,
-            "smbios_version" => Self::SMBIOS_VERSION_ID as u32,
+            "caption" => Self::CAPTION_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "release_date" => Self::RELEASE_DATE_ID,
+            "serial_number" => Self::SERIAL_NUMBER_ID,
+            "smbios_version" => Self::SMBIOS_VERSION_ID,
             _ => 0
         }
     }
@@ -1241,11 +1524,11 @@ pub struct WmiMotherboard {
 }
 
 impl WmiMotherboard {
-    const NAME_ID: u32 = 0x00000001;
-    const MANUFACTURER_ID: u32 = 0x00000002;
-    const PRODUCT_ID: u32 = 0x00000004;
-    const SERIAL_NUMBER_ID: u32 = 0x00000008;
-    const VERSION_ID: u32 = 0x00000010;
+    const NAME_ID: u64 = 0x00000001;
+    const MANUFACTURER_ID: u64 = 0x00000002;
+    const PRODUCT_ID: u64 = 0x00000004;
+    const SERIAL_NUMBER_ID: u64 = 0x00000008;
+    const VERSION_ID: u64 = 0x00000010;
 }
 
 impl Table for WmiMotherboard {
@@ -1256,7 +1539,7 @@ impl Table for WmiMotherboard {
         "serial_number",
         "version"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "manufacturer" => self.manufacturer.clone(),
@@ -1267,20 +1550,31 @@ impl Table for WmiMotherboard {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::PRODUCT_ID => self.product.clone(),
+            Self::SERIAL_NUMBER_ID => self.serial_number.clone(),
+            Self::VERSION_ID => self.version.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "product" => Self::PRODUCT_ID as u32,
-            "serial_number" => Self::SERIAL_NUMBER_ID as u32,
-            "version" => Self::VERSION_ID as u32,
+            "name" => Self::NAME_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "product" => Self::PRODUCT_ID,
+            "serial_number" => Self::SERIAL_NUMBER_ID,
+            "version" => Self::VERSION_ID,
             _ => 0
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiProcessor{
+pub struct WmiProcessor {
     pub address_width: String,
     pub cpu_satus: String,
     pub current_clock_speed: String,
@@ -1301,23 +1595,23 @@ pub struct WmiProcessor{
 }
 
 impl WmiProcessor {
-    const ADDRESS_WIDTH_ID: u32 = 0x00000001;
-    const CPU_STATUS_ID: u32 = 0x00000002;
-    const CURRENT_CLOCK_SPEED_ID: u32 = 0x00000004;
-    const CURRENT_VOLTAGE_ID: u32 = 0x00000008;
-    const DESCRIPTION_ID: u32 = 0x00000010;
-    const EXTERNAL_CLOCK_ID: u32 = 0x00000020;
-    const HYPER_THREADING_ENABLED_ID: u32 = 0x00000040;
-    const L2_CACHE_SIZE_ID: u32 = 0x00000080;
-    const L2_CACHE_SPEED_ID: u32 = 0x00000100;
-    const L3_CACHE_SIZE_ID: u32 = 0x00000200;
-    const L3_CACHE_SPEED_ID: u32 = 0x00000400;
-    const MANUFACTURER_ID: u32 = 0x00000800;
-    const MAX_CLOCK_SPEED_ID: u32 = 0x00001000;
-    const NAME_ID: u32 = 0x00002000;
-    const NUMBER_OF_CORES_ID: u32 = 0x00004000;
-    const NUMBER_OF_LOGICAL_PROCESSORS_ID: u32 = 0x00008000;
-    const SOCKET_DESIGNATION_ID: u32 = 0x00010000;
+    const ADDRESS_WIDTH_ID: u64 = 0x00000001;
+    const CPU_STATUS_ID: u64 = 0x00000002;
+    const CURRENT_CLOCK_SPEED_ID: u64 = 0x00000004;
+    const CURRENT_VOLTAGE_ID: u64 = 0x00000008;
+    const DESCRIPTION_ID: u64 = 0x00000010;
+    const EXTERNAL_CLOCK_ID: u64 = 0x00000020;
+    const HYPER_THREADING_ENABLED_ID: u64 = 0x00000040;
+    const L2_CACHE_SIZE_ID: u64 = 0x00000080;
+    const L2_CACHE_SPEED_ID: u64 = 0x00000100;
+    const L3_CACHE_SIZE_ID: u64 = 0x00000200;
+    const L3_CACHE_SPEED_ID: u64 = 0x00000400;
+    const MANUFACTURER_ID: u64 = 0x00000800;
+    const MAX_CLOCK_SPEED_ID: u64 = 0x00001000;
+    const NAME_ID: u64 = 0x00002000;
+    const NUMBER_OF_CORES_ID: u64 = 0x00004000;
+    const NUMBER_OF_LOGICAL_PROCESSORS_ID: u64 = 0x00008000;
+    const SOCKET_DESIGNATION_ID: u64 = 0x00010000;
 }
 
 impl Table for WmiProcessor {
@@ -1338,9 +1632,9 @@ impl Table for WmiProcessor {
         "name",
         "number_of_cores",
         "number_of_logical_processors",
-        "socket_designation",];
+        "socket_designation", ];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "address_width" => self.address_width.clone(),
             "cpu_satus" => self.cpu_satus.clone(),
@@ -1363,32 +1657,55 @@ impl Table for WmiProcessor {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::ADDRESS_WIDTH_ID => self.address_width.clone(),
+            Self::CPU_STATUS_ID => self.cpu_satus.clone(),
+            Self::CURRENT_CLOCK_SPEED_ID => self.current_clock_speed.clone(),
+            Self::CURRENT_VOLTAGE_ID => self.current_voltage.clone(),
+            Self::DESCRIPTION_ID => self.description.clone(),
+            Self::EXTERNAL_CLOCK_ID => self.external_clock.clone(),
+            Self::HYPER_THREADING_ENABLED_ID => self.hyper_threading_enabled.clone(),
+            Self::L2_CACHE_SIZE_ID => self.l2_cache_size.clone(),
+            Self::L2_CACHE_SPEED_ID => self.l2_cache_speed.clone(),
+            Self::L3_CACHE_SIZE_ID => self.l3_cache_size.clone(),
+            Self::L3_CACHE_SPEED_ID => self.l3_cache_speed.clone(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::MAX_CLOCK_SPEED_ID => self.max_clock_speed.clone(),
+            Self::NAME_ID => self.name.clone(),
+            Self::NUMBER_OF_CORES_ID => self.number_of_cores.clone(),
+            Self::NUMBER_OF_LOGICAL_PROCESSORS_ID => self.number_of_logical_processors.clone(),
+            Self::SOCKET_DESIGNATION_ID => self.socket_designation.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "address_width" => Self::ADDRESS_WIDTH_ID as u32,
-            "cpu_satus" => Self::CPU_STATUS_ID as u32,
-            "current_clock_speed" => Self::CURRENT_CLOCK_SPEED_ID as u32,
-            "current_voltage" => Self::CURRENT_VOLTAGE_ID as u32,
-            "description" => Self::DESCRIPTION_ID as u32,
-            "external_clock" => Self::EXTERNAL_CLOCK_ID as u32,
-            "hyper_threading_enabled" => Self::HYPER_THREADING_ENABLED_ID as u32,
-            "l2_cache_size" => Self::L2_CACHE_SIZE_ID as u32,
-            "l2_cache_speed" => Self::L2_CACHE_SPEED_ID as u32,
-            "l3_cache_size" => Self::L3_CACHE_SIZE_ID as u32,
-            "l3_cache_speed" => Self::L3_CACHE_SPEED_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "max_clock_speed" => Self::MAX_CLOCK_SPEED_ID as u32,
-            "name" => Self::NAME_ID as u32,
-            "number_of_cores" => Self::NUMBER_OF_CORES_ID as u32,
-            "number_of_logical_processors" => Self::NUMBER_OF_LOGICAL_PROCESSORS_ID as u32,
-            "socket_designation" => Self::SOCKET_DESIGNATION_ID as u32,
+            "address_width" => Self::ADDRESS_WIDTH_ID,
+            "cpu_satus" => Self::CPU_STATUS_ID,
+            "current_clock_speed" => Self::CURRENT_CLOCK_SPEED_ID,
+            "current_voltage" => Self::CURRENT_VOLTAGE_ID,
+            "description" => Self::DESCRIPTION_ID,
+            "external_clock" => Self::EXTERNAL_CLOCK_ID,
+            "hyper_threading_enabled" => Self::HYPER_THREADING_ENABLED_ID,
+            "l2_cache_size" => Self::L2_CACHE_SIZE_ID,
+            "l2_cache_speed" => Self::L2_CACHE_SPEED_ID,
+            "l3_cache_size" => Self::L3_CACHE_SIZE_ID,
+            "l3_cache_speed" => Self::L3_CACHE_SPEED_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "max_clock_speed" => Self::MAX_CLOCK_SPEED_ID,
+            "name" => Self::NAME_ID,
+            "number_of_cores" => Self::NUMBER_OF_CORES_ID,
+            "number_of_logical_processors" => Self::NUMBER_OF_LOGICAL_PROCESSORS_ID,
+            "socket_designation" => Self::SOCKET_DESIGNATION_ID,
             _ => 0
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiMemory{
+pub struct WmiMemory {
     pub name: String,
     pub bank_label: String,
     pub capacity: String,
@@ -1404,18 +1721,18 @@ pub struct WmiMemory{
 }
 
 impl WmiMemory {
-    const NAME_ID: u32 = 0x00000001;
-    const BANK_LABEL_ID: u32 = 0x00000002;
-    const CAPACITY_ID: u32 = 0x00000004;
-    const DESCRIPTION_ID: u32 = 0x00000008;
-    const DEVICE_LOCATOR_ID: u32 = 0x00000010;
-    const FORM_FACTOR_ID: u32 = 0x00000020;
-    const INTERLEAVE_DATA_DEPTH_ID: u32 = 0x00000040;
-    const INTERLEAVE_POSITION_ID: u32 = 0x00000080;
-    const MANUFACTURER_ID: u32 = 0x00000100;
-    const MEMORY_TYPE_ID: u32 = 0x00000200;
-    const SERIAL_NUMBER_ID: u32 = 0x00000400;
-    const SPEED_ID: u32 = 0x00000800;
+    const NAME_ID: u64 = 0x00000001;
+    const BANK_LABEL_ID: u64 = 0x00000002;
+    const CAPACITY_ID: u64 = 0x00000004;
+    const DESCRIPTION_ID: u64 = 0x00000008;
+    const DEVICE_LOCATOR_ID: u64 = 0x00000010;
+    const FORM_FACTOR_ID: u64 = 0x00000020;
+    const INTERLEAVE_DATA_DEPTH_ID: u64 = 0x00000040;
+    const INTERLEAVE_POSITION_ID: u64 = 0x00000080;
+    const MANUFACTURER_ID: u64 = 0x00000100;
+    const MEMORY_TYPE_ID: u64 = 0x00000200;
+    const SERIAL_NUMBER_ID: u64 = 0x00000400;
+    const SPEED_ID: u64 = 0x00000800;
 }
 
 impl Table for WmiMemory {
@@ -1431,9 +1748,9 @@ impl Table for WmiMemory {
         "manufacturer",
         "memory_type",
         "serial_number",
-        "speed",];
+        "speed", ];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "bank_label" => self.bank_label.clone(),
@@ -1451,28 +1768,45 @@ impl Table for WmiMemory {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::BANK_LABEL_ID => self.bank_label.clone(),
+            Self::CAPACITY_ID => self.capacity.clone(),
+            Self::DESCRIPTION_ID => self.description.clone(),
+            Self::DEVICE_LOCATOR_ID => self.device_locator.clone(),
+            Self::FORM_FACTOR_ID => self.form_factor.clone(),
+            Self::INTERLEAVE_DATA_DEPTH_ID => self.interleave_data_depth.clone(),
+            Self::INTERLEAVE_POSITION_ID => self.interleave_position.clone(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::MEMORY_TYPE_ID => self.memory_type.clone(),
+            Self::SERIAL_NUMBER_ID => self.serial_number.clone(),
+            Self::SPEED_ID => self.speed.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "bank_label" => Self::BANK_LABEL_ID as u32,
-            "capacity" => Self::CAPACITY_ID as u32,
-            "description" => Self::DESCRIPTION_ID as u32,
-            "device_locator" => Self::DEVICE_LOCATOR_ID as u32,
-            "form_factor" => Self::FORM_FACTOR_ID as u32,
-            "interleave_data_depth" => Self::INTERLEAVE_DATA_DEPTH_ID as u32,
-            "interleave_position" => Self::INTERLEAVE_POSITION_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "memory_type" => Self::MEMORY_TYPE_ID as u32,
-            "serial_number" => Self::SERIAL_NUMBER_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "speed" => Self::SPEED_ID as u32,
+            "name" => Self::NAME_ID,
+            "bank_label" => Self::BANK_LABEL_ID,
+            "capacity" => Self::CAPACITY_ID,
+            "description" => Self::DESCRIPTION_ID,
+            "device_locator" => Self::DEVICE_LOCATOR_ID,
+            "form_factor" => Self::FORM_FACTOR_ID,
+            "interleave_data_depth" => Self::INTERLEAVE_DATA_DEPTH_ID,
+            "interleave_position" => Self::INTERLEAVE_POSITION_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "memory_type" => Self::MEMORY_TYPE_ID,
+            "serial_number" => Self::SERIAL_NUMBER_ID,
+            "speed" => Self::SPEED_ID,
             _ => 0
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiSound{
+pub struct WmiSound {
     pub name: String,
     pub status: String,
     pub manufacturer: String,
@@ -1480,10 +1814,10 @@ pub struct WmiSound{
 }
 
 impl WmiSound {
-    const NAME_ID: u32 = 0x00000001;
-    const STATUS_ID: u32 = 0x00000002;
-    const MANUFACTURER_ID: u32 = 0x00000004;
-    const DMA_BUFFER_SIZE_ID: u32 = 0x00000008;
+    const NAME_ID: u64 = 0x00000001;
+    const STATUS_ID: u64 = 0x00000002;
+    const MANUFACTURER_ID: u64 = 0x00000004;
+    const DMA_BUFFER_SIZE_ID: u64 = 0x00000008;
 }
 
 impl Table for WmiSound {
@@ -1493,7 +1827,7 @@ impl Table for WmiSound {
         "manufacturer",
         "dma_buffer_size"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "status" => self.status.clone(),
@@ -1503,19 +1837,29 @@ impl Table for WmiSound {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::STATUS_ID => self.status.clone(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::DMA_BUFFER_SIZE_ID => self.dma_buffer_size.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "status" => Self::STATUS_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "dma_buffer_size" => Self::DMA_BUFFER_SIZE_ID as u32,
+            "name" => Self::NAME_ID,
+            "status" => Self::STATUS_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "dma_buffer_size" => Self::DMA_BUFFER_SIZE_ID,
             _ => 0
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiVideo{
+pub struct WmiVideo {
     pub name: String,
     pub adapter_compatibility: String,
     pub adapter_dac_type: String,
@@ -1531,18 +1875,18 @@ pub struct WmiVideo{
 }
 
 impl WmiVideo {
-    const NAME_ID: u32 = 0x00000001;
-    const ADAPTER_COMPATIBILITY_ID: u32 = 0x00000002;
-    const ADAPTER_DAC_TYPE_ID: u32 = 0x00000004;
-    const ADAPTER_RAM_ID: u32 = 0x00000008;
-    const AVAILABILITY_ID: u32 = 0x00000010;
-    const DRIVER_VERSION_ID: u32 = 0x00000020;
-    const INSTALLED_DISPLAY_DRIVER_ID: u32 = 0x00000040;
-    const REFRESH_RATE_ID: u32 = 0x00000080;
-    const SCREEN_INFO_ID: u32 = 0x00000100;
-    const STATUS_ID: u32 = 0x00000200;
-    const VIDEO_ARCHITECTURE_ID: u32 = 0x00000400;
-    const VIDEO_MEMORY_TYPE_ID: u32 = 0x00000800;
+    const NAME_ID: u64 = 0x00000001;
+    const ADAPTER_COMPATIBILITY_ID: u64 = 0x00000002;
+    const ADAPTER_DAC_TYPE_ID: u64 = 0x00000004;
+    const ADAPTER_RAM_ID: u64 = 0x00000008;
+    const AVAILABILITY_ID: u64 = 0x00000010;
+    const DRIVER_VERSION_ID: u64 = 0x00000020;
+    const INSTALLED_DISPLAY_DRIVER_ID: u64 = 0x00000040;
+    const REFRESH_RATE_ID: u64 = 0x00000080;
+    const SCREEN_INFO_ID: u64 = 0x00000100;
+    const STATUS_ID: u64 = 0x00000200;
+    const VIDEO_ARCHITECTURE_ID: u64 = 0x00000400;
+    const VIDEO_MEMORY_TYPE_ID: u64 = 0x00000800;
 }
 
 impl Table for WmiVideo {
@@ -1558,9 +1902,9 @@ impl Table for WmiVideo {
         "screen_info",
         "status",
         "video_architecture",
-        "video_memory_type",];
+        "video_memory_type", ];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "adapter_compatibility" => self.adapter_compatibility.clone(),
@@ -1575,7 +1919,7 @@ impl Table for WmiVideo {
                     installed_display_driver.push_str("\t");
                 }
                 installed_display_driver
-            },
+            }
             "refresh_rate" => self.refresh_rate.clone(),
             "screen_info" => self.screen_info.clone(),
             "status" => self.status.clone(),
@@ -1585,27 +1929,52 @@ impl Table for WmiVideo {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::ADAPTER_COMPATIBILITY_ID => self.adapter_compatibility.clone(),
+            Self::ADAPTER_DAC_TYPE_ID => self.adapter_dac_type.clone(),
+            Self::ADAPTER_RAM_ID => self.adapter_ram.to_string(),
+            Self::AVAILABILITY_ID => self.availability.clone(),
+            Self::DRIVER_VERSION_ID => self.driver_version.clone(),
+            Self::INSTALLED_DISPLAY_DRIVER_ID => {
+                let mut installed_display_driver: String = "".to_owned();
+                for driver in self.installed_display_driver.iter() {
+                    installed_display_driver.push_str(&driver);
+                    installed_display_driver.push_str("\t");
+                }
+                installed_display_driver
+            }
+            Self::REFRESH_RATE_ID => self.refresh_rate.clone(),
+            Self::SCREEN_INFO_ID => self.screen_info.clone(),
+            Self::STATUS_ID => self.status.clone(),
+            Self::VIDEO_ARCHITECTURE_ID => self.video_architecture.clone(),
+            Self::VIDEO_MEMORY_TYPE_ID => self.video_memory_type.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "adapter_compatibility" => Self::ADAPTER_COMPATIBILITY_ID as u32,
-            "adapter_dac_type" => Self::ADAPTER_DAC_TYPE_ID as u32,
-            "adapter_ram" => Self::ADAPTER_RAM_ID as u32,
-            "availability" => Self::AVAILABILITY_ID as u32,
-            "driver_version" => Self::DRIVER_VERSION_ID as u32,
-            "installed_display_driver" => Self::INSTALLED_DISPLAY_DRIVER_ID as u32,
-            "refresh_rate" => Self::REFRESH_RATE_ID as u32,
-            "screen_info" => Self::SCREEN_INFO_ID as u32,
-            "status" => Self::STATUS_ID as u32,
-            "video_architecture" => Self::VIDEO_ARCHITECTURE_ID as u32,
-            "video_memory_type" => Self::VIDEO_MEMORY_TYPE_ID as u32,
+            "name" => Self::NAME_ID,
+            "adapter_compatibility" => Self::ADAPTER_COMPATIBILITY_ID,
+            "adapter_dac_type" => Self::ADAPTER_DAC_TYPE_ID,
+            "adapter_ram" => Self::ADAPTER_RAM_ID,
+            "availability" => Self::AVAILABILITY_ID,
+            "driver_version" => Self::DRIVER_VERSION_ID,
+            "installed_display_driver" => Self::INSTALLED_DISPLAY_DRIVER_ID,
+            "refresh_rate" => Self::REFRESH_RATE_ID,
+            "screen_info" => Self::SCREEN_INFO_ID,
+            "status" => Self::STATUS_ID,
+            "video_architecture" => Self::VIDEO_ARCHITECTURE_ID,
+            "video_memory_type" => Self::VIDEO_MEMORY_TYPE_ID,
             _ => 0
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiMonitors{
+pub struct WmiMonitors {
     pub name: String,
     pub availability: String,
     pub bandwidth: u64,
@@ -1615,12 +1984,12 @@ pub struct WmiMonitors{
 }
 
 impl WmiMonitors {
-    const NAME_ID: u32 = 0x00000001;
-    const AVAILABILITY_ID: u32 = 0x00000002;
-    const BANDWIDTH_ID: u32 = 0x00000004;
-    const MANUFACTURER_ID: u32 = 0x00000008;
-    const SCREEN_HEIGHT_ID: u32 = 0x00000010;
-    const SCREEN_WIDTH_ID: u32 = 0x00000020;
+    const NAME_ID: u64 = 0x00000001;
+    const AVAILABILITY_ID: u64 = 0x00000002;
+    const BANDWIDTH_ID: u64 = 0x00000004;
+    const MANUFACTURER_ID: u64 = 0x00000008;
+    const SCREEN_HEIGHT_ID: u64 = 0x00000010;
+    const SCREEN_WIDTH_ID: u64 = 0x00000020;
 }
 
 impl Table for WmiMonitors {
@@ -1632,7 +2001,7 @@ impl Table for WmiMonitors {
         "screen_height",
         "screen_width"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "availability" => self.availability.clone(),
@@ -1644,21 +2013,33 @@ impl Table for WmiMonitors {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::AVAILABILITY_ID => self.availability.clone(),
+            Self::BANDWIDTH_ID => self.bandwidth.to_string(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::SCREEN_HEIGHT_ID => self.screen_height.to_string(),
+            Self::SCREEN_WIDTH_ID => self.screen_width.to_string(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "availability" => Self::AVAILABILITY_ID as u32,
-            "bandwidth" => Self::BANDWIDTH_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "screen_height" => Self::SCREEN_HEIGHT_ID as u32,
-            "screen_width" => Self::SCREEN_WIDTH_ID as u32,
+            "name" => Self::NAME_ID,
+            "availability" => Self::AVAILABILITY_ID,
+            "bandwidth" => Self::BANDWIDTH_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "screen_height" => Self::SCREEN_HEIGHT_ID,
+            "screen_width" => Self::SCREEN_WIDTH_ID,
             _ => 0
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiKeyboard{
+pub struct WmiKeyboard {
     pub name: String,
     pub description: String,
     pub device_id: String,
@@ -1666,10 +2047,10 @@ pub struct WmiKeyboard{
 }
 
 impl WmiKeyboard {
-    const NAME_ID: u32 = 0x00000001;
-    const DESCRIPTION_ID: u32 = 0x00000002;
-    const DEVICE_ID: u32 = 0x00000004;
-    const STATUS_ID: u32 = 0x00000008;
+    const NAME_ID: u64 = 0x00000001;
+    const DESCRIPTION_ID: u64 = 0x00000002;
+    const DEVICE_ID: u64 = 0x00000004;
+    const STATUS_ID: u64 = 0x00000008;
 }
 
 impl Table for WmiKeyboard {
@@ -1679,7 +2060,7 @@ impl Table for WmiKeyboard {
         "device_id",
         "status"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "description" => self.description.clone(),
@@ -1689,19 +2070,29 @@ impl Table for WmiKeyboard {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::DESCRIPTION_ID => self.description.clone(),
+            Self::DEVICE_ID => self.device_id.to_string(),
+            Self::STATUS_ID => self.status.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "description" => Self::DESCRIPTION_ID as u32,
-            "device_id" => Self::DEVICE_ID as u32,
-            "status" => Self::STATUS_ID as u32,
+            "name" => Self::NAME_ID,
+            "description" => Self::DESCRIPTION_ID,
+            "device_id" => Self::DEVICE_ID,
+            "status" => Self::STATUS_ID,
             _ => 0
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WmiPointingDevice{
+pub struct WmiPointingDevice {
     pub name: String,
     pub manufacturer: String,
     pub description: String,
@@ -1710,11 +2101,11 @@ pub struct WmiPointingDevice{
 }
 
 impl WmiPointingDevice {
-    const NAME_ID: u32 = 0x00000001;
-    const MANUFACTURER_ID: u32 = 0x00000002;
-    const DESCRIPTION_ID: u32 = 0x00000004;
-    const POINTING_TYPE_ID: u32 = 0x00000008;
-    const STATUS_ID: u32 = 0x00000008;
+    const NAME_ID: u64 = 0x00000001;
+    const MANUFACTURER_ID: u64 = 0x00000002;
+    const DESCRIPTION_ID: u64 = 0x00000004;
+    const POINTING_TYPE_ID: u64 = 0x00000008;
+    const STATUS_ID: u64 = 0x00000008;
 }
 
 impl Table for WmiPointingDevice {
@@ -1725,7 +2116,7 @@ impl Table for WmiPointingDevice {
         "pointing_type",
         "status"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "name" => self.name.clone(),
             "manufacturer" => self.manufacturer.clone(),
@@ -1736,13 +2127,24 @@ impl Table for WmiPointingDevice {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::NAME_ID => self.name.clone(),
+            Self::MANUFACTURER_ID => self.manufacturer.clone(),
+            Self::DESCRIPTION_ID => self.description.to_string(),
+            Self::POINTING_TYPE_ID => self.pointing_type.clone(),
+            Self::STATUS_ID => self.status.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "name" => Self::NAME_ID as u32,
-            "manufacturer" => Self::MANUFACTURER_ID as u32,
-            "description" => Self::DESCRIPTION_ID as u32,
-            "pointing_type" => Self::POINTING_TYPE_ID as u32,
-            "status" => Self::STATUS_ID as u32,
+            "name" => Self::NAME_ID,
+            "manufacturer" => Self::MANUFACTURER_ID,
+            "description" => Self::DESCRIPTION_ID,
+            "pointing_type" => Self::POINTING_TYPE_ID,
+            "status" => Self::STATUS_ID,
             _ => 0
         }
     }
@@ -1765,18 +2167,18 @@ pub struct ProcessOpenSocketsRow {
 }
 
 impl ProcessOpenSocketsRow {
-    const PID_ID: u32 = 0x00000001;
-    const FD_ID: u32 = 0x00000002;
-    const SOCKET_ID: u32 = 0x00000004;
-    const FAMILY_ID: u32 = 0x00000008;
-    const PROTOCOL_ID: u32 = 0x00000010;
-    const LOCAL_ADDRESS_ID: u32 = 0x00000020;
-    const REMOTE_ADDRESS_ID: u32 = 0x00000040;
-    const LOCAL_PORT_ID: u32 = 0x00000080;
-    const REMOTE_PORT_ID: u32 = 0x00000100;
-    const PATH_ID: u32 = 0x00000200;
-    const STATE_ID: u32 = 0x00000400;
-    const NET_NAMESPACE_ID: u32 = 0x00000800;
+    const PID_ID: u64 = 0x00000001;
+    const FD_ID: u64 = 0x00000002;
+    const SOCKET_ID: u64 = 0x00000004;
+    const FAMILY_ID: u64 = 0x00000008;
+    const PROTOCOL_ID: u64 = 0x00000010;
+    const LOCAL_ADDRESS_ID: u64 = 0x00000020;
+    const REMOTE_ADDRESS_ID: u64 = 0x00000040;
+    const LOCAL_PORT_ID: u64 = 0x00000080;
+    const REMOTE_PORT_ID: u64 = 0x00000100;
+    const PATH_ID: u64 = 0x00000200;
+    const STATE_ID: u64 = 0x00000400;
+    const NET_NAMESPACE_ID: u64 = 0x00000800;
 }
 
 impl Table for ProcessOpenSocketsRow {
@@ -1794,7 +2196,7 @@ impl Table for ProcessOpenSocketsRow {
         "state",
         "net_namespace"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "pid" => self.pid.to_string(),
             "fd" => self.fd.to_string(),
@@ -1812,20 +2214,38 @@ impl Table for ProcessOpenSocketsRow {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::PID_ID => self.pid.to_string(),
+            Self::FD_ID => self.fd.to_string(),
+            Self::SOCKET_ID => self.socket.to_string(),
+            Self::FAMILY_ID => self.family.to_string(),
+            Self::PROTOCOL_ID => self.protocol.to_string(),
+            Self::LOCAL_ADDRESS_ID => self.local_address.clone(),
+            Self::REMOTE_ADDRESS_ID => self.remote_address.clone(),
+            Self::LOCAL_PORT_ID => self.local_port.to_string(),
+            Self::REMOTE_PORT_ID => self.remote_port.to_string(),
+            Self::PATH_ID => self.path.clone(),
+            Self::STATE_ID => self.state.clone(),
+            Self::NET_NAMESPACE_ID => self.net_namespace.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "pid" => Self::PID_ID as u32,
-            "fd" => Self::FD_ID as u32,
-            "socket" => Self::SOCKET_ID as u32,
-            "family" => Self::FAMILY_ID as u32,
-            "protocol" => Self::PROTOCOL_ID as u32,
-            "local_address" => Self::LOCAL_ADDRESS_ID as u32,
-            "remote_address" => Self::REMOTE_ADDRESS_ID as u32,
-            "local_port" => Self::LOCAL_PORT_ID as u32,
-            "remote_port" => Self::REMOTE_PORT_ID as u32,
-            "path" => Self::PATH_ID as u32,
-            "state" => Self::STATE_ID as u32,
-            "net_namespace" => Self::NET_NAMESPACE_ID as u32,
+            "pid" => Self::PID_ID,
+            "fd" => Self::FD_ID,
+            "socket" => Self::SOCKET_ID,
+            "family" => Self::FAMILY_ID,
+            "protocol" => Self::PROTOCOL_ID,
+            "local_address" => Self::LOCAL_ADDRESS_ID,
+            "remote_address" => Self::REMOTE_ADDRESS_ID,
+            "local_port" => Self::LOCAL_PORT_ID,
+            "remote_port" => Self::REMOTE_PORT_ID,
+            "path" => Self::PATH_ID,
+            "state" => Self::STATE_ID,
+            "net_namespace" => Self::NET_NAMESPACE_ID,
             _ => 0
         }
     }
@@ -1870,40 +2290,40 @@ pub struct ProcessesRow {
 }
 
 impl ProcessesRow {
-    const PID_ID: u32 = 0x00000001;
-    const NAME_ID: u32 = 0x00000002;
-    const PATH_ID: u32 = 0x00000004;
-    const CMDLINE_ID: u32 = 0x00000008;
-    const STATE_ID: u32 = 0x00000010;
-    const CWD_ID: u32 = 0x00000020;
-    const ROOT_ID: u32 = 0x00000040;
-    const UID_ID: u32 = 0x00000080;
-    const GID_ID: u32 = 0x00000100;
-    const EUID_ID: u32 = 0x00000200;
-    const EGID_ID: u32 = 0x00000400;
-    const SUID_ID: u32 = 0x00000800;
-    const SGID_ID: u32 = 0x00001000;
-    const ON_DISK_ID: u32 = 0x00002000;
-    const WIRED_SIZE_ID: u32 = 0x00004000;
-    const RESIDENT_SIZE_ID: u32 = 0x00008000;
-    const TOTAL_SIZE_ID: u32 = 0x00010080;
-    const USER_TIME_ID: u32 = 0x00020000;
-    const SYSTEM_TIME_ID: u32 = 0x00040000;
-    const DISK_BYTES_READ_ID: u32 = 0x00080000;
-    const DISK_BYTES_WRITTEN_ID: u32 = 0x00100000;
-    const START_TIME_ID: u32 = 0x00200008;
-    const PARENT_ID: u32 = 0x00400000;
-    const PGROUP_ID: u32 = 0x00800000;
-    const THREADS_ID: u32 = 0x01000000;
-    const NICE_ID: u32 = 0x02000000;
-    const IS_ELEVATED_TOKEN_ID: u32 = 0x04000000;
-    const CGROUPE_NAMESPACE_ID: u32 = 0x08000000;
-    const IPC_NAMESPACE_ID: u32 = 0x10000000;
-    const MNT_NAMESPACE_ID: u32 = 0x20000000;
-    const NET_NAMESPACE_ID: u32 = 0x40000000;
-    const PID_NAMESPACE_ID: u32 = 0x80000000;
-    //const USER_NAMESPACE_ID: u64 = 0x100000000;
-    //const UTS_NAMESPACE_ID: u64 = 0x200000000;
+    const PID_ID: u64 = 0x00000001;
+    const NAME_ID: u64 = 0x00000002;
+    const PATH_ID: u64 = 0x00000004;
+    const CMDLINE_ID: u64 = 0x00000008;
+    const STATE_ID: u64 = 0x00000010;
+    const CWD_ID: u64 = 0x00000020;
+    const ROOT_ID: u64 = 0x00000040;
+    const UID_ID: u64 = 0x00000080;
+    const GID_ID: u64 = 0x00000100;
+    const EUID_ID: u64 = 0x00000200;
+    const EGID_ID: u64 = 0x00000400;
+    const SUID_ID: u64 = 0x00000800;
+    const SGID_ID: u64 = 0x00001000;
+    const ON_DISK_ID: u64 = 0x00002000;
+    const WIRED_SIZE_ID: u64 = 0x00004000;
+    const RESIDENT_SIZE_ID: u64 = 0x00008000;
+    const TOTAL_SIZE_ID: u64 = 0x00010080;
+    const USER_TIME_ID: u64 = 0x00020000;
+    const SYSTEM_TIME_ID: u64 = 0x00040000;
+    const DISK_BYTES_READ_ID: u64 = 0x00080000;
+    const DISK_BYTES_WRITTEN_ID: u64 = 0x00100000;
+    const START_TIME_ID: u64 = 0x00200008;
+    const PARENT_ID: u64 = 0x00400000;
+    const PGROUP_ID: u64 = 0x00800000;
+    const THREADS_ID: u64 = 0x01000000;
+    const NICE_ID: u64 = 0x02000000;
+    const IS_ELEVATED_TOKEN_ID: u64 = 0x04000000;
+    const CGROUPE_NAMESPACE_ID: u64 = 0x08000000;
+    const IPC_NAMESPACE_ID: u64 = 0x10000000;
+    const MNT_NAMESPACE_ID: u64 = 0x20000000;
+    const NET_NAMESPACE_ID: u64 = 0x40000000;
+    const PID_NAMESPACE_ID: u64 = 0x80000000;
+    const USER_NAMESPACE_ID: u64 = 0x100000000;
+    const UTS_NAMESPACE_ID: u64 = 0x200000000;
 }
 
 impl Table for ProcessesRow {
@@ -1943,7 +2363,7 @@ impl Table for ProcessesRow {
         "user_namespace",
         "uts_namespace"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "pid" => self.pid.to_string(),
             "name" => self.name.clone(),
@@ -1983,42 +2403,82 @@ impl Table for ProcessesRow {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::PID_ID => self.pid.to_string(),
+            Self::NAME_ID => self.name.clone(),
+            Self::PATH_ID => self.path.clone(),
+            Self::CMDLINE_ID => self.cmdline.clone(),
+            Self::STATE_ID => self.state.clone(),
+            Self::CWD_ID => self.cwd.clone(),
+            Self::ROOT_ID => self.root.clone(),
+            Self::UID_ID => self.uid.to_string(),
+            Self::GID_ID => self.gid.to_string(),
+            Self::EUID_ID => self.euid.to_string(),
+            Self::EGID_ID => self.egid.to_string(),
+            Self::SUID_ID => self.suid.to_string(),
+            Self::SGID_ID => self.sgid.to_string(),
+            Self::ON_DISK_ID => self.on_disk.to_string(),
+            Self::WIRED_SIZE_ID => self.wired_size.to_string(),
+            Self::RESIDENT_SIZE_ID => self.resident_size.to_string(),
+            Self::TOTAL_SIZE_ID => self.total_size.to_string(),
+            Self::USER_TIME_ID => self.user_time.to_string(),
+            Self::SYSTEM_TIME_ID => self.system_time.to_string(),
+            Self::DISK_BYTES_READ_ID => self.disk_bytes_read.to_string(),
+            Self::DISK_BYTES_WRITTEN_ID => self.disk_bytes_written.to_string(),
+            Self::START_TIME_ID => self.start_time.to_string(),
+            Self::PARENT_ID => self.parent.to_string(),
+            Self::PGROUP_ID => self.pgroup.to_string(),
+            Self::THREADS_ID => self.threads.to_string(),
+            Self::NICE_ID => self.nice.to_string(),
+            Self::IS_ELEVATED_TOKEN_ID => self.is_elevated_token.to_string(),
+            Self::CGROUPE_NAMESPACE_ID => self.cgroup_namespace.clone(),
+            Self::IPC_NAMESPACE_ID => self.ipc_namespace.clone(),
+            Self::MNT_NAMESPACE_ID => self.mnt_namespace.clone(),
+            Self::NET_NAMESPACE_ID => self.net_namespace.clone(),
+            Self::PID_NAMESPACE_ID => self.pid_namespace.clone(),
+            Self::USER_NAMESPACE_ID => self.user_namespace.clone(),
+            Self::UTS_NAMESPACE_ID => self.uts_namespace.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "pid" => Self::PID_ID as u32,
-            "name" => Self::NAME_ID as u32,
-            "path" => Self::PATH_ID as u32,
-            "cmdline" => Self::CMDLINE_ID as u32,
-            "state" => Self::STATE_ID as u32,
-            "cwd" => Self::CWD_ID as u32,
-            "root" => Self::ROOT_ID as u32,
-            "uid" => Self::UID_ID as u32,
-            "gid" => Self::GID_ID as u32,
-            "euid" => Self::EUID_ID as u32,
-            "egid" => Self::EGID_ID as u32,
-            "suid" => Self::SUID_ID as u32,
-            "sgid" => Self::SGID_ID as u32,
-            "on_disk" => Self::ON_DISK_ID as u32,
-            "wired_size" => Self::WIRED_SIZE_ID as u32,
-            "resident_size" => Self::RESIDENT_SIZE_ID as u32,
-            "total_size" => Self::TOTAL_SIZE_ID as u32,
-            "user_time" => Self::USER_TIME_ID as u32,
-            "system_time" => Self::SYSTEM_TIME_ID as u32,
-            "disk_bytes_read" => Self::DISK_BYTES_READ_ID as u32,
-            "disk_bytes_written" => Self::DISK_BYTES_WRITTEN_ID as u32,
-            "start_time" => Self::START_TIME_ID as u32,
-            "parent" => Self::PARENT_ID as u32,
-            "pgroup" => Self::PGROUP_ID as u32,
-            "threads" => Self::THREADS_ID as u32,
-            "nice" => Self::NICE_ID as u32,
-            "is_elevated_token" => Self::IS_ELEVATED_TOKEN_ID as u32,
-            "cgroup_namespace" => Self::CGROUPE_NAMESPACE_ID as u32,
-            "ipc_namespace" => Self::IPC_NAMESPACE_ID as u32,
-            "mnt_namespace" => Self::MNT_NAMESPACE_ID as u32,
-            "net_namespace" => Self::NET_NAMESPACE_ID as u32,
-            "pid_namespace" => Self::PID_NAMESPACE_ID as u32,
-            //"user_namespace" => Self::USER_NAMESPACE_ID as u32,
-            //"uts_namespace" => Self::UTS_NAMESPACE_ID as u32,
+            "pid" => Self::PID_ID,
+            "name" => Self::NAME_ID,
+            "path" => Self::PATH_ID,
+            "cmdline" => Self::CMDLINE_ID,
+            "state" => Self::STATE_ID,
+            "cwd" => Self::CWD_ID,
+            "root" => Self::ROOT_ID,
+            "uid" => Self::UID_ID,
+            "gid" => Self::GID_ID,
+            "euid" => Self::EUID_ID,
+            "egid" => Self::EGID_ID,
+            "suid" => Self::SUID_ID,
+            "sgid" => Self::SGID_ID,
+            "on_disk" => Self::ON_DISK_ID,
+            "wired_size" => Self::WIRED_SIZE_ID,
+            "resident_size" => Self::RESIDENT_SIZE_ID,
+            "total_size" => Self::TOTAL_SIZE_ID,
+            "user_time" => Self::USER_TIME_ID,
+            "system_time" => Self::SYSTEM_TIME_ID,
+            "disk_bytes_read" => Self::DISK_BYTES_READ_ID,
+            "disk_bytes_written" => Self::DISK_BYTES_WRITTEN_ID,
+            "start_time" => Self::START_TIME_ID,
+            "parent" => Self::PARENT_ID,
+            "pgroup" => Self::PGROUP_ID,
+            "threads" => Self::THREADS_ID,
+            "nice" => Self::NICE_ID,
+            "is_elevated_token" => Self::IS_ELEVATED_TOKEN_ID,
+            "cgroup_namespace" => Self::CGROUPE_NAMESPACE_ID,
+            "ipc_namespace" => Self::IPC_NAMESPACE_ID,
+            "mnt_namespace" => Self::MNT_NAMESPACE_ID,
+            "net_namespace" => Self::NET_NAMESPACE_ID,
+            "pid_namespace" => Self::PID_NAMESPACE_ID,
+            "user_namespace" => Self::USER_NAMESPACE_ID,
+            "uts_namespace" => Self::UTS_NAMESPACE_ID,
             _ => 0
         }
     }
@@ -2038,15 +2498,15 @@ pub struct ProcessMemoryMapRow {
 }
 
 impl ProcessMemoryMapRow {
-    const PID_ID: u32 = 0x00000001;
-    const START_ID: u32 = 0x00000002;
-    const END_ID: u32 = 0x00000004;
-    const PERMISSION_ID: u32 = 0x00000008;
-    const OFFSET_ID: u32 = 0x00000010;
-    const DEVICE_ID: u32 = 0x00000020;
-    const INODE_ID: u32 = 0x00000040;
-    const PATH_ID: u32 = 0x00000080;
-    const PSEUDO_ID: u32 = 0x00000100;
+    const PID_ID: u64 = 0x00000001;
+    const START_ID: u64 = 0x00000002;
+    const END_ID: u64 = 0x00000004;
+    const PERMISSION_ID: u64 = 0x00000008;
+    const OFFSET_ID: u64 = 0x00000010;
+    const DEVICE_ID: u64 = 0x00000020;
+    const INODE_ID: u64 = 0x00000040;
+    const PATH_ID: u64 = 0x00000080;
+    const PSEUDO_ID: u64 = 0x00000100;
 }
 
 impl Table for ProcessMemoryMapRow {
@@ -2061,7 +2521,7 @@ impl Table for ProcessMemoryMapRow {
         "path",
         "pseudo"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "pid" => self.pid.to_string(),
             "start" => self.start.clone(),
@@ -2076,17 +2536,32 @@ impl Table for ProcessMemoryMapRow {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::PID_ID => self.pid.to_string(),
+            Self::START_ID => self.start.clone(),
+            Self::END_ID => self.end.clone(),
+            Self::PERMISSION_ID => self.permissions.clone(),
+            Self::OFFSET_ID => self.offset.to_string(),
+            Self::DEVICE_ID => self.device.clone(),
+            Self::INODE_ID => self.inode.to_string(),
+            Self::PATH_ID => self.path.clone(),
+            Self::PSEUDO_ID => self.pseudo.to_string(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "pid" => Self::PID_ID as u32,
-            "start" => Self::START_ID as u32,
-            "end" => Self::END_ID as u32,
-            "permissions" => Self::PERMISSION_ID as u32,
-            "offset" => Self::OFFSET_ID as u32,
-            "device" => Self::DEVICE_ID as u32,
-            "inode" => Self::INODE_ID as u32,
-            "path" => Self::PATH_ID as u32,
-            "pseudo" => Self::PSEUDO_ID as u32,
+            "pid" => Self::PID_ID,
+            "start" => Self::START_ID,
+            "end" => Self::END_ID,
+            "permissions" => Self::PERMISSION_ID,
+            "offset" => Self::OFFSET_ID,
+            "device" => Self::DEVICE_ID,
+            "inode" => Self::INODE_ID,
+            "path" => Self::PATH_ID,
+            "pseudo" => Self::PSEUDO_ID,
             _ => 0
         }
     }
@@ -2100,9 +2575,9 @@ pub struct ProcessEnvsRow {
 }
 
 impl ProcessEnvsRow {
-    const PID_ID: u32 = 0x00000001;
-    const KEY_ID: u32 = 0x00000002;
-    const VALUE_ID: u32 = 0x00000004;
+    const PID_ID: u64 = 0x00000001;
+    const KEY_ID: u64 = 0x00000002;
+    const VALUE_ID: u64 = 0x00000004;
 }
 
 impl Table for ProcessEnvsRow {
@@ -2111,7 +2586,7 @@ impl Table for ProcessEnvsRow {
         "key",
         "value"];
 
-    fn get(&self, name: &str) -> String {
+    fn get_by_name(&self, name: &str) -> String {
         match name {
             "pid" => self.pid.to_string(),
             "key" => self.key.clone(),
@@ -2120,11 +2595,20 @@ impl Table for ProcessEnvsRow {
         }
     }
 
-    fn get_id(&self, name: &str) -> u32 {
+    fn get_by_id(&self, id: u64) -> String {
+        match id {
+            Self::PID_ID => self.pid.to_string(),
+            Self::KEY_ID => self.key.clone(),
+            Self::VALUE_ID => self.value.clone(),
+            _ => "".to_string()
+        }
+    }
+
+    fn get_id(&self, name: &str) -> u64 {
         match name {
-            "pid" => Self::PID_ID as u32,
-            "key" => Self::KEY_ID as u32,
-            "value" => Self::VALUE_ID as u32,
+            "pid" => Self::PID_ID,
+            "key" => Self::KEY_ID,
+            "value" => Self::VALUE_ID,
             _ => 0
         }
     }

@@ -10,11 +10,13 @@ use siquery::query::query_table;
 use clap::App;
 
 fn test_main() {
-    let tables = &["etc_hosts", "etc_services"];
+    let tables = &["etc_protocols"];
 
     for table in tables.iter() {
-        let res = query_table(table);
+        let columns: Vec<String> = vec!["name".to_string(), "number".to_string(), "socket".to_string()];
+        let res = query_table(table, columns);
 
+        println!("table: {:?}", table);
         for row in res.iter() {
             println!("{:?}", row);
         }
@@ -22,9 +24,9 @@ fn test_main() {
 }
 
 fn main() {
-    //test_main();
+    test_main();
 
-    let yaml = load_yaml!("cli.yml");
+    /*let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
 
@@ -432,7 +434,7 @@ fn main() {
             #[cfg(any(not(linux), not(windows)))]
                 println!("Not implemented!");
         }
-        "process_envs" => {
+        /*"process_envs" => {
             #[cfg(target_os = "windows")] {
                 for process in &system_info.process_envs {
                     println!("{:?}", process);
@@ -447,7 +449,7 @@ fn main() {
             }
             #[cfg(any(not(macos), not(windows)))]
                 println!("Not implemented!");
-        }
+        }*/
         _ => {}
-    }
+    }*/
 }

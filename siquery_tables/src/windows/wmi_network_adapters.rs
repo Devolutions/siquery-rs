@@ -9,6 +9,7 @@ impl WmiNetworkAdapters {
             database_path: String::new(),
             dhcp_enabled: String::new(),
             ip_address: Vec::new(),
+            ip_enabled: String::new(),
             ip_subnet: Vec::new(),
             mac_address: String::new(),
         }
@@ -51,6 +52,9 @@ impl WmiNetworkAdapters {
                     },
                     "IPAddress" => {
                         add_formatted_entry(&mut v,  &mut network_adapter.ip_address);
+                    },
+                    "IPEnabled" => {
+                        network_adapter.ip_enabled = v;
                     },
                     "IPSubnet" => {
                         add_formatted_entry(&mut v,  &mut network_adapter.ip_subnet);
