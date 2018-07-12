@@ -70,18 +70,16 @@ fn select_all<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
 fn select<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<Vec<String>> where T:Table+Sized {
     let mut res: Vec<Vec<String>> = Vec::new();
 
-    let mut id: u64 = 1;
-
     let mut hdr: Vec<String> = Vec::new();
     let mut columns_id: Vec<u64> = Vec::new();
 
     for column in columns.iter() {
         // make sur the header exist in the table
-        if !table[0].get_by_name(column).is_empty(){
+        let id = table[0].get_id(column);
+        if id != 0 {
             columns_id.push(id);
             hdr.push(column.to_string());
         }
-        id = id << 1;
     }
 
     res.push(hdr); // FIXME: store header elsewhere

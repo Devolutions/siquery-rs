@@ -13,7 +13,7 @@ fn test_main() {
     let tables = &["etc_protocols"];
 
     for table in tables.iter() {
-        let columns: Vec<String> = vec!["name".to_string(), "number".to_string(), "socket".to_string()];
+        let columns: Vec<String> = vec!["number".to_string(), "name".to_string(), "socket".to_string()];
         let res = query_table(table, columns);
 
         println!("table: {:?}", table);
