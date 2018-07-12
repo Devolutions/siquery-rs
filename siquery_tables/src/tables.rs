@@ -2159,7 +2159,7 @@ impl WmiPointingDevice {
     const MANUFACTURER_ID: u64 = 0x00000002;
     const DESCRIPTION_ID: u64 = 0x00000004;
     const POINTING_TYPE_ID: u64 = 0x00000008;
-    const STATUS_ID: u64 = 0x00000008;
+    const STATUS_ID: u64 = 0x00000010;
 }
 
 #[cfg(target_os = "windows")]
