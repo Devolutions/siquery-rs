@@ -131,8 +131,8 @@ pub struct SystemInfo {
     pub uptime: Result<Uptime, String>,
     pub process_open_sockets: Vec<ProcessOpenSocketsRow>,
     pub processes: Vec<ProcessesRow>,
-    pub process_memory_map: Vec<Vec<ProcessMemoryMapRow>>,
-    pub process_envs: Vec<Vec<ProcessEnvsRow>>,
+    pub process_memory_map: Vec<ProcessMemoryMapRow>,
+    pub process_envs: Vec<ProcessEnvsRow>,
 }
 
 impl SystemInfo {
