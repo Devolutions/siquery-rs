@@ -60,9 +60,7 @@ fn main() {
 
     let table = matches.value_of("table").unwrap_or("").to_string();*/
 
-    let args: Vec<String> = env::args().collect();
-
-
+    //let args: Vec<String> = env::args().collect();
     //parse_command(args);
 
 
