@@ -119,7 +119,7 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
                 select_all(&table)
             }
         },
-        #[cfg(not(macos))]
+        #[cfg(not(target_os = "macos"))]
         "interface_address" => {
             let table = InterfaceAddress::get_interfaces(system_reader.borrow());
             if columns.len() > 0 {
@@ -128,7 +128,7 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
                 select_all(&table)
             }
         },
-        #[cfg(not(macos))]
+        #[cfg(not(target_os = "macos"))]
         "interface_details" => {
             let table = InterfaceDetails::get_interface_details(system_reader.borrow());
             if columns.len() > 0 {
@@ -326,6 +326,7 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
                 select_all(&table)
             }
         },
+        #[cfg(not(target_os = "macos"))]
         "process_open_sockets" => {
             let table = ProcessOpenSocketsRow::gen_process_open_sockets_table();
             if columns.len() > 0 {
@@ -342,8 +343,9 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
                 select_all(&table)
             }
         },
+        #[cfg(not(target_os = "macos"))]
         "process_memory_map" => {
-            let table = ProcessMemoryMapRow::gen_memory_map_table();
+            let table = ProcessMemoryMapRow::gen_process_memory_map_table();
             if columns.len() > 0 {
                 select(&table, columns)
             } else {

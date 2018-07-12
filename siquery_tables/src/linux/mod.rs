@@ -8,6 +8,8 @@ use sysconf::raw::{sysconf, SysconfVariable};
 use uname;
 
 mod logical_drive;
+mod interface_address;
+mod interface_details;
 mod os_version;
 mod system_info;
 mod uptime;
@@ -141,16 +143,16 @@ impl SystemInfo {
         SystemInfo {
             system_info: system_info_data,
             os_version: OsVersion::new(system_reader.borrow()),
-            logical_drives: LogicalDrive::new(),
-            interface_addresses: InterfaceAddress::new(),
-            interface_details: InterfaceDetails::get_interfaces(system_reader.borrow()),
+            logical_drives: LogicalDrive::new(system_reader.borrow()),
+            interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
+            interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
             process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
-            processes: ProcessesRow::gen_processes_table(),
-            process_memory_map: ProcessMemoryMapRow::gen_process_map(),
+            processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
+            process_memory_map: ProcessMemoryMapRow::gen_process_memory_map_table(),
             process_envs: ProcessEnvsRow::gen_proc_environ_table(),
             system_reader,
         }

@@ -1,7 +1,7 @@
 extern crate winapi;
 
 use tables::ProcessesRow;
-use windows::SystemReaderInterface;
+use linux::SystemReaderInterface;
 
 use utils;
 use std::os::raw::c_void;

@@ -1,6 +1,5 @@
 use tables::InterfaceDetails;
-use utils;
-use windows::SystemReaderInterface;
+use linux::SystemReaderInterface;
 
 impl InterfaceDetails {
     pub(crate) fn new() -> InterfaceDetails {
@@ -12,8 +11,11 @@ impl InterfaceDetails {
         }
     }
 
-    pub fn get_interfaces(system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
+    pub fn get_interface_details(_system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
         let mut interfaces: Vec<InterfaceDetails> = Vec::new();
+        let interface = InterfaceDetails::new();
+        interfaces.push(interface);
+
         // TODO interface_details table implementation
         interfaces
     }

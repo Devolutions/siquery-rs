@@ -2,6 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+use macos::SystemReaderInterface;
 use libc::*;
 use libc::timeval;
 use std::collections::HashMap;
@@ -595,7 +596,7 @@ impl ProcessesRow {
         out
     }
 
-    pub fn gen_processes_table() -> Vec<ProcessesRow> {
+    pub fn gen_processes_table(system_reader: &SystemReaderInterface) -> Vec<ProcessesRow> {
         let mut processes_table: Vec<ProcessesRow> = Vec::new();
         let pidlist = ProcessesRow::get_proc_list();
         for pid in pidlist {

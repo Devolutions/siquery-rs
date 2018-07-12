@@ -359,7 +359,7 @@ impl SystemInfo {
             wmi_pointing_device: WmiPointingDevice::get_pointing_device_info(system_reader.borrow()),
             process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
             processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
-            process_memory_map: ProcessMemoryMapRow::gen_memory_map_table(),
+            process_memory_map: ProcessMemoryMapRow::gen_process_memory_map_table(),
             system_reader,
         }
     }

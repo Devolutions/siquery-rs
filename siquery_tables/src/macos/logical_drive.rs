@@ -1,9 +1,9 @@
 use tables::LogicalDrive;
-use linux::SystemReaderInterface;
+use macos::SystemReaderInterface;
 
 impl LogicalDrive {
     pub(crate) fn new(_system_reader: &SystemReaderInterface) -> Vec<LogicalDrive> {
-        let logical_drives = Vec::new();
+        let mut logical_drives = Vec::new();
 
         logical_drives.push( LogicalDrive {
             device_id: String::new(),

@@ -7,21 +7,21 @@ pub trait Table {
         Self::COLUMN_NAMES
     }
 
-    fn get_by_name(&self, name: &str) -> String;
-    fn get_by_id(&self, id: u64) -> String;
-    fn get_id(&self, name: &str) -> u64;
+    fn get_by_name(&self, _name: &str) -> String;
+    fn get_by_id(&self, _id: u64) -> String;
+    fn get_id(&self, _name: &str) -> u64;
 }
 
 impl<T: Table> Table for Vec<T> {
     const COLUMN_NAMES: &'static [&'static str] = T::COLUMN_NAMES;
 
-    fn get_by_name(&self, name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> String {
         unimplemented!()
     }
-    fn get_by_id(&self, id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> String {
         unimplemented!()
     }
-    fn get_id(&self, name: &str) -> u64 {
+    fn get_id(&self, _name: &str) -> u64 {
         unimplemented!()
     }
 }
@@ -34,20 +34,20 @@ impl Dummy {}
 impl Table for Dummy {
     const COLUMN_NAMES: &'static [&'static str] = &[];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             _ => "".to_string()
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             _ => "".to_string()
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             _ => 0
         }
     }
@@ -60,32 +60,32 @@ pub struct EtcHosts {
 }
 
 impl EtcHosts {
-    const ADDRESS_ID: u32 = 0x00000001;
-    const HOSTNAMES_ID: u32 = 0x00000002;
+    const ADDRESS_ID: u64 = 0x00000001;
+    const HOSTNAMES_ID: u64 = 0x00000002;
 }
 
 impl Table for EtcHosts {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "address", "hostnames"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "address" => self.address.clone(),
             "hostnames" => self.hostnames.clone(),
             _ => "".to_string()
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
-            ADDRESS_ID => self.address.clone(),
-            HOSTNAMES_ID => self.hostnames.clone(),
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
+            Self::ADDRESS_ID => self.address.clone(),
+            Self::HOSTNAMES_ID => self.hostnames.clone(),
             _ => "".to_string()
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "address" => Self::ADDRESS_ID as u64,
             "hostnames" => Self::HOSTNAMES_ID as u64,
             _ => 0
@@ -113,8 +113,8 @@ impl Table for EtcProtocols {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name", "number", "alias", "comment"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        let value = match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        let value = match _name {
             "name" => self.name.clone(),
             "number" => self.number.to_string(),
             "alias" => self.alias.clone(),
@@ -124,8 +124,8 @@ impl Table for EtcProtocols {
         value
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::NUMBER_ID => self.number.to_string(),
             Self::ALIAS_ID => self.alias.clone(),
@@ -134,8 +134,8 @@ impl Table for EtcProtocols {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "number" => Self::NUMBER_ID,
             "alias" => Self::ALIAS_ID,
@@ -167,8 +167,8 @@ impl Table for EtcServices {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name", "port", "protocol", "aliases", "comment"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "port" => self.port.to_string(),
             "protocol" => self.protocol.clone(),
@@ -178,8 +178,8 @@ impl Table for EtcServices {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::PORT_ID => self.port.to_string(),
             Self::PROTOCOL_ID => self.protocol.clone(),
@@ -189,8 +189,8 @@ impl Table for EtcServices {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "port" => Self::PORT_ID,
             "protocol" => Self::PROTOCOL_ID,
@@ -233,8 +233,8 @@ impl Table for WmiComputerInfo {
         "number_of_processors",
         "system_type"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "computer_name" => self.computer_name.clone(),
             "domain" => self.domain.to_string(),
             "manufacturer" => self.manufacturer.clone(),
@@ -245,8 +245,8 @@ impl Table for WmiComputerInfo {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::COMPUTER_NAME_ID => self.computer_name.clone(),
             Self::DOMAIN_ID => self.domain.to_string(),
             Self::MANUFACTURER_ID => self.manufacturer.clone(),
@@ -257,8 +257,8 @@ impl Table for WmiComputerInfo {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "computer_name" => Self::COMPUTER_NAME_ID,
             "domain" => Self::DOMAIN_ID,
             "manufacturer" => Self::MANUFACTURER_ID,
@@ -293,8 +293,8 @@ impl Table for SystemInfoData {
         "cpu_logical_cores",
         "physical_memory"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "computer_name" => self.computer_name.clone(),
             "cpu_brand" => self.cpu_brand.clone(),
             "cpu_logical_cores" => self.cpu_logical_cores.to_string(),
@@ -303,8 +303,8 @@ impl Table for SystemInfoData {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::COMPUTER_NAME_ID => self.computer_name.clone(),
             Self::CPU_BRAND_ID => self.cpu_brand.clone(),
             Self::CPU_LOGICAL_CORES_ID => self.cpu_logical_cores.to_string(),
@@ -313,8 +313,8 @@ impl Table for SystemInfoData {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "computer_name" => Self::COMPUTER_NAME_ID,
             "cpu_brand" => Self::CPU_BRAND_ID,
             "cpu_logical_cores" => Self::CPU_LOGICAL_CORES_ID,
@@ -389,8 +389,8 @@ impl Table for WmiOsVersion {
         "total_visible_mem_size",
         "win_directory"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "build_number" => self.build_number.clone(),
             "csname" => self.csname.to_string(),
             "caption" => self.caption.clone(),
@@ -412,8 +412,8 @@ impl Table for WmiOsVersion {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::BUILDER_NUMBER_ID => self.build_number.clone(),
             Self::CSNAME_ID => self.csname.to_string(),
             Self::CAPTION_ID => self.caption.clone(),
@@ -435,8 +435,8 @@ impl Table for WmiOsVersion {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "build_number" => Self::BUILDER_NUMBER_ID,
             "csname" => Self::CSNAME_ID,
             "caption" => Self::CAPTION_ID,
@@ -485,8 +485,8 @@ impl Table for OsVersion {
         "major",
         "minor"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "platform" => self.platform.clone(),
             "version" => self.version.clone(),
@@ -496,8 +496,8 @@ impl Table for OsVersion {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::PLATFORM_ID => self.platform.clone(),
             Self::VERSION_ID => self.version.clone(),
@@ -507,8 +507,8 @@ impl Table for OsVersion {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "platform" => Self::PLATFORM_ID,
             "version" => Self::VERSION_ID,
@@ -545,8 +545,8 @@ impl Table for LogicalDrive {
         "size",
         "file_system"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "device_id" => self.device_id.clone(),
             "drive_type" => self.drive_type.clone(),
             "free_space" => self.free_space.to_string(),
@@ -556,8 +556,8 @@ impl Table for LogicalDrive {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::DEVICE_ID => self.device_id.clone(),
             Self::DRIVE_TYPE_ID => self.drive_type.clone(),
             Self::FREE_SPACE_ID => self.free_space.to_string(),
@@ -595,7 +595,7 @@ impl Serialize for LogicalDrive {
     }
 }
 
-#[cfg(not(macos))]
+#[cfg(not(target_os = "macos"))]
 #[derive(Debug)]
 pub struct InterfaceAddress {
     pub interface: String,
@@ -605,7 +605,7 @@ pub struct InterfaceAddress {
     pub friendly_name: String,
 }
 
-#[cfg(not(macos))]
+#[cfg(not(target_os = "macos"))]
 #[allow(non_upper_case_globals)]
 impl InterfaceAddress {
     const INTERFACE_ID: u64 = 0x00000001;
@@ -615,7 +615,7 @@ impl InterfaceAddress {
     const FRIENDLY_NAME_ID: u64 = 0x00000010;
 }
 
-#[cfg(not(macos))]
+#[cfg(not(target_os = "macos"))]
 impl Table for InterfaceAddress {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "interface",
@@ -624,8 +624,8 @@ impl Table for InterfaceAddress {
         "interface_type",
         "friendly_name"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "interface" => self.interface.clone(),
             "address" => self.address.clone(),
             "mask" => self.mask.to_string(),
@@ -635,8 +635,8 @@ impl Table for InterfaceAddress {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::INTERFACE_ID => self.interface.clone(),
             Self::ADDRESS_ID => self.address.clone(),
             Self::MASK_ID => self.mask.to_string(),
@@ -647,8 +647,8 @@ impl Table for InterfaceAddress {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "interface" => Self::INTERFACE_ID,
             "address" => Self::ADDRESS_ID,
             "mask" => Self::MASK_ID,
@@ -659,7 +659,7 @@ impl Table for InterfaceAddress {
     }
 }
 
-#[cfg(not(macos))]
+#[cfg(not(target_os = "macos"))]
 impl Serialize for InterfaceAddress {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
@@ -675,7 +675,7 @@ impl Serialize for InterfaceAddress {
     }
 }
 
-#[cfg(not(macos))]
+#[cfg(not(target_os = "macos"))]
 #[derive(Debug, Serialize)]
 pub struct InterfaceDetails {
     pub interface: String,
@@ -684,7 +684,7 @@ pub struct InterfaceDetails {
     pub enabled: u8,
 }
 
-#[cfg(not(macos))]
+#[cfg(not(target_os = "macos"))]
 #[allow(non_upper_case_globals)]
 impl InterfaceDetails {
     const INTERFACE_ID: u64 = 0x00000001;
@@ -693,7 +693,7 @@ impl InterfaceDetails {
     const ENABLED_ID: u64 = 0x00000008;
 }
 
-#[cfg(not(macos))]
+#[cfg(not(target_os = "macos"))]
 impl Table for InterfaceDetails {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "interface",
@@ -701,8 +701,8 @@ impl Table for InterfaceDetails {
         "mtu",
         "enabled", ];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "interface" => self.interface.clone(),
             "mac" => self.mac.clone(),
             "mtu" => self.mtu.to_string(),
@@ -711,8 +711,8 @@ impl Table for InterfaceDetails {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::INTERFACE_ID => self.interface.clone(),
             Self::MAC_ID => self.mac.clone(),
             Self::MTU_ID => self.mtu.to_string(),
@@ -722,8 +722,8 @@ impl Table for InterfaceDetails {
     }
 
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "interface" => Self::INTERFACE_ID,
             "mac" => Self::MAC_ID,
             "mtu" => Self::MTU_ID,
@@ -759,8 +759,8 @@ impl Table for Uptime {
         "seconds",
         "total_seconds", ];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "days" => self.days.to_string(),
             "hours" => self.hours.to_string(),
             "minutes" => self.minutes.to_string(),
@@ -770,8 +770,8 @@ impl Table for Uptime {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::DAYS_ID => self.days.to_string(),
             Self::HOURS_ID => self.hours.to_string(),
             Self::MINUTES_ID => self.minutes.to_string(),
@@ -781,8 +781,8 @@ impl Table for Uptime {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "days" => Self::DAYS_ID,
             "hours" => Self::HOURS_ID,
             "minutes" => Self::MINUTES_ID,
@@ -864,8 +864,8 @@ impl Table for WmiPrinters {
         "system_name",
         "vertical_resolution"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "attributes" => self.attributes.clone(),
             "caption" => self.caption.clone(),
             "creation_class_name" => self.creation_class_name.clone(),
@@ -889,8 +889,8 @@ impl Table for WmiPrinters {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::ATTRIBUTES_ID => self.attributes.clone(),
             Self::CAPTION_ID => self.caption.clone(),
             Self::CREATION_CLASS_ID => self.creation_class_name.clone(),
@@ -914,8 +914,8 @@ impl Table for WmiPrinters {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "attributes" => Self::ATTRIBUTES_ID,
             "caption" => Self::CAPTION_ID,
             "creation_class_name" => Self::CREATION_CLASS_ID,
@@ -1011,8 +1011,8 @@ impl Table for WmiServices {
         "system_creation_class_name",
         "system_name"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "accept_pause" => self.accept_pause.clone(),
             "accept_stop" => self.accept_stop.clone(),
             "caption" => self.caption.clone(),
@@ -1036,8 +1036,8 @@ impl Table for WmiServices {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::ACCEPT_PAUSE_ID => self.accept_pause.clone(),
             Self::ACCEPT_STOP_ID => self.accept_stop.clone(),
             Self::CAPTION_ID => self.caption.clone(),
@@ -1061,8 +1061,8 @@ impl Table for WmiServices {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "accept_pause" => Self::ACCEPT_PAUSE_ID,
             "accept_stop" => Self::ACCEPT_STOP_ID,
             "caption" => Self::CAPTION_ID,
@@ -1120,8 +1120,8 @@ impl Table for WmiHotfixes {
         "installed_by",
         "installed_ON"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "caption" => self.caption.clone(),
             "csname" => self.csname.clone(),
             "description" => self.description.clone(),
@@ -1132,8 +1132,8 @@ impl Table for WmiHotfixes {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::CAPTION_ID => self.caption.clone(),
             Self::CSNAME_ID => self.csname.clone(),
             Self::DESCRIPTION_ID => self.description.clone(),
@@ -1144,8 +1144,8 @@ impl Table for WmiHotfixes {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "caption" => Self::CAPTION_ID,
             "csname" => Self::CSNAME_ID,
             "description" => Self::DESCRIPTION_ID,
@@ -1189,8 +1189,8 @@ impl Table for Products {
         "vendor",
         "version"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "install_date" => self.install_date.clone(),
             "install_location" => self.install_location.clone(),
             "help_link" => self.help_link.clone(),
@@ -1201,8 +1201,8 @@ impl Table for Products {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::INSTALL_DATE_ID => self.install_date.clone(),
             Self::INSTALL_LOCATION_ID => self.install_location.clone(),
             Self::HELP_LINK_ID => self.help_link.clone(),
@@ -1213,8 +1213,8 @@ impl Table for Products {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "install_date" => Self::INSTALL_DATE_ID,
             "install_location" => Self::INSTALL_LOCATION_ID,
             "help_link" => Self::HELP_LINK_ID,
@@ -1258,8 +1258,8 @@ impl Table for WmiNetworkAdapters {
         "ip_subnet",
         "mac_address"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "description" => self.description.clone(),
             "database_path" => self.database_path.clone(),
             "dhcp_enabled" => self.dhcp_enabled.clone(),
@@ -1284,8 +1284,8 @@ impl Table for WmiNetworkAdapters {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::DESCRIPTION_ID => self.description.clone(),
             Self::DATE_BASE_PATH_ID => self.database_path.clone(),
             Self::DHCP_ENABLED_ID => self.dhcp_enabled.clone(),
@@ -1310,8 +1310,8 @@ impl Table for WmiNetworkAdapters {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "description" => Self::DESCRIPTION_ID,
             "database_path" => Self::DATE_BASE_PATH_ID,
             "dhcp_enabled" => Self::DHCP_ENABLED_ID,
@@ -1357,8 +1357,8 @@ impl Table for WmiShares {
         "type",
         "allow_maximum"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "caption" => self.caption.clone(),
             "description" => self.description.clone(),
             "name" => self.name.clone(),
@@ -1370,8 +1370,8 @@ impl Table for WmiShares {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::CAPTION_ID => self.caption.clone(),
             Self::DESCRIPTION_ID => self.description.clone(),
             Self::NAME_ID => self.name.clone(),
@@ -1383,8 +1383,8 @@ impl Table for WmiShares {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "caption" => Self::CAPTION_ID,
             "description" => Self::DESCRIPTION_ID,
             "name" => Self::NAME_ID,
@@ -1437,8 +1437,8 @@ impl Table for WmiLocalAccounts {
         "sid_type",
         "status"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "account_type" => self.account_type.clone(),
             "caption" => self.caption.clone(),
             "description" => self.description.clone(),
@@ -1452,8 +1452,8 @@ impl Table for WmiLocalAccounts {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::ACCOUNT_TYPE_ID => self.account_type.clone(),
             Self::CAPTION_ID => self.caption.clone(),
             Self::DESCRIPTION_ID => self.description.clone(),
@@ -1467,8 +1467,8 @@ impl Table for WmiLocalAccounts {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "account_type" => Self::ACCOUNT_TYPE_ID,
             "caption" => Self::CAPTION_ID,
             "description" => Self::DESCRIPTION_ID,
@@ -1511,8 +1511,8 @@ impl Table for WmiBios {
         "serial_number",
         "smbios_version"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "caption" => self.caption.clone(),
             "manufacturer" => self.manufacturer.clone(),
             "release_date" => self.release_date.clone(),
@@ -1522,8 +1522,8 @@ impl Table for WmiBios {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::CAPTION_ID => self.caption.clone(),
             Self::MANUFACTURER_ID => self.manufacturer.clone(),
             Self::RELEASE_DATE_ID => self.release_date.clone(),
@@ -1533,8 +1533,8 @@ impl Table for WmiBios {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "caption" => Self::CAPTION_ID,
             "manufacturer" => Self::MANUFACTURER_ID,
             "release_date" => Self::RELEASE_DATE_ID,
@@ -1573,8 +1573,8 @@ impl Table for WmiMotherboard {
         "serial_number",
         "version"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "manufacturer" => self.manufacturer.clone(),
             "product" => self.product.clone(),
@@ -1584,8 +1584,8 @@ impl Table for WmiMotherboard {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::MANUFACTURER_ID => self.manufacturer.clone(),
             Self::PRODUCT_ID => self.product.clone(),
@@ -1595,8 +1595,8 @@ impl Table for WmiMotherboard {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "manufacturer" => Self::MANUFACTURER_ID,
             "product" => Self::PRODUCT_ID,
@@ -1671,8 +1671,8 @@ impl Table for WmiProcessor {
         "number_of_logical_processors",
         "socket_designation", ];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "address_width" => self.address_width.clone(),
             "cpu_satus" => self.cpu_satus.clone(),
             "current_clock_speed" => self.current_clock_speed.clone(),
@@ -1694,8 +1694,8 @@ impl Table for WmiProcessor {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::ADDRESS_WIDTH_ID => self.address_width.clone(),
             Self::CPU_STATUS_ID => self.cpu_satus.clone(),
             Self::CURRENT_CLOCK_SPEED_ID => self.current_clock_speed.clone(),
@@ -1717,8 +1717,8 @@ impl Table for WmiProcessor {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "address_width" => Self::ADDRESS_WIDTH_ID,
             "cpu_satus" => Self::CPU_STATUS_ID,
             "current_clock_speed" => Self::CURRENT_CLOCK_SPEED_ID,
@@ -1790,8 +1790,8 @@ impl Table for WmiMemory {
         "serial_number",
         "speed", ];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "bank_label" => self.bank_label.clone(),
             "capacity" => self.capacity.clone(),
@@ -1808,8 +1808,8 @@ impl Table for WmiMemory {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::BANK_LABEL_ID => self.bank_label.clone(),
             Self::CAPACITY_ID => self.capacity.clone(),
@@ -1826,8 +1826,8 @@ impl Table for WmiMemory {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "bank_label" => Self::BANK_LABEL_ID,
             "capacity" => Self::CAPACITY_ID,
@@ -1870,8 +1870,8 @@ impl Table for WmiSound {
         "manufacturer",
         "dma_buffer_size"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "status" => self.status.clone(),
             "manufacturer" => self.manufacturer.clone(),
@@ -1880,8 +1880,8 @@ impl Table for WmiSound {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::STATUS_ID => self.status.clone(),
             Self::MANUFACTURER_ID => self.manufacturer.clone(),
@@ -1890,8 +1890,8 @@ impl Table for WmiSound {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "status" => Self::STATUS_ID,
             "manufacturer" => Self::MANUFACTURER_ID,
@@ -1950,8 +1950,8 @@ impl Table for WmiVideo {
         "video_architecture",
         "video_memory_type", ];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "adapter_compatibility" => self.adapter_compatibility.clone(),
             "adapter_dac_type" => self.adapter_dac_type.clone(),
@@ -1975,8 +1975,8 @@ impl Table for WmiVideo {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::ADAPTER_COMPATIBILITY_ID => self.adapter_compatibility.clone(),
             Self::ADAPTER_DAC_TYPE_ID => self.adapter_dac_type.clone(),
@@ -2000,8 +2000,8 @@ impl Table for WmiVideo {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "adapter_compatibility" => Self::ADAPTER_COMPATIBILITY_ID,
             "adapter_dac_type" => Self::ADAPTER_DAC_TYPE_ID,
@@ -2050,8 +2050,8 @@ impl Table for WmiMonitors {
         "screen_height",
         "screen_width"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "availability" => self.availability.clone(),
             "bandwidth" => self.bandwidth.to_string(),
@@ -2062,8 +2062,8 @@ impl Table for WmiMonitors {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::AVAILABILITY_ID => self.availability.clone(),
             Self::BANDWIDTH_ID => self.bandwidth.to_string(),
@@ -2074,8 +2074,8 @@ impl Table for WmiMonitors {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "availability" => Self::AVAILABILITY_ID,
             "bandwidth" => Self::BANDWIDTH_ID,
@@ -2112,8 +2112,8 @@ impl Table for WmiKeyboard {
         "device_id",
         "status"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "description" => self.description.clone(),
             "device_id" => self.device_id.to_string(),
@@ -2122,8 +2122,8 @@ impl Table for WmiKeyboard {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::DESCRIPTION_ID => self.description.clone(),
             Self::DEVICE_ID => self.device_id.to_string(),
@@ -2132,8 +2132,8 @@ impl Table for WmiKeyboard {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "description" => Self::DESCRIPTION_ID,
             "device_id" => Self::DEVICE_ID,
@@ -2171,8 +2171,8 @@ impl Table for WmiPointingDevice {
         "pointing_type",
         "status"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "name" => self.name.clone(),
             "manufacturer" => self.manufacturer.clone(),
             "description" => self.description.to_string(),
@@ -2182,8 +2182,8 @@ impl Table for WmiPointingDevice {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::NAME_ID => self.name.clone(),
             Self::MANUFACTURER_ID => self.manufacturer.clone(),
             Self::DESCRIPTION_ID => self.description.to_string(),
@@ -2193,8 +2193,8 @@ impl Table for WmiPointingDevice {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "name" => Self::NAME_ID,
             "manufacturer" => Self::MANUFACTURER_ID,
             "description" => Self::DESCRIPTION_ID,
@@ -2251,8 +2251,8 @@ impl Table for ProcessOpenSocketsRow {
         "state",
         "net_namespace"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "pid" => self.pid.to_string(),
             "fd" => self.fd.to_string(),
             "socket" => self.socket.to_string(),
@@ -2269,8 +2269,8 @@ impl Table for ProcessOpenSocketsRow {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::PID_ID => self.pid.to_string(),
             Self::FD_ID => self.fd.to_string(),
             Self::SOCKET_ID => self.socket.to_string(),
@@ -2287,8 +2287,8 @@ impl Table for ProcessOpenSocketsRow {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "pid" => Self::PID_ID,
             "fd" => Self::FD_ID,
             "socket" => Self::SOCKET_ID,
@@ -2418,8 +2418,8 @@ impl Table for ProcessesRow {
         "user_namespace",
         "uts_namespace"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "pid" => self.pid.to_string(),
             "name" => self.name.clone(),
             "path" => self.path.clone(),
@@ -2458,8 +2458,8 @@ impl Table for ProcessesRow {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::PID_ID => self.pid.to_string(),
             Self::NAME_ID => self.name.clone(),
             Self::PATH_ID => self.path.clone(),
@@ -2498,8 +2498,8 @@ impl Table for ProcessesRow {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "pid" => Self::PID_ID,
             "name" => Self::NAME_ID,
             "path" => Self::PATH_ID,
@@ -2576,8 +2576,8 @@ impl Table for ProcessMemoryMapRow {
         "path",
         "pseudo"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "pid" => self.pid.to_string(),
             "start" => self.start.clone(),
             "end" => self.end.clone(),
@@ -2591,8 +2591,8 @@ impl Table for ProcessMemoryMapRow {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::PID_ID => self.pid.to_string(),
             Self::START_ID => self.start.clone(),
             Self::END_ID => self.end.clone(),
@@ -2606,8 +2606,8 @@ impl Table for ProcessMemoryMapRow {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "pid" => Self::PID_ID,
             "start" => Self::START_ID,
             "end" => Self::END_ID,
@@ -2641,8 +2641,8 @@ impl Table for ProcessEnvsRow {
         "key",
         "value"];
 
-    fn get_by_name(&self, name: &str) -> String {
-        match name {
+    fn get_by_name(&self, _name: &str) -> String {
+        match _name {
             "pid" => self.pid.to_string(),
             "key" => self.key.clone(),
             "value" => self.value.clone(),
@@ -2650,8 +2650,8 @@ impl Table for ProcessEnvsRow {
         }
     }
 
-    fn get_by_id(&self, id: u64) -> String {
-        match id {
+    fn get_by_id(&self, _id: u64) -> String {
+        match _id {
             Self::PID_ID => self.pid.to_string(),
             Self::KEY_ID => self.key.clone(),
             Self::VALUE_ID => self.value.clone(),
@@ -2659,8 +2659,8 @@ impl Table for ProcessEnvsRow {
         }
     }
 
-    fn get_id(&self, name: &str) -> u64 {
-        match name {
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
             "pid" => Self::PID_ID,
             "key" => Self::KEY_ID,
             "value" => Self::VALUE_ID,

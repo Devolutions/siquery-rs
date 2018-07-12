@@ -120,7 +120,7 @@ impl SystemInfo {
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
-            processes: ProcessesRow::gen_processes_table(),
+            processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
             process_envs: ProcessEnvsRow::gen_process_envs_table(),
             system_reader,
         }
