@@ -3,6 +3,9 @@ extern crate clap;
 
 extern crate siquery;
 
+
+use std::env;
+
 use siquery::SystemInfo;
 use siquery::sys::SystemReader;
 use siquery::query::query_table;
@@ -23,18 +26,51 @@ fn test_main() {
     }
 }
 
-fn main() {
-    test_main();
+/*fn parse_query_command(commands: Vec<String>){
 
-    /*let yaml = load_yaml!("cli.yml");
+    let query = &commands[1].as_str();
+    let values = &commands[2].as_str();
+    let table_name
+
+    /*match *query{
+        "SELECT" => {
+            match *values {
+                "*" =>
+                "all"
+            }
+        }
+        _ => println!("command not found"),
+    }*/
+
+    /*println!("{}", &commands[2]);
+    println!("{}", &commands[3]);
+    println!("{}", &commands[4]);*/
+}*/
+
+fn main() {
+    //let args: str = "Select * from etc_protocols",
+    test_main();
+    /*
+    let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
 
     let system_reader = Box::new(SystemReader::new());
     let system_info = SystemInfo::new(system_reader);
 
-    let table = matches.value_of("table").unwrap_or("").to_string();
+    let table = matches.value_of("table").unwrap_or("").to_string();*/
 
+    let args: Vec<String> = env::args().collect();
+
+
+    //parse_command(args);
+
+
+    /*match &args[1] {
+        "SELECT" => println!("{}", &args[1]),
+        _ => "".to_string(),
+    }*/
+    /*
     match table.as_str() {
         "wmi_os_version" => {
             #[cfg(target_os = "windows")]

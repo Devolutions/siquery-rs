@@ -369,6 +369,7 @@ impl WmiOsVersion {
     const WIN_DIRECTORY_ID: u64 = 0x00010000;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiOsVersion {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "build_number",
@@ -786,6 +787,7 @@ impl Table for Uptime {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPrinters {
     pub attributes: String,
@@ -809,6 +811,7 @@ pub struct WmiPrinters {
     pub vertical_resolution: String,
 }
 
+#[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl WmiPrinters {
     const ATTRIBUTES_ID: u64 = 0x00000001;
@@ -832,6 +835,7 @@ impl WmiPrinters {
     const VERTICAL_RESOLUTION_ID: u64 = 0x00040000;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiPrinters {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "attributes",
@@ -930,6 +934,7 @@ impl Table for WmiPrinters {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiServices {
     pub accept_pause: String,
@@ -953,6 +958,7 @@ pub struct WmiServices {
     pub system_name: String,
 }
 
+#[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl WmiServices {
     const ACCEPT_PAUSE_ID: u64 = 0x00000001;
@@ -1074,6 +1080,7 @@ impl Table for WmiServices {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiHotfixes {
     pub caption: String,
@@ -1084,6 +1091,7 @@ pub struct WmiHotfixes {
     pub installed_on: String,
 }
 
+#[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl WmiHotfixes {
     const CAPTION_ID: u64 = 0x00000001;
@@ -1094,6 +1102,7 @@ impl WmiHotfixes {
     const INSTALLED_ON_ID: u64 = 0x00000020;
 }
 
+#[cfg(target_os = "windows")]
 #[cfg(target_os = "windows")]
 impl Table for WmiHotfixes {
     const COLUMN_NAMES: &'static [&'static str] = &[
@@ -1141,6 +1150,7 @@ impl Table for WmiHotfixes {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Products {
     pub install_date: String,
@@ -1151,6 +1161,7 @@ pub struct Products {
     pub version: String,
 }
 
+#[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl Products {
     const INSTALL_DATE_ID: u64 = 0x00000001;
@@ -1161,6 +1172,7 @@ impl Products {
     const VERSION_ID: u64 = 0x00000020;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for Products {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "install_date",
@@ -1207,6 +1219,7 @@ impl Table for Products {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiNetworkAdapters {
     pub description: String,
@@ -1218,6 +1231,7 @@ pub struct WmiNetworkAdapters {
     pub mac_address: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiNetworkAdapters {
     const DESCRIPTION_ID: u64 = 0x00000001;
     const DATE_BASE_PATH_ID: u64 = 0x00000002;
@@ -1227,6 +1241,7 @@ impl WmiNetworkAdapters {
     const MAC_ADDRESS_ID: u64 = 0x00000020;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiNetworkAdapters {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "description",
@@ -1301,6 +1316,7 @@ impl Table for WmiNetworkAdapters {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiShares {
     pub caption: String,
@@ -1312,6 +1328,7 @@ pub struct WmiShares {
     pub allow_maximum: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiShares {
     const CAPTION_ID: u64 = 0x00000001;
     const DESCRIPTION_ID: u64 = 0x00000002;
@@ -1322,6 +1339,7 @@ impl WmiShares {
     const ALLOW_MAXIMUM_ID: u64 = 0x00000040;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiShares {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "caption",
@@ -1372,6 +1390,7 @@ impl Table for WmiShares {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiLocalAccounts {
     pub account_type: String,
@@ -1385,6 +1404,7 @@ pub struct WmiLocalAccounts {
     pub status: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiLocalAccounts {
     const ACCOUNT_TYPE_ID: u64 = 0x00000001;
     const CAPTION_ID: u64 = 0x00000002;
@@ -1397,6 +1417,7 @@ impl WmiLocalAccounts {
     const STATUS_ID: u64 = 0x00000100;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiLocalAccounts {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "account_type",
@@ -1455,6 +1476,7 @@ impl Table for WmiLocalAccounts {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiBios {
     pub caption: String,
@@ -1464,6 +1486,7 @@ pub struct WmiBios {
     pub smbios_version: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiBios {
     const CAPTION_ID: u64 = 0x00000001;
     const MANUFACTURER_ID: u64 = 0x00000002;
@@ -1472,6 +1495,7 @@ impl WmiBios {
     const SMBIOS_VERSION_ID: u64 = 0x00000010;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiBios {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "caption",
@@ -1514,6 +1538,7 @@ impl Table for WmiBios {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMotherboard {
     pub name: String,
@@ -1523,6 +1548,7 @@ pub struct WmiMotherboard {
     pub version: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiMotherboard {
     const NAME_ID: u64 = 0x00000001;
     const MANUFACTURER_ID: u64 = 0x00000002;
@@ -1531,6 +1557,7 @@ impl WmiMotherboard {
     const VERSION_ID: u64 = 0x00000010;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiMotherboard {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -1573,6 +1600,7 @@ impl Table for WmiMotherboard {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiProcessor {
     pub address_width: String,
@@ -1594,6 +1622,7 @@ pub struct WmiProcessor {
     pub socket_designation: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiProcessor {
     const ADDRESS_WIDTH_ID: u64 = 0x00000001;
     const CPU_STATUS_ID: u64 = 0x00000002;
@@ -1614,6 +1643,7 @@ impl WmiProcessor {
     const SOCKET_DESIGNATION_ID: u64 = 0x00010000;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiProcessor {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "address_width",
@@ -1704,6 +1734,7 @@ impl Table for WmiProcessor {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMemory {
     pub name: String,
@@ -1720,6 +1751,7 @@ pub struct WmiMemory {
     pub speed: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiMemory {
     const NAME_ID: u64 = 0x00000001;
     const BANK_LABEL_ID: u64 = 0x00000002;
@@ -1735,6 +1767,7 @@ impl WmiMemory {
     const SPEED_ID: u64 = 0x00000800;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiMemory {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -1805,6 +1838,7 @@ impl Table for WmiMemory {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiSound {
     pub name: String,
@@ -1813,6 +1847,7 @@ pub struct WmiSound {
     pub dma_buffer_size: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiSound {
     const NAME_ID: u64 = 0x00000001;
     const STATUS_ID: u64 = 0x00000002;
@@ -1820,6 +1855,7 @@ impl WmiSound {
     const DMA_BUFFER_SIZE_ID: u64 = 0x00000008;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiSound {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -1858,6 +1894,7 @@ impl Table for WmiSound {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiVideo {
     pub name: String,
@@ -1889,6 +1926,7 @@ impl WmiVideo {
     const VIDEO_MEMORY_TYPE_ID: u64 = 0x00000800;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiVideo {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -1973,6 +2011,7 @@ impl Table for WmiVideo {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMonitors {
     pub name: String,
@@ -1983,6 +2022,7 @@ pub struct WmiMonitors {
     pub screen_width: u64,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiMonitors {
     const NAME_ID: u64 = 0x00000001;
     const AVAILABILITY_ID: u64 = 0x00000002;
@@ -1992,6 +2032,7 @@ impl WmiMonitors {
     const SCREEN_WIDTH_ID: u64 = 0x00000020;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiMonitors {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -2038,6 +2079,7 @@ impl Table for WmiMonitors {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiKeyboard {
     pub name: String,
@@ -2046,6 +2088,7 @@ pub struct WmiKeyboard {
     pub status: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiKeyboard {
     const NAME_ID: u64 = 0x00000001;
     const DESCRIPTION_ID: u64 = 0x00000002;
@@ -2053,6 +2096,7 @@ impl WmiKeyboard {
     const STATUS_ID: u64 = 0x00000008;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiKeyboard {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -2091,6 +2135,7 @@ impl Table for WmiKeyboard {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPointingDevice {
     pub name: String,
@@ -2100,6 +2145,7 @@ pub struct WmiPointingDevice {
     pub status: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiPointingDevice {
     const NAME_ID: u64 = 0x00000001;
     const MANUFACTURER_ID: u64 = 0x00000002;
@@ -2108,6 +2154,7 @@ impl WmiPointingDevice {
     const STATUS_ID: u64 = 0x00000008;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiPointingDevice {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",

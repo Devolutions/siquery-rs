@@ -94,7 +94,6 @@ fn select<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<Vec<String>> where T:T
     res
 }
 
-
 pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
     let system_reader: Box<SystemReaderInterface> = Box::new(SystemReader::new());
     let res = match name {
