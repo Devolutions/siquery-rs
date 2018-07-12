@@ -595,7 +595,7 @@ impl Serialize for LogicalDrive {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(not(macos))]
 #[derive(Debug)]
 pub struct InterfaceAddress {
     pub interface: String,
@@ -605,7 +605,7 @@ pub struct InterfaceAddress {
     pub friendly_name: String,
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(not(macos))]
 #[allow(non_upper_case_globals)]
 impl InterfaceAddress {
     const INTERFACE_ID: u64 = 0x00000001;
@@ -615,7 +615,7 @@ impl InterfaceAddress {
     const FRIENDLY_NAME_ID: u64 = 0x00000010;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(not(macos))]
 impl Table for InterfaceAddress {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "interface",
@@ -659,6 +659,7 @@ impl Table for InterfaceAddress {
     }
 }
 
+#[cfg(not(macos))]
 impl Serialize for InterfaceAddress {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
@@ -674,6 +675,7 @@ impl Serialize for InterfaceAddress {
     }
 }
 
+#[cfg(not(macos))]
 #[derive(Debug, Serialize)]
 pub struct InterfaceDetails {
     pub interface: String,
@@ -682,6 +684,7 @@ pub struct InterfaceDetails {
     pub enabled: u8,
 }
 
+#[cfg(not(macos))]
 #[allow(non_upper_case_globals)]
 impl InterfaceDetails {
     const INTERFACE_ID: u64 = 0x00000001;
@@ -690,6 +693,7 @@ impl InterfaceDetails {
     const ENABLED_ID: u64 = 0x00000008;
 }
 
+#[cfg(not(macos))]
 impl Table for InterfaceDetails {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "interface",

@@ -119,8 +119,8 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
                 select_all(&table)
             }
         },
-        #[cfg(target_os = "windows")]
-        "interface_addresses" => {
+        #[cfg(not(macos))]
+        "interface_address" => {
             let table = InterfaceAddress::get_interfaces(system_reader.borrow());
             if columns.len() > 0 {
                 select(&table, columns)
@@ -128,6 +128,7 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
                 select_all(&table)
             }
         },
+        #[cfg(not(macos))]
         "interface_details" => {
             let table = InterfaceDetails::get_interface_details(system_reader.borrow());
             if columns.len() > 0 {
@@ -341,7 +342,6 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
                 select_all(&table)
             }
         },
-        #[cfg(target_os = "windows")]
         "process_memory_map" => {
             let table = ProcessMemoryMapRow::gen_memory_map_table();
             if columns.len() > 0 {

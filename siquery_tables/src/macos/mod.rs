@@ -115,7 +115,7 @@ impl SystemInfo {
         SystemInfo {
             system_info: system_info_data,
             os_version: OsVersion::new(system_reader.borrow()),
-            logical_drives: Vec::new(),
+            logical_drives: LogicalDrive::new(),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
