@@ -1,5 +1,4 @@
 use serde::ser::{Serialize, SerializeStruct, Serializer};
-use std::ops::BitAnd;
 
 pub trait Table {
     const COLUMN_NAMES: &'static [&'static str];
@@ -596,6 +595,7 @@ impl Serialize for LogicalDrive {
     }
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Debug)]
 pub struct InterfaceAddress {
     pub interface: String,
@@ -605,6 +605,7 @@ pub struct InterfaceAddress {
     pub friendly_name: String,
 }
 
+#[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl InterfaceAddress {
     const INTERFACE_ID: u64 = 0x00000001;
@@ -614,6 +615,7 @@ impl InterfaceAddress {
     const FRIENDLY_NAME_ID: u64 = 0x00000010;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for InterfaceAddress {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "interface",
@@ -982,6 +984,7 @@ impl WmiServices {
     const SYSTEM_NAME_ID: u64 = 0x00040000;
 }
 
+#[cfg(target_os = "windows")]
 impl Table for WmiServices {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "accept_pause",
@@ -1911,6 +1914,7 @@ pub struct WmiVideo {
     pub video_memory_type: String,
 }
 
+#[cfg(target_os = "windows")]
 impl WmiVideo {
     const NAME_ID: u64 = 0x00000001;
     const ADAPTER_COMPATIBILITY_ID: u64 = 0x00000002;

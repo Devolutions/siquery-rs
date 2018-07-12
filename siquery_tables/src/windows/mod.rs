@@ -334,7 +334,7 @@ impl SystemInfo {
             wmi_computer_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
             wmi_os_version: WmiOsVersion::new(system_reader.borrow()),
             os_version: OsVersion::new(system_reader.borrow()),
-            logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
+            logical_drives: LogicalDrive::new(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
             interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
