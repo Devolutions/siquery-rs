@@ -12,8 +12,8 @@ impl InterfaceDetails {
         }
     }
 
-    pub fn get_interfaces(system_reader: &SystemReaderInterface) -> Vec<InterfaceAddress> {
-        let mut interfaces: Vec<InterfaceAddress> = Vec::new();
+    pub fn get_interfaces(system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
+        let mut interfaces: Vec<InterfaceDetails> = Vec::new();
         // TODO interface_details table implementation
         interfaces
     }
