@@ -21,7 +21,7 @@ lazy_static! {
 
 impl EtcServices {
 
-    pub(crate) fn new() -> EtcServices {
+    pub fn new() -> EtcServices {
         EtcServices {
             name: String::new(),
             port: 0,

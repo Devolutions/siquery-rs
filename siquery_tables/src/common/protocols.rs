@@ -20,7 +20,8 @@ lazy_static! {
 }
 
 impl EtcProtocols {
-    pub(crate) fn new() -> EtcProtocols {
+
+    pub fn new() -> EtcProtocols {
         EtcProtocols {
             name: String::new(),
             number: 0,

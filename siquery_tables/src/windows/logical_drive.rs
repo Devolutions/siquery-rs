@@ -3,7 +3,7 @@ use utils;
 use windows::SystemReaderInterface;
 
 impl LogicalDrive {
-    pub(crate) fn new() -> LogicalDrive {
+    pub(crate) fn new_logical_drive() -> LogicalDrive {
         LogicalDrive {
             device_id: String::new(),
             drive_type: String::new(),
@@ -13,11 +13,11 @@ impl LogicalDrive {
         }
     }
 
-    pub(crate) fn get_drives(system_reader: &SystemReaderInterface) -> Vec<LogicalDrive> {
+    pub(crate) fn new(system_reader: &SystemReaderInterface) -> Vec<LogicalDrive> {
         let mut drives: Vec<LogicalDrive> = Vec::new();
 
         if let Some(drive_info) = system_reader.get_wmi_drives_info() {
-            let mut drive = LogicalDrive::new();
+            let mut drive = LogicalDrive::new_logical_drive();
             let lines = drive_info.split('\n');
 
             for line in lines {
@@ -25,7 +25,7 @@ impl LogicalDrive {
                     if drive.device_id != "" && drive.drive_type == "Disk drive" {
                         drives.push(drive);
                     }
-                    drive = LogicalDrive::new();
+                    drive = LogicalDrive::new_logical_drive();
                 }
                 let v: Vec<_> = line.split('=').collect();
                 if v.len() != 2 {

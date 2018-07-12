@@ -66,7 +66,7 @@ mod processes;
 mod process_memory_map;
 
 pub trait SystemReaderInterface {
-    fn get_os_info(&self) -> Option<String>;
+   fn get_os_info(&self) -> Option<String>;
     fn get_wmi_system_info(&self) -> Option<String>;
     fn get_wmi_os_info(&self) -> Option<String>;
     fn get_wmi_cpu_info(&self) -> Option<String>;
@@ -104,7 +104,6 @@ impl SystemReader {
 }
 
 impl SystemReaderInterface for SystemReader {
-
     fn get_os_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["os", "get", "/format:list"]).output().ok()?;
@@ -177,7 +176,7 @@ impl SystemReaderInterface for SystemReader {
         Some(string)
     }
 
-    fn get_wmi_printers_info(&self)-> Option<String>{
+    fn get_wmi_printers_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["printer",
                 "get",
@@ -189,7 +188,7 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_services_info(&self)-> Option<String>{
+    fn get_wmi_services_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["service",
                 "get",
@@ -200,7 +199,7 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_hotfixes_info(&self)-> Option<String>{
+    fn get_wmi_hotfixes_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["qfe",
                 "get",
@@ -209,7 +208,7 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_shares_info(&self)-> Option<String>{
+    fn get_wmi_shares_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["share",
                 "get",
@@ -218,75 +217,75 @@ impl SystemReaderInterface for SystemReader {
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_network_adapters_info(&self)-> Option<String> {
+    fn get_wmi_network_adapters_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["nicconfig", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_local_accounts_info(&self)-> Option<String> {
+    fn get_wmi_local_accounts_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["useraccount", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_bios_info(&self)-> Option<String> {
+    fn get_wmi_bios_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["bios", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_motherboard_info(&self)-> Option<String>{
+    fn get_wmi_motherboard_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["baseboard", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_processor_info(&self)-> Option<String>{
+    fn get_wmi_processor_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["cpu", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_physical_memory(&self)-> Option<String>{
+    fn get_wmi_physical_memory(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["memorychip", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_sound_info(&self)-> Option<String>{
+    fn get_wmi_sound_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["sounddev", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_video_info(&self)-> Option<String>{
+    fn get_wmi_video_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["path","win32_VideoController", "get", "/format:list"]).output().ok()?;
+            .args(&["path", "win32_VideoController", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_monitor_info(&self)-> Option<String>{
+    fn get_wmi_monitor_info(&self) -> Option<String> {
         let output = Command::new("wmic")
             .args(&["desktopmonitor", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_keyboard_info(&self)-> Option<String>{
+    fn get_wmi_keyboard_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["path","Win32_Keyboard", "get", "/format:list"]).output().ok()?;
+            .args(&["path", "Win32_Keyboard", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
-    fn get_wmi_pointing_device(&self)-> Option<String>{
+    fn get_wmi_pointing_device(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["path","Win32_PointingDevice", "get", "/format:list"]).output().ok()?;
+            .args(&["path", "Win32_PointingDevice", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 
     fn get_wmi_process_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["path","Win32_Process", "get", "/format:list"]).output().ok()?;
+            .args(&["path", "Win32_Process", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
 }
@@ -335,7 +334,7 @@ impl SystemInfo {
             wmi_computer_info: WmiComputerInfo::get_system_info(system_reader.borrow()),
             wmi_os_version: WmiOsVersion::new(system_reader.borrow()),
             os_version: OsVersion::new(system_reader.borrow()),
-            logical_drives: LogicalDrive::get_drives(system_reader.borrow()),
+            logical_drives: LogicalDrive::new(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
             interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
@@ -360,7 +359,7 @@ impl SystemInfo {
             wmi_pointing_device: WmiPointingDevice::get_pointing_device_info(system_reader.borrow()),
             process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
             processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
-            process_memory_map: ProcessMemoryMapRow::gen_memory_map_table(),
+            process_memory_map: ProcessMemoryMapRow::gen_process_memory_map_table(),
             system_reader,
         }
     }

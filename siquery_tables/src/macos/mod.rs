@@ -115,12 +115,12 @@ impl SystemInfo {
         SystemInfo {
             system_info: system_info_data,
             os_version: OsVersion::new(system_reader.borrow()),
-            logical_drives: Vec::new(),
+            logical_drives: LogicalDrive::new(),
             etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
             etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
             etc_services: EtcServices::get_services(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
-            processes: ProcessesRow::gen_processes_table(),
+            processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
             process_envs: ProcessEnvsRow::gen_process_envs_table(),
             system_reader,
         }

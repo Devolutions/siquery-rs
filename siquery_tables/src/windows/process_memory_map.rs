@@ -119,7 +119,7 @@ impl ProcessMemoryMapRow {
         }
         Some(out)
     }
-    pub fn gen_memory_map_table () -> Vec<Vec<ProcessMemoryMapRow>>{
+    pub fn gen_process_memory_map_table () -> Vec<Vec<ProcessMemoryMapRow>>{
         let pid_list = ProcessesRow::get_proc_list();
         let mut table: Vec<Vec<ProcessMemoryMapRow>> = Vec::new();
         for pid in pid_list.iter() {
