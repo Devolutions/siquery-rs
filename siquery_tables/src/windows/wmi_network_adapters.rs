@@ -15,7 +15,7 @@ impl WmiNetworkAdapters {
         }
     }
 
-    pub(crate) fn get_netwok_adapters_info(system_reader: &SystemReaderInterface) -> Vec<WmiNetworkAdapters> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiNetworkAdapters> {
 
         let mut network_adapters: Vec<WmiNetworkAdapters> = Vec::new();
 

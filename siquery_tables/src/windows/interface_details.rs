@@ -12,7 +12,7 @@ impl InterfaceDetails {
         }
     }
 
-    pub(crate) fn get_interface_details(system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
         let mut interfaces: Vec<InterfaceDetails> = Vec::new();
 
         if let Some(interface_info) = system_reader.get_wmi_nicconfig_details() {

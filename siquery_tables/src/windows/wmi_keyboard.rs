@@ -12,7 +12,7 @@ impl WmiKeyboard {
         }
     }
 
-    pub(crate) fn get_keyboard_info(system_reader: &SystemReaderInterface) -> Vec<WmiKeyboard> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiKeyboard> {
 
         let mut keyboards: Vec<WmiKeyboard> = Vec::new();
 

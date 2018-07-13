@@ -1,10 +1,12 @@
 extern crate kernel32;
 
 use tables::Uptime;
+use windows::SystemReaderInterface;
 
 impl Uptime {
 
-    pub fn get_uptime() ->Result <Uptime, String> {
+    pub fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<Uptime> {
+        let mut output : Vec<Uptime> = Vec::new();
         let mut upt = Uptime{
             days: 0,
             hours: 0,
@@ -37,7 +39,8 @@ impl Uptime {
         upt.seconds = get_seconds;
         upt.total_seconds = t as f64 / 1000.0;
 
-        Ok(upt)
+        output.push(upt);
+        output
     }
 }
 

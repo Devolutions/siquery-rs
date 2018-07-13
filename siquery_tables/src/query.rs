@@ -109,102 +109,94 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
         },
         #[cfg(target_os = "windows")]
         "products" => {
-            let table = Products::get_products_info();
+            let table = Products::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_computer_info" => {
-            let wmi_computer_info = WmiComputerInfo::get_system_info(system_reader.borrow());
-            let mut table: Vec<WmiComputerInfo> = Vec::new();
-            table.push(wmi_computer_info);
+            let table = WmiComputerInfo::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_os_version" => {
-            let wmi_os_version = WmiOsVersion::new(system_reader.borrow());
-            let mut table: Vec<WmiOsVersion> = Vec::new();
-            table.push(wmi_os_version);
+            let table = WmiOsVersion::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_printers" => {
-            let table = WmiPrinters::get_printers_info(system_reader.borrow());
+            let table = WmiPrinters::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_services" => {
-            let table = WmiServices::get_services_info(system_reader.borrow());
+            let table = WmiServices::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_hotfixes" => {
-            let table = WmiHotfixes::get_hotfixes_info(system_reader.borrow());
+            let table = WmiHotfixes::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_shares" => {
-            let table = WmiShares::get_shares_info(system_reader.borrow());
+            let table = WmiShares::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_network_adapters" => {
-            let table = WmiNetworkAdapters::get_netwok_adapters_info(system_reader.borrow());
+            let table = WmiNetworkAdapters::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_local_accounts" => {
-            let table = WmiLocalAccounts::get_local_accounts_info(system_reader.borrow());
+            let table = WmiLocalAccounts::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_bios" => {
-            let wmi_bios = WmiBios::get_bios_info(system_reader.borrow());
+            let wmi_bios = WmiBios::get_specific(system_reader.borrow());
             let mut table: Vec<WmiBios> = Vec::new();
             table.push(wmi_bios);
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_motherboard" => {
-            let wmi_motherboard = WmiMotherboard::get_motherboard_info(system_reader.borrow());
-            let mut table: Vec<WmiMotherboard> = Vec::new();
-            table.push(wmi_motherboard);
+            let table = WmiMotherboard::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_processor" => {
-            let wmi_processor = WmiProcessor::get_processor_info(system_reader.borrow());
-            let mut table: Vec<WmiProcessor> = Vec::new();
-            table.push(wmi_processor);
+            let table = WmiProcessor::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_physical_memory" => {
-            let table = WmiMemory::get_physical_memory_info(system_reader.borrow());
+            let table = WmiMemory::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_sound" => {
-            let table = WmiSound::get_sound_info(system_reader.borrow());
+            let table = WmiSound::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_video" => {
-            let table = WmiVideo::get_video_info(system_reader.borrow());
+            let table = WmiVideo::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_monitors" => {
-            let table = WmiMonitors::get_monitors_info(system_reader.borrow());
+            let table = WmiMonitors::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_keyboard" => {
-            let table = WmiKeyboard::get_keyboard_info(system_reader.borrow());
+            let table = WmiKeyboard::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_pointing_device" => {
-            let table = WmiPointingDevice::get_pointing_device_info(system_reader.borrow());
+            let table = WmiPointingDevice::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(not(target_os = "macos"))]

@@ -20,7 +20,7 @@ impl WmiVideo {
         }
     }
 
-    pub(crate) fn get_video_info(system_reader: &SystemReaderInterface) -> Vec<WmiVideo> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiVideo> {
 
         let mut videos: Vec<WmiVideo> = Vec::new();
 

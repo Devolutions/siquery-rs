@@ -14,7 +14,7 @@ impl WmiMonitors {
         }
     }
 
-    pub(crate) fn get_monitors_info(system_reader: &SystemReaderInterface) -> Vec<WmiMonitors> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiMonitors> {
 
         let mut monitors: Vec<WmiMonitors> = Vec::new();
 

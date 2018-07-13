@@ -3,8 +3,8 @@ use utils;
 use windows::SystemReaderInterface;
 
 impl WmiOsVersion {
-    pub(crate) fn new(system_reader: &SystemReaderInterface) -> WmiOsVersion {
-
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiOsVersion> {
+        let mut output : Vec<WmiOsVersion> = Vec::new();
         let mut os_version = WmiOsVersion {
             csname: String::new(),
             platform: String::from("Windows"),
@@ -95,6 +95,7 @@ impl WmiOsVersion {
             }
         }
 
-        os_version
+        output.push(os_version);
+        output
     }
 }

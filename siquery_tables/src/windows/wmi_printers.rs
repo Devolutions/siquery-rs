@@ -27,9 +27,9 @@ impl WmiPrinters {
         }
     }
 
-    pub(crate) fn get_printers_info(system_reader: &SystemReaderInterface) -> Vec<WmiPrinters> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiPrinters> {
 
-        let mut printers: Vec<WmiPrinters> = Vec::new();
+        let mut output: Vec<WmiPrinters> = Vec::new();
 
         if let Some(printer_info) = system_reader.get_wmi_printers_info() {
             let mut printer = WmiPrinters::new();
@@ -38,7 +38,7 @@ impl WmiPrinters {
             for line in lines {
                 if line.len() <= 2 {
                     if printer.attributes != "" {
-                        printers.push(printer);
+                        output.push(printer);
                     }
                     printer = WmiPrinters::new();
                 }
@@ -115,6 +115,6 @@ impl WmiPrinters {
             }
         }
 
-        printers
+        output
     }
 }

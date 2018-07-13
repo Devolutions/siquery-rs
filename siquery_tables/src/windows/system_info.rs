@@ -13,7 +13,9 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn update(&mut self, system_reader: &SystemReaderInterface) {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<SystemInfoData>{
+        let mut output : Vec<SystemInfoData> = Vec::new();
+        let mut system_info = SystemInfoData::new();
         if let Some(os_info) = system_reader.get_wmi_cpu_info() {
             let lines = os_info.split('\n');
 
@@ -23,12 +25,12 @@ impl SystemInfoData {
                     continue
                 }
                 if v[0].starts_with("Name") {
-                    self.cpu_brand = String::from(v[1]);
-                    utils::trim_string(&mut self.cpu_brand);
+                    system_info.cpu_brand = String::from(v[1]);
+                    utils::trim_string(&mut system_info.cpu_brand);
                 } else if v[0].starts_with("NumberOfLogicalProcessors") {
                     let mut n = String::from(v[1]);
                     utils::trim_string(&mut n);
-                    self.cpu_logical_cores = n.parse::<u32>().unwrap_or(1);
+                    system_info.cpu_logical_cores = n.parse::<u32>().unwrap_or(1);
                 }
             }
         }
@@ -42,14 +44,16 @@ impl SystemInfoData {
                     continue
                 }
                 if v[0].starts_with("Caption") {
-                    self.computer_name = String::from(v[1]);
-                    utils::trim_string(&mut self.computer_name);
+                    system_info.computer_name = String::from(v[1]);
+                    utils::trim_string(&mut system_info.computer_name);
                 } else if v[0].starts_with("TotalPhysicalMemory") {
                     let mut n = String::from(v[1]);
                     utils::trim_string(&mut n);
-                    self.physical_memory = n.parse::<u64>().unwrap_or(0);
+                    system_info.physical_memory = n.parse::<u64>().unwrap_or(0);
                 }
             }
         }
+        output.push(system_info);
+        output
     }
 }

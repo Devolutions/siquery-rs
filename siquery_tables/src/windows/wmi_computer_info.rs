@@ -14,7 +14,8 @@ impl WmiComputerInfo {
         }
     }
 
-    pub(crate) fn get_system_info(system_reader: &SystemReaderInterface) -> WmiComputerInfo {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiComputerInfo> {
+        let mut output : Vec<WmiComputerInfo> = Vec::new();
         let mut computer = WmiComputerInfo::new();
 
         if let Some(computer_info) = system_reader.get_wmi_computer_info() {
@@ -55,6 +56,7 @@ impl WmiComputerInfo {
                 }
             }
         }
-        computer
+        output.push(computer);
+        output
     }
 }

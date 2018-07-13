@@ -3,8 +3,8 @@ use utils;
 use windows::SystemReaderInterface;
 
 impl WmiMotherboard {
-    pub(crate) fn get_motherboard_info(system_reader: &SystemReaderInterface) -> WmiMotherboard {
-
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiMotherboard> {
+        let mut output : Vec<WmiMotherboard> = Vec::new();
         let mut motherboard = WmiMotherboard {
             name: String::new(),
             manufacturer: String::new(),
@@ -47,6 +47,7 @@ impl WmiMotherboard {
             }
         }
 
-        motherboard
+        output.push(motherboard);
+        output
     }
 }

@@ -17,7 +17,7 @@ impl WmiLocalAccounts {
         }
     }
 
-    pub(crate) fn get_local_accounts_info(system_reader: &SystemReaderInterface) -> Vec<WmiLocalAccounts> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiLocalAccounts> {
 
         let mut local_accounts: Vec<WmiLocalAccounts> = Vec::new();
 

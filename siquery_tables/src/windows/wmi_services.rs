@@ -27,9 +27,9 @@ impl WmiServices {
         }
     }
 
-    pub(crate) fn get_services_info(system_reader: &SystemReaderInterface) -> Vec<WmiServices> {
+    pub(crate) fn get_specific (system_reader: &SystemReaderInterface) -> Vec<WmiServices> {
 
-        let mut services: Vec<WmiServices> = Vec::new();
+        let mut output: Vec<WmiServices> = Vec::new();
 
         if let Some(service_info) = system_reader.get_wmi_services_info() {
             let mut service = WmiServices::new();
@@ -38,7 +38,7 @@ impl WmiServices {
             for line in lines {
                 if line.len() <= 2 {
                     if service.accept_pause != "" {
-                        services.push(service);
+                        output.push(service);
                     }
                     service = WmiServices::new();
                 }
@@ -115,6 +115,6 @@ impl WmiServices {
             }
         }
 
-        services
+        output
     }
 }
