@@ -30,7 +30,7 @@ impl EtcProtocols {
         }
     }
 
-    pub fn get_protocols(system_reader: &SystemReaderInterface) -> Vec<EtcProtocols> {
+    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<EtcProtocols> {
         let mut protocols: Vec<EtcProtocols> = Vec::new();
 
         for line in system_reader

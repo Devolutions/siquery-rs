@@ -19,7 +19,7 @@ lazy_static! {
 
 impl EtcHosts {
 
-    pub fn get_hosts(system_reader: &SystemReaderInterface) -> Vec<EtcHosts> {
+    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<EtcHosts> {
         let mut hosts: Vec<EtcHosts> = Vec::new();
 
         for line in system_reader

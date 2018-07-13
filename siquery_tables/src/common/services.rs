@@ -31,7 +31,7 @@ impl EtcServices {
         }
     }
 
-    pub fn get_services(system_reader: &SystemReaderInterface) -> Vec<EtcServices> {
+    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<EtcServices> {
 
         let mut services: Vec<EtcServices> = Vec::new();
 

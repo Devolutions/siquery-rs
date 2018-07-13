@@ -66,7 +66,7 @@ mod processes;
 mod process_memory_map;
 
 pub trait SystemReaderInterface {
-   fn get_os_info(&self) -> Option<String>;
+    fn get_os_info(&self) -> Option<String>;
     fn get_wmi_system_info(&self) -> Option<String>;
     fn get_wmi_os_info(&self) -> Option<String>;
     fn get_wmi_cpu_info(&self) -> Option<String>;
@@ -337,9 +337,9 @@ impl SystemInfo {
             logical_drives: LogicalDrive::new(system_reader.borrow()),
             interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
             interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
-            etc_hosts: EtcHosts::get_hosts(system_reader.borrow()),
-            etc_protocols: EtcProtocols::get_protocols(system_reader.borrow()),
-            etc_services: EtcServices::get_services(system_reader.borrow()),
+            etc_hosts: EtcHosts::get_specific(system_reader.borrow()),
+            etc_protocols: EtcProtocols::get_specific(system_reader.borrow()),
+            etc_services: EtcServices::get_specific(system_reader.borrow()),
             uptime: Uptime::get_uptime(),
             wmi_printers: WmiPrinters::get_printers_info(system_reader.borrow()),
             wmi_services: WmiServices::get_services_info(system_reader.borrow()),
