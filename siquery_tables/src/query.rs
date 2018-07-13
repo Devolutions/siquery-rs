@@ -209,7 +209,7 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
         },
         #[cfg(not(target_os = "macos"))]
         "process_open_sockets" => {
-            let table = ProcessOpenSocketsRow::gen_process_open_sockets_table();
+            let table = ProcessOpenSocketsRow::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         "processes" => {
@@ -218,7 +218,7 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
         },
         #[cfg(not(target_os = "macos"))]
         "process_memory_map" => {
-            let table = ProcessMemoryMapRow::gen_process_memory_map_table();
+            let table = ProcessMemoryMapRow::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(not(target_os = "windows"))]

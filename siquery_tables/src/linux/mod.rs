@@ -120,15 +120,15 @@ impl SystemReaderInterface for SystemReader {
 
 pub struct SystemInfo {
     system_reader: Box<SystemReaderInterface>,
-    pub system_info: SystemInfoData,
-    pub os_version: OsVersion,
+    pub system_info: Vec<SystemInfoData>,
+    pub os_version: Vec<OsVersion>,
     pub logical_drives: Vec<LogicalDrive>,
     pub interface_addresses: Vec<InterfaceAddress>,
     pub interface_details: Vec<InterfaceDetails>,
     pub etc_hosts: Vec<EtcHosts>,
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
-    pub uptime: Result<Uptime, String>,
+    pub uptime: Vec<Uptime>,
     pub process_open_sockets: Vec<ProcessOpenSocketsRow>,
     pub processes: Vec<ProcessesRow>,
     pub process_memory_map: Vec<ProcessMemoryMapRow>,
@@ -137,23 +137,20 @@ pub struct SystemInfo {
 
 impl SystemInfo {
     pub fn new(system_reader: Box<SystemReaderInterface>) -> SystemInfo {
-        let mut system_info_data = SystemInfoData::new();
-        system_info_data.update(system_reader.borrow());
-
         SystemInfo {
-            system_info: system_info_data,
-            os_version: OsVersion::new(system_reader.borrow()),
-            logical_drives: LogicalDrive::new(system_reader.borrow()),
-            interface_addresses: InterfaceAddress::get_interfaces(system_reader.borrow()),
-            interface_details: InterfaceDetails::get_interface_details(system_reader.borrow()),
-            etc_hosts: EtcHosts::get_specific(system_reader.borrow()),
-            etc_protocols: EtcProtocols::get_specific(system_reader.borrow()),
-            etc_services: EtcServices::get_specific(system_reader.borrow()),
-            uptime: Uptime::get_uptime(),
-            process_open_sockets: ProcessOpenSocketsRow::gen_process_open_sockets_table(),
-            processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
-            process_memory_map: ProcessMemoryMapRow::gen_process_memory_map_table(),
-            process_envs: ProcessEnvsRow::gen_proc_environ_table(),
+            system_info:            SystemInfoData::        get_specific(system_reader.borrow()),
+            os_version:             OsVersion::             get_specific(system_reader.borrow()),
+            logical_drives:         LogicalDrive::          get_specific(system_reader.borrow()),
+            interface_addresses:    InterfaceAddress::      get_specific(system_reader.borrow()),
+            interface_details:      InterfaceDetails::      get_specific(system_reader.borrow()),
+            etc_hosts:              EtcHosts::              get_specific(system_reader.borrow()),
+            etc_protocols:          EtcProtocols::          get_specific(system_reader.borrow()),
+            etc_services:           EtcServices::           get_specific(system_reader.borrow()),
+            uptime:                 Uptime::                get_specific(system_reader.borrow()),
+            process_open_sockets:   ProcessOpenSocketsRow:: get_specific(system_reader.borrow()),
+            processes:              ProcessesRow::          get_specific(system_reader.borrow()),
+            process_memory_map:     ProcessMemoryMapRow::   get_specific(system_reader.borrow()),
+            process_envs:           ProcessEnvsRow::        get_specific(system_reader.borrow()),
             system_reader,
         }
     }

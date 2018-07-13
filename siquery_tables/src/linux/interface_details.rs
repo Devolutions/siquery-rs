@@ -11,13 +11,12 @@ impl InterfaceDetails {
         }
     }
 
-    pub fn get_interface_details(_system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
+    pub fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
+        // TODO: implement interface_details table
         let mut interfaces: Vec<InterfaceDetails> = Vec::new();
-        let interface = InterfaceDetails::new();
-        interfaces.push(interface);
-
-        // TODO interface_details table implementation
+        interfaces.push(
+            InterfaceDetails::new()
+        );
         interfaces
     }
-
 }
