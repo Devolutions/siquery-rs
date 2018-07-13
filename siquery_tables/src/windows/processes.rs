@@ -1,3 +1,5 @@
+#![allow(unused_assignments)]
+
 extern crate winapi;
 
 use tables::ProcessesRow;
@@ -92,7 +94,7 @@ impl ProcessesRow {
     //TODO getUidFromSid()
     //TODO getGidFromSid()
 
-    pub(crate) fn gen_processes_table (system_reader: &SystemReaderInterface) -> Vec<ProcessesRow> {
+    pub(crate) fn get_specific (system_reader: &SystemReaderInterface) -> Vec<ProcessesRow> {
         let mut out: Vec<ProcessesRow> = Vec::new();
         let current_pid = unsafe{GetCurrentProcessId()} as i64;
 
@@ -131,7 +133,6 @@ impl ProcessesRow {
                         let pid = v.to_owned().parse::<i64>().unwrap_or(-1);
                         let null_pointer = ptr::null::<c_void>() as *mut c_void;
                         processes_row.pid = pid;
-                        #[allow(unused_assignments)]
                         let mut h_process: *mut winapi::ctypes::c_void = 0 as *mut c_void;
                         let gid : i64 = -1;
                         let uid : i64 = -1;

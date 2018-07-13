@@ -11,7 +11,11 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn update(&mut self, system_reader: &SystemReaderInterface) {
-        self.computer_name = system_reader.hostname().unwrap_or(String::from(""));
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<SystemInfoData> {
+        let mut output : Vec<SystemInfoData> = Vec::new();
+        let mut system_info = SystemInfoData::new();
+        system_info.computer_name = system_reader.hostname().unwrap_or(String::from(""));
+        output.push(system_info);
+        output
     }
 }

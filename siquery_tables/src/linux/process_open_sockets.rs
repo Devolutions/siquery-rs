@@ -2,7 +2,9 @@ use std::io::Read;
 use std::fs::{read_dir, File, read_link};
 use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
+
 use tables::{ProcessOpenSocketsRow, ProcessesRow};
+use linux::SystemReaderInterface;
 
 pub struct InternalProcNamespaces {
     cgroup_namespace: String,
@@ -68,6 +70,7 @@ impl ProcessOpenSocketsRow {
         Some(open_sockets)
     }
 
+    #[allow(unused_must_use)]
     pub fn internal_get_basic_sockets_info (
         file_path: String,
         expected_format: &str,
@@ -79,140 +82,141 @@ impl ProcessOpenSocketsRow {
         let mut socket_info: Vec<InternalBasicSocketInfo> = Vec::new();
         let mut _buff = File::open(file_path).ok()?;
         let mut file_contents = String::new();
-        _buff.read_to_string(&mut file_contents);
-        let mut lines = file_contents.lines();
+        if let Ok(_bytes_read) = _buff.read_to_string(&mut file_contents) {
+            let mut lines = file_contents.lines();
 
-        if lines.nth(0)?.contains(expected_format) {
-            for line in lines.skip(1) {
-                let v: Vec<_> = line.split_whitespace().collect();
-                if family == "2" || family == "10" {
-                    if v.len() == expected_columns as usize {
-                        let local_address_and_port: Vec<_> = v[1].split(':').collect();
-                        let remote_address_and_port: Vec<_> = v[2].split(':').collect();
-                        if local_address_and_port.len() == 2 && remote_address_and_port.len() == 2 {
-                            let mut local_address: String;
-                            match local_address_and_port[0].len() {
-                                8 => {
-                                    // IPv4 is represented as 8 bytes in the tcp6 file in linux.
-                                    local_address = Ipv4Addr::from(u32::from_be(u32::from_str_radix(local_address_and_port[0], 16).unwrap_or(1))).to_string();
-                                }
-                                32 => {
-                                    /* As explained here:
-                                https://serverfault.com/questions/592574/why-does-proc-net-tcp6-represents-1-as-1000
-                                In the tcp6 file, the address is handled as four
-                                little-endian words consisting of 4 bytes each.
-                                Then, for proper network byte-order,
-                                adjacent words must also be swapped. */
+            if lines.nth(0)?.contains(expected_format) {
+                for line in lines.skip(1) {
+                    let v: Vec<_> = line.split_whitespace().collect();
+                    if family == "2" || family == "10" {
+                        if v.len() == expected_columns as usize {
+                            let local_address_and_port: Vec<_> = v[1].split(':').collect();
+                            let remote_address_and_port: Vec<_> = v[2].split(':').collect();
+                            if local_address_and_port.len() == 2 && remote_address_and_port.len() == 2 {
+                                let mut local_address: String;
+                                match local_address_and_port[0].len() {
+                                    8 => {
+                                        // IPv4 is represented as 8 bytes in the tcp6 file in linux.
+                                        local_address = Ipv4Addr::from(u32::from_be(u32::from_str_radix(local_address_and_port[0], 16).unwrap_or(1))).to_string();
+                                    }
+                                    32 => {
+                                        /* As explained here:
+                                    https://serverfault.com/questions/592574/why-does-proc-net-tcp6-represents-1-as-1000
+                                    In the tcp6 file, the address is handled as four
+                                    little-endian words consisting of 4 bytes each.
+                                    Then, for proper network byte-order,
+                                    adjacent words must also be swapped. */
 
-                                    // Split the address in words of 4 bytes.
-                                    let (a, _buf) = local_address_and_port[0].split_at(4);
-                                    let (b, _buf) = _buf.split_at(4);
-                                    let (c, _buf) = _buf.split_at(4);
-                                    let (d, _buf) = _buf.split_at(4);
-                                    let (e, _buf) = _buf.split_at(4);
-                                    let (f, _buf) = _buf.split_at(4);
-                                    let (g, _buf) = _buf.split_at(4);
-                                    let (h, _buf) = _buf.split_at(4);
+                                        // Split the address in words of 4 bytes.
+                                        let (a, _buf) = local_address_and_port[0].split_at(4);
+                                        let (b, _buf) = _buf.split_at(4);
+                                        let (c, _buf) = _buf.split_at(4);
+                                        let (d, _buf) = _buf.split_at(4);
+                                        let (e, _buf) = _buf.split_at(4);
+                                        let (f, _buf) = _buf.split_at(4);
+                                        let (g, _buf) = _buf.split_at(4);
+                                        let (h, _buf) = _buf.split_at(4);
 
-                                    /* Parse every word as u16,
-                                convert to big-endian and swap adjacent words. */
-                                    let ip = [
-                                        u16::from_be(u16::from_str_radix(b, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(a, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(d, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(c, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(f, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(e, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(h, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(g, 16).unwrap_or(1)),
-                                    ];
-                                    local_address = Ipv6Addr::from(ip).to_string();
+                                        /* Parse every word as u16,
+                                    convert to big-endian and swap adjacent words. */
+                                        let ip = [
+                                            u16::from_be(u16::from_str_radix(b, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(a, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(d, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(c, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(f, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(e, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(h, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(g, 16).unwrap_or(1)),
+                                        ];
+                                        local_address = Ipv6Addr::from(ip).to_string();
+                                    }
+                                    _ => {
+                                        local_address = "An error occurred while parsing the local address: the address does not have an expected format".to_string();
+                                    }
                                 }
-                                _ => {
-                                    local_address = "An error occurred while parsing the local address: the address does not have an expected format".to_string();
+                                let mut remote_address: String;
+                                match local_address_and_port[0].len() {
+                                    8 => {
+                                        // IPv4 is represented as 8 bytes in the tcp6 file in linux.
+                                        remote_address = Ipv4Addr::from(u32::from_be(u32::from_str_radix(local_address_and_port[0], 16).unwrap_or(1))).to_string();
+                                    }
+                                    32 => {
+                                        /* As explained here:
+                                    https://serverfault.com/questions/592574/why-does-proc-net-tcp6-represents-1-as-1000
+                                    In the tcp6 file, the address is handled as four
+                                    little-endian words consisting of 4 bytes each.
+                                    Then, for proper network byte-order,
+                                    adjacent words must also be swapped. */
+
+                                        // Split the address in words of 4 bytes.
+                                        let (a, _buf) = local_address_and_port[0].split_at(4);
+                                        let (b, _buf) = _buf.split_at(4);
+                                        let (c, _buf) = _buf.split_at(4);
+                                        let (d, _buf) = _buf.split_at(4);
+                                        let (e, _buf) = _buf.split_at(4);
+                                        let (f, _buf) = _buf.split_at(4);
+                                        let (g, _buf) = _buf.split_at(4);
+                                        let (h, _buf) = _buf.split_at(4);
+
+                                        /* Parse every word as u16,
+                                    convert to big-endian and swap adjacent words. */
+                                        let ip = [
+                                            u16::from_be(u16::from_str_radix(b, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(a, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(d, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(c, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(f, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(e, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(h, 16).unwrap_or(1)),
+                                            u16::from_be(u16::from_str_radix(g, 16).unwrap_or(1)),
+                                        ];
+                                        remote_address = Ipv6Addr::from(ip).to_string();
+                                    }
+                                    _ => {
+                                        remote_address = "An error occurred while parsing the local address: the address does not have an expected format".to_string();
+                                    }
                                 }
+                                socket_info.push(InternalBasicSocketInfo {
+                                    family: family.to_owned(),
+                                    protocol: protocol.to_owned(),
+                                    local_address,
+                                    local_port: local_address_and_port[1].to_owned(),
+                                    remote_address,
+                                    remote_port: remote_address_and_port[1].to_owned(),
+                                    inode: v[9].to_owned(),
+                                    path: "".to_owned(),
+                                    state: v[3].to_owned(),
+                                    net_namespace: ns.to_owned(),
+                                });
                             }
-                            let mut remote_address: String;
-                            match local_address_and_port[0].len() {
-                                8 => {
-                                    // IPv4 is represented as 8 bytes in the tcp6 file in linux.
-                                    remote_address = Ipv4Addr::from(u32::from_be(u32::from_str_radix(local_address_and_port[0], 16).unwrap_or(1))).to_string();
-                                }
-                                32 => {
-                                    /* As explained here:
-                                https://serverfault.com/questions/592574/why-does-proc-net-tcp6-represents-1-as-1000
-                                In the tcp6 file, the address is handled as four
-                                little-endian words consisting of 4 bytes each.
-                                Then, for proper network byte-order,
-                                adjacent words must also be swapped. */
-
-                                    // Split the address in words of 4 bytes.
-                                    let (a, _buf) = local_address_and_port[0].split_at(4);
-                                    let (b, _buf) = _buf.split_at(4);
-                                    let (c, _buf) = _buf.split_at(4);
-                                    let (d, _buf) = _buf.split_at(4);
-                                    let (e, _buf) = _buf.split_at(4);
-                                    let (f, _buf) = _buf.split_at(4);
-                                    let (g, _buf) = _buf.split_at(4);
-                                    let (h, _buf) = _buf.split_at(4);
-
-                                    /* Parse every word as u16,
-                                convert to big-endian and swap adjacent words. */
-                                    let ip = [
-                                        u16::from_be(u16::from_str_radix(b, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(a, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(d, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(c, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(f, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(e, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(h, 16).unwrap_or(1)),
-                                        u16::from_be(u16::from_str_radix(g, 16).unwrap_or(1)),
-                                    ];
-                                    remote_address = Ipv6Addr::from(ip).to_string();
-                                }
-                                _ => {
-                                    remote_address = "An error occurred while parsing the local address: the address does not have an expected format".to_string();
-                                }
-                            }
-                            socket_info.push(InternalBasicSocketInfo {
-                                family: family.to_owned(),
-                                protocol: protocol.to_owned(),
-                                local_address,
-                                local_port: local_address_and_port[1].to_owned(),
-                                remote_address,
-                                remote_port: remote_address_and_port[1].to_owned(),
-                                inode: v[9].to_owned(),
-                                path: "".to_owned(),
-                                state: v[3].to_owned(),
-                                net_namespace: ns.to_owned(),
-                            });
                         }
                     }
+                        else if family == "1" {
+                            if v.len() >= expected_columns as usize {
+
+                                let mut path = String::new();
+                                if v.len() == 8 {
+                                    path = v[7].to_owned();
+                                } else if v.len() == 7 {
+                                    path = "".to_owned()
+                                }
+                                socket_info.push(InternalBasicSocketInfo {
+                                    family: family.to_owned(),
+                                    protocol: protocol.to_owned(),
+                                    local_address: "".to_owned(),
+                                    local_port: "".to_owned(),
+                                    remote_address: "".to_owned(),
+                                    remote_port: "".to_owned(),
+                                    inode: v[6].to_owned(),
+                                    path,
+                                    state: v[5].to_owned(),
+                                    net_namespace: ns.to_owned(),
+                                });
+
+                            }
+                        }
                 }
-                    else if family == "1" {
-                        if v.len() >= expected_columns as usize {
-
-                            let mut path = String::new();
-                            if v.len() == 8 {
-                                path = v[7].to_owned();
-                            } else if v.len() == 7 {
-                                path = "".to_owned()
-                            }
-                            socket_info.push(InternalBasicSocketInfo {
-                                family: family.to_owned(),
-                                protocol: protocol.to_owned(),
-                                local_address: "".to_owned(),
-                                local_port: "".to_owned(),
-                                remote_address: "".to_owned(),
-                                remote_port: "".to_owned(),
-                                inode: v[6].to_owned(),
-                                path,
-                                state: v[5].to_owned(),
-                                net_namespace: ns.to_owned(),
-                            });
-
-                        }
-                    }
             }
         }
         Some(socket_info)
@@ -285,7 +289,7 @@ impl ProcessOpenSocketsRow {
         Some(net_namespaces)
     }
 
-    pub fn gen_process_open_sockets_table () -> Vec<ProcessOpenSocketsRow>{
+    pub fn get_specific (_system_reader: &SystemReaderInterface) -> Vec<ProcessOpenSocketsRow>{
         let mut table: Vec<ProcessOpenSocketsRow> = Vec::new();
         let mut all_namespaces = ProcessOpenSocketsRow::get_all_network_namespaces().unwrap_or(HashMap::new());
         let all_pid_ino = ProcessOpenSocketsRow::get_all_open_sockets().unwrap_or(Vec::new());

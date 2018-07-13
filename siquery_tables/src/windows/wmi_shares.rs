@@ -15,7 +15,7 @@ impl WmiShares {
         }
     }
 
-    pub(crate) fn get_shares_info(system_reader: &SystemReaderInterface) -> Vec<WmiShares> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiShares> {
 
         let mut shares: Vec<WmiShares> = Vec::new();
 

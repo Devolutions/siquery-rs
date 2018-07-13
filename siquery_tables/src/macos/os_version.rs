@@ -1,12 +1,12 @@
 use plist::Plist;
-use serde_json;
 
 use tables::OsVersion;
 use macos::SystemReaderInterface;
 
 
 impl OsVersion {
-    pub(crate) fn new(system_reader: &SystemReaderInterface) -> OsVersion {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<OsVersion> {
+        let mut output : Vec<OsVersion> = Vec::new();
         let system_version = system_reader.system_version();
 
         let mut name = String::new();
@@ -30,12 +30,15 @@ impl OsVersion {
                 }
         }
 
-        OsVersion {
-            name,
-            platform: String::from("MacOS"),
-            version,
-            major,
-            minor,
-        }
+        output.push(
+            OsVersion {
+                name,
+                platform: String::from("MacOS"),
+                version,
+                major,
+                minor,
+            }
+        );
+        output
     }
 }

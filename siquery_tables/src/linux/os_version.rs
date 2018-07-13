@@ -2,7 +2,8 @@ use tables::OsVersion;
 use linux::SystemReaderInterface;
 
 impl OsVersion {
-    pub(crate) fn new(system_reader: &SystemReaderInterface) -> OsVersion {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<OsVersion> {
+        let mut output : Vec<OsVersion> = Vec::new();
         let os_release = system_reader.os_release();
         let name = match os_release {
             Some(ref s) => {
@@ -37,12 +38,15 @@ impl OsVersion {
             }
         }
 
-        OsVersion {
-            name,
-            platform: system_reader.os_platform().unwrap_or_else(|| String::from("")),
-            version,
-            major,
-            minor,
-        }
+        output.push(
+            OsVersion {
+                name,
+                platform: system_reader.os_platform().unwrap_or_else(|| String::from("")),
+                version,
+                major,
+                minor,
+            }
+        );
+        output
     }
 }

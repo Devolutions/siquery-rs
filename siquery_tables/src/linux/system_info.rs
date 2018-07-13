@@ -16,10 +16,12 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn update(&mut self, system_reader: &SystemReaderInterface) {
-        self.computer_name = system_reader.hostname().unwrap_or_else(|| String::from(""));
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<SystemInfoData> {
+        let mut output : Vec<SystemInfoData> = Vec::new();
+        let mut system_info = SystemInfoData::new();
+        system_info.computer_name = system_reader.hostname().unwrap_or_else(|| String::from(""));
 
-        self.physical_memory = match system_reader.meminfo() {
+        system_info.physical_memory = match system_reader.meminfo() {
             Some(s) => {
                 let n = s.split('\n').find(|line| line.starts_with("MemTotal"))
                          .and_then(|line| line.split(':').last())
@@ -31,10 +33,12 @@ impl SystemInfoData {
             None => 0
         };
 
-        if let Some(cpu_info) = self.get_cpu_info(system_reader) {
-            self.cpu_brand = cpu_info.cpu_brand;
-            self.cpu_logical_cores = cpu_info.cpu_logical_cores;
+        if let Some(cpu_info) = system_info.get_cpu_info(system_reader) {
+            system_info.cpu_brand = cpu_info.cpu_brand;
+            system_info.cpu_logical_cores = cpu_info.cpu_logical_cores;
         };
+        output.push(system_info);
+        output
     }
 
     fn get_cpu_info(&mut self, system_reader: &SystemReaderInterface) -> Option<CpuInfo> {

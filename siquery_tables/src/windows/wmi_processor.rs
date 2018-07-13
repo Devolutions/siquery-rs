@@ -3,8 +3,8 @@ use utils;
 use windows::SystemReaderInterface;
 
 impl WmiProcessor {
-    pub(crate) fn get_processor_info(system_reader: &SystemReaderInterface) -> WmiProcessor {
-
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiProcessor> {
+        let mut output : Vec<WmiProcessor> = Vec::new();
         let mut processor = WmiProcessor {
             address_width: String::new(),
             cpu_satus: String::new(),
@@ -129,6 +129,7 @@ impl WmiProcessor {
             processor.hyper_threading_enabled = "TRUE".to_string();
         }
 
-        processor
+        output.push(processor);
+        output
     }
 }

@@ -13,7 +13,7 @@ impl WmiPointingDevice {
         }
     }
 
-    pub(crate) fn get_pointing_device_info(system_reader: &SystemReaderInterface) -> Vec<WmiPointingDevice> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiPointingDevice> {
 
         let mut pointing_devices: Vec<WmiPointingDevice> = Vec::new();
 

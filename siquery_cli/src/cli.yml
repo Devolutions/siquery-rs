@@ -8,6 +8,12 @@ args:
         value_name: table
         help: select all from table
         takes_value: true
+    - select:
+        short: s
+        long: S
+        value_name: select
+        help: columns to select
+        takes_value: true
     - list_all:
         short: l
         long: L

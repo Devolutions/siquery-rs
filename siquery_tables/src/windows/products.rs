@@ -2,6 +2,7 @@ extern crate winreg;
 
 use tables::Products;
 use windows::products::winreg::enums::{HKEY_LOCAL_MACHINE, KEY_READ};
+use windows::SystemReaderInterface;
 
 impl Products {
     pub(crate) fn new() -> Products {
@@ -15,7 +16,7 @@ impl Products {
         }
     }
 
-    pub(crate) fn get_products_info() -> Vec<Products> {
+    pub(crate) fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<Products> {
         let mut products: Vec<Products> = Vec::new();
         let mut product = Products::new();
 

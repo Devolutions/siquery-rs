@@ -3,7 +3,7 @@ use utils;
 use windows::SystemReaderInterface;
 
 impl WmiBios {
-    pub(crate) fn get_bios_info(system_reader: &SystemReaderInterface) -> WmiBios {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> WmiBios {
 
         let mut bios = WmiBios {
             caption : String::new(),

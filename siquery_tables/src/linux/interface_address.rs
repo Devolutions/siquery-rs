@@ -12,13 +12,12 @@ impl InterfaceAddress {
         }
     }
 
-    pub(crate) fn get_interfaces(_system_reader: &SystemReaderInterface) -> Vec<InterfaceAddress> {
-        let mut interfaces: Vec<InterfaceAddress> = Vec::new();
-        let address = InterfaceAddress::new();
-
-        interfaces.push(address);
-
-        // TODO interface_address table implementation
-        interfaces
+    pub(crate) fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<InterfaceAddress> {
+        // TODO: implement logical_drive table
+        let mut output: Vec<InterfaceAddress> = Vec::new();
+        output.push(
+            InterfaceAddress::new()
+        );
+        output
     }
 }

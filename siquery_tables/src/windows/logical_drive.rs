@@ -13,7 +13,7 @@ impl LogicalDrive {
         }
     }
 
-    pub(crate) fn new(system_reader: &SystemReaderInterface) -> Vec<LogicalDrive> {
+    pub(crate) fn get_specific (system_reader: &SystemReaderInterface) -> Vec<LogicalDrive> {
         let mut drives: Vec<LogicalDrive> = Vec::new();
 
         if let Some(drive_info) = system_reader.get_wmi_drives_info() {

@@ -21,7 +21,7 @@ impl InterfaceAddress {
         }
     }
 
-    pub fn get_interfaces(system_reader: &SystemReaderInterface) -> Vec<InterfaceAddress> {
+    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<InterfaceAddress> {
         let mut interfaces: Vec<InterfaceAddress> = Vec::new();
 
         if let Some(interface_info) = system_reader.get_wmi_nicconfig() {

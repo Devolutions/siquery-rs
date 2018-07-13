@@ -12,6 +12,8 @@ use winapi::shared::minwindef::{
 #[allow(unused_imports)]
 use winapi::shared::ws2def::{AF_INET,AF_INET6};
 
+use windows::SystemReaderInterface;
+
 #[link(name = "iphlpapi")]
 extern "system" {
     fn GetExtendedTcpTable (
@@ -408,7 +410,7 @@ enum SocketType {
 }
 
 impl ProcessOpenSocketsRow {
-    pub fn gen_process_open_sockets_table () -> Vec<ProcessOpenSocketsRow>{
+    pub fn get_specific (_system_reader: &SystemReaderInterface) -> Vec<ProcessOpenSocketsRow>{
 
         let mut open_sockets_table: Vec<ProcessOpenSocketsRow> = Vec::new();
         parse_socket_table(SocketType::Tcp, &mut open_sockets_table);

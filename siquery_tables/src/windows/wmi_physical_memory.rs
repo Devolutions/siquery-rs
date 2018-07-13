@@ -20,7 +20,7 @@ impl WmiMemory {
         }
     }
 
-    pub(crate) fn get_physical_memory_info(system_reader: &SystemReaderInterface) -> Vec<WmiMemory> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiMemory> {
 
         let mut physical_memories: Vec<WmiMemory> = Vec::new();
 

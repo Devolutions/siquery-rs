@@ -14,7 +14,7 @@ impl WmiHotfixes {
         }
     }
 
-    pub(crate) fn get_hotfixes_info(system_reader: &SystemReaderInterface) -> Vec<WmiHotfixes> {
+    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiHotfixes> {
 
         let mut hotfixes: Vec<WmiHotfixes> = Vec::new();
 
