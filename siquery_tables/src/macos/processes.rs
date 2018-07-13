@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_variables)]
 
 use macos::SystemReaderInterface;
 use libc::*;
@@ -8,7 +9,7 @@ use libc::timeval;
 use std::collections::HashMap;
 use std::mem;
 use std::ptr;
-use tables::{ProcessesRow, ProcessEnvsRow};
+use tables::ProcessesRow;
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::path::Path;
 use std::ffi::CStr;
@@ -28,9 +29,9 @@ pub struct ProcCred {
     saved_gid: gid_t,
 }
 
-struct ProcArgs {
-    args: Vec<String>,
-    env: HashMap<String, String>,
+pub struct ProcArgs {
+    pub args: Vec<String>,
+    pub env: HashMap<String, String>,
 }
 
 struct RootAndCwdInternal {
@@ -236,7 +237,7 @@ impl ProcessesRow {
         }
     }
 
-    fn get_proc_list() -> Vec<i32> {
+    pub fn get_proc_list() -> Vec<i32> {
         let mut out: Vec<i32> = Vec::new();
         let PROC_ALL_PIDS = 1;
 
@@ -356,7 +357,7 @@ impl ProcessesRow {
         cred
     }
 
-    fn gen_max_args() -> usize {
+    pub fn gen_max_args() -> usize {
         let mut arg_max: usize = 0;
 
         if arg_max == 0 {
@@ -468,7 +469,7 @@ impl ProcessesRow {
         threads
     }
 
-    fn get_proc_raw_args(pid: i32, mut argmax: size_t) -> ProcArgs {
+    pub fn get_proc_raw_args(pid: i32, mut argmax: size_t) -> ProcArgs {
         let mut args: ProcArgs = ProcArgs {
             args: Vec::new(),
             env: HashMap::new(),
@@ -596,7 +597,7 @@ impl ProcessesRow {
         out
     }
 
-    pub fn gen_processes_table(system_reader: &SystemReaderInterface) -> Vec<ProcessesRow> {
+    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<ProcessesRow> {
         let mut processes_table: Vec<ProcessesRow> = Vec::new();
         let pidlist = ProcessesRow::get_proc_list();
         for pid in pidlist {
@@ -653,23 +654,3 @@ impl ProcessesRow {
     }
 }
 
-impl ProcessEnvsRow {
-    pub fn gen_process_envs_table() -> Vec<ProcessEnvsRow> {
-        let mut process_envs_table: Vec<ProcessEnvsRow> = Vec::new();
-        let pidlist = ProcessesRow::get_proc_list();
-        let argmax = ProcessesRow::gen_max_args();
-        for pid in pidlist {
-            let proc_args = ProcessesRow::get_proc_raw_args(pid, argmax);
-            for (key, value) in proc_args.env.iter() {
-                process_envs_table.push(
-                    ProcessEnvsRow {
-                        pid,
-                        key: key.to_owned(),
-                        value: value.to_owned(),
-                    }
-                )
-            }
-        }
-        process_envs_table
-    }
-}

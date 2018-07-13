@@ -5,10 +5,12 @@ use std::process::Command;
 
 use serde_json;
 
+mod logical_drive;
 mod os_version;
 mod system_info;
 mod uptime;
 mod processes;
+mod process_envs;
 
 use tables::{
     LogicalDrive,
@@ -89,39 +91,31 @@ impl SystemReaderInterface for SystemReader {
     }
 }
 
-struct CpuInfo {
-    cpu_brand: String,
-    cpu_logical_cores: u32
-}
-
 pub struct SystemInfo {
     system_reader: Box<SystemReaderInterface>,
-    pub system_info: SystemInfoData,
-    pub os_version: OsVersion,
+    pub system_info: Vec<SystemInfoData>,
+    pub os_version: Vec<OsVersion>,
     pub logical_drives: Vec<LogicalDrive>,
     pub etc_hosts: Vec<EtcHosts>,
     pub etc_protocols: Vec<EtcProtocols>,
     pub etc_services: Vec<EtcServices>,
-    pub uptime: Result<Uptime, String>,
+    pub uptime: Vec<Uptime>,
     pub processes: Vec<ProcessesRow>,
     pub process_envs: Vec<ProcessEnvsRow>,
 }
 
 impl SystemInfo {
     pub fn new(system_reader: Box<SystemReaderInterface>) -> SystemInfo {
-        let mut system_info_data = SystemInfoData::new();
-        system_info_data.update(system_reader.borrow());
-
         SystemInfo {
-            system_info: system_info_data,
-            os_version: OsVersion::new(system_reader.borrow()),
-            logical_drives: LogicalDrive::new(),
+            system_info: SystemInfoData::get_specific(system_reader.borrow()),
+            os_version: OsVersion::get_specific(system_reader.borrow()),
+            logical_drives: LogicalDrive::get_specific(system_reader.borrow()),
             etc_hosts: EtcHosts::get_specific(system_reader.borrow()),
             etc_protocols: EtcProtocols::get_specific(system_reader.borrow()),
             etc_services: EtcServices::get_specific(system_reader.borrow()),
-            uptime: Uptime::get_uptime(),
-            processes: ProcessesRow::gen_processes_table(system_reader.borrow()),
-            process_envs: ProcessEnvsRow::gen_process_envs_table(),
+            uptime: Uptime::get_specific(system_reader.borrow()),
+            processes: ProcessesRow::get_specific(system_reader.borrow()),
+            process_envs: ProcessEnvsRow::get_specific(system_reader.borrow()),
             system_reader,
         }
     }

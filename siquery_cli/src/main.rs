@@ -2,6 +2,7 @@
 extern crate clap;
 extern crate siquery;
 
+#[allow(unused_imports)]    // TODO column names with macros
 #[macro_use]
 extern crate prettytable;
 

@@ -82,38 +82,29 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
             select(&table, columns)
         },
         "system_info" => {
-            let mut system_info_data = SystemInfoData::new();
-            system_info_data.update(system_reader.borrow());
-
-            let mut table: Vec<SystemInfoData> = Vec::new();
-            table.push(system_info_data);
+            let table = SystemInfoData::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         "os_version" => {
-            let os_version = OsVersion::new(system_reader.borrow());
-
-            let mut table: Vec<OsVersion> = Vec::new();
-            table.push(os_version);
+            let table = OsVersion::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         "logical_drives" => {
-            let table = LogicalDrive::new(system_reader.borrow());
+            let table = LogicalDrive::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(not(target_os = "macos"))]
         "interface_address" => {
-            let table = InterfaceAddress::get_interfaces(system_reader.borrow());
+            let table = InterfaceAddress::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(not(target_os = "macos"))]
         "interface_details" => {
-            let table = InterfaceDetails::get_interface_details(system_reader.borrow());
+            let table = InterfaceDetails::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         "uptime" => {
-            let uptime = Uptime::get_uptime().unwrap();
-            let mut table: Vec<Uptime> = Vec::new();
-            table.push(uptime);
+            let table = Uptime::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(target_os = "windows")]
@@ -222,12 +213,17 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
             select(&table, columns)
         },
         "processes" => {
-            let table = ProcessesRow::gen_processes_table(system_reader.borrow());
+            let table = ProcessesRow::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         #[cfg(not(target_os = "macos"))]
         "process_memory_map" => {
             let table = ProcessMemoryMapRow::gen_process_memory_map_table();
+            select(&table, columns)
+        },
+        #[cfg(not(target_os = "windows"))]
+        "process_envs" => {
+            let table = ProcessEnvsRow::get_specific(system_reader.borrow());
             select(&table, columns)
         },
         _ => {
