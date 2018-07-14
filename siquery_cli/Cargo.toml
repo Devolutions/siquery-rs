@@ -14,3 +14,11 @@ clap = { version = "2.31", features = ["yaml"] }
 [dependencies.siquery]
 path = "../siquery_tables"
 
+[dependencies.rusqlite]
+git = "https://github.com/gwenn/rusqlite.git"
+rev = "b19d050"
+features = ["vtab", "bundled"]
+
+[dependencies.libsqlite3-sys]
+git = "https://github.com/gwenn/rusqlite.git"
+rev = "b19d050"

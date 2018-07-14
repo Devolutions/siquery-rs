@@ -12,6 +12,13 @@ use siquery::query::query_table;
 
 use clap::App;
 
+#[macro_use]
+extern crate rusqlite;
+extern crate libsqlite3_sys;
+
+mod vtab;
+use vtab::test_dummy_module;
+
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
     table.printstd();
@@ -34,10 +41,13 @@ fn query_select(name: &str, select: &str) {
 }
 
 fn main() {
+    test_dummy_module();
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
     let table = matches.value_of("table").unwrap_or("").to_string();
     let select = matches.value_of("select").unwrap_or("").to_string();
-    query_select(table.as_str(), select.as_str());
+    if table.len() > 0 {
+        query_select(table.as_str(), select.as_str());
+    }
 }
