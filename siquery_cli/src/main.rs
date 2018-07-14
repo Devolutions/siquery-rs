@@ -17,7 +17,7 @@ extern crate rusqlite;
 extern crate libsqlite3_sys;
 
 mod vtab;
-use vtab::test_dummy_module;
+use vtab::sql_query;
 
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
@@ -41,7 +41,7 @@ fn query_select(name: &str, select: &str) {
 }
 
 fn main() {
-    test_dummy_module();
+    sql_query();
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
