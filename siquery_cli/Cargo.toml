@@ -16,9 +16,5 @@ path = "../siquery_tables"
 
 [dependencies.rusqlite]
 git = "https://github.com/gwenn/rusqlite.git"
-rev = "fe64d51"
+rev = "849dbda"
 features = ["vtab", "bundled"]
-
-[dependencies.libsqlite3-sys]
-git = "https://github.com/gwenn/rusqlite.git"
-rev = "fe64d51"

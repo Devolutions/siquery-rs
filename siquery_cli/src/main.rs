@@ -13,7 +13,6 @@ use siquery::query::query_table;
 use clap::App;
 
 extern crate rusqlite;
-extern crate libsqlite3_sys;
 
 mod vtab;
 use vtab::sql_query;
