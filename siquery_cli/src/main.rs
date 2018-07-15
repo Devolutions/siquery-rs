@@ -12,7 +12,6 @@ use siquery::query::query_table;
 
 use clap::App;
 
-#[macro_use]
 extern crate rusqlite;
 extern crate libsqlite3_sys;
 
