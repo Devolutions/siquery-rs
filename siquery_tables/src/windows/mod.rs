@@ -1,40 +1,15 @@
+#[allow(unused_imports)]
+// Required for test
 use std::borrow::Borrow;
 use std::process::Command;
+#[allow(unused_imports)]
+// TODO implement to_json
 use serde_json;
 use std::fs::File;
 use std::io::Read;
-use tables::{
-    EtcServices,
-    EtcProtocols,
-    EtcHosts,
-    InterfaceAddress,
-    InterfaceDetails,
-    LogicalDrive,
-    OsVersion,
-    WmiOsVersion,
-    SystemInfoData,
-    WmiComputerInfo,
-    Uptime,
-    WmiPrinters,
-    WmiServices,
-    WmiHotfixes,
-    Products,
-    WmiShares,
-    WmiNetworkAdapters,
-    WmiLocalAccounts,
-    WmiBios,
-    WmiMotherboard,
-    WmiProcessor,
-    WmiMemory,
-    WmiSound,
-    WmiVideo,
-    WmiMonitors,
-    WmiKeyboard,
-    WmiPointingDevice,
-    ProcessOpenSocketsRow,
-    ProcessesRow,
-    ProcessMemoryMapRow,
-};
+#[allow(unused_imports)]
+// Required for test
+use tables::*;
 use std::env;
 
 mod interface_address;
