@@ -1,8 +1,11 @@
+#[allow(unused_imports)]
+// Required for test
 use std::borrow::Borrow;
 use std::fs::File;
 use std::io::Read;
 use std::process::Command;
-
+#[allow(unused_imports)]
+// TODO implement to_json
 use serde_json;
 
 mod logical_drive;
@@ -12,17 +15,9 @@ mod uptime;
 mod processes;
 mod process_envs;
 
-use tables::{
-    LogicalDrive,
-    OsVersion,
-    SystemInfoData,
-    EtcHosts,
-    EtcProtocols,
-    EtcServices,
-    Uptime,
-    ProcessesRow,
-    ProcessEnvsRow,
-};
+#[allow(unused_imports)]
+// Required for test
+use tables::*;
 use utils;
 
 pub trait SystemReaderInterface {
