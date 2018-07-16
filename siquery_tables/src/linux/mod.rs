@@ -1,8 +1,11 @@
+#[allow(unused_imports)]
+// Required in test
 use std::borrow::Borrow;
 use std::fs::File;
 use std::io::Read;
 use std::process::Command;
-
+#[allow(unused_imports)]
+// TODO implement to_json
 use serde_json;
 use sysconf::raw::{sysconf, SysconfVariable};
 use uname;
@@ -16,21 +19,9 @@ mod uptime;
 mod process_open_sockets;
 mod processes;
 
-use tables::{
-    InterfaceAddress,
-    InterfaceDetails,
-    LogicalDrive,
-    OsVersion,
-    SystemInfoData,
-    EtcHosts,
-    EtcProtocols,
-    EtcServices,
-    Uptime,
-    ProcessOpenSocketsRow,
-    ProcessesRow,
-    ProcessMemoryMapRow,
-    ProcessEnvsRow,
-};
+#[allow(unused_imports)]
+// Required for test
+use tables::*;
 use utils;
 
 pub trait SystemReaderInterface {
