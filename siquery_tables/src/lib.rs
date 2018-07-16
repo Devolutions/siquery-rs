@@ -40,5 +40,3 @@ cfg_if! {
         pub use windows as sys;
     }
 }
-
-pub use sys::SystemInfo;
