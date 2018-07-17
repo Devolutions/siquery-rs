@@ -1,13 +1,24 @@
-
 use rusqlite::vtab::{
-    eponymous_only_module, sqlite3_vtab, sqlite3_vtab_cursor,
-    Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values,
+    sqlite3_vtab, sqlite3_vtab_cursor,
+    Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values,simple_module,
+    dequote, escape_double_quote, parse_boolean, Module,
 };
+
 use rusqlite::types::Null;
 use rusqlite::{version_number, Connection, Result, Error};
 use std::os::raw::c_int;
+use std::str;
 
 use siquery::query::query_table;
+
+pub fn load_module(conn: &Connection) -> Result<()> {
+    let aux: Option<()> = None;
+    conn.create_module("dummy", &DUMMY_MODULE, aux)
+}
+
+lazy_static! {
+    static ref DUMMY_MODULE: Module<DummyTab> = simple_module::<DummyTab>();
+}
 
 #[repr(C)]
 struct DummyTab {
@@ -16,6 +27,30 @@ struct DummyTab {
     table_name: String,
     columns: Vec<String>,
     rows: Vec<Vec<String>>,
+}
+
+impl DummyTab {
+    fn parameter(c_slice: &[u8]) -> Result<(&str, &str)> {
+        let arg = try!(str::from_utf8(c_slice)).trim();
+        let mut split = arg.split('=');
+        if let Some(key) = split.next() {
+            if let Some(value) = split.next() {
+                let param = key.trim();
+                let value = dequote(value);
+                return Ok((param, value));
+            }
+        }
+        Err(Error::ModuleError(format!("illegal argument: '{}'", arg)))
+    }
+
+    fn get_from_args(args: &str)-> Vec<String>{
+        let mut v : Vec<String> = Vec::new();
+        let split : Vec<_>= args.split(';').collect();
+        for value in split {
+            v.push(value.to_string());
+        }
+        v
+    }
 }
 
 impl VTab for DummyTab {
@@ -28,28 +63,49 @@ impl VTab for DummyTab {
         _args: &[&[u8]],
     ) -> Result<(String, DummyTab)> {
 
-        let vtab = DummyTab {
+        if _args.len() < 4 {
+            return Err(Error::ModuleError("no table name specified".to_owned()));
+        }
+
+        let mut vtab = DummyTab {
             base: sqlite3_vtab::default(),
             table_name: String::new(),
             columns: Vec::new(),
             rows: Vec::new(),
         };
 
-        // we create the header
-        let mut cols: Vec<String> = vec!["name".to_string(),
-                                         "number".to_string(),
-                                         "alias".to_string(),
-                                         "comment".to_string(),];
+        let args= &_args[3..];
+
+        for c_slice in args {
+            let (param, value) = try!(DummyTab::parameter(c_slice));
+            match param {
+                "table_name" => {
+                    vtab.table_name = value.to_string();
+                }
+                "columns" => {
+                    vtab.columns = DummyTab::get_from_args(value);
+                }
+                _ => {
+                    return Err(Error::ModuleError(format!(
+                        "unrecognized parameter '{}'",
+                        param
+                    )));
+                }
+            }
+        }
+
+        // create the table in memory
+        vtab.rows = query_table(vtab.table_name.as_str(), vtab.columns.clone());
 
         let mut schema= None;
 
         if schema.is_none() {
             let mut sql = String::from("CREATE TABLE x(");
-            for (i, col) in cols.iter().enumerate() {
+            for (i, col) in vtab.rows[0].iter().enumerate() {
                 sql.push('"');
                 sql.push_str(col);
                 sql.push_str("\" TEXT");
-                if i == cols.len() - 1 {
+                if i == vtab.rows[0].len() - 1 {
                     sql.push_str(");");
                 } else {
                     sql.push_str(", ");
@@ -100,15 +156,11 @@ impl VTabCursor for DummyTabCursor {
         _idx_str: Option<&str>,
         _args: &Values,
     ) -> Result<()> {
-        self.eot = false;
 
         // test etc_protocols table
-        self.rows = query_table("etc_protocols",
-                                    vec!["name".to_string(),
-                                         "number".to_string(),
-                                         "alias".to_string(),
-                                         "comment".to_string(),
-                                         ]);
+        let mut DummyTable = unsafe {&*(self.base.pVtab as * const DummyTab)};
+
+        self.rows = DummyTable.rows.clone();
 
         self.row_id = 0;
         self.next()
@@ -155,21 +207,14 @@ impl VTabCursor for DummyTabCursor {
     }
 }
 
-fn next_col(cursor: &mut DummyTabCursor) -> i64 {
-    if cursor.column_id >= cursor.cols.len() as i64{
-        cursor.column_id = 0;
-    }
-        else {
-            cursor.column_id += 1;
-        }
-    cursor.column_id
-}
-
 pub fn sql_query() {
-    let module = eponymous_only_module::<DummyTab>();
     let db = Connection::open_in_memory().unwrap();
 
-    db.create_module::<DummyTab>("dummy", &module, None).unwrap();
+    load_module(&db).unwrap();
+
+    let command =  "CREATE VIRTUAL TABLE process_memory_map USING dummy(table_name=process_memory_map)";
+
+    db.execute_batch(&command).unwrap();
 
     let version = version_number();
 
@@ -177,13 +222,24 @@ pub fn sql_query() {
         return;
     }
 
-    let mut s = db.prepare("SELECT name,comment FROM dummy()").unwrap();
+    let mut s = db.prepare("SELECT count(pid) FROM process_memory_map").unwrap();
 
-    let ids: Result<Vec<String>> = s
+    let ids: Result<Vec<i32>> = s
+        .query_map(&[], |row| row.get::<_, i32>(0))
+        .unwrap()
+        .collect();
+
+    println!("pid counter :     {:?} ", ids.unwrap());
+
+    let command2 =  "CREATE VIRTUAL TABLE etc_protocols USING dummy(table_name=etc_protocols)";
+    db.execute_batch(&command2).unwrap();
+
+    let mut s2 = db.prepare("SELECT name FROM etc_protocols").unwrap();
+
+    let ids: Result<Vec<String>> = s2
         .query_map(&[], |row| row.get::<_, String>(0))
         .unwrap()
         .collect();
 
-    println!("Dummy table :     {:?} ", ids.unwrap());
-
+    println!("protocols name :     {:?} ", ids.unwrap());
 }
