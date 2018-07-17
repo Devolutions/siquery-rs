@@ -31,7 +31,6 @@ pub trait SystemReaderInterface {
     fn os_release(&self) -> Option<String>;
     fn os_platform(&self) -> Option<String>;
     fn meminfo(&self) -> Option<String>;
-    fn get_hosts_file(&self) -> Option<String>;
     fn get_protocols_file(&self) -> Option<String>;
     fn get_services_file(&self) -> Option<String>;
 }
@@ -89,12 +88,6 @@ impl SystemReaderInterface for SystemReader {
         Some(s)
     }
 
-    fn get_hosts_file(&self) -> Option<String> {
-        let mut s = String::new();
-        File::open("/etc/hosts").ok()?.read_to_string(&mut s).ok()?;
-        Some(s)
-    }
-
     fn get_protocols_file(&self) -> Option<String> {
         let mut s = String::new();
         File::open("/etc/protocols").ok()?.read_to_string(&mut s).ok()?;
@@ -107,6 +100,15 @@ impl SystemReaderInterface for SystemReader {
         Some(s)
     }
 
+}
+
+pub struct EtcHostsReader {}
+impl EtcHostsIface for EtcHostsReader {
+    fn get_hosts_file(&self) -> Option<String> {
+        let mut s = String::new();
+        File::open("/etc/hosts").ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
+    }
 }
 
 #[cfg(test)]
@@ -138,10 +140,6 @@ mod tests {
 
         fn meminfo(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/meminfo.txt")))
-        }
-
-        fn get_hosts_file(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/hosts.txt")))
         }
 
         fn get_protocols_file(&self) -> Option<String> {

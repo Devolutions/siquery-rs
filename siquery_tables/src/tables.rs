@@ -59,6 +59,10 @@ pub struct EtcHosts {
     pub hostnames: String,
 }
 
+pub trait EtcHostsIface {
+    fn get_hosts_file(&self) -> Option<String>;
+}
+
 impl EtcHosts {
     const ADDRESS_ID: u64 = 0x00000001;
     const HOSTNAMES_ID: u64 = 0x00000002;

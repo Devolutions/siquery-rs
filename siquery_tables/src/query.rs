@@ -70,7 +70,8 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
     let system_reader: Box<SystemReaderInterface> = Box::new(SystemReader::new());
     let res = match name {
         "etc_hosts" => {
-            let table = EtcHosts::get_specific(system_reader.borrow());
+            // The reader interface is obtained inside get_specific() and feeded into get_specific_ex().
+            let table = EtcHosts::get_specific();
             select(&table, columns)
         },
         "etc_protocols" => {
