@@ -7,10 +7,15 @@ use rusqlite::types::Null;
 use rusqlite::{version_number, Connection, Result, Error};
 use std::os::raw::c_int;
 
+use siquery::query::query_table;
+
 #[repr(C)]
 struct DummyTab {
     /// Base class. Must be first
     base: sqlite3_vtab,
+    table_name: String,
+    columns: Vec<String>,
+    rows: Vec<Vec<String>>,
 }
 
 impl VTab for DummyTab {
@@ -22,10 +27,39 @@ impl VTab for DummyTab {
         _aux: Option<&()>,
         _args: &[&[u8]],
     ) -> Result<(String, DummyTab)> {
+
         let vtab = DummyTab {
             base: sqlite3_vtab::default(),
+            table_name: String::new(),
+            columns: Vec::new(),
+            rows: Vec::new(),
         };
-        Ok(("CREATE TABLE x(value)".to_owned(), vtab))
+
+        // we create the header
+        let mut cols: Vec<String> = vec!["name".to_string(),
+                                         "number".to_string(),
+                                         "alias".to_string(),
+                                         "comment".to_string(),];
+
+        let mut schema= None;
+
+        if schema.is_none() {
+            let mut sql = String::from("CREATE TABLE x(");
+            for (i, col) in cols.iter().enumerate() {
+                sql.push('"');
+                sql.push_str(col);
+                sql.push_str("\" TEXT");
+                if i == cols.len() - 1 {
+                    sql.push_str(");");
+                } else {
+                    sql.push_str(", ");
+                }
+            }
+            schema = Some(sql);
+        }
+
+        Ok((schema.unwrap().to_owned(), vtab))
+
     }
 
     fn best_index(&self, info: &mut IndexInfo) -> Result<()> {
@@ -45,8 +79,12 @@ struct DummyTabCursor {
     base: sqlite3_vtab_cursor,
     /// The rowid
     row_id: i64,
-    /// columns
+    /// the column id
+    column_id: i64,
+    /// columns name
     cols : Vec<String>,
+    /// rows
+    rows : Vec<Vec<String>>,
     /// the length of the table
     table_length: u32,
     /// the end of the table
@@ -62,27 +100,31 @@ impl VTabCursor for DummyTabCursor {
         _idx_str: Option<&str>,
         _args: &Values,
     ) -> Result<()> {
-        self.row_id = 0;
         self.eot = false;
-        self.cols = vec!["test1".to_string(),
-                         "test2".to_string(),
-                         "test3".to_string(),
-                         "test4".to_string(),
-                         "test5".to_string(),
-                         "test6".to_string(),
-                         "test7".to_string(),
-                         "test8".to_string()];
+
+        // test etc_protocols table
+        self.rows = query_table("etc_protocols",
+                                    vec!["name".to_string(),
+                                         "number".to_string(),
+                                         "alias".to_string(),
+                                         "comment".to_string(),
+                                         ]);
+
+        self.row_id = 0;
         self.next()
     }
     
     fn next(&mut self) -> Result<()> {
         {
-            if self.row_id == self.cols.len() as i64 {
+            if self.row_id == self.rows.len() as i64 {
                 self.eot = true;
                 return Ok(());
             }
+            else {
+                self.eot = false;
+                self.cols = self.rows[self.row_id as usize].clone()
+            }
         }
-
         self.row_id += 1;
         Ok(())
     }
@@ -90,20 +132,37 @@ impl VTabCursor for DummyTabCursor {
     fn eof(&self) -> bool {
         self.eot
     }
-
     fn column(&self, ctx: &mut Context, col: c_int) -> Result<()> {
+
+        if col < 0 || col as usize >= self.cols.len() {
+            /*return Err(Error::ModuleError(format!(
+                "column index out of bounds: {}",
+                col
+            )));*/
+            return ctx.set_result(&Null);
+        }
 
         // TODO Make sur we have the good format of the table
         if self.cols.is_empty() {
             return ctx.set_result(&Null);
         }
-        // TODO Affinity
-        ctx.set_result(&self.cols[(self.row_id - 1)  as usize].to_owned())
+        ctx.set_result(&self.cols[col as usize].to_owned())
+
     }
     
     fn rowid(&self) -> Result<i64> {
         Ok(self.row_id)
     }
+}
+
+fn next_col(cursor: &mut DummyTabCursor) -> i64 {
+    if cursor.column_id >= cursor.cols.len() as i64{
+        cursor.column_id = 0;
+    }
+        else {
+            cursor.column_id += 1;
+        }
+    cursor.column_id
 }
 
 pub fn sql_query() {
@@ -118,13 +177,13 @@ pub fn sql_query() {
         return;
     }
 
-    let mut s = db.prepare("SELECT * FROM dummy()").unwrap();
+    let mut s = db.prepare("SELECT name,comment FROM dummy()").unwrap();
 
     let ids: Result<Vec<String>> = s
         .query_map(&[], |row| row.get::<_, String>(0))
         .unwrap()
         .collect();
 
-    println!("Dummy table :     {:?} ", ids);
+    println!("Dummy table :     {:?} ", ids.unwrap());
 
 }
