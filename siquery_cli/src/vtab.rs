@@ -1,7 +1,7 @@
 use rusqlite::vtab::{
     sqlite3_vtab, sqlite3_vtab_cursor,
     Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values,simple_module,
-    dequote, escape_double_quote, parse_boolean, Module,
+    dequote, Module,
 };
 
 use rusqlite::types::Null;
@@ -9,7 +9,7 @@ use rusqlite::{version_number, Connection, Result, Error};
 use std::os::raw::c_int;
 use std::str;
 
-use siquery::query::query_table;
+use siquery::query::{query_table, query_header};
 
 pub fn load_module(conn: &Connection) -> Result<()> {
     let aux: Option<()> = None;
@@ -26,7 +26,7 @@ struct DummyTab {
     base: sqlite3_vtab,
     table_name: String,
     columns: Vec<String>,
-    rows: Vec<Vec<String>>,
+    header: Vec<String>,
 }
 
 impl DummyTab {
@@ -71,7 +71,7 @@ impl VTab for DummyTab {
             base: sqlite3_vtab::default(),
             table_name: String::new(),
             columns: Vec::new(),
-            rows: Vec::new(),
+            header: Vec::new(),
         };
 
         let args= &_args[3..];
@@ -83,7 +83,11 @@ impl VTab for DummyTab {
                     vtab.table_name = value.to_string();
                 }
                 "columns" => {
-                    vtab.columns = DummyTab::get_from_args(value);
+                    if value.len() > 1 {
+                        vtab.columns = DummyTab::get_from_args(value);
+                    } else{
+                        vtab.columns = Vec::new();
+                    }
                 }
                 _ => {
                     return Err(Error::ModuleError(format!(
@@ -94,18 +98,17 @@ impl VTab for DummyTab {
             }
         }
 
-        // create the table in memory
-        vtab.rows = query_table(vtab.table_name.as_str(), vtab.columns.clone());
+        // create the header
+        vtab.header = query_header(vtab.table_name.as_str(), vtab.columns.clone());
 
         let mut schema= None;
-
         if schema.is_none() {
             let mut sql = String::from("CREATE TABLE x(");
-            for (i, col) in vtab.rows[0].iter().enumerate() {
+            for (i, col) in vtab.header.iter().enumerate() {
                 sql.push('"');
                 sql.push_str(col);
                 sql.push_str("\" TEXT");
-                if i == vtab.rows[0].len() - 1 {
+                if i == vtab.header.len() - 1 {
                     sql.push_str(");");
                 } else {
                     sql.push_str(", ");
@@ -135,14 +138,10 @@ struct DummyTabCursor {
     base: sqlite3_vtab_cursor,
     /// The rowid
     row_id: i64,
-    /// the column id
-    column_id: i64,
     /// columns name
     cols : Vec<String>,
     /// rows
     rows : Vec<Vec<String>>,
-    /// the length of the table
-    table_length: u32,
     /// the end of the table
     eot : bool
 }
@@ -156,12 +155,10 @@ impl VTabCursor for DummyTabCursor {
         _idx_str: Option<&str>,
         _args: &Values,
     ) -> Result<()> {
+        let dummy_table = unsafe {&*(self.base.pVtab as * const DummyTab)};
 
-        // test etc_protocols table
-        let mut DummyTable = unsafe {&*(self.base.pVtab as * const DummyTab)};
-
-        self.rows = DummyTable.rows.clone();
-
+        //register the table in memory
+        self.rows = query_table(dummy_table.table_name.as_str(), dummy_table.header.clone());
         self.row_id = 0;
         self.next()
     }
@@ -194,7 +191,6 @@ impl VTabCursor for DummyTabCursor {
             return ctx.set_result(&Null);
         }
 
-        // TODO Make sur we have the good format of the table
         if self.cols.is_empty() {
             return ctx.set_result(&Null);
         }
@@ -208,38 +204,31 @@ impl VTabCursor for DummyTabCursor {
 }
 
 pub fn sql_query() {
-    let db = Connection::open_in_memory().unwrap();
-
-    load_module(&db).unwrap();
-
-    let command =  "CREATE VIRTUAL TABLE process_memory_map USING dummy(table_name=process_memory_map)";
-
-    db.execute_batch(&command).unwrap();
-
     let version = version_number();
-
     if version < 3008012 {
         return;
     }
 
+    let db = Connection::open_in_memory().unwrap();
+    load_module(&db).unwrap();
+
+    let command =  "CREATE VIRTUAL TABLE process_memory_map USING dummy(table_name=process_memory_map)";
+    db.execute_batch(&command).unwrap();
     let mut s = db.prepare("SELECT count(pid) FROM process_memory_map").unwrap();
 
     let ids: Result<Vec<i32>> = s
         .query_map(&[], |row| row.get::<_, i32>(0))
         .unwrap()
         .collect();
+    println!("number of pids :     {:?} ", ids.unwrap());
 
-    println!("pid counter :     {:?} ", ids.unwrap());
-
-    let command2 =  "CREATE VIRTUAL TABLE etc_protocols USING dummy(table_name=etc_protocols)";
+    let command2 =  "CREATE VIRTUAL TABLE etc_protocols USING dummy(table_name=etc_protocols, columns=name)";
     db.execute_batch(&command2).unwrap();
-
     let mut s2 = db.prepare("SELECT name FROM etc_protocols").unwrap();
 
     let ids: Result<Vec<String>> = s2
         .query_map(&[], |row| row.get::<_, String>(0))
         .unwrap()
         .collect();
-
     println!("protocols name :     {:?} ", ids.unwrap());
 }
