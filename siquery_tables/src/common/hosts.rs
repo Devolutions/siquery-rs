@@ -18,8 +18,6 @@ lazy_static! {
     static ref HOSTS_FILE_REGEX: Regex = Regex::new(r"(?m)^([^#]*)").unwrap();
 }
 
-
-
 impl EtcHosts {
 
     pub fn new() -> EtcHosts {
@@ -36,30 +34,30 @@ impl EtcHosts {
             .get_hosts_file()
             .unwrap_or_else(|| "".to_string())
             .lines()
-        {
-            let captures = HOSTS_FILE_REGEX.captures(&line);
-            if let Some(cap) = captures {
-                if let Some(ip_group) = cap.get(0) {
-                    // Omitting empty outputs from regex.
-                    if ip_group.as_str().is_empty() {
-                        continue;
-                    }
-                    let v: Vec<_> = ip_group.as_str().trim().split_whitespace().collect();
-                    
-                    if v.len() < 2 {
-                        continue;
-                    }
+            {
+                let captures = HOSTS_FILE_REGEX.captures(&line);
+                if let Some(cap) = captures {
+                    if let Some(ip_group) = cap.get(0) {
+                        // Omitting empty outputs from regex.
+                        if ip_group.as_str().is_empty() {
+                            continue;
+                        }
+                        let v: Vec<_> = ip_group.as_str().trim().split_whitespace().collect();
 
-                    // Check the ip for format validity.
-                    if v[0].parse::<IpAddr>().is_ok() {
-                        hosts.push(EtcHosts {
-                            address: v[0].to_string(),
-                            hostnames: v[1..].join(","),
-                        });
-                    };
+                        if v.len() < 2 {
+                            continue;
+                        }
+
+                        // Check the ip for format validity.
+                        if v[0].parse::<IpAddr>().is_ok() {
+                            hosts.push(EtcHosts {
+                                address: v[0].to_string(),
+                                hostnames: v[1..].join(","),
+                            });
+                        };
+                    }
                 }
             }
-        }
         hosts
     }
 
