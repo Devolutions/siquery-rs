@@ -1,6 +1,18 @@
-use tables::WmiVideo;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiVideo,WmiVideoIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiVideoIface for Reader {
+    fn get_wmi_video_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["path", "win32_VideoController", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
+
 
 impl WmiVideo {
     pub(crate) fn new() -> WmiVideo {
@@ -20,11 +32,11 @@ impl WmiVideo {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiVideo> {
+    pub(crate) fn get_specific_ex(reader: &WmiVideoIface) -> Vec<WmiVideo> {
 
         let mut videos: Vec<WmiVideo> = Vec::new();
 
-        if let Some(video_info) = system_reader.get_wmi_video_info() {
+        if let Some(video_info) = reader.get_wmi_video_info() {
             let mut video = WmiVideo::new();
             let lines = video_info.split('\n');
 
@@ -243,5 +255,40 @@ impl WmiVideo {
         }
 
         videos
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiVideo> {
+        let reader: Box<WmiVideoIface> = Box::new(Reader{});
+        let out = WmiVideo::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiVideoIface for Test {
+        fn get_wmi_video_info(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-video.txt")))
+        }
+    }
+    #[test]
+    fn test_wmi_video () {
+        let reader: Box<WmiVideoIface> = Box::new(Test{});
+        let video_info = &WmiVideo::get_specific_ex(reader.borrow())[0];
+        assert_eq!(WmiVideo::get_specific_ex(reader.borrow()).len(), 3);
+        assert_eq!(video_info.name, "Graphic Design Institute 940MX");
+        assert_eq!(video_info.adapter_compatibility, "Graphic Design Institute");
+        assert_eq!(video_info.adapter_dac_type, "Integrated RAMDAC");
+        assert_eq!(video_info.adapter_ram, 2.0);
+        assert_eq!(video_info.availability, "Power Cycle");
+        assert_eq!(video_info.driver_version, "23.21.13.9065");
+        assert_eq!(video_info.installed_display_driver.len(), 2);
+        assert_eq!(video_info.refresh_rate, "60");
+        assert_eq!(video_info.screen_info, "1920 x 1080 x 4294967296 colors");
+        assert_eq!(video_info.status, "OK");
+        assert_eq!(video_info.video_architecture, "MDA");
+        assert_eq!(video_info.video_memory_type, "WRAM");
     }
 }

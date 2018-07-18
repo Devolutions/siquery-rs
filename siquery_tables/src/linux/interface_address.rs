@@ -13,7 +13,7 @@ impl InterfaceAddress {
     }
 
     pub(crate) fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<InterfaceAddress> {
-        // TODO: implement logical_drive table
+        // TODO: implement interface_address table
         let mut output: Vec<InterfaceAddress> = Vec::new();
         output.push(
             InterfaceAddress::new()

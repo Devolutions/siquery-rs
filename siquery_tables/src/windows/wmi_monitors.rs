@@ -1,6 +1,17 @@
-use tables::WmiMonitors;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiMonitors,WmiMonitorsIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiMonitorsIface for Reader {
+    fn get_wmi_monitor_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["desktopmonitor", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl WmiMonitors {
     pub(crate) fn new() -> WmiMonitors {
@@ -14,11 +25,11 @@ impl WmiMonitors {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiMonitors> {
+    pub(crate) fn get_specific_ex(reader: &WmiMonitorsIface) -> Vec<WmiMonitors> {
 
         let mut monitors: Vec<WmiMonitors> = Vec::new();
 
-        if let Some(monitor_info) = system_reader.get_wmi_monitor_info() {
+        if let Some(monitor_info) = reader.get_wmi_monitor_info() {
             let mut monitor = WmiMonitors::new();
             let lines = monitor_info.split('\n');
             for line in lines {
@@ -129,5 +140,34 @@ impl WmiMonitors {
         }
 
         monitors
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiMonitors> {
+        let reader: Box<WmiMonitorsIface> = Box::new(Reader{});
+        let out = WmiMonitors::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiMonitorsIface for Test {
+        fn get_wmi_monitor_info(&self)-> Option<String>{
+            Some(String::from(include_str!("../../test_data/wmi-monitors.txt")))
+        }
+    }
+    #[test]
+    fn test_wmi_monitors () {
+        let reader: Box<WmiMonitorsIface> = Box::new(Test{});
+        assert_eq!(WmiMonitors::get_specific_ex(reader.borrow()).len(), 3);
+        let monitor_info = &WmiMonitors::get_specific_ex(reader.borrow())[0];
+        assert_eq!(monitor_info.name, "Default Monitor");
+        assert_eq!(monitor_info.availability, "In Test");
+        assert_eq!(monitor_info.bandwidth, 0);
+        assert_eq!(monitor_info.screen_height, 1080);
+        assert_eq!(monitor_info.screen_width, 1920);
+        assert_eq!(monitor_info.manufacturer, "");
     }
 }

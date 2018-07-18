@@ -1,14 +1,15 @@
 use regex::Regex;
-use tables::EtcProtocols;
+use tables::{EtcProtocols,EtcProtocolsIface};
 use std::str::FromStr;
+use std::borrow::Borrow;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
-        use linux::SystemReaderInterface;
+        use linux::EtcProtocolsReader;
     } else if #[cfg(target_os = "macos")] {
-       use macos::SystemReaderInterface;
+       use macos::EtcProtocolsReader;
     } else if #[cfg(target_os = "windows")] {
-        use windows::SystemReaderInterface;
+        use windows::EtcProtocolsReader;
     }
 }
 
@@ -30,10 +31,10 @@ impl EtcProtocols {
         }
     }
 
-    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<EtcProtocols> {
+    pub fn get_specific_ex(reader: &EtcProtocolsIface) -> Vec<EtcProtocols> {
         let mut protocols: Vec<EtcProtocols> = Vec::new();
 
-        for line in system_reader
+        for line in reader
             .get_protocols_file()
             .unwrap_or_else(|| "".to_string())
             .lines()
@@ -79,5 +80,36 @@ impl EtcProtocols {
             protocols.push(etc_protocols);
         }
         protocols
+    }
+
+    pub fn get_specific() -> Vec<EtcProtocols> {
+        let reader: Box<EtcProtocolsIface> = Box::new(EtcProtocolsReader{});
+        let out = EtcProtocols::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct EtcProtocolsTest {}
+    impl EtcProtocolsIface for EtcProtocolsTest {
+        fn get_protocols_file(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/protocols.txt")))
+        }
+    }
+    #[test]
+    fn test_etc_protocols () {
+        let reader: Box<EtcProtocolsIface> = Box::new(EtcProtocolsTest {});
+        let etc_protocols = EtcProtocols::get_specific_ex(reader.borrow());
+        assert_eq!(etc_protocols.get(0).unwrap().name, "ip");
+        assert_eq!(etc_protocols.get(0).unwrap().number, 0);
+        assert_eq!(etc_protocols.get(0).unwrap().alias, "IP");
+        assert_eq!(etc_protocols.get(0).unwrap().comment, "internet protocol, pseudo protocol number");
+        assert_eq!(etc_protocols.get(1).unwrap().name, "icmp");
+        assert_eq!(etc_protocols.get(1).unwrap().number, 1);
+        assert_eq!(etc_protocols.get(1).unwrap().alias, "ICMP");
+        assert_eq!(etc_protocols.get(1).unwrap().comment, "internet control message protocol");
+        assert_eq!(etc_protocols.len(), 3);
     }
 }

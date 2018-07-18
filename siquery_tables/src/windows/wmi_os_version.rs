@@ -1,9 +1,20 @@
-use tables::WmiOsVersion;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiOsVersion,WmiOsVersionIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiOsVersionIface for Reader {
+    fn get_wmi_os_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["os", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl WmiOsVersion {
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiOsVersion> {
+    pub(crate) fn get_specific_ex(reader: &WmiOsVersionIface) -> Vec<WmiOsVersion> {
         let mut output : Vec<WmiOsVersion> = Vec::new();
         let mut os_version = WmiOsVersion {
             csname: String::new(),
@@ -25,7 +36,7 @@ impl WmiOsVersion {
             win_directory: String::new(),
         };
 
-        if let Some(os_info) = system_reader.get_wmi_os_info() {
+        if let Some(os_info) = reader.get_wmi_os_info() {
             let lines = os_info.split('\n');
 
             for line in lines {
@@ -97,5 +108,44 @@ impl WmiOsVersion {
 
         output.push(os_version);
         output
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiOsVersion> {
+        let reader: Box<WmiOsVersionIface> = Box::new(Reader{});
+        let out = WmiOsVersion::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiOsVersionIface for Test {
+        fn get_wmi_os_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-os-version.txt")))
+        }
+    }
+    #[test]
+    fn test_wmi_os_version () {
+        let reader: Box<WmiOsVersionIface> = Box::new(Test{});
+        let wmi_os_version = &WmiOsVersion::get_specific_ex(reader.borrow())[0];
+        assert_eq!(wmi_os_version.platform, "Windows");
+        assert_eq!(wmi_os_version.csname, "Olympia");
+        assert_eq!(wmi_os_version.version, "10.10.16299");
+        assert_eq!(wmi_os_version.major, "10");
+        assert_eq!(wmi_os_version.minor, "10");
+        assert_eq!(wmi_os_version.build_number, "9999");
+        assert_eq!(wmi_os_version.caption, "describe something here");
+        assert_eq!(wmi_os_version.free_physical_mem, "10138896");
+        assert_eq!(wmi_os_version.free_virtual_mem, "10900164");
+        assert_eq!(wmi_os_version.manufacturer, "Wide World Importers");
+        assert_eq!(wmi_os_version.name, "Wide World Importers 10 Home");
+        assert_eq!(wmi_os_version.service_pack_major, "0");
+        assert_eq!(wmi_os_version.service_pack_minor, "0");
+        assert_eq!(wmi_os_version.size_stored_in_paging_file, "2490368");
+        assert_eq!(wmi_os_version.total_virtual_mem_size, "19134092");
+        assert_eq!(wmi_os_version.total_visible_mem_size, "16643724");
+        assert_eq!(wmi_os_version.win_directory, "C:\\WINDOWS");
     }
 }

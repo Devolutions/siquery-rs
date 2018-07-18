@@ -18,7 +18,6 @@ use winapi::um::winbase::FORMAT_MESSAGE_FROM_SYSTEM;
 use winapi::um::errhandlingapi::GetLastError;
 
 use tables::ProcessesRow;
-use windows::SystemReaderInterface;
 
 impl ProcessMemoryMapRow {
     pub fn new() -> ProcessMemoryMapRow {
@@ -120,7 +119,7 @@ impl ProcessMemoryMapRow {
         }
         Some(out)
     }
-    pub fn get_specific (_system_reader: &SystemReaderInterface) -> Vec<ProcessMemoryMapRow>{
+    pub fn get_specific () -> Vec<ProcessMemoryMapRow>{
         let pid_list = ProcessesRow::get_proc_list();
         let mut table: Vec<ProcessMemoryMapRow> = Vec::new();
         for pid in pid_list.iter() {

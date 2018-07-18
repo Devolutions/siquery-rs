@@ -2,9 +2,6 @@
 
 extern crate winapi;
 
-use tables::ProcessesRow;
-use windows::SystemReaderInterface;
-
 use utils;
 use std::os::raw::c_void;
 use winapi::um::tlhelp32::*;
@@ -22,6 +19,19 @@ use winapi::shared::minwindef::FALSE;
 use winapi::shared::ntdef::HANDLE;
 use winapi::um::libloaderapi::*;
 use winapi::um::securitybaseapi::*;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{ProcessesRow,ProcessesIface};
+
+pub struct Reader {}
+impl ProcessesIface for Reader {
+    fn get_wmi_process_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["path", "Win32_Process", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl ProcessesRow {
     pub fn new () -> ProcessesRow{
@@ -94,11 +104,11 @@ impl ProcessesRow {
     //TODO getUidFromSid()
     //TODO getGidFromSid()
 
-    pub(crate) fn get_specific (system_reader: &SystemReaderInterface) -> Vec<ProcessesRow> {
+    pub(crate) fn get_specific_ex (reader: &ProcessesIface) -> Vec<ProcessesRow> {
         let mut out: Vec<ProcessesRow> = Vec::new();
         let current_pid = unsafe{GetCurrentProcessId()} as i64;
 
-        if let Some(process_info) = system_reader.get_wmi_process_info() {
+        if let Some(process_info) = reader.get_wmi_process_info() {
             let mut processes_row = ProcessesRow::new();
             for line in process_info.lines() {
                 let v: Vec<_> = line.split('=').collect();
@@ -265,4 +275,15 @@ impl ProcessesRow {
         }
         out
     }
+
+    pub(crate) fn get_specific () -> Vec<ProcessesRow> {
+        let reader: Box<ProcessesIface> = Box::new(Reader{});
+        let out = ProcessesRow::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    //TODO
 }

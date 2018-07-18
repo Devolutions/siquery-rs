@@ -27,10 +27,10 @@ impl EtcHosts {
         }
     }
 
-    pub fn get_specific_ex(hosts_reader: &EtcHostsIface) -> Vec<EtcHosts> {
+    pub fn get_specific_ex(reader: &EtcHostsIface) -> Vec<EtcHosts> {
         let mut hosts: Vec<EtcHosts> = Vec::new();
 
-        for line in hosts_reader
+        for line in reader
             .get_hosts_file()
             .unwrap_or_else(|| "".to_string())
             .lines()
@@ -62,36 +62,25 @@ impl EtcHosts {
     }
 
     pub fn get_specific() -> Vec<EtcHosts> {
-        let hosts_reader: Box<EtcHostsIface> = Box::new(EtcHostsReader{});
-        let out = EtcHosts::get_specific_ex(hosts_reader.borrow());
+        let reader: Box<EtcHostsIface> = Box::new(EtcHostsReader{});
+        let out = EtcHosts::get_specific_ex(reader.borrow());
         out
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-
     use super::*;
-
     pub struct EtcHostsTest {}
-
-    impl EtcHostsTest {
-        fn new () -> EtcHostsTest {
-            EtcHostsTest {}
-        }
-    }
-
     impl EtcHostsIface for EtcHostsTest {
         fn get_hosts_file(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/hosts.txt")))
         }
     }
-
     #[test]
     fn test_etc_hosts() {
-        let hosts_reader: Box<EtcHostsIface> = Box::new(EtcHostsTest::new());
-        let etc_hosts = EtcHosts::get_specific_ex(hosts_reader.borrow());
+        let reader: Box<EtcHostsIface> = Box::new(EtcHostsTest {});
+        let etc_hosts = EtcHosts::get_specific_ex(reader.borrow());
         assert_eq!(etc_hosts.get(0).unwrap().address, "127.0.0.1");
         assert_eq!(etc_hosts.get(0).unwrap().hostnames, "localhost");
         assert_eq!(etc_hosts.get(1).unwrap().address, "255.255.255.255");

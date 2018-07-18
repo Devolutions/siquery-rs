@@ -25,9 +25,6 @@ pub trait SystemReaderInterface {
     fn cpuinfo(&self) -> Option<String>;
     fn cpu_count(&self) -> u32;
     fn meminfo(&self) -> Option<String>;
-    fn system_version(&self) -> Option<String>;
-    fn get_protocols_file(&self) -> Option<String>;
-    fn get_services_file(&self) -> Option<String>;
 }
 
 pub struct SystemReader {}
@@ -56,35 +53,37 @@ impl SystemReaderInterface for SystemReader {
         0
     }
 
-    fn system_version(&self) -> Option<String> {
-        let mut s = String::new();
-        File::open("/System/Library/CoreServices/SystemVersion.plist").ok()?.read_to_string(&mut s).ok()?;
-        Some(s)
-    }
+
 
     fn meminfo(&self) -> Option<String> {
         Some(String::new())
     }
 
-    fn get_protocols_file(&self) -> Option<String> {
-        let mut s = String::new();
-        File::open("/etc/protocols").ok()?.read_to_string(&mut s).ok()?;
-        Some(s)
-    }
-
-    fn get_services_file(&self) -> Option<String> {
-        let mut s = String::new();
-        File::open("/etc/services").ok()?.read_to_string(&mut s).ok()?;
-        Some(s)
-    }
 }
-
 
 pub struct EtcHostsReader {}
 impl EtcHostsIface for EtcHostsReader {
     fn get_hosts_file(&self) -> Option<String> {
         let mut s = String::new();
         File::open("/etc/hosts").ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
+    }
+}
+
+pub struct EtcProtocolsReader {}
+impl EtcProtocolsIface for EtcProtocolsReader {
+    fn get_protocols_file(&self) -> Option<String> {
+        let mut s = String::new();
+        File::open("/etc/protocols").ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
+    }
+}
+
+pub struct EtcServicesReader {}
+impl EtcServicesIface for EtcServicesReader {
+    fn get_services_file(&self) -> Option<String> {
+        let mut s = String::new();
+        File::open("/etc/services").ok()?.read_to_string(&mut s).ok()?;
         Some(s)
     }
 }
@@ -108,46 +107,13 @@ mod tests {
             4
         }
 
-        fn system_version(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/SystemVersion.plist")))
-        }
+
 
         fn meminfo(&self) -> Option<String> {
             Some(String::new())
         }
-
-        fn get_protocols_file(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/protocols.txt")))
-        }
-
-        fn get_services_file(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/services.txt")))
-        }
     }
 
-    #[test]
-    fn test_etc_services() {
-        let system_reader: Box<SystemReaderInterface> = Box::new(MockSystemReader {});
-
-        //checking possible cases for services file
-        let etc_services = EtcServices::get_specific(system_reader.borrow());
-        assert_eq!(etc_services.get(0).unwrap().name, "echo");
-        assert_eq!(etc_services.get(0).unwrap().port, 7);
-        assert_eq!(etc_services.get(0).unwrap().protocol, "tcp");
-        assert_eq!(etc_services.get(0).unwrap().aliases, "");
-        assert_eq!(etc_services.get(0).unwrap().comment, "");
-        assert_eq!(etc_services.get(2).unwrap().name, "discard");
-        assert_eq!(etc_services.get(2).unwrap().port, 9);
-        assert_eq!(etc_services.get(2).unwrap().protocol, "tcp");
-        assert_eq!(etc_services.get(2).unwrap().aliases, "sink null");
-        assert_eq!(etc_services.get(2).unwrap().comment, "");
-        assert_eq!(etc_services.get(12).unwrap().name, "ftp-data");
-        assert_eq!(etc_services.get(12).unwrap().port, 20);
-        assert_eq!(etc_services.get(12).unwrap().protocol, "tcp");
-        assert_eq!(etc_services.get(12).unwrap().aliases, "");
-        assert_eq!(etc_services.get(12).unwrap().comment, "FTP, data");
-        assert_eq!(etc_services.len(), 15);
-    }
     fn test_system_info () {
         let system_reader: Box<SystemReaderInterface> = Box::new(MockSystemReader {});
 
@@ -156,30 +122,5 @@ mod tests {
         assert_eq!(system_info.computer_name, "galaxy500");
         assert_eq!(system_info.cpu_logical_cores, 0);
     }
-    fn tset_os_version () {
-        let system_reader: Box<SystemReaderInterface> = Box::new(MockSystemReader {});
 
-        //os_version
-        let os_version = &OsVersion::get_specific(system_reader.borrow())[0];
-        assert_eq!(os_version.platform, "MacOS");
-        assert_eq!(os_version.name, "Mac OS X");
-        assert_eq!(os_version.version, "10.13.3");
-        assert_eq!(os_version.major, 10);
-        assert_eq!(os_version.minor, 13);
-    }
-    fn test_etc_protocols () {
-        let system_reader: Box<SystemReaderInterface> = Box::new(MockSystemReader {});
-
-        //protocols
-        let etc_protocols = EtcProtocols::get_specific(system_reader.borrow());
-        assert_eq!(etc_protocols.get(0).unwrap().name, "ip");
-        assert_eq!(etc_protocols.get(0).unwrap().number, 0);
-        assert_eq!(etc_protocols.get(0).unwrap().alias, "IP");
-        assert_eq!(etc_protocols.get(0).unwrap().comment, "internet protocol, pseudo protocol number");
-        assert_eq!(etc_protocols.get(1).unwrap().name, "icmp");
-        assert_eq!(etc_protocols.get(1).unwrap().number, 1);
-        assert_eq!(etc_protocols.get(1).unwrap().alias, "ICMP");
-        assert_eq!(etc_protocols.get(1).unwrap().comment, "internet control message protocol");
-        assert_eq!(etc_protocols.len(), 3);
-    }
 }

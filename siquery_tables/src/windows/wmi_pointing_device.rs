@@ -1,6 +1,17 @@
-use tables::WmiPointingDevice;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiPointingDevice,WmiPointingDeviceIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiPointingDeviceIface for Reader {
+    fn get_wmi_pointing_device(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["path", "Win32_PointingDevice", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl WmiPointingDevice {
     pub(crate) fn new() -> WmiPointingDevice {
@@ -13,11 +24,11 @@ impl WmiPointingDevice {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiPointingDevice> {
+    pub(crate) fn get_specific_ex(reader: &WmiPointingDeviceIface) -> Vec<WmiPointingDevice> {
 
         let mut pointing_devices: Vec<WmiPointingDevice> = Vec::new();
 
-        if let Some(pointing_device_info) = system_reader.get_wmi_pointing_device() {
+        if let Some(pointing_device_info) = reader.get_wmi_pointing_device() {
             let mut pointing_device = WmiPointingDevice::new();
             let lines = pointing_device_info.split('\n');
             for line in lines {
@@ -88,5 +99,33 @@ impl WmiPointingDevice {
             }
         }
         pointing_devices
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiPointingDevice> {
+        let reader: Box<WmiPointingDeviceIface> = Box::new(Reader{});
+        let out = WmiPointingDevice::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiPointingDeviceIface for Test {
+        fn get_wmi_pointing_device(&self)-> Option<String>{
+            Some(String::from(include_str!("../../test_data/wmi-pointing-device.txt")))
+        }
+    }
+    #[test]
+    fn tset_wmi_pointing_device () {
+        let reader: Box<WmiPointingDeviceIface> = Box::new(Test{});
+        assert_eq!(WmiPointingDevice::get_specific_ex(reader.borrow()).len(), 3);
+        let pointing_device_info = &WmiPointingDevice::get_specific_ex(reader.borrow())[0];
+        assert_eq!(pointing_device_info.name,"PS/2 Compatible Mouse");
+        assert_eq!(pointing_device_info.manufacturer,"Fabrikam, Inc.");
+        assert_eq!(pointing_device_info.description, "PS/2 Compatible Mouse");
+        assert_eq!(pointing_device_info.pointing_type, "Touch Screen");
+        assert_eq!(pointing_device_info.status, "OK");
     }
 }
