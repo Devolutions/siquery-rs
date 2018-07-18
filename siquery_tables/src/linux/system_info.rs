@@ -1,4 +1,4 @@
-use tables::SystemInfoData;
+use tables::{SystemInfoData,SystemInfoDataIface};
 use linux::SystemReaderInterface;
 
 struct CpuInfo {
@@ -16,7 +16,7 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<SystemInfoData> {
+    pub(crate) fn get_specific_ex(system_reader: &SystemReaderInterface) -> Vec<SystemInfoData> {
         let mut output : Vec<SystemInfoData> = Vec::new();
         let mut system_info = SystemInfoData::new();
         system_info.computer_name = system_reader.hostname().unwrap_or_else(|| String::from(""));
@@ -50,4 +50,11 @@ impl SystemInfoData {
 
         Some(CpuInfo {cpu_brand: model_name, cpu_logical_cores: system_reader.cpu_count()})
     }
+
+    pub(crate) fn get_specific() -> Vec<SystemInfoData> {
+        let reader: Box<SystemInfoDataIface> = Box::new(Reader{});
+        let out = SystemInfoData::get_specific_ex(reader.borrow());
+        out
+    }
 }
+

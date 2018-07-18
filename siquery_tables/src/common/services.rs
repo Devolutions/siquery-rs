@@ -5,9 +5,9 @@ use std::borrow::Borrow;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
-        use linux::SystemReaderInterface;
+        use linux::EtcServicesReader;
     } else if #[cfg(target_os = "macos")] {
-       use macos::SystemReaderInterface;
+       use macos::EtcServicesReader;
     } else if #[cfg(target_os = "windows")] {
         use windows::EtcServicesReader;
     }

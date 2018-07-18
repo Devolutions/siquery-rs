@@ -46,12 +46,7 @@ impl SystemReader {
 }
 
 impl SystemReaderInterface for SystemReader {
-    fn hostname(&self) -> Option<String> {
-        let output = Command::new("hostname").output().ok()?;
-        let mut hostname = String::from_utf8(output.stdout).ok()?;
-        utils::trim_string(&mut hostname);
-        Some(hostname)
-    }
+
 
     fn cpuinfo(&self) -> Option<String> {
         let mut s = String::new();
