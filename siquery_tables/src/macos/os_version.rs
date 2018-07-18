@@ -12,6 +12,7 @@ impl OsVersionIface for Reader {
         File::open("/System/Library/CoreServices/SystemVersion.plist").ok()?.read_to_string(&mut s).ok()?;
         Some(s)
     }
+    // NA for mac
     fn os_release(&self) -> Option<String> {
         Some(String::from("For linux only"))
     }
@@ -69,14 +70,15 @@ mod tests {
     use super::*;
     pub struct Test {}
     impl OsVersionIface for Test {
+        fn get_os_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/SystemVersion.plist")))
+        }
+        // NA for mac
         fn os_release(&self) -> Option<String> {
             Some(String::new())
         }
         fn os_platform(&self) -> Option<String> {
             Some(String::new())
-        }
-        fn get_os_info(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/SystemVersion.plist")))
         }
     }
     #[test]

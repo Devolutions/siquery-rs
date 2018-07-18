@@ -6,29 +6,29 @@ use utils;
 
 pub struct Reader {}
 impl SystemInfoDataIface for Reader {
-    fn get_wmi_cpu_info(&self) -> Option<String> {
-        Some(String::from("For windows only"))
-    }
-    fn get_wmi_system_info(&self) -> Option<String> {
-        Some(String::from("For windows only"))
-    }
     fn hostname(&self) -> Option<String> {
         let output = Command::new("hostname").output().ok()?;
         let mut hostname = String::from_utf8(output.stdout).ok()?;
         utils::trim_string(&mut hostname);
         Some(hostname)
     }
-    fn meminfo(&self) -> Option<String> {
-        Some(String::new())
-    }
     fn cpuinfo(&self) -> Option<String> {
         // TODO
         Some(String::new())
     }
-
     fn cpu_count(&self) -> u32 {
         // TODO
         0
+    }
+    // NA for linux
+    fn get_wmi_cpu_info(&self) -> Option<String> {
+        Some(String::new())
+    }
+    fn get_wmi_system_info(&self) -> Option<String> {
+        Some(String::new())
+    }
+    fn meminfo(&self) -> Option<String> {
+        Some(String::new())
     }
 }
 
@@ -60,36 +60,27 @@ impl SystemInfoData {
 #[cfg(test)]
 mod tests {
     use super::*;
-
     struct Test{}
-
     impl SystemInfoDataIface for Test {
-
         fn get_wmi_cpu_info(&self) -> Option<String> {
             Some(String::new())
         }
-
         fn get_wmi_system_info(&self) -> Option<String> {
             Some(String::new())
         }
-
         fn hostname(&self) -> Option<String> {
             Some(String::from("galaxy500"))
         }
-
         fn cpuinfo(&self) -> Option<String> {
             Some(String::new())
         }
-
         fn cpu_count(&self) -> u32 {
             4
         }
-
         fn meminfo(&self) -> Option<String> {
             Some(String::new())
         }
     }
-
     #[test]
     fn test_system_info () {
         let system_reader: Box<SystemInfoDataIface> = Box::new(Test{});

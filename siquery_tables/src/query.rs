@@ -63,7 +63,6 @@ fn select<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<Vec<String>> where T:T
 pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
     let res = match name {
         "etc_hosts" => {
-            // The reader interface is obtained inside get_specific() and feeded into get_specific_ex().
             let table = EtcHosts::get_specific();
             select(&table, columns)
         },

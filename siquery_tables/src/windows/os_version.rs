@@ -11,6 +11,9 @@ impl OsVersionIface for Reader {
             .args(&["os", "get", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
+    // NA for windows
+    fn os_release(&self) -> Option<String> {Some(String::new())}
+    fn os_platform(&self) ->Option<String> {Some(String::new())}
 }
 
 impl OsVersion {
@@ -66,6 +69,9 @@ mod tests {
         fn get_os_info(&self) -> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-osinfo.txt")))
         }
+        // NA for windows
+        fn os_release(&self) -> Option<String> {Some(String::new())}
+        fn os_platform(&self) ->Option<String> {Some(String::new())}
     }
     #[test]
     fn test_os_version () {

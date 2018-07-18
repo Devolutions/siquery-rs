@@ -16,6 +16,11 @@ impl SystemInfoDataIface for Reader {
             .args(&["computersystem", "get", "Caption,TotalPhysicalMemory", "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
+    // NA for windows
+    fn hostname(&self) -> Option<String> {Some(String::new())}
+    fn meminfo(&self) -> Option<String> {Some(String::new())}
+    fn cpuinfo(&self) -> Option<String> {Some(String::new())}
+    fn cpu_count(&self) -> u32 {0}
 }
 
 
@@ -90,7 +95,13 @@ mod tests {
         }
         fn get_wmi_system_info(&self)-> Option<String> {
             Some(String::from(include_str!("../../test_data/wmi-system-info.txt")))
-        }    }
+        }
+        // NA for windows
+        fn hostname(&self) -> Option<String> {Some(String::new())}
+        fn meminfo(&self) -> Option<String> {Some(String::new())}
+        fn cpuinfo(&self) -> Option<String> {Some(String::new())}
+        fn cpu_count(&self) -> u32 {0}
+    }
     #[test]
     fn test_system_info () {
         let reader: Box<SystemInfoDataIface> = Box::new(Test{});
