@@ -9,7 +9,7 @@ use rusqlite::{version_number, Connection, Result, Error};
 use std::os::raw::c_int;
 use std::str;
 
-use siquery::query::{query_table, query_header};
+use query::{query_table, query_header};
 
 pub fn load_module(conn: &Connection) -> Result<()> {
     let aux: Option<()> = None;
@@ -47,8 +47,13 @@ impl DummyTab {
         let mut v : Vec<String> = Vec::new();
         let split : Vec<_>= args.split(';').collect();
         for value in split {
-            v.push(value.to_string());
+            if value.len() > 0 {
+                v.push(value.to_string());
+            }
+
         }
+        println!("columns {:?} ", v);
+
         v
     }
 }
@@ -116,9 +121,7 @@ impl VTab for DummyTab {
             }
             schema = Some(sql);
         }
-
         Ok((schema.unwrap().to_owned(), vtab))
-
     }
 
     fn best_index(&self, info: &mut IndexInfo) -> Result<()> {
@@ -201,34 +204,4 @@ impl VTabCursor for DummyTabCursor {
     fn rowid(&self) -> Result<i64> {
         Ok(self.row_id)
     }
-}
-
-pub fn sql_query() {
-    let version = version_number();
-    if version < 3008012 {
-        return;
-    }
-
-    let db = Connection::open_in_memory().unwrap();
-    load_module(&db).unwrap();
-
-    let command =  "CREATE VIRTUAL TABLE process_memory_map USING dummy(table_name=process_memory_map)";
-    db.execute_batch(&command).unwrap();
-    let mut s = db.prepare("SELECT count(pid) FROM process_memory_map").unwrap();
-
-    let ids: Result<Vec<i32>> = s
-        .query_map(&[], |row| row.get::<_, i32>(0))
-        .unwrap()
-        .collect();
-    println!("number of pids :     {:?} ", ids.unwrap());
-
-    let command2 =  "CREATE VIRTUAL TABLE etc_protocols USING dummy(table_name=etc_protocols, columns=name)";
-    db.execute_batch(&command2).unwrap();
-    let mut s2 = db.prepare("SELECT name FROM etc_protocols").unwrap();
-
-    let ids: Result<Vec<String>> = s2
-        .query_map(&[], |row| row.get::<_, String>(0))
-        .unwrap()
-        .collect();
-    println!("protocols name :     {:?} ", ids.unwrap());
 }

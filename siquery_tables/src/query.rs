@@ -6,6 +6,9 @@ use std::borrow::Borrow;
 
 use tables::*;
 
+use vtab::*;
+use rusqlite::{version_number, Connection, Result, Error};
+
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
     let mut res: Vec<Vec<String>> = Vec::new();
 
@@ -396,4 +399,58 @@ pub fn query_header(name: &str, columns: Vec<String>) -> Vec<String> {
         }
     };
     res
+}
+
+pub fn get_table_list() -> Vec<String> {
+    vec![
+        "etc_hosts".to_string(),
+        "etc_protocols".to_string(),
+        "etc_services".to_string(),
+        "system_info".to_string(),
+        "os_version".to_string(),
+        "logical_drives".to_string(),
+        "interface_address".to_string(),
+        "interface_details".to_string(),
+        "uptime".to_string(),
+        "products".to_string(),
+        "wmi_computer_info".to_string(),
+        "wmi_os_version".to_string(),
+        "wmi_printers".to_string(),
+        "wmi_services".to_string(),
+        "wmi_hotfixes".to_string(),
+        "wmi_shares".to_string(),
+        "wmi_network_adapters".to_string(),
+        "wmi_local_accounts".to_string(),
+        "wmi_bios".to_string(),
+        "wmi_motherboard".to_string(),
+        "wmi_processor".to_string(),
+        "wmi_physical_memory".to_string(),
+        "wmi_sound".to_string(),
+        "wmi_video".to_string(),
+        "wmi_monitors".to_string(),
+        "wmi_keyboard".to_string(),
+        "wmi_pointing_device".to_string(),
+        "process_open_sockets".to_string(),
+        "processes".to_string(),
+        "process_memory_map".to_string(),
+        #[cfg(not(target_os = "windows"))]
+        "process_envs".to_string(),
+    ]
+}
+
+pub fn init_db()-> Connection {
+    let mut db = Connection::open_in_memory().unwrap();
+    load_module(&db).unwrap();
+    db
+}
+
+pub fn register_tables(db:  &Connection, tables: Vec<String>){
+    for table in tables.iter() {
+        let mut command = format!("{}{}{}{}{}",
+                          "CREATE VIRTUAL TABLE ",
+                          table,
+                          " USING dummy(table_name=",
+                          table,")");
+        &db.execute_batch(&command).unwrap();
+    }
 }

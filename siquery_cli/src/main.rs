@@ -8,17 +8,16 @@ extern crate siquery;
 #[allow(unused_imports)]    // TODO column names with macros
 #[macro_use]
 extern crate prettytable;
+extern crate rusqlite;
+use rusqlite::{version_number, Connection, Result, Error};
 
 use prettytable::Table;
 
-use siquery::query::query_table;
-
+use siquery::query::{query_table, init_db, register_tables, get_table_list};
+use siquery::vtab::sql_query;
 use clap::App;
 
-extern crate rusqlite;
-
-mod vtab;
-use vtab::sql_query;
+use std::env;
 
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
@@ -42,13 +41,27 @@ fn query_select(name: &str, select: &str) {
 }
 
 fn main() {
-    sql_query();
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
     let table = matches.value_of("table").unwrap_or("").to_string();
     let select = matches.value_of("select").unwrap_or("").to_string();
+    let siquery = matches.value_of("siquery").unwrap_or("").to_string();
     if table.len() > 0 {
         query_select(table.as_str(), select.as_str());
+    }
+    if siquery.len() > 0 {
+
+        let db = init_db();
+        register_tables(&db, get_table_list());
+        let mut s = db.prepare(&siquery).unwrap();
+
+        // TODO loop into the number of columns returned to print by index
+        let ids: Result<Vec<String>> = s
+            .query_map(&[], |row| row.get::<_, String>(0))
+            .unwrap()
+            .collect();
+
+        println!("protocols name :     {:?} ", ids.unwrap());
     }
 }

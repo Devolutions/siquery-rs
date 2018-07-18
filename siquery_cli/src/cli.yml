@@ -14,6 +14,20 @@ args:
         value_name: select
         help: columns to select
         takes_value: true
+        requires: table
+    - siquery:
+        short: q
+        long: query
+        value_name: siquery
+        help: sqlite command
+        takes_value: false
+    - SIQUERY_INPUT:
+        requires: siquery
+        value_name: input
+        conflicts_with: table
+        conflicts_with: select
+        help: < sqlite query command >
+        index: 1
     - list_all:
         short: l
         long: L
