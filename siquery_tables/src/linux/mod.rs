@@ -1,14 +1,8 @@
-#[allow(unused_imports)]
-// Required in test
-use std::borrow::Borrow;
 use std::fs::File;
 use std::io::Read;
-use std::process::Command;
 #[allow(unused_imports)]
 // TODO implement to_json
 use serde_json;
-use sysconf::raw::{sysconf, SysconfVariable};
-use uname;
 
 use tables::{EtcHostsIface,EtcProtocolsIface,EtcServicesIface};
 
