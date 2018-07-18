@@ -1,5 +1,3 @@
-#![allow(unused_variables)]
-
 extern crate libc;
 extern crate time;
 
@@ -7,10 +5,9 @@ use std::mem;
 use std::ptr;
 
 use tables::Uptime;
-use macos::SystemReaderInterface;
 
 impl Uptime {
-    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<Uptime> {
+    pub fn get_specific() -> Vec<Uptime> {
         let mut output : Vec<Uptime> = Vec::new();
         let mut upt = Uptime {
             days: 0,

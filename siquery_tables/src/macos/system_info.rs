@@ -1,5 +1,36 @@
-use tables::SystemInfoData;
-use macos::SystemReaderInterface;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{SystemInfoData,SystemInfoDataIface};
+use utils;
+
+pub struct Reader {}
+impl SystemInfoDataIface for Reader {
+    fn get_wmi_cpu_info(&self) -> Option<String> {
+        Some(String::from("For windows only"))
+    }
+    fn get_wmi_system_info(&self) -> Option<String> {
+        Some(String::from("For windows only"))
+    }
+    fn hostname(&self) -> Option<String> {
+        let output = Command::new("hostname").output().ok()?;
+        let mut hostname = String::from_utf8(output.stdout).ok()?;
+        utils::trim_string(&mut hostname);
+        Some(hostname)
+    }
+    fn meminfo(&self) -> Option<String> {
+        Some(String::new())
+    }
+    fn cpuinfo(&self) -> Option<String> {
+        // TODO
+        Some(String::new())
+    }
+
+    fn cpu_count(&self) -> u32 {
+        // TODO
+        0
+    }
+}
 
 impl SystemInfoData {
     pub(crate) fn new() -> SystemInfoData {
@@ -11,11 +42,60 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<SystemInfoData> {
+    pub(crate) fn get_specific_ex(reader: &SystemInfoDataIface) -> Vec<SystemInfoData> {
         let mut output : Vec<SystemInfoData> = Vec::new();
         let mut system_info = SystemInfoData::new();
-        system_info.computer_name = system_reader.hostname().unwrap_or(String::from(""));
+        system_info.computer_name = reader.hostname().unwrap_or(String::from(""));
         output.push(system_info);
         output
     }
+
+    pub(crate) fn get_specific() -> Vec<SystemInfoData> {
+        let reader: Box<SystemInfoDataIface> = Box::new(Reader{});
+        let out = SystemInfoData::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct Test{}
+
+    impl SystemInfoDataIface for Test {
+
+        fn get_wmi_cpu_info(&self) -> Option<String> {
+            Some(String::new())
+        }
+
+        fn get_wmi_system_info(&self) -> Option<String> {
+            Some(String::new())
+        }
+
+        fn hostname(&self) -> Option<String> {
+            Some(String::from("galaxy500"))
+        }
+
+        fn cpuinfo(&self) -> Option<String> {
+            Some(String::new())
+        }
+
+        fn cpu_count(&self) -> u32 {
+            4
+        }
+
+        fn meminfo(&self) -> Option<String> {
+            Some(String::new())
+        }
+    }
+
+    #[test]
+    fn test_system_info () {
+        let system_reader: Box<SystemInfoDataIface> = Box::new(Test{});
+        let system_info = &SystemInfoData::get_specific_ex(system_reader.borrow())[0];
+        assert_eq!(system_info.computer_name, "galaxy500");
+        assert_eq!(system_info.cpu_logical_cores, 0);
+    }
+
 }
