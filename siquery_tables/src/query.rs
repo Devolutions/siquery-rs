@@ -205,11 +205,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
             let table = ProcessMemoryMapRow::get_specific();
             select(&table, columns)
         },
-        /*#[cfg(not(target_os = "windows"))]
+        #[cfg(not(target_os = "windows"))]
         "process_envs" => {
-            let table = ProcessEnvsRow::get_specific(system_reader.borrow());
+            let table = ProcessEnvsRow::get_specific();
             select(&table, columns)
-        },*/
+        },
         _ => {
             let table: Vec<Dummy> = Vec::new();
             select(&table, columns)

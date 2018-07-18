@@ -93,8 +93,8 @@ mod tests {
         }    }
     #[test]
     fn test_system_info () {
-        let system_reader: Box<SystemInfoDataIface> = Box::new(Test{});
-        let system_info = &SystemInfoData::get_specific_ex(system_reader.borrow())[0];
+        let reader: Box<SystemInfoDataIface> = Box::new(Test{});
+        let system_info = &SystemInfoData::get_specific_ex(reader.borrow())[0];
         assert_eq!(system_info.computer_name, "galaxy500");
         assert_eq!(system_info.cpu_logical_cores, 4);
         assert_eq!(system_info.cpu_brand, "Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz");

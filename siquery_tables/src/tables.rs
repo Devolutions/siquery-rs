@@ -296,6 +296,10 @@ pub struct SystemInfoData {
 pub trait SystemInfoDataIface {
     fn get_wmi_cpu_info(&self) -> Option<String>;
     fn get_wmi_system_info(&self) -> Option<String>;
+    fn hostname(&self) -> Option<String>;
+    fn meminfo(&self) -> Option<String>;
+    fn cpuinfo(&self) -> Option<String>;
+    fn cpu_count(&self) -> u32;
 }
 #[allow(non_upper_case_globals)]
 impl SystemInfoData {
@@ -493,6 +497,8 @@ pub struct OsVersion {
 
 pub trait OsVersionIface {
     fn get_os_info(&self) -> Option<String>;
+    fn os_release(&self) -> Option<String>;
+    fn os_platform(&self) -> Option<String>;
 }
 
 

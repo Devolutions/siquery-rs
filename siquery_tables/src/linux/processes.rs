@@ -3,8 +3,6 @@ use regex::Regex;
 use std::io::Read;
 use std::fs::{read_dir, File, canonicalize, read_link};
 
-use linux::SystemReaderInterface;
-
 use tables::{
     ProcessesRow,
     ProcessEnvsRow,
@@ -142,7 +140,7 @@ impl ProcessesRow {
 
     }
     #[allow(unused_variables)]
-    pub fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<ProcessesRow> {
+    pub fn get_specific() -> Vec<ProcessesRow> {
         let pid_list = get_proc_list();
         let mut pid_table: Vec<ProcessesRow> = Vec::new();
         for pid in pid_list.iter() {
@@ -177,7 +175,7 @@ impl ProcessEnvsRow {
         Some(table)
     }
 
-    pub fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<ProcessEnvsRow> {
+    pub fn get_specific() -> Vec<ProcessEnvsRow> {
         let pid_list = get_proc_list();
         let mut table: Vec<ProcessEnvsRow> = Vec::new();
         for pid in pid_list.iter() {
@@ -239,7 +237,7 @@ impl ProcessMemoryMapRow {
         Some(table_row)
     }
 
-    pub fn get_specific (_system_reader: &SystemReaderInterface) -> Vec<ProcessMemoryMapRow> {
+    pub fn get_specific () -> Vec<ProcessMemoryMapRow> {
         let pid_list = get_proc_list();
         let mut table: Vec<ProcessMemoryMapRow> = Vec::new();
         for pid in pid_list.iter() {

@@ -1,5 +1,4 @@
 use tables::InterfaceAddress;
-use linux::SystemReaderInterface;
 
 impl InterfaceAddress {
     pub(crate) fn new() -> InterfaceAddress {
@@ -12,7 +11,7 @@ impl InterfaceAddress {
         }
     }
 
-    pub(crate) fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<InterfaceAddress> {
+    pub(crate) fn get_specific() -> Vec<InterfaceAddress> {
         // TODO: implement interface_address table
         let mut output: Vec<InterfaceAddress> = Vec::new();
         output.push(

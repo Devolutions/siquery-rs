@@ -1,8 +1,7 @@
 use tables::LogicalDrive;
-use linux::SystemReaderInterface;
 
 impl LogicalDrive {
-    pub(crate) fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<LogicalDrive> {
+    pub(crate) fn get_specific() -> Vec<LogicalDrive> {
         // TODO: implement logical_drive table
 
         let mut output = Vec::new();
