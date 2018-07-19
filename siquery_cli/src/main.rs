@@ -41,6 +41,27 @@ fn query_select(name: &str, select: &str) {
     print_table_pretty(result);
 }
 
+fn siquery_select(siquery: &str) {
+    let first_table = get_form_query(&siquery);
+
+    let db = init_db();
+    register_first(&db, first_table.clone());
+    let mut s = db.prepare(&siquery).unwrap();
+
+    // TODO loop into the number of columns returned to print by index
+    // bad type error if querying a counter
+    for i in 0..s.column_names().len() {
+        print!("{} ", s.column_names()[i]);
+        let ids: Result<Vec<String>> = s
+            .query_map(&[], |row| row.get::<_, String>(i))
+            .unwrap()
+            .collect();
+
+        println!("{:?} ", ids.unwrap());
+    }
+    register_tables(&db, get_table_list(), first_table);
+}
+
 fn main() {
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
@@ -52,22 +73,6 @@ fn main() {
         query_select(table.as_str(), select.as_str());
     }
     if siquery.len() > 0 {
-
-        let mut first_table = get_form_query(&siquery);
-
-        let db = init_db();
-        register_first(&db, first_table.clone());
-        let mut s = db.prepare(&siquery).unwrap();
-
-        // TODO loop into the number of columns returned to print by index
-
-        let ids: Result<Vec<String>> = s
-            .query_map(&[], |row| row.get::<_, String>(0))
-            .unwrap()
-            .collect();
-
-        println!("{:?} ", ids.unwrap());
-
-        register_tables(&db, get_table_list(), first_table);
+        siquery_select(&siquery);
     }
 }
