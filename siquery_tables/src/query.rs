@@ -1,5 +1,5 @@
 
-pub use sys::{SystemInfo, SystemReader};
+pub use sys::SystemReader;
 use sys::{SystemReaderInterface};
 
 use std::borrow::Borrow;

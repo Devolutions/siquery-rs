@@ -1,40 +1,15 @@
+#[allow(unused_imports)]
+// Required for test
 use std::borrow::Borrow;
 use std::process::Command;
+#[allow(unused_imports)]
+// TODO implement to_json
 use serde_json;
 use std::fs::File;
 use std::io::Read;
-use tables::{
-    EtcServices,
-    EtcProtocols,
-    EtcHosts,
-    InterfaceAddress,
-    InterfaceDetails,
-    LogicalDrive,
-    OsVersion,
-    WmiOsVersion,
-    SystemInfoData,
-    WmiComputerInfo,
-    Uptime,
-    WmiPrinters,
-    WmiServices,
-    WmiHotfixes,
-    Products,
-    WmiShares,
-    WmiNetworkAdapters,
-    WmiLocalAccounts,
-    WmiBios,
-    WmiMotherboard,
-    WmiProcessor,
-    WmiMemory,
-    WmiSound,
-    WmiVideo,
-    WmiMonitors,
-    WmiKeyboard,
-    WmiPointingDevice,
-    ProcessOpenSocketsRow,
-    ProcessesRow,
-    ProcessMemoryMapRow,
-};
+#[allow(unused_imports)]
+// Required for test
+use tables::*;
 use std::env;
 
 mod interface_address;
@@ -290,112 +265,6 @@ impl SystemReaderInterface for SystemReader {
     }
 }
 
-pub struct SystemInfo {
-    system_reader: Box<SystemReaderInterface>,
-    pub system_info: Vec<SystemInfoData>,
-    pub wmi_computer_info: Vec<WmiComputerInfo>,
-    pub wmi_os_version: Vec<WmiOsVersion>,
-    pub os_version: Vec<OsVersion>,
-    pub logical_drives: Vec<LogicalDrive>,
-    pub interface_addresses: Vec<InterfaceAddress>,
-    pub interface_details: Vec<InterfaceDetails>,
-    pub etc_hosts: Vec<EtcHosts>,
-    pub etc_protocols: Vec<EtcProtocols>,
-    pub etc_services: Vec<EtcServices>,
-    pub uptime: Vec<Uptime>,
-    pub wmi_printers: Vec<WmiPrinters>,
-    pub wmi_services: Vec<WmiServices>,
-    pub wmi_hotfixes: Vec<WmiHotfixes>,
-    pub products: Vec<Products>,
-    pub wmi_shares: Vec<WmiShares>,
-    pub wmi_network_adapters: Vec<WmiNetworkAdapters>,
-    pub wmi_local_accounts : Vec<WmiLocalAccounts>,
-    pub wmi_bios: WmiBios,
-    pub wmi_motherboard: Vec<WmiMotherboard>,
-    pub wmi_processor: Vec<WmiProcessor>,
-    pub wmi_physical_memory: Vec<WmiMemory>,
-    pub wmi_sound: Vec<WmiSound>,
-    pub wmi_video: Vec<WmiVideo>,
-    pub wmi_monitors: Vec<WmiMonitors>,
-    pub wmi_keyboard: Vec<WmiKeyboard>,
-    pub wmi_pointing_device: Vec<WmiPointingDevice>,
-    pub process_open_sockets: Vec<ProcessOpenSocketsRow>,
-    pub processes: Vec<ProcessesRow>,
-    pub process_memory_map : Vec<ProcessMemoryMapRow>,
-}
-
-impl SystemInfo {
-    pub fn new(system_reader: Box<SystemReaderInterface>) -> SystemInfo {
-        SystemInfo {
-            system_info:            SystemInfoData::        get_specific(system_reader.borrow()),
-            wmi_computer_info:      WmiComputerInfo::       get_specific(system_reader.borrow()),
-            wmi_os_version:         WmiOsVersion::          get_specific(system_reader.borrow()),
-            os_version:             OsVersion::             get_specific(system_reader.borrow()),
-            logical_drives:         LogicalDrive::          get_specific(system_reader.borrow()),
-            interface_addresses:    InterfaceAddress::      get_specific(system_reader.borrow()),
-            interface_details:      InterfaceDetails::      get_specific(system_reader.borrow()),
-            etc_hosts:              EtcHosts::              get_specific(system_reader.borrow()),
-            etc_protocols:          EtcProtocols::          get_specific(system_reader.borrow()),
-            etc_services:           EtcServices::           get_specific(system_reader.borrow()),
-            uptime:                 Uptime::                get_specific(system_reader.borrow()),
-            wmi_printers:           WmiPrinters::           get_specific(system_reader.borrow()),
-            wmi_services:           WmiServices::           get_specific(system_reader.borrow()),
-            wmi_hotfixes:           WmiHotfixes::           get_specific(system_reader.borrow()),
-            products:               Products::              get_specific(system_reader.borrow()),
-            wmi_shares:             WmiShares::             get_specific(system_reader.borrow()),
-            wmi_network_adapters:   WmiNetworkAdapters::    get_specific(system_reader.borrow()),
-            wmi_local_accounts :    WmiLocalAccounts::      get_specific(system_reader.borrow()),
-            wmi_bios:               WmiBios::               get_specific(system_reader.borrow()),
-            wmi_motherboard:        WmiMotherboard::        get_specific(system_reader.borrow()),
-            wmi_processor:          WmiProcessor::          get_specific(system_reader.borrow()),
-            wmi_physical_memory:    WmiMemory::             get_specific(system_reader.borrow()),
-            wmi_sound:              WmiSound::              get_specific(system_reader.borrow()),
-            wmi_video:              WmiVideo::              get_specific(system_reader.borrow()),
-            wmi_monitors:           WmiMonitors::           get_specific(system_reader.borrow()),
-            wmi_keyboard:           WmiKeyboard::           get_specific(system_reader.borrow()),
-            wmi_pointing_device:    WmiPointingDevice::     get_specific(system_reader.borrow()),
-            process_open_sockets:   ProcessOpenSocketsRow:: get_specific(system_reader.borrow()),
-            processes:              ProcessesRow::          get_specific(system_reader.borrow()),
-            process_memory_map:     ProcessMemoryMapRow::   get_specific(system_reader.borrow()),
-            system_reader,
-        }
-    }
-
-    pub fn to_json(&self) -> String {
-        serde_json::to_string_pretty(&json!({
-            "system_info": self.system_info,
-            "wmi_computer_info": self.system_info,
-            "wmi_os_version" : self.wmi_os_version,
-            "os_version" : self.os_version,
-            "logical_drives" : self.logical_drives,
-            "interface_addresses" : self.interface_addresses,
-            "interface_details" : self.interface_details,
-            "etc_hosts" : self.etc_hosts,
-            "etc_protocols" : self.etc_protocols,
-            "etc_services" : self.etc_services,
-            "uptime" : self.uptime,
-            "wmi_printers" : self.wmi_printers,
-            "wmi_services" : self.wmi_services,
-            "wmi_hotfixes" : self.wmi_hotfixes,
-            "products": self.products,
-            "wmi_shares" : self.wmi_shares,
-            "wmi_network_adapters" : self.wmi_network_adapters,
-            "wmi_local_accounts" : self.wmi_local_accounts,
-            "wmi_bios" : self.wmi_bios,
-            "wmi_motherboard" : self.wmi_motherboard,
-            "wmi_processor" : self.wmi_processor,
-            "wmi_physical_memory" : self.wmi_physical_memory,
-            "wmi_sound" : self.wmi_sound,
-            "wmi_video" : self.wmi_video,
-            "wmi_monitors" : self.wmi_monitors,
-            "wmi_keyboard" : self.wmi_keyboard,
-            "Wmi_pointing_device" : self.wmi_pointing_device,
-            "process_open_sockets" : self.process_open_sockets,
-            "processes" : self.processes,
-        })).unwrap()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -507,115 +376,123 @@ mod tests {
         }
 
         fn get_wmi_process_info(&self) -> Option<String> {
-
+            //TODO test file
+            Some(String::from(include_str!("../../test_data/wmi-pointing-device.txt")))
         }
     }
 
     #[test]
     fn test_system_info() {
-        let system_info = SystemInfo::new(Box::new(MockSystemReader{}));
+        let system_reader: Box<SystemReaderInterface> = Box::new(MockSystemReader{});
 
         // checking possible cases for services file
-        assert_eq!(system_info.etc_services.get(0).unwrap().name, "echo");
-        assert_eq!(system_info.etc_services.get(0).unwrap().port, 7);
-        assert_eq!(system_info.etc_services.get(0).unwrap().protocol, "tcp");
-        assert_eq!(system_info.etc_services.get(0).unwrap().aliases, "");
-        assert_eq!(system_info.etc_services.get(0).unwrap().comment, "");
-        assert_eq!(system_info.etc_services.get(2).unwrap().name, "discard");
-        assert_eq!(system_info.etc_services.get(2).unwrap().port, 9);
-        assert_eq!(system_info.etc_services.get(2).unwrap().protocol, "tcp");
-        assert_eq!(system_info.etc_services.get(2).unwrap().aliases, "sink null");
-        assert_eq!(system_info.etc_services.get(2).unwrap().comment, "");
-        assert_eq!(system_info.etc_services.get(12).unwrap().name, "ftp-data");
-        assert_eq!(system_info.etc_services.get(12).unwrap().port, 20);
-        assert_eq!(system_info.etc_services.get(12).unwrap().protocol, "tcp");
-        assert_eq!(system_info.etc_services.get(12).unwrap().aliases, "");
-        assert_eq!(system_info.etc_services.get(12).unwrap().comment, "FTP, data");
-        assert_eq!(system_info.etc_services.len(), 15);
+        let etc_services = EtcServices::get_specific(system_reader.borrow());
+        assert_eq!(etc_services.get(0).unwrap().name, "echo");
+        assert_eq!(etc_services.get(0).unwrap().port, 7);
+        assert_eq!(etc_services.get(0).unwrap().protocol, "tcp");
+        assert_eq!(etc_services.get(0).unwrap().aliases, "");
+        assert_eq!(etc_services.get(0).unwrap().comment, "");
+        assert_eq!(etc_services.get(2).unwrap().name, "discard");
+        assert_eq!(etc_services.get(2).unwrap().port, 9);
+        assert_eq!(etc_services.get(2).unwrap().protocol, "tcp");
+        assert_eq!(etc_services.get(2).unwrap().aliases, "sink null");
+        assert_eq!(etc_services.get(2).unwrap().comment, "");
+        assert_eq!(etc_services.get(12).unwrap().name, "ftp-data");
+        assert_eq!(etc_services.get(12).unwrap().port, 20);
+        assert_eq!(etc_services.get(12).unwrap().protocol, "tcp");
+        assert_eq!(etc_services.get(12).unwrap().aliases, "");
+        assert_eq!(etc_services.get(12).unwrap().comment, "FTP, data");
+        assert_eq!(etc_services.len(), 15);
 
         //protocols
-        assert_eq!(system_info.etc_protocols.get(0).unwrap().name, "ip");
-        assert_eq!(system_info.etc_protocols.get(0).unwrap().number, 0);
-        assert_eq!(system_info.etc_protocols.get(0).unwrap().alias, "IP");
-        assert_eq!(system_info.etc_protocols.get(0).unwrap().comment, "internet protocol, pseudo protocol number");
-        assert_eq!(system_info.etc_protocols.get(1).unwrap().name, "icmp");
-        assert_eq!(system_info.etc_protocols.get(1).unwrap().number, 1);
-        assert_eq!(system_info.etc_protocols.get(1).unwrap().alias, "ICMP");
-        assert_eq!(system_info.etc_protocols.get(1).unwrap().comment, "internet control message protocol");
-        assert_eq!(system_info.etc_protocols.len(), 3);
+        let etc_protocols = EtcProtocols::get_specific(system_reader.borrow());
+        assert_eq!(etc_protocols.get(0).unwrap().name, "ip");
+        assert_eq!(etc_protocols.get(0).unwrap().number, 0);
+        assert_eq!(etc_protocols.get(0).unwrap().alias, "IP");
+        assert_eq!(etc_protocols.get(0).unwrap().comment, "internet protocol, pseudo protocol number");
+        assert_eq!(etc_protocols.get(1).unwrap().name, "icmp");
+        assert_eq!(etc_protocols.get(1).unwrap().number, 1);
+        assert_eq!(etc_protocols.get(1).unwrap().alias, "ICMP");
+        assert_eq!(etc_protocols.get(1).unwrap().comment, "internet control message protocol");
+        assert_eq!(etc_protocols.len(), 3);
 
         //hosts
-        assert_eq!(system_info.etc_hosts.get(0).unwrap().address, "127.0.0.1");
-        assert_eq!(system_info.etc_hosts.get(0).unwrap().hostnames, "localhost");
-        assert_eq!(system_info.etc_hosts.get(1).unwrap().address, "255.255.255.255");
-        assert_eq!(system_info.etc_hosts.get(1).unwrap().hostnames, "broadcasthost");
-        assert_eq!(system_info.etc_hosts.get(2).unwrap().address, "::1");
-        assert_eq!(system_info.etc_hosts.get(2).unwrap().hostnames, "localhost");
-        assert_eq!(system_info.etc_hosts.get(3).unwrap().address, "127.0.0.1");
-        assert_eq!(system_info.etc_hosts.get(3).unwrap().hostnames, "example.com,example");
-        assert_eq!(system_info.etc_hosts.get(4).unwrap().address, "127.0.0.1");
-        assert_eq!(system_info.etc_hosts.get(4).unwrap().hostnames, "example.net");
-        assert_eq!(system_info.etc_hosts.len(), 5);
+        let etc_hosts = EtcHosts::get_specific(system_reader.borrow());
+        assert_eq!(etc_hosts.get(0).unwrap().address, "127.0.0.1");
+        assert_eq!(etc_hosts.get(0).unwrap().hostnames, "localhost");
+        assert_eq!(etc_hosts.get(1).unwrap().address, "255.255.255.255");
+        assert_eq!(etc_hosts.get(1).unwrap().hostnames, "broadcasthost");
+        assert_eq!(etc_hosts.get(2).unwrap().address, "::1");
+        assert_eq!(etc_hosts.get(2).unwrap().hostnames, "localhost");
+        assert_eq!(etc_hosts.get(3).unwrap().address, "127.0.0.1");
+        assert_eq!(etc_hosts.get(3).unwrap().hostnames, "example.com,example");
+        assert_eq!(etc_hosts.get(4).unwrap().address, "127.0.0.1");
+        assert_eq!(etc_hosts.get(4).unwrap().hostnames, "example.net");
+        assert_eq!(etc_hosts.len(), 5);
 
         // wmi_computer_info
-        assert_eq!(system_info.wmi_computer_info.computer_name, "Lucerne Publishing");
-        assert_eq!(system_info.wmi_computer_info.domain, "STANDALONE");
-        assert_eq!(system_info.wmi_computer_info.manufacturer, "Lucerne Publishing");
-        assert_eq!(system_info.wmi_computer_info.model, "TailSpin Toys");
-        assert_eq!(system_info.wmi_computer_info.number_of_processors, "18");
-        assert_eq!(system_info.wmi_computer_info.system_type, "x128-based PC");
+        let wmi_computer_info = &WmiComputerInfo::get_specific(system_reader.borrow())[0];
+        assert_eq!(wmi_computer_info.computer_name, "Lucerne Publishing");
+        assert_eq!(wmi_computer_info.domain, "STANDALONE");
+        assert_eq!(wmi_computer_info.manufacturer, "Lucerne Publishing");
+        assert_eq!(wmi_computer_info.model, "TailSpin Toys");
+        assert_eq!(wmi_computer_info.number_of_processors, "18");
+        assert_eq!(wmi_computer_info.system_type, "x128-based PC");
 
         // system_info
-        assert_eq!(system_info.system_info.computer_name, "galaxy500");
-        assert_eq!(system_info.system_info.cpu_logical_cores, 4);
-        assert_eq!(system_info.system_info.cpu_brand, "Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz");
-        assert_eq!(system_info.system_info.physical_memory, 17043189760);
+        let system_info = &SystemInfoData::get_specific(system_reader.borrow())[0];
+        assert_eq!(system_info.computer_name, "galaxy500");
+        assert_eq!(system_info.cpu_logical_cores, 4);
+        assert_eq!(system_info.cpu_brand, "Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz");
+        assert_eq!(system_info.physical_memory, 17043189760);
 
         // wmi_os_version
-        assert_eq!(system_info.wmi_os_version.platform, "Windows");
-        assert_eq!(system_info.wmi_os_version.csname, "Olympia");
-        assert_eq!(system_info.wmi_os_version.version, "10.10.16299");
-        assert_eq!(system_info.wmi_os_version.major, "10");
-        assert_eq!(system_info.wmi_os_version.minor, "10");
-        assert_eq!(system_info.wmi_os_version.build_number, "9999");
-        assert_eq!(system_info.wmi_os_version.caption, "describe something here");
-        assert_eq!(system_info.wmi_os_version.free_physical_mem, "10138896");
-        assert_eq!(system_info.wmi_os_version.free_virtual_mem, "10900164");
-        assert_eq!(system_info.wmi_os_version.manufacturer, "Wide World Importers");
-        assert_eq!(system_info.wmi_os_version.name, "Wide World Importers 10 Home");
-        assert_eq!(system_info.wmi_os_version.service_pack_major, "0");
-        assert_eq!(system_info.wmi_os_version.service_pack_minor, "0");
-        assert_eq!(system_info.wmi_os_version.size_stored_in_paging_file, "2490368");
-        assert_eq!(system_info.wmi_os_version.total_virtual_mem_size, "19134092");
-        assert_eq!(system_info.wmi_os_version.total_visible_mem_size, "16643724");
-        assert_eq!(system_info.wmi_os_version.win_directory, "C:\\WINDOWS");
+        let wmi_os_version = &WmiOsVersion::get_specific(system_reader.borrow())[0];
+        assert_eq!(wmi_os_version.platform, "Windows");
+        assert_eq!(wmi_os_version.csname, "Olympia");
+        assert_eq!(wmi_os_version.version, "10.10.16299");
+        assert_eq!(wmi_os_version.major, "10");
+        assert_eq!(wmi_os_version.minor, "10");
+        assert_eq!(wmi_os_version.build_number, "9999");
+        assert_eq!(wmi_os_version.caption, "describe something here");
+        assert_eq!(wmi_os_version.free_physical_mem, "10138896");
+        assert_eq!(wmi_os_version.free_virtual_mem, "10900164");
+        assert_eq!(wmi_os_version.manufacturer, "Wide World Importers");
+        assert_eq!(wmi_os_version.name, "Wide World Importers 10 Home");
+        assert_eq!(wmi_os_version.service_pack_major, "0");
+        assert_eq!(wmi_os_version.service_pack_minor, "0");
+        assert_eq!(wmi_os_version.size_stored_in_paging_file, "2490368");
+        assert_eq!(wmi_os_version.total_virtual_mem_size, "19134092");
+        assert_eq!(wmi_os_version.total_visible_mem_size, "16643724");
+        assert_eq!(wmi_os_version.win_directory, "C:\\WINDOWS");
 
         // os_version
-        assert_eq!(system_info.os_version.platform, "Windows");
-        assert_eq!(system_info.os_version.name, "Microsoft Windows 10 Pro");
-        assert_eq!(system_info.os_version.version, "10.0.16299");
-        assert_eq!(system_info.os_version.major, 10);
-        assert_eq!(system_info.os_version.minor, 0);
+        let os_version = &OsVersion::get_specific(system_reader.borrow())[0];
+        assert_eq!(os_version.platform, "Windows");
+        assert_eq!(os_version.name, "Microsoft Windows 10 Pro");
+        assert_eq!(os_version.version, "10.0.16299");
+        assert_eq!(os_version.major, 10);
+        assert_eq!(os_version.minor, 0);
 
         // logical_drives
-        assert_eq!(system_info.logical_drives.len(), 2);
+        let logical_drives = LogicalDrive::get_specific(system_reader.borrow());
+        assert_eq!(logical_drives.len(), 2);
 
-        let drive = &system_info.logical_drives[0];
-        assert_eq!(drive.device_id, "C:");
-        assert_eq!(drive.file_system, "NTFS");
-        assert_eq!(drive.size, 496869830656);
-        assert_eq!(drive.free_space, 55674548224);
+        let drive = LogicalDrive::get_specific(system_reader.borrow());
+        assert_eq!(drive[0].device_id, "C:");
+        assert_eq!(drive[0].file_system, "NTFS");
+        assert_eq!(drive[0].size, 496869830656);
+        assert_eq!(drive[0].free_space, 55674548224);
 
-        let drive = &system_info.logical_drives[1];
-        assert_eq!(drive.device_id, "E:");
-        assert_eq!(drive.file_system, "NTFS");
-        assert_eq!(drive.size, 501215232);
-        assert_eq!(drive.free_space, 469622784);
+        assert_eq!(drive[1].device_id, "E:");
+        assert_eq!(drive[1].file_system, "NTFS");
+        assert_eq!(drive[1].size, 501215232);
+        assert_eq!(drive[1].free_space, 469622784);
 
         // interface_addresses
-        assert_eq!(system_info.interface_addresses.len(), 1);
+        assert_eq!(InterfaceAddress::get_specific(system_reader.borrow()).len(), 1);
 
-        let interface = &system_info.interface_addresses[0];
+        let interface = &InterfaceAddress::get_specific(system_reader.borrow())[0];
         assert_eq!(interface.interface, "1");
         assert_eq!(interface.friendly_name, "Realtek USB GbE Family Controller");
         assert_eq!(interface.address, "192.168.1.172");
@@ -623,104 +500,101 @@ mod tests {
         assert_eq!(interface.interface_type, "dhcp");
 
         // interface_details
-        assert_eq!(system_info.interface_details.len(), 1);
+        let interface_details = &InterfaceDetails::get_specific(system_reader.borrow())[0];
 
-        let interface_details = &system_info.interface_details[0];
+        assert_eq!(InterfaceDetails::get_specific(system_reader.borrow()).len(), 1);
         assert_eq!(interface_details.interface, "1");
         assert_eq!(interface_details.mac, "A0:CE:C8:05:0D:32");
         assert_eq!(interface_details.enabled, 1);
         assert_eq!(interface_details.mtu, 1400);
 
-        //uptime
-        assert_eq!(system_info.uptime.is_ok(), true);
-
         //wmi_printers
-        let _test_printer = &system_info.wmi_printers.get(0);
-        assert_eq!(_test_printer.unwrap().caption, "Snagit 2018");
-        assert_eq!(_test_printer.unwrap().creation_class_name, "Win32_Printer");
-        assert_eq!(_test_printer.unwrap().device_id, "Snagit 2018");
-        assert_eq!(_test_printer.unwrap().do_complete_first, "FALSE");
-        assert_eq!(_test_printer.unwrap().driver_name, "Snagit 18 Printer");
-        assert_eq!(_test_printer.unwrap().extended_printer_status, "2");
-        assert_eq!(_test_printer.unwrap().horizontal_resolution, "200");
-        assert_eq!(_test_printer.unwrap().local, "TRUE");
-        assert_eq!(_test_printer.unwrap().name, "Snagit 2018");
-        assert_eq!(_test_printer.unwrap().port_name, "C:\\ProgramData\\TechSmith\\Snagit18\\PrinterPortFile");
-        assert_eq!(_test_printer.unwrap().printer_status, "3");
-        assert_eq!(_test_printer.unwrap().print_job_data_type, "RAW");
-        assert_eq!(_test_printer.unwrap().print_processor, "winprint");
-        assert_eq!(_test_printer.unwrap().priority, "1");
-        assert_eq!(_test_printer.unwrap().status, "Unknown");
-        assert_eq!(_test_printer.unwrap().system_creation_class_name, "Win32_ComputerSystem");
-        assert_eq!(_test_printer.unwrap().system_name, "ekyaw");
-        assert_eq!(_test_printer.unwrap().vertical_resolution, "200");
+        let _test_printer = &WmiPrinters::get_specific(system_reader.borrow())[0];
+        assert_eq!(_test_printer.caption, "Snagit 2018");
+        assert_eq!(_test_printer.creation_class_name, "Win32_Printer");
+        assert_eq!(_test_printer.device_id, "Snagit 2018");
+        assert_eq!(_test_printer.do_complete_first, "FALSE");
+        assert_eq!(_test_printer.driver_name, "Snagit 18 Printer");
+        assert_eq!(_test_printer.extended_printer_status, "2");
+        assert_eq!(_test_printer.horizontal_resolution, "200");
+        assert_eq!(_test_printer.local, "TRUE");
+        assert_eq!(_test_printer.name, "Snagit 2018");
+        assert_eq!(_test_printer.port_name, "C:\\ProgramData\\TechSmith\\Snagit18\\PrinterPortFile");
+        assert_eq!(_test_printer.printer_status, "3");
+        assert_eq!(_test_printer.print_job_data_type, "RAW");
+        assert_eq!(_test_printer.print_processor, "winprint");
+        assert_eq!(_test_printer.priority, "1");
+        assert_eq!(_test_printer.status, "Unknown");
+        assert_eq!(_test_printer.system_creation_class_name, "Win32_ComputerSystem");
+        assert_eq!(_test_printer.system_name, "ekyaw");
+        assert_eq!(_test_printer.vertical_resolution, "200");
 
         //wmi-services
-        let _test_service = &system_info.wmi_services.get(0);
-        assert_eq!(_test_service.unwrap().accept_pause,"FALSE");
-        assert_eq!(_test_service.unwrap().accept_stop,"TRUE");
-        assert_eq!(_test_service.unwrap().caption,"Windows Push Notifications User Service_10b2b340");
-        assert_eq!(_test_service.unwrap().creation_class_name,"Win32_Service");
-        assert_eq!(_test_service.unwrap().description,"do something");
-        assert_eq!(_test_service.unwrap().desktop_interact,"FALSE");
-        assert_eq!(_test_service.unwrap().display_name,"Windows Push Notifications User Service_10b2b340");
-        assert_eq!(_test_service.unwrap().error_control,"Ignore");
-        assert_eq!(_test_service.unwrap().exit_code, 0);
-        assert_eq!(_test_service.unwrap().name,"WpnUserService_10b2b340");
-        assert_eq!(_test_service.unwrap().path_name,"C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup");
-        assert_eq!(_test_service.unwrap().service_type,"Unknown");
-        assert_eq!(_test_service.unwrap().started,"TRUE");
-        assert_eq!(_test_service.unwrap().start_mode,"Auto");
-        assert_eq!(_test_service.unwrap().start_name,"");
-        assert_eq!(_test_service.unwrap().state,"Running");
-        assert_eq!(_test_service.unwrap().status,"OK");
-        assert_eq!(_test_service.unwrap().system_creation_class_name, "Win32_ComputerSystem");
-        assert_eq!(_test_service.unwrap().system_name, "waka-waka");
+        let _test_service = &WmiServices::get_specific(system_reader.borrow())[0];
+        assert_eq!(_test_service.accept_pause,"FALSE");
+        assert_eq!(_test_service.accept_stop,"TRUE");
+        assert_eq!(_test_service.caption,"Windows Push Notifications User Service_10b2b340");
+        assert_eq!(_test_service.creation_class_name,"Win32_Service");
+        assert_eq!(_test_service.description,"do something");
+        assert_eq!(_test_service.desktop_interact,"FALSE");
+        assert_eq!(_test_service.display_name,"Windows Push Notifications User Service_10b2b340");
+        assert_eq!(_test_service.error_control,"Ignore");
+        assert_eq!(_test_service.exit_code, 0);
+        assert_eq!(_test_service.name,"WpnUserService_10b2b340");
+        assert_eq!(_test_service.path_name,"C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup");
+        assert_eq!(_test_service.service_type,"Unknown");
+        assert_eq!(_test_service.started,"TRUE");
+        assert_eq!(_test_service.start_mode,"Auto");
+        assert_eq!(_test_service.start_name,"");
+        assert_eq!(_test_service.state,"Running");
+        assert_eq!(_test_service.status,"OK");
+        assert_eq!(_test_service.system_creation_class_name, "Win32_ComputerSystem");
+        assert_eq!(_test_service.system_name, "waka-waka");
 
         //wmi-hotfixes
-        let _test_hotfix = &system_info.wmi_hotfixes.get(0);
-        assert_eq!(_test_hotfix.unwrap().caption,"http://support.microsoft.com/?kbid=4103");
-        assert_eq!(_test_hotfix.unwrap().csname,"wakwaka");
-        assert_eq!(_test_hotfix.unwrap().description,"Update");
-        assert_eq!(_test_hotfix.unwrap().hotfix_id,"KB4103");
-        assert_eq!(_test_hotfix.unwrap().installed_by,"wakwaka\\johnCena");
-        assert_eq!(_test_hotfix.unwrap().installed_on,"5/10/2018");
+        let _test_hotfix = &WmiHotfixes::get_specific(system_reader.borrow())[0];
+        assert_eq!(_test_hotfix.caption,"http://support.microsoft.com/?kbid=4103");
+        assert_eq!(_test_hotfix.csname,"wakwaka");
+        assert_eq!(_test_hotfix.description,"Update");
+        assert_eq!(_test_hotfix.hotfix_id,"KB4103");
+        assert_eq!(_test_hotfix.installed_by,"wakwaka\\johnCena");
+        assert_eq!(_test_hotfix.installed_on,"5/10/2018");
 
         //wmi-shares
-        let _test_share = &system_info.wmi_shares.get(0);
-        assert_eq!(_test_share.unwrap().name,"print$");
-        assert_eq!(_test_share.unwrap().caption,"Printer Drivers");
-        assert_eq!(_test_share.unwrap().description,"Printer Drivers");
-        assert_eq!(_test_share.unwrap().path,"C:\\WINDOWS\\system32\\spool\\drivers");
-        assert_eq!(_test_share.unwrap().status,"OK");
-        assert_eq!(_test_share.unwrap()._type,"Device Admin");
-        assert_eq!(_test_share.unwrap().allow_maximum,"TRUE");
+        let _test_share = &WmiShares::get_specific(system_reader.borrow())[0];
+        assert_eq!(_test_share.name,"print$");
+        assert_eq!(_test_share.caption,"Printer Drivers");
+        assert_eq!(_test_share.description,"Printer Drivers");
+        assert_eq!(_test_share.path,"C:\\WINDOWS\\system32\\spool\\drivers");
+        assert_eq!(_test_share.status,"OK");
+        assert_eq!(_test_share._type,"Device Admin");
+        assert_eq!(_test_share.allow_maximum,"TRUE");
 
         //wmi-network-adapter
-        let _wmi_network_adapter = &system_info.wmi_network_adapters.get(0);
-        assert_eq!(_wmi_network_adapter.unwrap().description,"VMware Virtual Ethernet Adapter for VMnet8");
-        assert_eq!(_wmi_network_adapter.unwrap().database_path,"%SystemRoot%\\System32\\drivers\\etc");
-        assert_eq!(_wmi_network_adapter.unwrap().dhcp_enabled,"TRUE");
-        assert_eq!(_wmi_network_adapter.unwrap().ip_address,vec!["192.168.197.1", "ff80::9999:ffff:9999:f9f9"]);
-        assert_eq!(_wmi_network_adapter.unwrap().ip_enabled,"TRUE");
-        assert_eq!(_wmi_network_adapter.unwrap().ip_subnet,vec!["255.255.255.0", "64"]);
-        assert_eq!(_wmi_network_adapter.unwrap().mac_address,"FF:FF:FF:FF:FF:FF");
+        let _wmi_network_adapter = &WmiNetworkAdapters::get_specific(system_reader.borrow())[0];
+        assert_eq!(_wmi_network_adapter.description,"VMware Virtual Ethernet Adapter for VMnet8");
+        assert_eq!(_wmi_network_adapter.database_path,"%SystemRoot%\\System32\\drivers\\etc");
+        assert_eq!(_wmi_network_adapter.dhcp_enabled,"TRUE");
+        assert_eq!(_wmi_network_adapter.ip_address,vec!["192.168.197.1", "ff80::9999:ffff:9999:f9f9"]);
+        assert_eq!(_wmi_network_adapter.ip_enabled,"TRUE");
+        assert_eq!(_wmi_network_adapter.ip_subnet,vec!["255.255.255.0", "64"]);
+        assert_eq!(_wmi_network_adapter.mac_address,"FF:FF:FF:FF:FF:FF");
 
         //wmi-local-accounts
-        let _wmi_local_account = &system_info.wmi_local_accounts.get(0);
-        assert_eq!(_wmi_local_account.unwrap().account_type,"Server trust account");
-        assert_eq!(_wmi_local_account.unwrap().caption,"bipbip\\Acc");
-        assert_eq!(_wmi_local_account.unwrap().description,"A server account");
-        assert_eq!(_wmi_local_account.unwrap()._domain,"bipbip1010");
-        assert_eq!(_wmi_local_account.unwrap().local_account,"TRUE");
-        assert_eq!(_wmi_local_account.unwrap().name,"UtilityAccount");
-        assert_eq!(_wmi_local_account.unwrap().sid,"S-0-0-11-1111111111-111111111-111111111-111");
-        assert_eq!(_wmi_local_account.unwrap().sid_type,"1");
-        assert_eq!(_wmi_local_account.unwrap().status,"Degraded");
-        assert_eq!(system_info.wmi_local_accounts.len(),2);
+        let _wmi_local_account = &WmiLocalAccounts::get_specific(system_reader.borrow())[0];
+        assert_eq!(_wmi_local_account.account_type,"Server trust account");
+        assert_eq!(_wmi_local_account.caption,"bipbip\\Acc");
+        assert_eq!(_wmi_local_account.description,"A server account");
+        assert_eq!(_wmi_local_account._domain,"bipbip1010");
+        assert_eq!(_wmi_local_account.local_account,"TRUE");
+        assert_eq!(_wmi_local_account.name,"UtilityAccount");
+        assert_eq!(_wmi_local_account.sid,"S-0-0-11-1111111111-111111111-111111111-111");
+        assert_eq!(_wmi_local_account.sid_type,"1");
+        assert_eq!(_wmi_local_account.status,"Degraded");
+        assert_eq!(WmiLocalAccounts::get_specific(system_reader.borrow()).len(),2);
 
         //wmi-bios
-        let bios_info = &system_info.wmi_bios;
+        let bios_info = WmiBios::get_specific(system_reader.borrow());
         assert_eq!(bios_info.caption,"1.23.3");
         assert_eq!(bios_info.manufacturer,"Lucerne Publishing");
         assert_eq!(bios_info.release_date,"20180126");
@@ -728,7 +602,7 @@ mod tests {
         assert_eq!(bios_info.smbios_version,"1.23.3");
 
         //wmi_motherboard
-        let motherboard_info = &system_info.wmi_motherboard;
+        let motherboard_info = &WmiMotherboard::get_specific(system_reader.borrow())[0];
         assert_eq!(motherboard_info.name,"Base Board");
         assert_eq!(motherboard_info.manufacturer," The Phone Company");
         assert_eq!(motherboard_info.product," 958B84C99");
@@ -736,7 +610,7 @@ mod tests {
         assert_eq!(motherboard_info.version," A11");
 
         //wmi_processor
-        let processor_info = &system_info.wmi_processor;
+        let processor_info = &WmiProcessor::get_specific(system_reader.borrow())[0];
         assert_eq!(processor_info.name,"Fabrikam Core(TM) i7-7500U CPU @ 2.70GHz");
         assert_eq!(processor_info.address_width,"64");
         assert_eq!(processor_info.cpu_satus,"CPU Enabled");
@@ -756,71 +630,71 @@ mod tests {
         assert_eq!(processor_info.socket_designation,"U4E2");
 
         //wmi_physical_memory
-        let physical_memory = &system_info.wmi_physical_memory.get(0);
-        assert_eq!(physical_memory.unwrap().name,"Physical Memory");
-        assert_eq!(physical_memory.unwrap().bank_label,"BANK 0");
-        assert_eq!(physical_memory.unwrap().capacity,"17179869184 bytes");
-        assert_eq!(physical_memory.unwrap().description,"Physical Memory");
-        assert_eq!(physical_memory.unwrap().device_locator,"DIMM A");
-        assert_eq!(physical_memory.unwrap().form_factor,"12");
-        assert_eq!(physical_memory.unwrap().interleave_data_depth,"0");
-        assert_eq!(physical_memory.unwrap().interleave_position,"0");
-        assert_eq!(physical_memory.unwrap().manufacturer,"Fabrikam, Inc.");
-        assert_eq!(physical_memory.unwrap().memory_type,"0");
-        assert_eq!(physical_memory.unwrap().serial_number,"91A92B93C");
-        assert_eq!(physical_memory.unwrap().speed,"2400");
+        let physical_memory = &WmiMemory::get_specific(system_reader.borrow())[0];
+        assert_eq!(physical_memory.name,"Physical Memory");
+        assert_eq!(physical_memory.bank_label,"BANK 0");
+        assert_eq!(physical_memory.capacity,"17179869184 bytes");
+        assert_eq!(physical_memory.description,"Physical Memory");
+        assert_eq!(physical_memory.device_locator,"DIMM A");
+        assert_eq!(physical_memory.form_factor,"12");
+        assert_eq!(physical_memory.interleave_data_depth,"0");
+        assert_eq!(physical_memory.interleave_position,"0");
+        assert_eq!(physical_memory.manufacturer,"Fabrikam, Inc.");
+        assert_eq!(physical_memory.memory_type,"0");
+        assert_eq!(physical_memory.serial_number,"91A92B93C");
+        assert_eq!(physical_memory.speed,"2400");
 
         //wmi_sound
-        let sound_info = &system_info.wmi_sound.get(0);
-        assert_eq!(sound_info.unwrap().name,"Fabrikam Audio");
-        assert_eq!(sound_info.unwrap().manufacturer,"Fabrikam, Inc.");
-        assert_eq!(sound_info.unwrap().status,"OK");
-        assert_eq!(sound_info.unwrap().dma_buffer_size,"256");
+        let sound_info = &WmiSound::get_specific(system_reader.borrow())[0];
+        assert_eq!(sound_info.name,"Fabrikam Audio");
+        assert_eq!(sound_info.manufacturer,"Fabrikam, Inc.");
+        assert_eq!(sound_info.status,"OK");
+        assert_eq!(sound_info.dma_buffer_size,"256");
 
         //wmi_video
-        let video_info = &system_info.wmi_video.get(0);
-        assert_eq!(system_info.wmi_video.len(), 3);
-        assert_eq!(video_info.unwrap().name,"Graphic Design Institute 940MX");
-        assert_eq!(video_info.unwrap().adapter_compatibility,"Graphic Design Institute");
-        assert_eq!(video_info.unwrap().adapter_dac_type,"Integrated RAMDAC");
-        assert_eq!(video_info.unwrap().adapter_ram, 2.0);
-        assert_eq!(video_info.unwrap().availability,"Power Cycle");
-        assert_eq!(video_info.unwrap().driver_version,"23.21.13.9065");
-        assert_eq!(video_info.unwrap().installed_display_driver.len(), 2);
-        assert_eq!(video_info.unwrap().refresh_rate,"60");
-        assert_eq!(video_info.unwrap().screen_info,"1920 x 1080 x 4294967296 colors");
-        assert_eq!(video_info.unwrap().status,"OK");
-        assert_eq!(video_info.unwrap().video_architecture,"MDA");
-        assert_eq!(video_info.unwrap().video_memory_type,"WRAM");
+        let video_info = &WmiVideo::get_specific(system_reader.borrow())[0];
+        assert_eq!(WmiVideo::get_specific(system_reader.borrow()).len(), 3);
+        assert_eq!(video_info.name,"Graphic Design Institute 940MX");
+        assert_eq!(video_info.adapter_compatibility,"Graphic Design Institute");
+        assert_eq!(video_info.adapter_dac_type,"Integrated RAMDAC");
+        assert_eq!(video_info.adapter_ram, 2.0);
+        assert_eq!(video_info.availability,"Power Cycle");
+        assert_eq!(video_info.driver_version,"23.21.13.9065");
+        assert_eq!(video_info.installed_display_driver.len(), 2);
+        assert_eq!(video_info.refresh_rate,"60");
+        assert_eq!(video_info.screen_info,"1920 x 1080 x 4294967296 colors");
+        assert_eq!(video_info.status,"OK");
+        assert_eq!(video_info.video_architecture,"MDA");
+        assert_eq!(video_info.video_memory_type,"WRAM");
 
         //wmi_monitors
-        assert_eq!(system_info.wmi_monitors.len(), 3);
+        assert_eq!(WmiMonitors::get_specific(system_reader.borrow()).len(), 3);
 
-        let monitor_info = &system_info.wmi_monitors.get(0);
-        assert_eq!(monitor_info.unwrap().name,"Default Monitor");
-        assert_eq!(monitor_info.unwrap().availability,"In Test");
-        assert_eq!(monitor_info.unwrap().bandwidth, 0);
-        assert_eq!(monitor_info.unwrap().screen_height, 1080);
-        assert_eq!(monitor_info.unwrap().screen_width, 1920);
-        assert_eq!(monitor_info.unwrap().manufacturer,"");
+        let monitor_info = &WmiMonitors::get_specific(system_reader.borrow())[0];
+        assert_eq!(monitor_info.name,"Default Monitor");
+        assert_eq!(monitor_info.availability,"In Test");
+        assert_eq!(monitor_info.bandwidth, 0);
+        assert_eq!(monitor_info.screen_height, 1080);
+        assert_eq!(monitor_info.screen_width, 1920);
+        assert_eq!(monitor_info.manufacturer,"");
 
         //wmi_monitors
-        assert_eq!(system_info.wmi_keyboard.len(), 2);
+        assert_eq!(WmiKeyboard::get_specific(system_reader.borrow()).len(), 2);
 
-        let keyboard_info = &system_info.wmi_keyboard.get(0);
-        assert_eq!(keyboard_info.unwrap().name, "Enhanced (101- or 102-key)");
-        assert_eq!(keyboard_info.unwrap().description, "USB Input Device");
-        assert_eq!(keyboard_info.unwrap().device_id, "USB\\VID_046D&amp;0&amp;0000");
-        assert_eq!(keyboard_info.unwrap().status, "OK");
+        let keyboard_info = &WmiKeyboard::get_specific(system_reader.borrow())[0];
+        assert_eq!(keyboard_info.name, "Enhanced (101- or 102-key)");
+        assert_eq!(keyboard_info.description, "USB Input Device");
+        assert_eq!(keyboard_info.device_id, "USB\\VID_046D&amp;0&amp;0000");
+        assert_eq!(keyboard_info.status, "OK");
 
         //wmi_pointing_device
-        assert_eq!(system_info.wmi_pointing_device.len(), 3);
+        assert_eq!(WmiPointingDevice::get_specific(system_reader.borrow()).len(), 3);
 
-        let pointing_device_info = &system_info.wmi_pointing_device.get(0);
-        assert_eq!(pointing_device_info.unwrap().name,"PS/2 Compatible Mouse");
-        assert_eq!(pointing_device_info.unwrap().manufacturer,"Fabrikam, Inc.");
-        assert_eq!(pointing_device_info.unwrap().description, "PS/2 Compatible Mouse");
-        assert_eq!(pointing_device_info.unwrap().pointing_type, "Touch Screen");
-        assert_eq!(pointing_device_info.unwrap().status, "OK");
+        let pointing_device_info = &WmiPointingDevice::get_specific(system_reader.borrow())[0];
+        assert_eq!(pointing_device_info.name,"PS/2 Compatible Mouse");
+        assert_eq!(pointing_device_info.manufacturer,"Fabrikam, Inc.");
+        assert_eq!(pointing_device_info.description, "PS/2 Compatible Mouse");
+        assert_eq!(pointing_device_info.pointing_type, "Touch Screen");
+        assert_eq!(pointing_device_info.status, "OK");
     }
 }
