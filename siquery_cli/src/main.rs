@@ -48,7 +48,6 @@ fn siquery_select(siquery: &str) {
     register_first(&db, first_table.clone());
     let mut s = db.prepare(&siquery).unwrap();
 
-    // TODO loop into the number of columns returned to print by index
     // bad type error if querying a counter
     for i in 0..s.column_names().len() {
         print!("{} ", s.column_names()[i]);
