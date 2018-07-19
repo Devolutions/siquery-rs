@@ -7,7 +7,7 @@ use std::borrow::Borrow;
 use tables::*;
 
 use vtab::*;
-use rusqlite::{version_number, Connection, Result, Error};
+use rusqlite::{version_number, Connection};
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
     let mut res: Vec<Vec<String>> = Vec::new();
@@ -441,14 +441,21 @@ pub fn get_table_list() -> Vec<String> {
 }
 
 pub fn init_db()-> Connection {
-    let mut db = Connection::open_in_memory().unwrap();
+    let db = Connection::open_in_memory().unwrap();
     load_module(&db).unwrap();
     db
 }
 
 pub fn register_first(db:  &Connection, first_table: String){
+    let version = version_number();
+
+    if version < 3008012 {
+        println!("version: '{}' is not supported", version);
+        return
+    }
+
     if first_table.len() > 0 {
-        let mut command = format!("{}{}{}{}{}",
+        let command = format!("{}{}{}{}{}",
                                   "CREATE VIRTUAL TABLE ",
                                   first_table,
                                   " USING siquery(table_name=",
@@ -458,15 +465,15 @@ pub fn register_first(db:  &Connection, first_table: String){
 }
 
 pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: String) {
-    /*let version = version_number();
+    let version = version_number();
 
     if version < 3008012 {
-        //let s: &str = &version.to_string();
-        return Err(Error::ModuleError(format!("version: '{}' is not supported", version)));
-    }*/
+        println!("version: '{}' is not supported", version);
+        return
+    }
     for table in tables.iter() {
         if *table != first_table {
-            let mut command = format!("{}{}{}{}{}",
+            let command = format!("{}{}{}{}{}",
                                       "CREATE VIRTUAL TABLE ",
                                       table,
                                       " USING siquery(table_name=",
@@ -477,10 +484,10 @@ pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: Strin
 }
 
 pub fn get_form_query(query: &str) -> String {
-    let mut _args = query.clone().to_uppercase();
-    let mut v: Vec<_> = query.clone().split_whitespace().collect();
-    let mut k: Vec<_> = _args.split_whitespace().collect();
-    let mut table_name_idx = 0;
+    let _args = query.clone().to_uppercase();
+    let v: Vec<_> = query.clone().split_whitespace().collect();
+    let k: Vec<_> = _args.split_whitespace().collect();
+    let mut table_name_idx;
     let mut table_name: String = "".to_string();
 
     if _args.starts_with("SELECT") && _args.contains("FROM") {

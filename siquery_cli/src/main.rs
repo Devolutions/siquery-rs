@@ -1,7 +1,4 @@
 #[macro_use]
-extern crate lazy_static;
-
-#[macro_use]
 extern crate clap;
 extern crate siquery;
 
@@ -9,7 +6,7 @@ extern crate siquery;
 #[macro_use]
 extern crate prettytable;
 extern crate rusqlite;
-use rusqlite::{MappedRows, version_number, Connection, Result, Error};
+use rusqlite::{Result};
 
 use prettytable::Table;
 

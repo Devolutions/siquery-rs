@@ -5,7 +5,7 @@ use rusqlite::vtab::{
 };
 
 use rusqlite::types::Null;
-use rusqlite::{version_number, Connection, Result, Error};
+use rusqlite::{Connection, Result, Error};
 use std::os::raw::c_int;
 use std::str;
 
@@ -188,7 +188,6 @@ impl VTabCursor for SiqueryTabCursor {
                 "column index out of bounds: {}",
                 col
             )));
-            return ctx.set_result(&Null);
         }
 
         if self.cols.is_empty() {
