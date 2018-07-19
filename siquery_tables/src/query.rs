@@ -444,13 +444,51 @@ pub fn init_db()-> Connection {
     db
 }
 
-pub fn register_tables(db:  &Connection, tables: Vec<String>){
-    for table in tables.iter() {
+pub fn register_first(db:  &Connection, first_table: String){
+    if first_table.len() > 0 {
         let mut command = format!("{}{}{}{}{}",
-                          "CREATE VIRTUAL TABLE ",
-                          table,
-                          " USING dummy(table_name=",
-                          table,")");
+                                  "CREATE VIRTUAL TABLE ",
+                                  first_table,
+                                  " USING siquery(table_name=",
+                                  first_table, ")");
         &db.execute_batch(&command).unwrap();
     }
+}
+
+pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: String) {
+    /*let version = version_number();
+
+    if version < 3008012 {
+        //let s: &str = &version.to_string();
+        return Err(Error::ModuleError(format!("version: '{}' is not supported", version)));
+    }*/
+    for table in tables.iter() {
+        if *table != first_table {
+            let mut command = format!("{}{}{}{}{}",
+                                      "CREATE VIRTUAL TABLE ",
+                                      table,
+                                      " USING siquery(table_name=",
+                                      table, ")");
+            &db.execute_batch(&command).unwrap();
+        }
+    }
+}
+
+pub fn get_form_query(query: &str) -> String {
+    let mut _args = query.clone().to_uppercase();
+    let mut v: Vec<_> = query.clone().split_whitespace().collect();
+    let mut k: Vec<_> = _args.split_whitespace().collect();
+    let mut table_name_idx = 0;
+    let mut table_name: String = "".to_string();
+
+    if _args.starts_with("SELECT") && _args.contains("FROM") {
+        for i in 0..k.len() {
+            if k[i] == "FROM" {
+                table_name_idx = i + 1;
+                table_name = v[table_name_idx].to_string();
+            }
+        }
+    }
+
+    table_name
 }

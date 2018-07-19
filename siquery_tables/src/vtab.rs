@@ -13,15 +13,15 @@ use query::{query_table, query_header};
 
 pub fn load_module(conn: &Connection) -> Result<()> {
     let aux: Option<()> = None;
-    conn.create_module("dummy", &DUMMY_MODULE, aux)
+    conn.create_module("siquery", &SIQUERY_MODULE, aux)
 }
 
 lazy_static! {
-    static ref DUMMY_MODULE: Module<DummyTab> = simple_module::<DummyTab>();
+    static ref SIQUERY_MODULE: Module<SiqueryTab> = simple_module::<SiqueryTab>();
 }
 
 #[repr(C)]
-struct DummyTab {
+struct SiqueryTab {
     /// Base class. Must be first
     base: sqlite3_vtab,
     table_name: String,
@@ -29,7 +29,7 @@ struct DummyTab {
     header: Vec<String>,
 }
 
-impl DummyTab {
+impl SiqueryTab {
     fn parameter(c_slice: &[u8]) -> Result<(&str, &str)> {
         let arg = try!(str::from_utf8(c_slice)).trim();
         let mut split = arg.split('=');
@@ -52,27 +52,25 @@ impl DummyTab {
             }
 
         }
-        println!("columns {:?} ", v);
-
         v
     }
 }
 
-impl VTab for DummyTab {
+impl VTab for SiqueryTab {
     type Aux = ();
-    type Cursor = DummyTabCursor;
+    type Cursor = SiqueryTabCursor;
 
     fn connect(
         _: &mut VTabConnection,
         _aux: Option<&()>,
         _args: &[&[u8]],
-    ) -> Result<(String, DummyTab)> {
+    ) -> Result<(String, SiqueryTab)> {
 
         if _args.len() < 4 {
             return Err(Error::ModuleError("no table name specified".to_owned()));
         }
 
-        let mut vtab = DummyTab {
+        let mut vtab = SiqueryTab {
             base: sqlite3_vtab::default(),
             table_name: String::new(),
             columns: Vec::new(),
@@ -82,14 +80,14 @@ impl VTab for DummyTab {
         let args= &_args[3..];
 
         for c_slice in args {
-            let (param, value) = try!(DummyTab::parameter(c_slice));
+            let (param, value) = try!(SiqueryTab::parameter(c_slice));
             match param {
                 "table_name" => {
                     vtab.table_name = value.to_string();
                 }
                 "columns" => {
                     if value.len() > 1 {
-                        vtab.columns = DummyTab::get_from_args(value);
+                        vtab.columns = SiqueryTab::get_from_args(value);
                     } else{
                         vtab.columns = Vec::new();
                     }
@@ -129,14 +127,14 @@ impl VTab for DummyTab {
         Ok(())
     }
 
-    fn open(&self) -> Result<DummyTabCursor> {
-        Ok(DummyTabCursor::default())
+    fn open(&self) -> Result<SiqueryTabCursor> {
+        Ok(SiqueryTabCursor::default())
     }
 }
 
 #[derive(Default)]
 #[repr(C)]
-struct DummyTabCursor {
+struct SiqueryTabCursor {
     /// Base class. Must be first
     base: sqlite3_vtab_cursor,
     /// The rowid
@@ -149,8 +147,8 @@ struct DummyTabCursor {
     eot : bool
 }
 
-impl VTabCursor for DummyTabCursor {
-    type Table = DummyTab;
+impl VTabCursor for SiqueryTabCursor {
+    type Table = SiqueryTab;
 
     fn filter(
         &mut self,
@@ -158,10 +156,10 @@ impl VTabCursor for DummyTabCursor {
         _idx_str: Option<&str>,
         _args: &Values,
     ) -> Result<()> {
-        let dummy_table = unsafe {&*(self.base.pVtab as * const DummyTab)};
+        let siquery_table = unsafe {&*(self.base.pVtab as * const SiqueryTab)};
 
         //register the table in memory
-        self.rows = query_table(dummy_table.table_name.as_str(), dummy_table.header.clone());
+        self.rows = query_table(siquery_table.table_name.as_str(), siquery_table.header.clone());
         self.row_id = 0;
         self.next()
     }
@@ -180,7 +178,6 @@ impl VTabCursor for DummyTabCursor {
         self.row_id += 1;
         Ok(())
     }
-    
     fn eof(&self) -> bool {
         self.eot
     }
@@ -200,7 +197,6 @@ impl VTabCursor for DummyTabCursor {
         ctx.set_result(&self.cols[col as usize].to_owned())
 
     }
-    
     fn rowid(&self) -> Result<i64> {
         Ok(self.row_id)
     }

@@ -13,8 +13,9 @@ use rusqlite::{version_number, Connection, Result, Error};
 
 use prettytable::Table;
 
-use siquery::query::{query_table, init_db, register_tables, get_table_list};
-use siquery::vtab::sql_query;
+use siquery::query::{query_table, init_db, register_tables,
+                     get_table_list, get_form_query, register_first};
+
 use clap::App;
 
 use std::env;
@@ -52,16 +53,21 @@ fn main() {
     }
     if siquery.len() > 0 {
 
+        let mut first_table = get_form_query(&siquery);
+
         let db = init_db();
-        register_tables(&db, get_table_list());
+        register_first(&db, first_table.clone());
         let mut s = db.prepare(&siquery).unwrap();
 
         // TODO loop into the number of columns returned to print by index
+
         let ids: Result<Vec<String>> = s
             .query_map(&[], |row| row.get::<_, String>(0))
             .unwrap()
             .collect();
 
-        println!("protocols name :     {:?} ", ids.unwrap());
+        println!("{:?} ", ids.unwrap());
+
+        register_tables(&db, get_table_list(), first_table);
     }
 }
