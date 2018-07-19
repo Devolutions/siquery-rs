@@ -184,10 +184,10 @@ impl VTabCursor for SiqueryTabCursor {
     fn column(&self, ctx: &mut Context, col: c_int) -> Result<()> {
 
         if col < 0 || col as usize >= self.cols.len() {
-            /*return Err(Error::ModuleError(format!(
+            return Err(Error::ModuleError(format!(
                 "column index out of bounds: {}",
                 col
-            )));*/
+            )));
             return ctx.set_result(&Null);
         }
 

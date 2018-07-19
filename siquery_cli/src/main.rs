@@ -9,7 +9,7 @@ extern crate siquery;
 #[macro_use]
 extern crate prettytable;
 extern crate rusqlite;
-use rusqlite::{version_number, Connection, Result, Error};
+use rusqlite::{MappedRows, version_number, Connection, Result, Error};
 
 use prettytable::Table;
 
@@ -17,8 +17,6 @@ use siquery::query::{query_table, init_db, register_tables,
                      get_table_list, get_form_query, register_first};
 
 use clap::App;
-
-use std::env;
 
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);

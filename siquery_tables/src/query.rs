@@ -45,9 +45,11 @@ fn select<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<Vec<String>> where T:T
 
     for column in columns.iter() {
         // make sure the header exist in the table
-        let id = table[0].get_id(column);
-        if id != 0 {
-            columns_id.push(id);
+        if table.len() > 0 {
+            let id = table[0].get_id(column);
+            if id != 0 {
+                columns_id.push(id);
+            }
         }
     }
 
