@@ -411,9 +411,18 @@ pub fn get_table_list() -> Vec<String> {
         "system_info".to_string(),
         "os_version".to_string(),
         "logical_drives".to_string(),
-        "interface_address".to_string(),
-        "interface_details".to_string(),
         "uptime".to_string(),
+        "processes".to_string(),
+        #[cfg(not(target_os = "macos"))]
+        "interface_address".to_string(),
+        #[cfg(not(target_os = "macos"))]
+        "interface_details".to_string(),
+        #[cfg(not(target_os = "macos"))]
+        "process_open_sockets".to_string(),
+        #[cfg(not(target_os = "macos"))]
+        "process_memory_map".to_string(),
+        #[cfg(target_os = "windows")]
+        (
         "products".to_string(),
         "wmi_computer_info".to_string(),
         "wmi_os_version".to_string(),
@@ -432,9 +441,7 @@ pub fn get_table_list() -> Vec<String> {
         "wmi_monitors".to_string(),
         "wmi_keyboard".to_string(),
         "wmi_pointing_device".to_string(),
-        "process_open_sockets".to_string(),
-        "processes".to_string(),
-        "process_memory_map".to_string(),
+        ),
         #[cfg(not(target_os = "windows"))]
         "process_envs".to_string(),
     ]
@@ -446,22 +453,25 @@ pub fn init_db()-> Connection {
     db
 }
 
-pub fn register_first(db:  &Connection, first_table: String){
+pub fn register_first(db:  &Connection, first_table: String) -> Option<bool> {
     let version = version_number();
 
     if version < 3008012 {
         println!("version: '{}' is not supported", version);
-        return
+        return None
     }
-
-    if first_table.len() > 0 {
-        let command = format!("{}{}{}{}{}",
+    for table in get_table_list().iter() {
+        if *table == first_table {
+            let command = format!("{}{}{}{}{}",
                                   "CREATE VIRTUAL TABLE ",
-                                  first_table,
+                                  table,
                                   " USING siquery(table_name=",
-                                  first_table, ")");
-        &db.execute_batch(&command).unwrap();
+                                  table, ")");
+            &db.execute_batch(&command).unwrap();
+            return Some(true)
+        }
     }
+    None
 }
 
 pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: String) {

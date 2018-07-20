@@ -40,19 +40,26 @@ fn siquery_select(siquery: &str) {
     let first_table = get_form_query(&siquery);
 
     let db = init_db();
-    register_first(&db, first_table.clone());
-    let mut s = db.prepare(&siquery).unwrap();
 
-    // bad type error if querying a counter
-    for i in 0..s.column_names().len() {
-        print!("{} ", s.column_names()[i]);
-        let ids: Result<Vec<String>> = s
-            .query_map(&[], |row| row.get::<_, String>(i))
-            .unwrap()
-            .collect();
+    match register_first(&db, first_table.clone()) {
+        Some(true) => {
+            let mut s = db.prepare(&siquery).unwrap();
+            // bad type error if querying a counter
+            for i in 0..s.column_names().len() {
+                print!("{} ", s.column_names()[i]);
 
-        println!("{:?} ", ids.unwrap());
+                let value: Result<Vec<String>> = s
+                    .query_map(&[], |row| row.get::<_, String>(i))
+                    .unwrap()
+                    .collect();
+
+                println!("{:?} ", value.unwrap());
+            }
+        }
+        Some(false) => println!("Table {} does not exit ", first_table),
+        None => println!("Table {} does not exist ", first_table),
     }
+
     register_tables(&db, get_table_list(), first_table);
 }
 
