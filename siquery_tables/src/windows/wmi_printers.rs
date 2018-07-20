@@ -1,6 +1,23 @@
-use tables::WmiPrinters;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiPrinters,WmiPrintersIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiPrintersIface for Reader {
+    fn get_wmi_printers_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["printer",
+                "get",
+                "Attributes,Caption,CreationClassName,DeviceID,DoCompleteFirst,DriverName,\
+                ExtendedPrinterStatus,HorizontalResolution,Local,Name,PortName,PrinterStatus,\
+                PrintJobDataType,PrintProcessor,Priority,Status,SystemCreationClassName,\
+                SystemName,VerticalResolution",
+                "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl WmiPrinters {
     pub(crate) fn new() -> WmiPrinters {
@@ -27,11 +44,11 @@ impl WmiPrinters {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiPrinters> {
+    pub(crate) fn get_specific_ex(reader: &WmiPrintersIface) -> Vec<WmiPrinters> {
 
         let mut output: Vec<WmiPrinters> = Vec::new();
 
-        if let Some(printer_info) = system_reader.get_wmi_printers_info() {
+        if let Some(printer_info) = reader.get_wmi_printers_info() {
             let mut printer = WmiPrinters::new();
             let lines = printer_info.split('\n');
 
@@ -116,5 +133,45 @@ impl WmiPrinters {
         }
 
         output
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiPrinters> {
+        let reader: Box<WmiPrintersIface> = Box::new(Reader{});
+        let out = WmiPrinters::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiPrintersIface for Test {
+        fn get_wmi_printers_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-printers.txt")))
+        }
+    }
+    #[test]
+    fn test_wmi_printers () {
+        let reader: Box<WmiPrintersIface> = Box::new(Test{});
+        let test_printers = &WmiPrinters::get_specific_ex(reader.borrow())[0];
+        assert_eq!(test_printers.caption, "Snagit 2018");
+        assert_eq!(test_printers.creation_class_name, "Win32_Printer");
+        assert_eq!(test_printers.device_id, "Snagit 2018");
+        assert_eq!(test_printers.do_complete_first, "FALSE");
+        assert_eq!(test_printers.driver_name, "Snagit 18 Printer");
+        assert_eq!(test_printers.extended_printer_status, "2");
+        assert_eq!(test_printers.horizontal_resolution, "200");
+        assert_eq!(test_printers.local, "TRUE");
+        assert_eq!(test_printers.name, "Snagit 2018");
+        assert_eq!(test_printers.port_name, "C:\\ProgramData\\TechSmith\\Snagit18\\PrinterPortFile");
+        assert_eq!(test_printers.printer_status, "3");
+        assert_eq!(test_printers.print_job_data_type, "RAW");
+        assert_eq!(test_printers.print_processor, "winprint");
+        assert_eq!(test_printers.priority, "1");
+        assert_eq!(test_printers.status, "Unknown");
+        assert_eq!(test_printers.system_creation_class_name, "Win32_ComputerSystem");
+        assert_eq!(test_printers.system_name, "ekyaw");
+        assert_eq!(test_printers.vertical_resolution, "200");
     }
 }

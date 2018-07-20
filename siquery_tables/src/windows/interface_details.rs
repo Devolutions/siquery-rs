@@ -1,9 +1,21 @@
-use tables::InterfaceDetails;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{InterfaceDetails,InterfaceDetailsIface};
 use utils;
-use windows::SystemReaderInterface;
+
+
+pub(crate) struct Reader {}
+impl InterfaceDetailsIface for Reader {
+    fn get_wmi_nicconfig_details(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["nicconfig", "get", "IPEnabled,InterfaceIndex,MACAddress,MTU", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl InterfaceDetails {
-     pub(crate) fn new() -> InterfaceDetails {
+    pub(crate) fn new() -> InterfaceDetails {
         InterfaceDetails {
             interface: String::new(),
             mac: String::new(),
@@ -12,7 +24,7 @@ impl InterfaceDetails {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
+    pub(crate) fn get_specific_ex(system_reader: &InterfaceDetailsIface) -> Vec<InterfaceDetails> {
         let mut interfaces: Vec<InterfaceDetails> = Vec::new();
 
         if let Some(interface_info) = system_reader.get_wmi_nicconfig_details() {
@@ -39,13 +51,13 @@ impl InterfaceDetails {
                 utils::trim_string(&mut v);
 
                 match k.as_str() {
-                     "InterfaceIndex" => {
+                    "InterfaceIndex" => {
                         interface_details.interface = v;
                     },
                     "MACAddress" => {
                         interface_details.mac = v;
                     },
-                     "MTU" => {
+                    "MTU" => {
                         if let Ok(n) = v.parse::<u32>() {
                             interface_details.mtu = n;
                         }
@@ -59,5 +71,32 @@ impl InterfaceDetails {
         }
 
         interfaces
-    } 
+    }
+
+    pub(crate) fn get_specific() -> Vec<InterfaceDetails> {
+        let reader: Box<InterfaceDetailsIface> = Box::new(Reader{});
+        let out = InterfaceDetails::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl InterfaceDetailsIface for Test {
+        fn get_wmi_nicconfig_details(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-nicconfig-details.txt")))
+        }
+    }
+    #[test]
+    fn test_interface_details () {
+        let reader: Box<InterfaceDetailsIface> = Box::new(Test{});
+        let interface_details = &InterfaceDetails::get_specific_ex(reader.borrow())[0];
+        assert_eq!(InterfaceDetails::get_specific_ex(reader.borrow()).len(), 1);
+        assert_eq!(interface_details.interface, "1");
+        assert_eq!(interface_details.mac, "A0:CE:C8:05:0D:32");
+        assert_eq!(interface_details.enabled, 1);
+        assert_eq!(interface_details.mtu, 1400);
+    }
 }

@@ -1,7 +1,4 @@
-#![allow(unused_variables)]
-
 use tables::LogicalDrive;
-use macos::SystemReaderInterface;
 
 impl LogicalDrive {
     pub(crate) fn new() -> LogicalDrive {
@@ -14,7 +11,7 @@ impl LogicalDrive {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<LogicalDrive> {
+    pub(crate) fn get_specific() -> Vec<LogicalDrive> {
         // TODO implement logical_drive table
         let mut output: Vec<LogicalDrive> = Vec::new();
         let logical_drive = LogicalDrive::new();
