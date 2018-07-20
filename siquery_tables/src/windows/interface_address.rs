@@ -1,7 +1,19 @@
-use tables::InterfaceAddress;
-use utils;
-use windows::SystemReaderInterface;
+use std::process::Command;
+use std::borrow::Borrow;
 
+use tables::{InterfaceAddress,InterfaceAddressIface};
+use utils;
+
+pub struct Reader {}
+impl InterfaceAddressIface for Reader {
+    fn get_wmi_nicconfig(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["nicconfig", "get",
+                "IPEnabled,InterfaceIndex,Description,DefaultIPGateway,IPAddress,IPSubnet,DHCPEnabled",
+                "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 fn split_wmi_array(s: String) -> Vec<String> {
     s.replace("{", "")
@@ -11,7 +23,7 @@ fn split_wmi_array(s: String) -> Vec<String> {
 }
 
 impl InterfaceAddress {
-     pub fn new() -> InterfaceAddress {
+    pub fn new() -> InterfaceAddress {
         InterfaceAddress {
             interface: String::new(),
             address: String::new(),
@@ -21,10 +33,10 @@ impl InterfaceAddress {
         }
     }
 
-    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<InterfaceAddress> {
+    pub fn get_specific_ex(reader: &InterfaceAddressIface) -> Vec<InterfaceAddress> {
         let mut interfaces: Vec<InterfaceAddress> = Vec::new();
 
-        if let Some(interface_info) = system_reader.get_wmi_nicconfig() {
+        if let Some(interface_info) = reader.get_wmi_nicconfig() {
             let mut interface = InterfaceAddress::new();
             let lines = interface_info.split('\n');
             let mut ip_enabled = String::new();
@@ -80,5 +92,33 @@ impl InterfaceAddress {
         }
 
         interfaces
-    } 
+    }
+
+    pub fn get_specific() -> Vec<InterfaceAddress> {
+        let reader: Box<InterfaceAddressIface> = Box::new(Reader{});
+        let out = InterfaceAddress::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl InterfaceAddressIface for Test {
+        fn get_wmi_nicconfig(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-nicconfig.txt")))
+        }
+    }
+    #[test]
+    fn test_interface_addresses () {
+        let reader: Box<InterfaceAddressIface> = Box::new(Test {});
+        assert_eq!(InterfaceAddress::get_specific_ex(reader.borrow()).len(), 1);
+        let interface = &InterfaceAddress::get_specific_ex(reader.borrow())[0];
+        assert_eq!(interface.interface, "1");
+        assert_eq!(interface.friendly_name, "Realtek USB GbE Family Controller");
+        assert_eq!(interface.address, "192.168.1.172");
+        assert_eq!(interface.mask, "255.255.248.0");
+        assert_eq!(interface.interface_type, "dhcp");
+    }
 }

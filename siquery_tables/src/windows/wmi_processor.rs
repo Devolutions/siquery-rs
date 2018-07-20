@@ -1,9 +1,20 @@
-use tables::WmiProcessor;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiProcessor,WmiProcessorIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiProcessorIface for Reader {
+    fn get_wmi_processor_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["cpu", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl WmiProcessor {
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiProcessor> {
+    pub(crate) fn get_specific_ex(reader: &WmiProcessorIface) -> Vec<WmiProcessor> {
         let mut output : Vec<WmiProcessor> = Vec::new();
         let mut processor = WmiProcessor {
             address_width: String::new(),
@@ -28,7 +39,7 @@ impl WmiProcessor {
         let mut nbr_cores = 0;
         let mut nbr_logical_cpu = 0;
 
-        if let Some(processor_info) = system_reader.get_wmi_processor_info() {
+        if let Some(processor_info) = reader.get_wmi_processor_info() {
             let lines = processor_info.split('\n');
 
             for line in lines {
@@ -131,5 +142,44 @@ impl WmiProcessor {
 
         output.push(processor);
         output
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiProcessor> {
+        let reader: Box<WmiProcessorIface> = Box::new(Reader{});
+        let out = WmiProcessor::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiProcessorIface for Test {
+        fn get_wmi_processor_info(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-processor.txt")))
+        }
+    }
+    #[test]
+    fn test_wmi_processor () {
+        let reader: Box<WmiProcessorIface> = Box::new(Test{});
+        let processor_info = &WmiProcessor::get_specific_ex(reader.borrow())[0];
+        assert_eq!(processor_info.name, "Fabrikam Core(TM) i7-7500U CPU @ 2.70GHz");
+        assert_eq!(processor_info.address_width, "64");
+        assert_eq!(processor_info.cpu_satus, "CPU Enabled");
+        assert_eq!(processor_info.current_clock_speed, "1600 Mhz");
+        assert_eq!(processor_info.current_voltage, "11");
+        assert_eq!(processor_info.description, "Fabrikam Family 6 Model 142 Stepping 9");
+        assert_eq!(processor_info.external_clock, "100");
+        assert_eq!(processor_info.hyper_threading_enabled, "FALSE");
+        assert_eq!(processor_info.l2_cache_size, "512");
+        assert_eq!(processor_info.l2_cache_speed, "0");
+        assert_eq!(processor_info.l3_cache_size, "4096");
+        assert_eq!(processor_info.l3_cache_speed, "0");
+        assert_eq!(processor_info.manufacturer, "Fabrikam, Inc.");
+        assert_eq!(processor_info.max_clock_speed, "2901 Mhz");
+        assert_eq!(processor_info.number_of_cores, "2");
+        assert_eq!(processor_info.number_of_logical_processors, "2");
+        assert_eq!(processor_info.socket_designation, "U4E2");
     }
 }

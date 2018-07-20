@@ -1,6 +1,20 @@
-use tables::WmiHotfixes;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiHotfixes,WmiHotfixesIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiHotfixesIface for Reader {
+    fn get_wmi_hotfixes_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["qfe",
+                "get",
+                "Caption,CSName,Description,HotFixID,InstalledBy,InstalledOn",
+                "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl WmiHotfixes {
     pub(crate) fn new() -> WmiHotfixes {
@@ -14,11 +28,11 @@ impl WmiHotfixes {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiHotfixes> {
+    pub(crate) fn get_specific_ex(reader: &WmiHotfixesIface) -> Vec<WmiHotfixes> {
 
         let mut hotfixes: Vec<WmiHotfixes> = Vec::new();
 
-        if let Some(hotfix_info) = system_reader.get_wmi_hotfixes_info() {
+        if let Some(hotfix_info) = reader.get_wmi_hotfixes_info() {
 
             let mut hotfix = WmiHotfixes::new();
             let lines = hotfix_info.split('\n');
@@ -64,5 +78,33 @@ impl WmiHotfixes {
             }
         }
         hotfixes
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiHotfixes> {
+        let reader: Box<WmiHotfixesIface> = Box::new(Reader{});
+        let out = WmiHotfixes::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiHotfixesIface for Test {
+        fn get_wmi_hotfixes_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-hotfixes.txt")))
+        }
+    }
+    #[test]
+    fn test_wmi_hotfixes () {
+        let reader: Box<WmiHotfixesIface> = Box::new(Test{});
+        let wmi_hotfixes = &WmiHotfixes::get_specific_ex(reader.borrow())[0];
+        assert_eq!(wmi_hotfixes.caption, "http://support.microsoft.com/?kbid=4103");
+        assert_eq!(wmi_hotfixes.csname, "wakwaka");
+        assert_eq!(wmi_hotfixes.description, "Update");
+        assert_eq!(wmi_hotfixes.hotfix_id, "KB4103");
+        assert_eq!(wmi_hotfixes.installed_by, "wakwaka\\johnCena");
+        assert_eq!(wmi_hotfixes.installed_on, "5/10/2018");
     }
 }

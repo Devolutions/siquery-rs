@@ -1,5 +1,4 @@
 use tables::InterfaceDetails;
-use linux::SystemReaderInterface;
 
 impl InterfaceDetails {
     pub(crate) fn new() -> InterfaceDetails {
@@ -11,7 +10,7 @@ impl InterfaceDetails {
         }
     }
 
-    pub fn get_specific(_system_reader: &SystemReaderInterface) -> Vec<InterfaceDetails> {
+    pub fn get_specific() -> Vec<InterfaceDetails> {
         // TODO: implement interface_details table
         let mut interfaces: Vec<InterfaceDetails> = Vec::new();
         interfaces.push(

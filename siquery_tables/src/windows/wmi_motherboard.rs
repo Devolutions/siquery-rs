@@ -1,9 +1,20 @@
-use tables::WmiMotherboard;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiMotherboard,WmiMotherboardIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiMotherboardIface for Reader {
+    fn get_wmi_motherboard_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["baseboard", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl WmiMotherboard {
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiMotherboard> {
+    pub(crate) fn get_specific_ex(reader: &WmiMotherboardIface) -> Vec<WmiMotherboard> {
         let mut output : Vec<WmiMotherboard> = Vec::new();
         let mut motherboard = WmiMotherboard {
             name: String::new(),
@@ -12,7 +23,7 @@ impl WmiMotherboard {
             serial_number: String::new(),
             version: String::new(),
         };
-        if let Some(motherboard_info) = system_reader.get_wmi_motherboard_info() {
+        if let Some(motherboard_info) = reader.get_wmi_motherboard_info() {
             let lines = motherboard_info.split('\n');
 
             for line in lines {
@@ -49,5 +60,32 @@ impl WmiMotherboard {
 
         output.push(motherboard);
         output
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiMotherboard> {
+        let reader: Box<WmiMotherboardIface> = Box::new(Reader{});
+        let out = WmiMotherboard::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiMotherboardIface for Test {
+        fn get_wmi_motherboard_info(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-motherboard-info.txt")))
+        }
+    }
+    #[test]
+    fn test_wmi_motherboard () {
+        let reader: Box<WmiMotherboardIface> = Box::new(Test{});
+        let motherboard_info = &WmiMotherboard::get_specific_ex(reader.borrow())[0];
+        assert_eq!(motherboard_info.name, "Base Board");
+        assert_eq!(motherboard_info.manufacturer, " The Phone Company");
+        assert_eq!(motherboard_info.product, " 958B84C99");
+        assert_eq!(motherboard_info.serial_number, " /D8D8DH2/ETFSC0070C000T/");
+        assert_eq!(motherboard_info.version, " A11");
     }
 }

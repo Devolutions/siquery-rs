@@ -1,9 +1,23 @@
-use tables::OsVersion;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{OsVersion,OsVersionIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl OsVersionIface for Reader {
+    fn get_os_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["os", "get", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+    // NA for windows
+    fn os_release(&self) -> Option<String> {Some(String::new())}
+    fn os_platform(&self) ->Option<String> {Some(String::new())}
+}
 
 impl OsVersion {
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<OsVersion> {
+    pub(crate) fn get_specific_ex(reader: &OsVersionIface) -> Vec<OsVersion> {
         let mut output : Vec<OsVersion> = Vec::new();
         let mut os_version = OsVersion {
             name: String::new(),
@@ -13,7 +27,7 @@ impl OsVersion {
             minor: 0,
         };
 
-        if let Some(os_info) = system_reader.get_os_info() {
+        if let Some(os_info) = reader.get_os_info() {
             let lines = os_info.split('\n');
 
             for line in lines {
@@ -38,5 +52,35 @@ impl OsVersion {
 
         output.push(os_version);
         output
+    }
+
+    pub(crate) fn get_specific() -> Vec<OsVersion> {
+        let reader: Box<OsVersionIface> = Box::new(Reader{});
+        let out = OsVersion::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl OsVersionIface for Test {
+        fn get_os_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-osinfo.txt")))
+        }
+        // NA for windows
+        fn os_release(&self) -> Option<String> {Some(String::new())}
+        fn os_platform(&self) ->Option<String> {Some(String::new())}
+    }
+    #[test]
+    fn test_os_version () {
+        let reader: Box<OsVersionIface> = Box::new(Test{});
+        let os_version = &OsVersion::get_specific_ex(reader.borrow())[0];
+        assert_eq!(os_version.platform, "Windows");
+        assert_eq!(os_version.name, "Microsoft Windows 10 Pro");
+        assert_eq!(os_version.version, "10.0.16299");
+        assert_eq!(os_version.major, 10);
+        assert_eq!(os_version.minor, 0);
     }
 }

@@ -3,11 +3,10 @@ extern crate libc;
 use std::mem;
 
 use tables::Uptime;
-use linux::SystemReaderInterface;
 
 impl Uptime {
 
-    pub fn get_specific(_system_reader: &SystemReaderInterface) ->  Vec<Uptime> {
+    pub fn get_specific() ->  Vec<Uptime> {
         let mut output : Vec<Uptime> = Vec::new();
         let mut upt = Uptime {
             days: 0,

@@ -1,6 +1,27 @@
+use std::process::Command;
+use std::borrow::Borrow;
+
 use utils;
-use tables::SystemInfoData;
-use windows::SystemReaderInterface;
+use tables::{SystemInfoData,SystemInfoDataIface};
+
+pub struct Reader {}
+impl SystemInfoDataIface for Reader {
+    fn get_wmi_cpu_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["cpu", "get", "Name,NumberOfLogicalProcessors", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+    fn get_wmi_system_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["computersystem", "get", "Caption,TotalPhysicalMemory", "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+    // NA for windows
+    fn hostname(&self) -> Option<String> {Some(String::new())}
+    fn meminfo(&self) -> Option<String> {Some(String::new())}
+    fn cpuinfo(&self) -> Option<String> {Some(String::new())}
+    fn cpu_count(&self) -> u32 {0}
+}
 
 
 impl SystemInfoData {
@@ -13,10 +34,10 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<SystemInfoData>{
+    pub(crate) fn get_specific_ex(reader: &SystemInfoDataIface) -> Vec<SystemInfoData>{
         let mut output : Vec<SystemInfoData> = Vec::new();
         let mut system_info = SystemInfoData::new();
-        if let Some(os_info) = system_reader.get_wmi_cpu_info() {
+        if let Some(os_info) = reader.get_wmi_cpu_info() {
             let lines = os_info.split('\n');
 
             for line in lines {
@@ -35,7 +56,7 @@ impl SystemInfoData {
             }
         }
 
-        if let Some(os_info) = system_reader.get_wmi_system_info() {
+        if let Some(os_info) = reader.get_wmi_system_info() {
         let lines = os_info.split('\n');
 
         for line in lines {
@@ -56,4 +77,40 @@ impl SystemInfoData {
         output.push(system_info);
         output
     }
+
+    pub(crate) fn get_specific() -> Vec<SystemInfoData> {
+        let reader: Box<SystemInfoDataIface> = Box::new(Reader{});
+        let out = SystemInfoData::get_specific_ex(reader.borrow());
+        out
+    }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl SystemInfoDataIface for Test {
+        fn get_wmi_cpu_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-cpuinfo.txt")))
+        }
+        fn get_wmi_system_info(&self)-> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-system-info.txt")))
+        }
+        // NA for windows
+        fn hostname(&self) -> Option<String> {Some(String::new())}
+        fn meminfo(&self) -> Option<String> {Some(String::new())}
+        fn cpuinfo(&self) -> Option<String> {Some(String::new())}
+        fn cpu_count(&self) -> u32 {0}
+    }
+    #[test]
+    fn test_system_info () {
+        let reader: Box<SystemInfoDataIface> = Box::new(Test{});
+        let system_info = &SystemInfoData::get_specific_ex(reader.borrow())[0];
+        assert_eq!(system_info.computer_name, "galaxy500");
+        assert_eq!(system_info.cpu_logical_cores, 4);
+        assert_eq!(system_info.cpu_brand, "Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz");
+        assert_eq!(system_info.physical_memory, 17043189760);
+    }
+}
+
+

@@ -1,6 +1,20 @@
-use tables::WmiShares;
+use std::process::Command;
+use std::borrow::Borrow;
+
+use tables::{WmiShares,WmiSharesIface};
 use utils;
-use windows::SystemReaderInterface;
+
+pub struct Reader {}
+impl WmiSharesIface for Reader {
+    fn get_wmi_shares_info(&self) -> Option<String> {
+        let output = Command::new("wmic")
+            .args(&["share",
+                "get",
+                "Caption,Description,Name,Path,Status,Type,AllowMaximum",
+                "/format:list"]).output().ok()?;
+        String::from_utf8(output.stdout).ok()
+    }
+}
 
 impl WmiShares {
     pub(crate) fn new() -> WmiShares {
@@ -15,11 +29,11 @@ impl WmiShares {
         }
     }
 
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<WmiShares> {
+    pub(crate) fn get_specific_ex(reader: &WmiSharesIface) -> Vec<WmiShares> {
 
         let mut shares: Vec<WmiShares> = Vec::new();
 
-        if let Some(share_info) = system_reader.get_wmi_shares_info() {
+        if let Some(share_info) = reader.get_wmi_shares_info() {
             let mut share = WmiShares::new();
             let lines = share_info.split('\n');
 
@@ -95,5 +109,34 @@ impl WmiShares {
         }
 
         shares
+    }
+
+    pub(crate) fn get_specific() -> Vec<WmiShares> {
+        let reader: Box<WmiSharesIface> = Box::new(Reader{});
+        let out = WmiShares::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl WmiSharesIface for Test {
+        fn get_wmi_shares_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/wmi-shares.txt")))
+        }
+    }
+    #[test]
+    fn test_wmi_shares () {
+        let reader: Box<WmiSharesIface> = Box::new(Test{});
+        let test_shares = &WmiShares::get_specific_ex(reader.borrow())[0];
+        assert_eq!(test_shares.name, "print$");
+        assert_eq!(test_shares.caption, "Printer Drivers");
+        assert_eq!(test_shares.description, "Printer Drivers");
+        assert_eq!(test_shares.path, "C:\\WINDOWS\\system32\\spool\\drivers");
+        assert_eq!(test_shares.status, "OK");
+        assert_eq!(test_shares._type, "Device Admin");
+        assert_eq!(test_shares.allow_maximum, "TRUE");
     }
 }

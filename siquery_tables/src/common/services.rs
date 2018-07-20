@@ -1,14 +1,15 @@
-use tables::EtcServices;
+use tables::{EtcServices,EtcServicesIface};
 use regex::Regex;
 use std::str::FromStr;
+use std::borrow::Borrow;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
-        use linux::SystemReaderInterface;
+        use linux::EtcServicesReader;
     } else if #[cfg(target_os = "macos")] {
-       use macos::SystemReaderInterface;
+       use macos::EtcServicesReader;
     } else if #[cfg(target_os = "windows")] {
-        use windows::SystemReaderInterface;
+        use windows::EtcServicesReader;
     }
 }
 
@@ -31,11 +32,11 @@ impl EtcServices {
         }
     }
 
-    pub fn get_specific(system_reader: &SystemReaderInterface) -> Vec<EtcServices> {
+    pub fn get_specific_ex(reader: &EtcServicesIface) -> Vec<EtcServices> {
 
         let mut services: Vec<EtcServices> = Vec::new();
 
-        for line in system_reader
+        for line in reader
             .get_services_file()
             .unwrap_or_else(|| "".to_string())
             .lines() {
@@ -102,5 +103,43 @@ impl EtcServices {
             services.push(etc_services);
         }
         services
+    }
+
+    pub fn get_specific() -> Vec<EtcServices> {
+        let reader: Box<EtcServicesIface> = Box::new(EtcServicesReader{});
+        let out = EtcServices::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct EtcServicesTest {}
+    impl EtcServicesIface for EtcServicesTest {
+        fn get_services_file(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/services.txt")))
+        }
+    }
+    #[test]
+    fn test_etc_services() {
+        let reader: Box<EtcServicesIface> = Box::new(EtcServicesTest {});
+        let etc_services = EtcServices::get_specific_ex(reader.borrow());
+        assert_eq!(etc_services.get(0).unwrap().name, "echo");
+        assert_eq!(etc_services.get(0).unwrap().port, 7);
+        assert_eq!(etc_services.get(0).unwrap().protocol, "tcp");
+        assert_eq!(etc_services.get(0).unwrap().aliases, "");
+        assert_eq!(etc_services.get(0).unwrap().comment, "");
+        assert_eq!(etc_services.get(2).unwrap().name, "discard");
+        assert_eq!(etc_services.get(2).unwrap().port, 9);
+        assert_eq!(etc_services.get(2).unwrap().protocol, "tcp");
+        assert_eq!(etc_services.get(2).unwrap().aliases, "sink null");
+        assert_eq!(etc_services.get(2).unwrap().comment, "");
+        assert_eq!(etc_services.get(12).unwrap().name, "ftp-data");
+        assert_eq!(etc_services.get(12).unwrap().port, 20);
+        assert_eq!(etc_services.get(12).unwrap().protocol, "tcp");
+        assert_eq!(etc_services.get(12).unwrap().aliases, "");
+        assert_eq!(etc_services.get(12).unwrap().comment, "FTP, data");
+        assert_eq!(etc_services.len(), 15);
     }
 }

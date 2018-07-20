@@ -1,13 +1,30 @@
 use plist::Plist;
+use std::fs::File;
+use std::io::Read;
+use std::borrow::Borrow;
 
-use tables::OsVersion;
-use macos::SystemReaderInterface;
+use tables::{OsVersion,OsVersionIface};
 
+pub struct Reader {}
+impl OsVersionIface for Reader {
+    fn get_os_info(&self) -> Option<String> {
+        let mut s = String::new();
+        File::open("/System/Library/CoreServices/SystemVersion.plist").ok()?.read_to_string(&mut s).ok()?;
+        Some(s)
+    }
+    // NA for mac
+    fn os_release(&self) -> Option<String> {
+        Some(String::from("For linux only"))
+    }
+    fn os_platform(&self) -> Option<String> {
+        Some(String::from("For linux only"))
+    }
+}
 
 impl OsVersion {
-    pub(crate) fn get_specific(system_reader: &SystemReaderInterface) -> Vec<OsVersion> {
+    pub(crate) fn get_specific_ex(reader: &OsVersionIface) -> Vec<OsVersion> {
         let mut output : Vec<OsVersion> = Vec::new();
-        let system_version = system_reader.system_version();
+        let system_version = reader.get_os_info();
 
         let mut name = String::new();
         let mut version = String::new();
@@ -40,5 +57,38 @@ impl OsVersion {
             }
         );
         output
+    }
+    pub(crate) fn get_specific() -> Vec<OsVersion> {
+        let reader: Box<OsVersionIface> = Box::new(Reader{});
+        let out = OsVersion::get_specific_ex(reader.borrow());
+        out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    pub struct Test {}
+    impl OsVersionIface for Test {
+        fn get_os_info(&self) -> Option<String> {
+            Some(String::from(include_str!("../../test_data/SystemVersion.plist")))
+        }
+        // NA for mac
+        fn os_release(&self) -> Option<String> {
+            Some(String::new())
+        }
+        fn os_platform(&self) -> Option<String> {
+            Some(String::new())
+        }
+    }
+    #[test]
+    fn test_os_version () {
+        let reader: Box<OsVersionIface> = Box::new(Test{});
+        let os_version = &OsVersion::get_specific_ex(reader.borrow())[0];
+        assert_eq!(os_version.platform, "MacOS");
+        assert_eq!(os_version.name, "Mac OS X");
+        assert_eq!(os_version.version, "10.13.3");
+        assert_eq!(os_version.major, 10);
+        assert_eq!(os_version.minor, 13);
     }
 }

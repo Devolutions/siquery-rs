@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
 use tables::{ProcessOpenSocketsRow, ProcessesRow};
-use linux::SystemReaderInterface;
 
 pub struct InternalProcNamespaces {
     cgroup_namespace: String,
@@ -289,7 +288,7 @@ impl ProcessOpenSocketsRow {
         Some(net_namespaces)
     }
 
-    pub fn get_specific (_system_reader: &SystemReaderInterface) -> Vec<ProcessOpenSocketsRow>{
+    pub fn get_specific () -> Vec<ProcessOpenSocketsRow>{
         let mut table: Vec<ProcessOpenSocketsRow> = Vec::new();
         let mut all_namespaces = ProcessOpenSocketsRow::get_all_network_namespaces().unwrap_or(HashMap::new());
         let all_pid_ino = ProcessOpenSocketsRow::get_all_open_sockets().unwrap_or(Vec::new());

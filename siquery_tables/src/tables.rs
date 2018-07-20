@@ -59,6 +59,10 @@ pub struct EtcHosts {
     pub hostnames: String,
 }
 
+pub trait EtcHostsIface {
+    fn get_hosts_file(&self) -> Option<String>;
+}
+
 impl EtcHosts {
     const ADDRESS_ID: u64 = 0x00000001;
     const HOSTNAMES_ID: u64 = 0x00000002;
@@ -99,6 +103,10 @@ pub struct EtcProtocols {
     pub number: u16,
     pub alias: String,
     pub comment: String,
+}
+
+pub trait EtcProtocolsIface {
+    fn get_protocols_file(&self) -> Option<String>;
 }
 
 #[allow(non_upper_case_globals)]
@@ -152,6 +160,10 @@ pub struct EtcServices {
     pub protocol: String,
     pub aliases: String,
     pub comment: String,
+}
+
+pub trait EtcServicesIface {
+    fn get_services_file(&self) -> Option<String>;
 }
 
 #[allow(non_upper_case_globals)]
@@ -212,6 +224,9 @@ pub struct WmiComputerInfo {
     pub system_type: String,
 }
 
+pub trait WmiComputerInfoIface {
+    fn get_wmi_computer_info(&self) -> Option<String>;
+}
 #[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl WmiComputerInfo {
@@ -278,6 +293,14 @@ pub struct SystemInfoData {
     pub physical_memory: u64,
 }
 
+pub trait SystemInfoDataIface {
+    fn get_wmi_cpu_info(&self) -> Option<String>;
+    fn get_wmi_system_info(&self) -> Option<String>;
+    fn hostname(&self) -> Option<String>;
+    fn meminfo(&self) -> Option<String>;
+    fn cpuinfo(&self) -> Option<String>;
+    fn cpu_count(&self) -> u32;
+}
 #[allow(non_upper_case_globals)]
 impl SystemInfoData {
     const COMPUTER_NAME_ID: u64 = 0x00000001;
@@ -344,6 +367,10 @@ pub struct WmiOsVersion {
     pub total_virtual_mem_size: String,
     pub total_visible_mem_size: String,
     pub win_directory: String,
+}
+
+pub trait WmiOsVersionIface {
+    fn get_wmi_os_info(&self) -> Option<String>;
 }
 
 #[cfg(target_os = "windows")]
@@ -468,6 +495,13 @@ pub struct OsVersion {
     pub minor: u32,
 }
 
+pub trait OsVersionIface {
+    fn get_os_info(&self) -> Option<String>;
+    fn os_release(&self) -> Option<String>;
+    fn os_platform(&self) -> Option<String>;
+}
+
+
 #[allow(non_upper_case_globals)]
 impl OsVersion {
     const NAME_ID: u64 = 0x00000001;
@@ -526,6 +560,10 @@ pub struct LogicalDrive {
     pub free_space: u64,
     pub size: u64,
     pub file_system: String,
+}
+
+pub trait LogicalDriveIface {
+    fn get_wmi_drives_info(&self) -> Option<String>;
 }
 
 #[allow(non_upper_case_globals)]
@@ -605,6 +643,10 @@ pub struct InterfaceAddress {
     pub friendly_name: String,
 }
 
+pub trait InterfaceAddressIface {
+    fn get_wmi_nicconfig(&self) -> Option<String>;
+}
+
 #[cfg(not(target_os = "macos"))]
 #[allow(non_upper_case_globals)]
 impl InterfaceAddress {
@@ -682,6 +724,10 @@ pub struct InterfaceDetails {
     pub mac: String,
     pub mtu: u32,
     pub enabled: u8,
+}
+
+pub trait InterfaceDetailsIface {
+    fn get_wmi_nicconfig_details(&self) -> Option<String>;
 }
 
 #[cfg(not(target_os = "macos"))]
@@ -815,6 +861,10 @@ pub struct WmiPrinters {
     pub system_creation_class_name: String,
     pub system_name: String,
     pub vertical_resolution: String,
+}
+
+pub trait WmiPrintersIface {
+    fn get_wmi_printers_info(&self)-> Option<String>;
 }
 
 #[cfg(target_os = "windows")]
@@ -964,6 +1014,10 @@ pub struct WmiServices {
     pub system_name: String,
 }
 
+pub trait WmiServicesIface {
+    fn get_wmi_services_info(&self)-> Option<String>;
+}
+
 #[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
 impl WmiServices {
@@ -1096,6 +1150,10 @@ pub struct WmiHotfixes {
     pub hotfix_id: String,
     pub installed_by: String,
     pub installed_on: String,
+}
+
+pub trait WmiHotfixesIface {
+    fn get_wmi_hotfixes_info(&self)-> Option<String>;
 }
 
 #[cfg(target_os = "windows")]
@@ -1238,6 +1296,10 @@ pub struct WmiNetworkAdapters {
     pub mac_address: String,
 }
 
+pub trait WmiNetworkAdaptersIface {
+    fn get_wmi_network_adapters_info(&self)-> Option<String>;
+}
+
 #[cfg(target_os = "windows")]
 impl WmiNetworkAdapters {
     const DESCRIPTION_ID: u64 = 0x00000001;
@@ -1335,6 +1397,10 @@ pub struct WmiShares {
     pub allow_maximum: String,
 }
 
+pub trait WmiSharesIface {
+    fn get_wmi_shares_info(&self)-> Option<String>;
+}
+
 #[cfg(target_os = "windows")]
 impl WmiShares {
     const CAPTION_ID: u64 = 0x00000001;
@@ -1409,6 +1475,10 @@ pub struct WmiLocalAccounts {
     pub sid: String,
     pub sid_type: String,
     pub status: String,
+}
+
+pub trait WmiLocalAccountsIface {
+    fn get_wmi_local_accounts_info(&self)-> Option<String>;
 }
 
 #[cfg(target_os = "windows")]
@@ -1493,6 +1563,10 @@ pub struct WmiBios {
     pub smbios_version: String,
 }
 
+pub trait WmiBiosIface {
+    fn get_wmi_bios_info(&self)-> Option<String>;
+}
+
 #[cfg(target_os = "windows")]
 impl WmiBios {
     const CAPTION_ID: u64 = 0x00000001;
@@ -1553,6 +1627,10 @@ pub struct WmiMotherboard {
     pub product: String,
     pub serial_number: String,
     pub version: String,
+}
+
+pub trait WmiMotherboardIface {
+    fn get_wmi_motherboard_info(&self)-> Option<String>;
 }
 
 #[cfg(target_os = "windows")]
@@ -1629,6 +1707,9 @@ pub struct WmiProcessor {
     pub socket_designation: String,
 }
 
+pub trait WmiProcessorIface {
+    fn get_wmi_processor_info(&self)-> Option<String>;
+}
 #[cfg(target_os = "windows")]
 impl WmiProcessor {
     const ADDRESS_WIDTH_ID: u64 = 0x00000001;
@@ -1758,6 +1839,10 @@ pub struct WmiMemory {
     pub speed: String,
 }
 
+pub trait WmiMemoryIface {
+    fn get_wmi_physical_memory(&self)-> Option<String>;
+}
+
 #[cfg(target_os = "windows")]
 impl WmiMemory {
     const NAME_ID: u64 = 0x00000001;
@@ -1854,6 +1939,10 @@ pub struct WmiSound {
     pub dma_buffer_size: String,
 }
 
+pub trait WmiSoundIface {
+    fn get_wmi_sound_info(&self)-> Option<String>;
+}
+
 #[cfg(target_os = "windows")]
 impl WmiSound {
     const NAME_ID: u64 = 0x00000001;
@@ -1916,6 +2005,10 @@ pub struct WmiVideo {
     pub status: String,
     pub video_architecture: String,
     pub video_memory_type: String,
+}
+
+pub trait WmiVideoIface {
+    fn get_wmi_video_info(&self)-> Option<String>;
 }
 
 #[cfg(target_os = "windows")]
@@ -2030,6 +2123,10 @@ pub struct WmiMonitors {
     pub screen_width: u64,
 }
 
+pub trait WmiMonitorsIface {
+    fn get_wmi_monitor_info(&self)-> Option<String>;
+}
+
 #[cfg(target_os = "windows")]
 impl WmiMonitors {
     const NAME_ID: u64 = 0x00000001;
@@ -2096,6 +2193,10 @@ pub struct WmiKeyboard {
     pub status: String,
 }
 
+pub trait WmiKeyboardIface {
+    fn get_wmi_keyboard_info(&self)-> Option<String>;
+}
+
 #[cfg(target_os = "windows")]
 impl WmiKeyboard {
     const NAME_ID: u64 = 0x00000001;
@@ -2151,6 +2252,10 @@ pub struct WmiPointingDevice {
     pub description: String,
     pub pointing_type: String,
     pub status: String,
+}
+
+pub trait WmiPointingDeviceIface {
+    fn get_wmi_pointing_device(&self)-> Option<String>;
 }
 
 #[cfg(target_os = "windows")]
@@ -2342,6 +2447,10 @@ pub struct ProcessesRow {
     pub pid_namespace: String,
     pub user_namespace: String,
     pub uts_namespace: String,
+}
+
+pub trait ProcessesIface {
+    fn get_wmi_process_info(&self) -> Option<String>;
 }
 
 impl ProcessesRow {
