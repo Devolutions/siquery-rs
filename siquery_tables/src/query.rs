@@ -1,3 +1,6 @@
+
+use std::borrow::Borrow;
+
 use tables::*;
 
 use vtab::*;
@@ -235,155 +238,153 @@ fn select_header<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<String> where T
 }
 
 pub fn query_header(name: &str, columns: Vec<String>) -> Vec<String> {
-    let system_reader: Box<SystemReaderInterface> = Box::new(SystemReader::new());
+
     let res = match name {
         "etc_hosts" => {
-            let table = EtcHosts::get_specific(system_reader.borrow());
+            let table = EtcHosts::get_specific();
             select_header(&table, columns)
         },
         "etc_protocols" => {
-            let table = EtcProtocols::get_specific(system_reader.borrow());
+            let table = EtcProtocols::get_specific();
             select_header(&table, columns)
         },
         "etc_services" => {
-            let table = EtcServices::get_specific(system_reader.borrow());
+            let table = EtcServices::get_specific();
             select_header(&table, columns)
         },
         "system_info" => {
-            let table = SystemInfoData::get_specific(system_reader.borrow());
+            let table = SystemInfoData::get_specific();
             select_header(&table, columns)
         },
         "os_version" => {
-            let table = OsVersion::get_specific(system_reader.borrow());
+            let table = OsVersion::get_specific();
             select_header(&table, columns)
         },
         "logical_drives" => {
-            let table = LogicalDrive::get_specific(system_reader.borrow());
+            let table = LogicalDrive::get_specific();
             select_header(&table, columns)
         },
         #[cfg(not(target_os = "macos"))]
         "interface_address" => {
-            let table = InterfaceAddress::get_specific(system_reader.borrow());
+            let table = InterfaceAddress::get_specific();
             select_header(&table, columns)
         },
         #[cfg(not(target_os = "macos"))]
         "interface_details" => {
-            let table = InterfaceDetails::get_specific(system_reader.borrow());
+            let table = InterfaceDetails::get_specific();
             select_header(&table, columns)
         },
         "uptime" => {
-            let table = Uptime::get_specific(system_reader.borrow());
+            let table = Uptime::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "products" => {
-            let table = Products::get_specific(system_reader.borrow());
+            let table = Products::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_computer_info" => {
-            let table = WmiComputerInfo::get_specific(system_reader.borrow());
+            let table = WmiComputerInfo::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_os_version" => {
-            let table = WmiOsVersion::get_specific(system_reader.borrow());
+            let table = WmiOsVersion::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_printers" => {
-            let table = WmiPrinters::get_specific(system_reader.borrow());
+            let table = WmiPrinters::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_services" => {
-            let table = WmiServices::get_specific(system_reader.borrow());
+            let table = WmiServices::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_hotfixes" => {
-            let table = WmiHotfixes::get_specific(system_reader.borrow());
+            let table = WmiHotfixes::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_shares" => {
-            let table = WmiShares::get_specific(system_reader.borrow());
+            let table = WmiShares::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_network_adapters" => {
-            let table = WmiNetworkAdapters::get_specific(system_reader.borrow());
+            let table = WmiNetworkAdapters::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_local_accounts" => {
-            let table = WmiLocalAccounts::get_specific(system_reader.borrow());
+            let table = WmiLocalAccounts::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_bios" => {
-            let wmi_bios = WmiBios::get_specific(system_reader.borrow());
-            let mut table: Vec<WmiBios> = Vec::new();
-            table.push(wmi_bios);
+            let table = WmiBios::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_motherboard" => {
-            let table = WmiMotherboard::get_specific(system_reader.borrow());
+            let table = WmiMotherboard::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_processor" => {
-            let table = WmiProcessor::get_specific(system_reader.borrow());
+            let table = WmiProcessor::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_physical_memory" => {
-            let table = WmiMemory::get_specific(system_reader.borrow());
+            let table = WmiMemory::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_sound" => {
-            let table = WmiSound::get_specific(system_reader.borrow());
+            let table = WmiSound::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_video" => {
-            let table = WmiVideo::get_specific(system_reader.borrow());
+            let table = WmiVideo::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_monitors" => {
-            let table = WmiMonitors::get_specific(system_reader.borrow());
+            let table = WmiMonitors::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_keyboard" => {
-            let table = WmiKeyboard::get_specific(system_reader.borrow());
+            let table = WmiKeyboard::get_specific();
             select_header(&table, columns)
         },
         #[cfg(target_os = "windows")]
         "wmi_pointing_device" => {
-            let table = WmiPointingDevice::get_specific(system_reader.borrow());
+            let table = WmiPointingDevice::get_specific();
             select_header(&table, columns)
         },
         #[cfg(not(target_os = "macos"))]
         "process_open_sockets" => {
-            let table = ProcessOpenSocketsRow::get_specific(system_reader.borrow());
+            let table = ProcessOpenSocketsRow::get_specific();
             select_header(&table, columns)
         },
         "processes" => {
-            let table = ProcessesRow::get_specific(system_reader.borrow());
+            let table = ProcessesRow::get_specific();
             select_header(&table, columns)
         },
         #[cfg(not(target_os = "macos"))]
         "process_memory_map" => {
-            let table = ProcessMemoryMapRow::get_specific(system_reader.borrow());
+            let table = ProcessMemoryMapRow::get_specific();
             select_header(&table, columns)
         },
         #[cfg(not(target_os = "windows"))]
         "process_envs" => {
-            let table = ProcessEnvsRow::get_specific(system_reader.borrow());
+            let table = ProcessEnvsRow::get_specific();
             select_header(&table, columns)
         },
         _ => {
@@ -402,30 +403,52 @@ pub fn get_table_list() -> Vec<String> {
         "system_info".to_string(),
         "os_version".to_string(),
         "logical_drives".to_string(),
-        "interface_address".to_string(),
-        "interface_details".to_string(),
         "uptime".to_string(),
-        "products".to_string(),
-        "wmi_computer_info".to_string(),
-        "wmi_os_version".to_string(),
-        "wmi_printers".to_string(),
-        "wmi_services".to_string(),
-        "wmi_hotfixes".to_string(),
-        "wmi_shares".to_string(),
-        "wmi_network_adapters".to_string(),
-        "wmi_local_accounts".to_string(),
-        "wmi_bios".to_string(),
-        "wmi_motherboard".to_string(),
-        "wmi_processor".to_string(),
-        "wmi_physical_memory".to_string(),
-        "wmi_sound".to_string(),
-        "wmi_video".to_string(),
-        "wmi_monitors".to_string(),
-        "wmi_keyboard".to_string(),
-        "wmi_pointing_device".to_string(),
-        "process_open_sockets".to_string(),
         "processes".to_string(),
+        #[cfg(not(target_os = "macos"))]
+        "interface_address".to_string(),
+        #[cfg(not(target_os = "macos"))]
+        "interface_details".to_string(),
+        #[cfg(not(target_os = "macos"))]
+        "process_open_sockets".to_string(),
+        #[cfg(not(target_os = "macos"))]
         "process_memory_map".to_string(),
+        #[cfg(target_os = "windows")]
+        "products".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_computer_info".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_os_version".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_printers".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_services".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_hotfixes".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_shares".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_network_adapters".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_local_accounts".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_bios".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_motherboard".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_processor".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_physical_memory".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_sound".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_video".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_monitors".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_keyboard".to_string(),
+        #[cfg(target_os = "windows")]
+        "wmi_pointing_device".to_string(),
         #[cfg(not(target_os = "windows"))]
         "process_envs".to_string(),
     ]
@@ -437,22 +460,25 @@ pub fn init_db()-> Connection {
     db
 }
 
-pub fn register_first(db:  &Connection, first_table: String){
+pub fn register_first(db:  &Connection, first_table: String) -> Option<bool> {
     let version = version_number();
 
     if version < 3008012 {
         println!("version: '{}' is not supported", version);
-        return
+        return None
     }
-
-    if first_table.len() > 0 {
-        let command = format!("{}{}{}{}{}",
+    for table in get_table_list().iter() {
+        if *table == first_table {
+            let command = format!("{}{}{}{}{}",
                                   "CREATE VIRTUAL TABLE ",
-                                  first_table,
+                                  table,
                                   " USING siquery(table_name=",
-                                  first_table, ")");
-        &db.execute_batch(&command).unwrap();
+                                  table, ")");
+            &db.execute_batch(&command).unwrap();
+            return Some(true)
+        }
     }
+    None
 }
 
 pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: String) {
@@ -465,10 +491,10 @@ pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: Strin
     for table in tables.iter() {
         if *table != first_table {
             let command = format!("{}{}{}{}{}",
-                                      "CREATE VIRTUAL TABLE ",
-                                      table,
-                                      " USING siquery(table_name=",
-                                      table, ")");
+                                  "CREATE VIRTUAL TABLE ",
+                                  table,
+                                  " USING siquery(table_name=",
+                                  table, ")");
             &db.execute_batch(&command).unwrap();
         }
     }
