@@ -11,7 +11,9 @@ extern crate regex;
 #[macro_use]
 extern crate lazy_static;
 extern crate time;
+extern crate rusqlite;
 
+pub mod vtab;
 mod common;
 mod utils;
 pub mod query;
