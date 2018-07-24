@@ -10,7 +10,12 @@ path = "src/main.rs"
 [dependencies]
 prettytable-rs = "^0.6"
 clap = { version = "2.31", features = ["yaml"] }
+lazy_static = "1.0"
 
 [dependencies.siquery]
 path = "../siquery_tables"
 
+[dependencies.rusqlite]
+git = "https://github.com/gwenn/rusqlite.git"
+rev = "849dbda"
+features = ["vtab", "bundled"]

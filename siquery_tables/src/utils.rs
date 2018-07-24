@@ -5,3 +5,4 @@ pub fn trim_string(s: &mut String) {
         s.truncate(new_len);
     }
 }
+//Todo error handler

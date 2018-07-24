@@ -30,3 +30,8 @@ winapi =  { version = "0.3", features = ["handleapi","winnt", "minwindef", "ws2d
 
 [target.'cfg(not(windows))'.dependencies]
 libc = "0.2"
+
+[dependencies.rusqlite]
+git = "https://github.com/gwenn/rusqlite.git"
+rev = "849dbda"
+features = ["vtab", "bundled"]
