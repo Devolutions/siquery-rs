@@ -9,6 +9,7 @@ use rusqlite::{Connection, Result, Error};
 use std::os::raw::c_int;
 use std::str;
 
+use std::time::{Duration, SystemTime};
 use query::{query_table, query_header};
 
 pub fn load_module(conn: &Connection) -> Result<()> {
@@ -25,6 +26,7 @@ struct SiqueryTab {
     /// Base class. Must be first
     base: sqlite3_vtab,
     table_name: String,
+    table: Vec<Vec<String>>,
     columns: Vec<String>,
     header: Vec<String>,
 }
@@ -73,6 +75,7 @@ impl VTab for SiqueryTab {
         let mut vtab = SiqueryTab {
             base: sqlite3_vtab::default(),
             table_name: String::new(),
+            table: Vec::new(),
             columns: Vec::new(),
             header: Vec::new(),
         };
@@ -101,10 +104,11 @@ impl VTab for SiqueryTab {
             }
         }
 
-        // create the header
+        // create the header & register table in memory
         vtab.header = query_header(vtab.table_name.as_str(), vtab.columns.clone());
+        vtab.table = query_table(vtab.table_name.as_str(), vtab.header.clone());
 
-        let mut schema= None;
+        let mut schema = None;
         if schema.is_none() {
             let mut sql = String::from("CREATE TABLE x(");
             for (i, col) in vtab.header.iter().enumerate() {
@@ -117,7 +121,9 @@ impl VTab for SiqueryTab {
                     sql.push_str(", ");
                 }
             }
+
             schema = Some(sql);
+            println!("schema {:?}", schema);
         }
         Ok((schema.unwrap().to_owned(), vtab))
     }
@@ -156,14 +162,13 @@ impl VTabCursor for SiqueryTabCursor {
         _idx_str: Option<&str>,
         _args: &Values,
     ) -> Result<()> {
-        let siquery_table = unsafe {&*(self.base.pVtab as * const SiqueryTab)};
 
-        //register the table in memory
-        self.rows = query_table(siquery_table.table_name.as_str(), siquery_table.header.clone());
-        self.row_id = 0;
+        println!("wow ok ");
+        let siquery_table = unsafe {&*(self.base.pVtab as * const SiqueryTab)};
+        self.rows = siquery_table.table.to_owned();
+        //self.row_id = 0;
         self.next()
     }
-    
     fn next(&mut self) -> Result<()> {
         {
             if self.row_id == self.rows.len() as i64 {
@@ -171,10 +176,10 @@ impl VTabCursor for SiqueryTabCursor {
                 return Ok(());
             }
             else {
-                self.eot = false;
-                self.cols = self.rows[self.row_id as usize].clone()
+                self.cols = self.rows[self.row_id as usize].clone();
             }
         }
+
         self.row_id += 1;
         Ok(())
     }
@@ -194,7 +199,6 @@ impl VTabCursor for SiqueryTabCursor {
             return ctx.set_result(&Null);
         }
         ctx.set_result(&self.cols[col as usize].to_owned())
-
     }
     fn rowid(&self) -> Result<i64> {
         Ok(self.row_id)

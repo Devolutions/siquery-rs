@@ -65,6 +65,7 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
         "etc_hosts" => {
             let table = EtcHosts::get_specific();
             select(&table, columns)
+
         },
         "etc_protocols" => {
             let table = EtcProtocols::get_specific();

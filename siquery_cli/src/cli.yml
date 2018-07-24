@@ -24,9 +24,7 @@ args:
     - SIQUERY_INPUT:
         requires: siquery
         value_name: input
-        conflicts_with: table
-        conflicts_with: select
-        help: < sqlite query command >
+        help: sqlite query command
         index: 1
     - list_all:
         short: l
@@ -42,3 +40,5 @@ args:
         short: v
         multiple: true
         help: Sets the level of verbosity
+
+
