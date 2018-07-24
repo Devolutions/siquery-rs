@@ -3,7 +3,7 @@
 #[macro_use] extern crate libfuzzer_sys;
 extern crate siquery;
 
-use siquery::tables::{EtcProtocolsIface,EtcProtocols,WmiComputerInfo};
+use siquery::tables::{EtcProtocolsIface,EtcProtocols};
 
 struct StringFuzzer {
     s: String,
