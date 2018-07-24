@@ -25,7 +25,7 @@ impl WmiMonitors {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiMonitorsIface) -> Vec<WmiMonitors> {
+    pub fn get_specific_ex(reader: &WmiMonitorsIface) -> Vec<WmiMonitors> {
 
         let mut monitors: Vec<WmiMonitors> = Vec::new();
 

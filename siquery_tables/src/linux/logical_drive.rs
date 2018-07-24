@@ -1,5 +1,6 @@
 use tables::LogicalDrive;
 
+#[cfg(not(fuzzing))]    // Since not yet implemented for linux, disable this implementation when fuzzing to allow fuzzing interface_address for windows
 impl LogicalDrive {
     pub(crate) fn get_specific() -> Vec<LogicalDrive> {
         // TODO: implement logical_drive table

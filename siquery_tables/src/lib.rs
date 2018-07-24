@@ -18,13 +18,20 @@ pub mod query;
 pub mod tables;
 
 cfg_if! {
-    if #[cfg(target_os = "linux")] {
+    if #[cfg(all(target_os = "linux",fuzzing))] {
+        extern crate sysconf;
+        extern crate uname;
+
+        pub mod windows;
+        pub mod linux;
+        pub use linux as sys;
+    } else if #[cfg(all(target_os = "linux",not(fuzzing)))] {
         extern crate sysconf;
         extern crate uname;
 
         pub mod linux;
         pub use linux as sys;
-    } else if #[cfg(target_os = "macos")] {
+    }else if #[cfg(target_os = "macos")] {
         extern crate plist;
         extern crate uname;
         extern crate libc;

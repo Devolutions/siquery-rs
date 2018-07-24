@@ -13,15 +13,11 @@ use std::env;
 mod interface_address;
 mod interface_details;
 mod logical_drive;
-mod os_version;
-mod system_info;
 mod wmi_os_version;
 mod wmi_computer_info;
-mod uptime;
 mod wmi_printers;
 mod wmi_services;
 mod wmi_hotfixes;
-mod products;
 mod wmi_shares;
 mod wmi_network_adapters;
 mod wmi_local_accounts;
@@ -34,9 +30,13 @@ mod wmi_video;
 mod wmi_monitors;
 mod wmi_keyboard;
 mod wmi_pointing_device;
-mod process_open_sockets;
-mod processes;
-mod process_memory_map;
+#[cfg(not(fuzzing))]    mod process_open_sockets;
+#[cfg(not(fuzzing))]    mod processes;
+#[cfg(not(fuzzing))]    mod process_memory_map;
+#[cfg(not(fuzzing))]    mod os_version;
+#[cfg(not(fuzzing))]    mod system_info;
+#[cfg(not(fuzzing))]    mod products;
+#[cfg(not(fuzzing))]    mod uptime;
 
 pub struct EtcHostsReader {}
 impl EtcHostsIface for EtcHostsReader {

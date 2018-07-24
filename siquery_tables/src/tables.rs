@@ -213,7 +213,7 @@ impl Table for EtcServices {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize)]
 pub struct WmiComputerInfo {
     pub computer_name: String,
@@ -227,7 +227,7 @@ pub struct WmiComputerInfo {
 pub trait WmiComputerInfoIface {
     fn get_wmi_computer_info(&self) -> Option<String>;
 }
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[allow(non_upper_case_globals)]
 impl WmiComputerInfo {
     const COMPUTER_NAME_ID: u64 = 0x00000001;
@@ -347,7 +347,7 @@ impl Table for SystemInfoData {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize)]
 pub struct WmiOsVersion {
     pub build_number: String,
@@ -839,7 +839,7 @@ impl Table for Uptime {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPrinters {
     pub attributes: String,
@@ -990,7 +990,7 @@ impl Table for WmiPrinters {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiServices {
     pub accept_pause: String,
@@ -1141,7 +1141,7 @@ impl Table for WmiServices {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiHotfixes {
     pub caption: String,
@@ -1215,7 +1215,7 @@ impl Table for WmiHotfixes {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Products {
     pub install_date: String,
@@ -1284,7 +1284,7 @@ impl Table for Products {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiNetworkAdapters {
     pub description: String,
@@ -1385,7 +1385,7 @@ impl Table for WmiNetworkAdapters {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiShares {
     pub caption: String,
@@ -1463,7 +1463,7 @@ impl Table for WmiShares {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiLocalAccounts {
     pub account_type: String,
@@ -1553,7 +1553,7 @@ impl Table for WmiLocalAccounts {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiBios {
     pub caption: String,
@@ -1619,7 +1619,7 @@ impl Table for WmiBios {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMotherboard {
     pub name: String,
@@ -1685,7 +1685,7 @@ impl Table for WmiMotherboard {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiProcessor {
     pub address_width: String,
@@ -1822,7 +1822,7 @@ impl Table for WmiProcessor {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMemory {
     pub name: String,
@@ -1930,7 +1930,7 @@ impl Table for WmiMemory {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiSound {
     pub name: String,
@@ -1990,7 +1990,7 @@ impl Table for WmiSound {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiVideo {
     pub name: String,
@@ -2112,7 +2112,7 @@ impl Table for WmiVideo {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMonitors {
     pub name: String,
@@ -2184,7 +2184,7 @@ impl Table for WmiMonitors {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiKeyboard {
     pub name: String,
@@ -2244,7 +2244,7 @@ impl Table for WmiKeyboard {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows",fuzzing))]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPointingDevice {
     pub name: String,

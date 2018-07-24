@@ -14,7 +14,7 @@ impl WmiMotherboardIface for Reader {
 }
 
 impl WmiMotherboard {
-    pub(crate) fn get_specific_ex(reader: &WmiMotherboardIface) -> Vec<WmiMotherboard> {
+    pub fn get_specific_ex(reader: &WmiMotherboardIface) -> Vec<WmiMotherboard> {
         let mut output : Vec<WmiMotherboard> = Vec::new();
         let mut motherboard = WmiMotherboard {
             name: String::new(),

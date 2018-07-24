@@ -25,7 +25,7 @@ impl WmiComputerInfo {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiComputerInfoIface) -> Vec<WmiComputerInfo> {
+    pub fn get_specific_ex(reader: &WmiComputerInfoIface) -> Vec<WmiComputerInfo> {
         let mut output : Vec<WmiComputerInfo> = Vec::new();
         let mut computer = WmiComputerInfo::new();
 

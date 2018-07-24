@@ -23,7 +23,7 @@ impl WmiKeyboard {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiKeyboardIface) -> Vec<WmiKeyboard> {
+    pub fn get_specific_ex(reader: &WmiKeyboardIface) -> Vec<WmiKeyboard> {
 
         let mut keyboards: Vec<WmiKeyboard> = Vec::new();
 
