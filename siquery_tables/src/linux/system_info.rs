@@ -55,7 +55,7 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &SystemInfoDataIface) -> Vec<SystemInfoData> {
+    pub fn get_specific_ex(reader: &SystemInfoDataIface) -> Vec<SystemInfoData> {
         let mut output : Vec<SystemInfoData> = Vec::new();
         let mut system_info = SystemInfoData::new();
         system_info.computer_name = reader.hostname().unwrap_or_else(|| String::from(""));

@@ -44,7 +44,7 @@ impl WmiPrinters {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiPrintersIface) -> Vec<WmiPrinters> {
+    pub fn get_specific_ex(reader: &WmiPrintersIface) -> Vec<WmiPrinters> {
 
         let mut output: Vec<WmiPrinters> = Vec::new();
 

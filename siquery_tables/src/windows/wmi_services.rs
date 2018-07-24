@@ -43,7 +43,7 @@ impl WmiServices {
         }
     }
 
-    pub(crate) fn get_specific_ex (reader: &WmiServicesIface) -> Vec<WmiServices> {
+    pub fn get_specific_ex (reader: &WmiServicesIface) -> Vec<WmiServices> {
 
         let mut output: Vec<WmiServices> = Vec::new();
 

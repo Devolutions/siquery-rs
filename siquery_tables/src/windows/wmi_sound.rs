@@ -23,7 +23,7 @@ impl WmiSound {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiSoundIface) -> Vec<WmiSound> {
+    pub fn get_specific_ex(reader: &WmiSoundIface) -> Vec<WmiSound> {
 
         let mut sounds: Vec<WmiSound> = Vec::new();
 

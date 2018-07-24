@@ -31,7 +31,7 @@ impl WmiMemory {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiMemoryIface) -> Vec<WmiMemory> {
+    pub fn get_specific_ex(reader: &WmiMemoryIface) -> Vec<WmiMemory> {
 
         let mut physical_memories: Vec<WmiMemory> = Vec::new();
 

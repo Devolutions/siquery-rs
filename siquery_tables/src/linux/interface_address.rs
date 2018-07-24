@@ -1,5 +1,6 @@
 use tables::InterfaceAddress;
 
+#[cfg(not(fuzzing))]    // Since not yet implemented for linux, disable this implementation when fuzzing to allow fuzzing interface_address for windows
 impl InterfaceAddress {
     pub(crate) fn new() -> InterfaceAddress {
         InterfaceAddress {

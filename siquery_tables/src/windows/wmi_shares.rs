@@ -29,7 +29,7 @@ impl WmiShares {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiSharesIface) -> Vec<WmiShares> {
+    pub fn get_specific_ex(reader: &WmiSharesIface) -> Vec<WmiShares> {
 
         let mut shares: Vec<WmiShares> = Vec::new();
 

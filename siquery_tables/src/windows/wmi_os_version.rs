@@ -14,7 +14,7 @@ impl WmiOsVersionIface for Reader {
 }
 
 impl WmiOsVersion {
-    pub(crate) fn get_specific_ex(reader: &WmiOsVersionIface) -> Vec<WmiOsVersion> {
+    pub fn get_specific_ex(reader: &WmiOsVersionIface) -> Vec<WmiOsVersion> {
         let mut output : Vec<WmiOsVersion> = Vec::new();
         let mut os_version = WmiOsVersion {
             csname: String::new(),
