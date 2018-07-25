@@ -29,6 +29,7 @@ struct SiqueryTab {
     table: Vec<Vec<String>>,
     columns: Vec<String>,
     header: Vec<String>,
+    table_in_memory: bool,
 }
 
 impl SiqueryTab {
@@ -52,7 +53,6 @@ impl SiqueryTab {
             if value.len() > 0 {
                 v.push(value.to_string());
             }
-
         }
         v
     }
@@ -78,6 +78,7 @@ impl VTab for SiqueryTab {
             table: Vec::new(),
             columns: Vec::new(),
             header: Vec::new(),
+            table_in_memory: false,
         };
 
         let args= &_args[3..];
@@ -121,20 +122,17 @@ impl VTab for SiqueryTab {
                     sql.push_str(", ");
                 }
             }
-
             schema = Some(sql);
-            println!("schema {:?}", schema);
         }
         Ok((schema.unwrap().to_owned(), vtab))
     }
 
     fn best_index(&self, info: &mut IndexInfo) -> Result<()> {
-        info.set_estimated_cost(1.);
+        info.set_estimated_cost(0.);
         Ok(())
     }
 
-    fn open(&self) -> Result<SiqueryTabCursor> {
-        Ok(SiqueryTabCursor::default())
+    fn open(&self) -> Result<SiqueryTabCursor> { Ok(SiqueryTabCursor::default())
     }
 }
 
@@ -163,10 +161,10 @@ impl VTabCursor for SiqueryTabCursor {
         _args: &Values,
     ) -> Result<()> {
 
-        println!("wow ok ");
         let siquery_table = unsafe {&*(self.base.pVtab as * const SiqueryTab)};
+
         self.rows = siquery_table.table.to_owned();
-        //self.row_id = 0;
+        self.row_id = 0;
         self.next()
     }
     fn next(&mut self) -> Result<()> {
@@ -174,12 +172,10 @@ impl VTabCursor for SiqueryTabCursor {
             if self.row_id == self.rows.len() as i64 {
                 self.eot = true;
                 return Ok(());
-            }
-            else {
+            } else {
                 self.cols = self.rows[self.row_id as usize].clone();
             }
         }
-
         self.row_id += 1;
         Ok(())
     }

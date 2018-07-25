@@ -10,12 +10,12 @@ extern crate serde_json;
 extern crate csv;
 extern crate rusqlite;
 
-use rusqlite::{Result, Statement};
+use rusqlite::{Result, Error, Statement, Connection};
 
 use prettytable::Table;
 use serde::ser::{Serialize, SerializeStruct, Serializer};
-use siquery::query::{query_table, init_db, register_tables,
-                     get_table_list, get_form_query, register_first, query_header};
+use siquery::query::{query_table, init_db, register_table,
+                     get_table_list, find_table,   query_header};
 
 use clap::App;
 use csv::{Writer, WriterBuilder, Terminator};
@@ -35,7 +35,6 @@ fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
     let serialized = serde_json::to_string_pretty(&result).unwrap();
     println!("  {}", serialized);
 }
-
 fn print_table_csv(mut result: Vec<Vec<String>>, header: Vec<String>) {
     let mut wtr = WriterBuilder::new()
         .delimiter(b'|')
@@ -52,12 +51,10 @@ fn print_table_csv(mut result: Vec<Vec<String>>, header: Vec<String>) {
 
     println!("{:?}", String::from_utf8(wtr.into_inner().unwrap()).unwrap());
 }
-
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
     table.printstd();
 }
-
 fn query_select(name: &str, select: &str) {
     let mut columns: Vec<String> = vec![];
     if select != "*" {
@@ -74,42 +71,78 @@ fn query_select(name: &str, select: &str) {
 
     //print_table_pretty(result.clone());
     //print_table_json(result, query_header(name, columns));
-    print_table_csv(result.clone(), query_header(name, columns).clone());
+    //print_table_csv(result.clone(), query_header(name, columns).clone());
 }
-
 fn siquery_select(siquery: &str) {
-    let first_table = get_form_query(&siquery);
-
     let db = init_db();
+
+
+    let mut response = init_tables(&db, siquery);
+    match response {
+        Ok(res) => execute_query(&db, siquery),
+        Err(e) => println!("{}", e),
+    }
+}
+fn get_from_query_failure(msg: &str) -> Result<(&str)> {
+    let v: Vec<&str> = msg.split("no such table: ").collect();
+    if v.len() > 0 {
+        if find_table(v[1]) {
+            return Ok(v[1])
+        }
+        Err(Error::ModuleError(format!("{}", msg)))
+    } else {
+        Err(Error::ModuleError(format!("{}", msg)))
+    }
+}
+fn init_tables(db: &Connection, query: &str) -> Result<(&'static str, &'static str)> {
+    let mut is_ok = false;
+    let mut s = db.prepare(&query);
+
     let sys_time = SystemTime::now();
-    match register_first(&db, first_table.clone()) {
-        Some(true) => {
-            let mut s = db.prepare(&siquery).unwrap();
-            // bad type error if querying a counter
-            for i in 0..s.column_names().len() {
-                print!("{} ", s.column_names()[i]);
 
-               let value: Result<Vec<String>> = s
-                    .query_map(&[], |row| row.get::<_, String>(i))
-                    .unwrap()
-                    .collect();
-
-                //println!("{:?} ", value.unwrap());
+    match s {
+        Ok(v) => return Ok(("all tables from query are registred in memory", "ok")) ,
+        Err(e) => {
+            match e {
+                rusqlite::Error::SqliteFailure(r, m) => {
+                    if let Some(msg) = m {
+                        match get_from_query_failure(&msg) {
+                            Ok(table) => register_table(&db, table.to_string()),
+                            Err(error) => return Err(Error::ModuleError(format!("{}'", error))),
+                        };
+                        let difference = SystemTime::now().duration_since(sys_time)
+                            .expect("SystemTime::duration_since failed");
+                        println!("init table duration : {:?}",  difference);
+                        init_tables(db, query)
+                    } else {
+                        return Err(Error::ModuleError(format!("{:?}", m)));
+                    }
+                }
+                _ => return Err(Error::ModuleError(format!("{}", e)))
             }
         }
-        Some(false) => println!("Table {} does not exit ", first_table),
-        None => println!("Table {} does not exist ", first_table),
+
     }
 
-    let difference = SystemTime::now().duration_since(sys_time)
-        .expect("SystemTime::duration_since failed");
-    println!("query duration : {:?}", difference);
 
-    /*let sys_time = SystemTime::now();
-    register_tables(&db, get_table_list(), first_table);
+}
+fn execute_query(db: &Connection, query: &str) {
+    let mut s = db.prepare(&query).unwrap();
+    // bad type error if querying a counter
+    let sys_time = SystemTime::now();
+    for i in 0..s.column_names().len() {
+        //print!("{} ", s.column_names()[i]);
+
+        let value: Result<Vec<String>> = s
+            .query_map(&[], |row| row.get::<_, String>(i))
+            .unwrap()
+            .collect();
+
+        //println!("{:?} ", value.unwrap());
+    }
     let difference = SystemTime::now().duration_since(sys_time)
         .expect("SystemTime::duration_since failed");
-    println!("registering tables duration : {:?}", difference);*/
+    println!("query duration : {:?}",  difference);
 }
 
 fn main() {
@@ -121,14 +154,9 @@ fn main() {
     let table = matches.value_of("table").unwrap_or("").to_string();
     let select = matches.value_of("select").unwrap_or("").to_string();
     let siquery = matches.value_of("siquery").unwrap_or("").to_string();
-    //let mode = matches.value_of("csv_mode").unwrap_or("").to_string();
+
     if table.len() > 0 {
         query_select(table.as_str(), select.as_str());
-
-        /*println!("mode ? {}", mode);
-        if mode.len() > 0 {
-
-        }*/
     }
     if siquery.len() > 0 {
         siquery_select(&siquery);
@@ -136,5 +164,5 @@ fn main() {
 
     let difference = SystemTime::now().duration_since(sys_time)
         .expect("SystemTime::duration_since failed");
-    println!("All duration : {:?}", difference);
+    println!("All duration: {:?}",  difference);
 }

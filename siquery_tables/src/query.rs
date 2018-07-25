@@ -37,9 +37,7 @@ fn select<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<Vec<String>> where T:T
     }
 
     let mut res: Vec<Vec<String>> = Vec::new();
-
     let mut columns_id: Vec<u64> = Vec::new();
-
     for column in columns.iter() {
         // make sure the header exist in the table
         if table.len() > 0 {
@@ -65,7 +63,6 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<String>> {
         "etc_hosts" => {
             let table = EtcHosts::get_specific();
             select(&table, columns)
-
         },
         "etc_protocols" => {
             let table = EtcProtocols::get_specific();
@@ -455,31 +452,91 @@ pub fn get_table_list() -> Vec<String> {
     ]
 }
 
+pub fn find_table(table: &str) -> bool {
+    match table {
+        "etc_hosts" => true,
+        "etc_protocols" => true,
+        "etc_services" => true,
+        "system_info" => true,
+        "os_version" => true,
+        "logical_drives" => true,
+        "uptime" => true,
+        "processes" => true,
+        #[cfg(not(target_os = "macos"))]
+        "interface_address" => true,
+        #[cfg(not(target_os = "macos"))]
+        "interface_details" => true,
+        #[cfg(not(target_os = "macos"))]
+        "process_open_sockets" => true,
+        #[cfg(not(target_os = "macos"))]
+        "process_memory_map" => true,
+        #[cfg(target_os = "windows")]
+        "products" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_computer_info" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_os_version" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_printers" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_services" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_hotfixes" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_shares" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_network_adapters" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_local_accounts" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_bios" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_motherboard" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_processor" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_physical_memory" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_sound" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_video" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_monitors" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_keyboard" => true,
+        #[cfg(target_os = "windows")]
+        "wmi_pointing_device" => true,
+        #[cfg(not(target_os = "windows"))]
+        "process_envs" => true,
+        _ => false,
+    }
+}
+
 pub fn init_db()-> Connection {
     let db = Connection::open_in_memory().unwrap();
     load_module(&db).unwrap();
     db
 }
 
-pub fn register_first(db:  &Connection, first_table: String) -> Option<bool> {
+pub fn register_table(db:  &Connection, table: String) -> bool {
     let version = version_number();
 
     if version < 3008012 {
         println!("version: '{}' is not supported", version);
-        return None
+        return false;
     }
-    for table in get_table_list().iter() {
-        if *table == first_table {
+    for tab in get_table_list().iter() {
+        if *tab == table {
             let command = format!("{}{}{}{}{}",
                                   "CREATE VIRTUAL TABLE ",
-                                  table,
+                                  tab,
                                   " USING siquery(table_name=",
-                                  table, ")");
+                                  tab, ")");
             &db.execute_batch(&command).unwrap();
-            return Some(true)
+            return true;
         }
     }
-    None
+    false
 }
 
 pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: String) {
@@ -501,7 +558,7 @@ pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: Strin
     }
 }
 
-pub fn get_form_query(query: &str) -> String {
+/*pub fn get_form_query(query: &str) -> String {
     let _args = query.clone().to_uppercase();
     let v: Vec<_> = query.clone().split_whitespace().collect();
     let k: Vec<_> = _args.split_whitespace().collect();
@@ -518,4 +575,4 @@ pub fn get_form_query(query: &str) -> String {
     }
 
     table_name
-}
+}*/
