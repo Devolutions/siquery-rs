@@ -28,7 +28,7 @@ impl WmiHotfixes {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiHotfixesIface) -> Vec<WmiHotfixes> {
+    pub fn get_specific_ex(reader: &WmiHotfixesIface) -> Vec<WmiHotfixes> {
 
         let mut hotfixes: Vec<WmiHotfixes> = Vec::new();
 

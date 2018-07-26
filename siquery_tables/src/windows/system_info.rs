@@ -25,6 +25,7 @@ impl SystemInfoDataIface for Reader {
 
 
 impl SystemInfoData {
+    #[cfg(not(fuzzing))]
     pub fn new() -> SystemInfoData {
         SystemInfoData {
             computer_name: String::new(),
@@ -78,6 +79,7 @@ impl SystemInfoData {
         output
     }
 
+    #[cfg(not(fuzzing))]
     pub(crate) fn get_specific() -> Vec<SystemInfoData> {
         let reader: Box<SystemInfoDataIface> = Box::new(Reader{});
         let out = SystemInfoData::get_specific_ex(reader.borrow());

@@ -8,7 +8,6 @@ extern crate serde_json;
 extern crate csv;
 extern crate rusqlite;
 
-
 use prettytable::Table;
 use siquery::query::{query_table, init_db, execute_query,
                      init_query_tables};
@@ -16,7 +15,6 @@ use siquery::query::{query_table, init_db, execute_query,
 use clap::App;
 use csv::{WriterBuilder, Terminator};
 use std::time::{SystemTime};
-
 
 fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
     for i in 0..result.len() {
@@ -73,6 +71,7 @@ fn siquery_select(siquery: &str) {
         Err(e) => println!("{}", e),
     }
 }
+
 
 fn main() {
     let sys_time = SystemTime::now();

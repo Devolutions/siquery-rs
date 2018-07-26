@@ -28,7 +28,7 @@ impl WmiLocalAccounts {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiLocalAccountsIface) -> Vec<WmiLocalAccounts> {
+    pub fn get_specific_ex(reader: &WmiLocalAccountsIface) -> Vec<WmiLocalAccounts> {
 
         let mut local_accounts: Vec<WmiLocalAccounts> = Vec::new();
 

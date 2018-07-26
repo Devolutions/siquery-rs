@@ -21,5 +21,81 @@ git = "https://github.com/rust-fuzz/libfuzzer-sys.git"
 members = ["."]
 
 [[bin]]
-name = "fuzz_target_1"
-path = "fuzz_targets/fuzz_target_1.rs"
+name = "fuzz_etc_hosts"
+path = "fuzz_targets/fuzz_etc_hosts.rs"
+
+[[bin]]
+name = "fuzz_etc_protocols"
+path = "fuzz_targets/fuzz_etc_protocols.rs"
+
+[[bin]]
+name = "fuzz_etc_services"
+path = "fuzz_targets/fuzz_etc_services.rs"
+
+[[bin]]
+name = "fuzz_system_info"
+path = "fuzz_targets/fuzz_system_info.rs"
+
+[[bin]]
+name = "fuzz_wmi_computer_info"
+path = "fuzz_targets/fuzz_wmi_computer_info.rs"
+
+[[bin]]
+name = "fuzz_wmi_hotfixes"
+path = "fuzz_targets/fuzz_wmi_hotfixes.rs"
+
+[[bin]]
+name = "fuzz_wmi_keyboard"
+path = "fuzz_targets/fuzz_wmi_keyboard.rs"
+
+[[bin]]
+name = "fuzz_wmi_local_accounts"
+path = "fuzz_targets/fuzz_wmi_local_accounts.rs"
+
+[[bin]]
+name = "fuzz_wmi_monitors"
+path = "fuzz_targets/fuzz_wmi_monitors.rs"
+
+[[bin]]
+name = "fuzz_wmi_motherboard"
+path = "fuzz_targets/fuzz_wmi_motherboard.rs"
+
+[[bin]]
+name = "fuzz_wmi_network_adapters"
+path = "fuzz_targets/fuzz_wmi_network_adapters.rs"
+
+[[bin]]
+name = "fuzz_wmi_os_version"
+path = "fuzz_targets/fuzz_wmi_os_version.rs"
+
+[[bin]]
+name = "fuzz_wmi_physical_memory"
+path = "fuzz_targets/fuzz_wmi_physical_memory.rs"
+
+[[bin]]
+name = "fuzz_wmi_pointing_device"
+path = "fuzz_targets/fuzz_wmi_pointing_device.rs"
+
+[[bin]]
+name = "fuzz_wmi_printers"
+path = "fuzz_targets/fuzz_wmi_printers.rs"
+
+[[bin]]
+name = "fuzz_wmi_processor"
+path = "fuzz_targets/fuzz_wmi_processor.rs"
+
+[[bin]]
+name = "fuzz_wmi_services"
+path = "fuzz_targets/fuzz_wmi_services.rs"
+
+[[bin]]
+name = "fuzz_wmi_shares"
+path = "fuzz_targets/fuzz_wmi_shares.rs"
+
+[[bin]]
+name = "fuzz_wmi_sound"
+path = "fuzz_targets/fuzz_wmi_sound.rs"
+
+[[bin]]
+name = "fuzz_wmi_video"
+path = "fuzz_targets/fuzz_wmi_video.rs"

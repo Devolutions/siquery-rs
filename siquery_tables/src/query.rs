@@ -34,6 +34,7 @@ fn select<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<Vec<String>> where T:T
     }
 
     let mut res: Vec<Vec<String>> = Vec::new();
+
     let mut columns_id: Vec<u64> = Vec::new();
     for column in columns.iter() {
         // make sure the header exist in the table
@@ -580,7 +581,7 @@ pub fn get_from_query_failure(msg: &str) -> Result<(&str)> {
 pub fn init_query_tables(db: &Connection, query: &str) -> Result<(&'static str, &'static str)> {
     let s = db.prepare(&query);
     match s {
-        Ok(_v) => return Ok(("all tables from query are registred in memory", "ok")) ,
+        Ok(_v) => return Ok(("all tables from query are registred in memory", "ok")),
         Err(e) => {
             match e {
                 Error::SqliteFailure(_r, m) => {

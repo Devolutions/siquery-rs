@@ -24,7 +24,7 @@ impl WmiPointingDevice {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &WmiPointingDeviceIface) -> Vec<WmiPointingDevice> {
+    pub fn get_specific_ex(reader: &WmiPointingDeviceIface) -> Vec<WmiPointingDevice> {
 
         let mut pointing_devices: Vec<WmiPointingDevice> = Vec::new();
 

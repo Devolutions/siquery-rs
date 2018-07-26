@@ -107,7 +107,7 @@ impl VTab for SiqueryTab {
         vtab.header = query_header(vtab.table_name.as_str(), vtab.columns.clone());
         vtab.table = query_table(vtab.table_name.as_str(), vtab.header.clone());
 
-        let mut schema = None;
+        let mut schema= None;
         if schema.is_none() {
             let mut sql = String::from("CREATE TABLE x(");
             for (i, col) in vtab.header.iter().enumerate() {
@@ -130,8 +130,7 @@ impl VTab for SiqueryTab {
         Ok(())
     }
 
-    fn open(&self) -> Result<SiqueryTabCursor> { Ok(SiqueryTabCursor::default())
-    }
+    fn open(&self) -> Result<SiqueryTabCursor> { Ok(SiqueryTabCursor::default())}
 }
 
 #[derive(Default)]

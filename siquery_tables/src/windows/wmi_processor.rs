@@ -14,7 +14,7 @@ impl WmiProcessorIface for Reader {
 }
 
 impl WmiProcessor {
-    pub(crate) fn get_specific_ex(reader: &WmiProcessorIface) -> Vec<WmiProcessor> {
+    pub fn get_specific_ex(reader: &WmiProcessorIface) -> Vec<WmiProcessor> {
         let mut output : Vec<WmiProcessor> = Vec::new();
         let mut processor = WmiProcessor {
             address_width: String::new(),
