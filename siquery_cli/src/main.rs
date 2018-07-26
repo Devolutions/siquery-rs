@@ -1,30 +1,22 @@
 #[macro_use]
 extern crate clap;
 extern crate siquery;
-#[allow(unused_imports)]    // TODO column names with macros
-#[macro_use]
+// TODO column names with macros\
 extern crate prettytable;
-#[macro_use]
 extern crate serde;
 extern crate serde_json;
 extern crate csv;
 extern crate rusqlite;
 
-use rusqlite::{Result, Error, Statement, Connection};
 
 use prettytable::Table;
-use serde::ser::{Serialize, SerializeStruct, Serializer};
-use siquery::query::{query_table, init_db, register_table,
-                     get_table_list, find_table,   query_header};
+use siquery::query::{query_table, init_db, execute_query,
+                     init_query_tables};
 
 use clap::App;
-use csv::{Writer, WriterBuilder, Terminator};
-use std::time::{Duration, SystemTime};
+use csv::{WriterBuilder, Terminator};
+use std::time::{SystemTime};
 
-use std::io;
-use std::process;
-use std::fs::File;
-use std::io::prelude::*;
 
 fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
     for i in 0..result.len() {
@@ -35,7 +27,7 @@ fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
     let serialized = serde_json::to_string_pretty(&result).unwrap();
     println!("  {}", serialized);
 }
-fn print_table_csv(mut result: Vec<Vec<String>>, header: Vec<String>) {
+fn print_table_csv(result: Vec<Vec<String>>, header: Vec<String>) {
     let mut wtr = WriterBuilder::new()
         .delimiter(b'|')
         .has_headers(true)
@@ -67,7 +59,7 @@ fn query_select(name: &str, select: &str) {
             columns.push(col.to_string());
         }
     }
-    let mut result = query_table(name, columns.clone());
+    let _result = query_table(name, columns.clone());
 
     //print_table_pretty(result.clone());
     //print_table_json(result, query_header(name, columns));
@@ -75,74 +67,11 @@ fn query_select(name: &str, select: &str) {
 }
 fn siquery_select(siquery: &str) {
     let db = init_db();
-
-
-    let mut response = init_tables(&db, siquery);
+    let response = init_query_tables(&db, siquery);
     match response {
-        Ok(res) => execute_query(&db, siquery),
+        Ok(_res) => execute_query(&db, siquery),
         Err(e) => println!("{}", e),
     }
-}
-fn get_from_query_failure(msg: &str) -> Result<(&str)> {
-    let v: Vec<&str> = msg.split("no such table: ").collect();
-    if v.len() > 0 {
-        if find_table(v[1]) {
-            return Ok(v[1])
-        }
-        Err(Error::ModuleError(format!("{}", msg)))
-    } else {
-        Err(Error::ModuleError(format!("{}", msg)))
-    }
-}
-fn init_tables(db: &Connection, query: &str) -> Result<(&'static str, &'static str)> {
-    let mut is_ok = false;
-    let mut s = db.prepare(&query);
-
-    let sys_time = SystemTime::now();
-
-    match s {
-        Ok(v) => return Ok(("all tables from query are registred in memory", "ok")) ,
-        Err(e) => {
-            match e {
-                rusqlite::Error::SqliteFailure(r, m) => {
-                    if let Some(msg) = m {
-                        match get_from_query_failure(&msg) {
-                            Ok(table) => register_table(&db, table.to_string()),
-                            Err(error) => return Err(Error::ModuleError(format!("{}'", error))),
-                        };
-                        let difference = SystemTime::now().duration_since(sys_time)
-                            .expect("SystemTime::duration_since failed");
-                        println!("init table duration : {:?}",  difference);
-                        init_tables(db, query)
-                    } else {
-                        return Err(Error::ModuleError(format!("{:?}", m)));
-                    }
-                }
-                _ => return Err(Error::ModuleError(format!("{}", e)))
-            }
-        }
-
-    }
-
-
-}
-fn execute_query(db: &Connection, query: &str) {
-    let mut s = db.prepare(&query).unwrap();
-    // bad type error if querying a counter
-    let sys_time = SystemTime::now();
-    for i in 0..s.column_names().len() {
-        //print!("{} ", s.column_names()[i]);
-
-        let value: Result<Vec<String>> = s
-            .query_map(&[], |row| row.get::<_, String>(i))
-            .unwrap()
-            .collect();
-
-        //println!("{:?} ", value.unwrap());
-    }
-    let difference = SystemTime::now().duration_since(sys_time)
-        .expect("SystemTime::duration_since failed");
-    println!("query duration : {:?}",  difference);
 }
 
 fn main() {

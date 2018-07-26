@@ -1,10 +1,7 @@
-
-use std::borrow::Borrow;
-
 use tables::*;
 
 use vtab::*;
-use rusqlite::{version_number, Connection};
+use rusqlite::{version_number, Connection, Result, Error};
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
     let mut res: Vec<Vec<String>> = Vec::new();
@@ -525,17 +522,16 @@ pub fn register_table(db:  &Connection, table: String) -> bool {
         println!("version: '{}' is not supported", version);
         return false;
     }
-    for tab in get_table_list().iter() {
-        if *tab == table {
+    if find_table(&table) {
             let command = format!("{}{}{}{}{}",
                                   "CREATE VIRTUAL TABLE ",
-                                  tab,
+                                  &table,
                                   " USING siquery(table_name=",
-                                  tab, ")");
+                                  &table, ")");
             &db.execute_batch(&command).unwrap();
             return true;
         }
-    }
+
     false
 }
 
@@ -558,21 +554,50 @@ pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: Strin
     }
 }
 
-/*pub fn get_form_query(query: &str) -> String {
-    let _args = query.clone().to_uppercase();
-    let v: Vec<_> = query.clone().split_whitespace().collect();
-    let k: Vec<_> = _args.split_whitespace().collect();
-    let mut table_name_idx;
-    let mut table_name: String = "".to_string();
+pub fn execute_query(db: &Connection, query: &str) {
+    let mut s = db.prepare(&query).unwrap();
+    // bad type error if querying a counter
+    // todo get col by type
+    for i in 0..s.column_names().len() {
+        print!("{} ", s.column_names()[i]);
+        let value: Result<Vec<String>> = s
+            .query_map(&[], |row| row.get::<_, String>(i))
+            .unwrap()
+            .collect();
+        println!("{:?} ", value.unwrap());
+    }
+}
 
-    if _args.starts_with("SELECT") && _args.contains("FROM") {
-        for i in 0..k.len() {
-            if k[i] == "FROM" {
-                table_name_idx = i + 1;
-                table_name = v[table_name_idx].to_string();
+pub fn get_from_query_failure(msg: &str) -> Result<(&str)> {
+    let v: Vec<&str> = msg.split("no such table: ").collect();
+    if v.len() > 1 && find_table(v[1]) {
+        return Ok(v[1])
+    } else {
+        Err(Error::ModuleError(format!("{}", msg)))
+    }
+}
+
+pub fn init_query_tables(db: &Connection, query: &str) -> Result<(&'static str, &'static str)> {
+    let s = db.prepare(&query);
+    match s {
+        Ok(_v) => return Ok(("all tables from query are registred in memory", "ok")) ,
+        Err(e) => {
+            match e {
+                Error::SqliteFailure(_r, m) => {
+                    if let Some(msg) = m {
+                        match get_from_query_failure(&msg) {
+                            Ok(table) => {
+                                register_table(&db, table.to_string());
+                            },
+                            Err(error) => return Err(Error::ModuleError(format!("{}'", error))),
+                        };
+                        init_query_tables(db, query)
+                    } else {
+                        return Err(Error::ModuleError(format!("{:?}", m)));
+                    }
+                }
+                _ => return Err(Error::ModuleError(format!("{}", e)))
             }
         }
     }
-
-    table_name
-}*/
+}

@@ -9,7 +9,6 @@ use rusqlite::{Connection, Result, Error};
 use std::os::raw::c_int;
 use std::str;
 
-use std::time::{Duration, SystemTime};
 use query::{query_table, query_header};
 
 pub fn load_module(conn: &Connection) -> Result<()> {
@@ -104,7 +103,6 @@ impl VTab for SiqueryTab {
                 }
             }
         }
-
         // create the header & register table in memory
         vtab.header = query_header(vtab.table_name.as_str(), vtab.columns.clone());
         vtab.table = query_table(vtab.table_name.as_str(), vtab.header.clone());
