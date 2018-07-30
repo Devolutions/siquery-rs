@@ -9,8 +9,7 @@ extern crate csv;
 extern crate rusqlite;
 
 use prettytable::Table;
-use siquery::query::{query_table, init_db, execute_query,
-                     init_query_tables};
+use siquery::query::{query_table, init_db, execute_query};
 
 use clap::App;
 use csv::{WriterBuilder, Terminator};
@@ -63,15 +62,11 @@ fn query_select(name: &str, select: &str) {
     //print_table_json(result, query_header(name, columns));
     //print_table_csv(result.clone(), query_header(name, columns).clone());
 }
+
 fn siquery_select(siquery: &str) {
     let db = init_db();
-    let response = init_query_tables(&db, siquery);
-    match response {
-        Ok(_res) => execute_query(&db, siquery),
-        Err(e) => println!("{}", e),
-    }
+    execute_query(&db, siquery);
 }
-
 
 fn main() {
     let sys_time = SystemTime::now();

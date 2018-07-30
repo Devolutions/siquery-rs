@@ -1,8 +1,7 @@
 use rusqlite::vtab::{
     sqlite3_vtab, sqlite3_vtab_cursor,
-    Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values,simple_module,
-    dequote, Module,
-};
+    Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values, simple_module,
+    dequote, Module};
 
 use rusqlite::types::Null;
 use rusqlite::{Connection, Result, Error};
@@ -28,7 +27,6 @@ struct SiqueryTab {
     table: Vec<Vec<String>>,
     columns: Vec<String>,
     header: Vec<String>,
-    table_in_memory: bool,
 }
 
 impl SiqueryTab {
@@ -66,7 +64,6 @@ impl VTab for SiqueryTab {
         _aux: Option<&()>,
         _args: &[&[u8]],
     ) -> Result<(String, SiqueryTab)> {
-
         if _args.len() < 4 {
             return Err(Error::ModuleError("no table name specified".to_owned()));
         }
@@ -77,7 +74,6 @@ impl VTab for SiqueryTab {
             table: Vec::new(),
             columns: Vec::new(),
             header: Vec::new(),
-            table_in_memory: false,
         };
 
         let args= &_args[3..];
@@ -103,9 +99,8 @@ impl VTab for SiqueryTab {
                 }
             }
         }
-        // create the header & register table in memory
+        // create the header
         vtab.header = query_header(vtab.table_name.as_str(), vtab.columns.clone());
-        vtab.table = query_table(vtab.table_name.as_str(), vtab.header.clone());
 
         let mut schema= None;
         if schema.is_none() {
@@ -126,11 +121,11 @@ impl VTab for SiqueryTab {
     }
 
     fn best_index(&self, info: &mut IndexInfo) -> Result<()> {
-        info.set_estimated_cost(0.);
+        info.set_estimated_cost(1_000_000.);
         Ok(())
     }
 
-    fn open(&self) -> Result<SiqueryTabCursor> { Ok(SiqueryTabCursor::default())}
+    fn open(&self) -> Result<SiqueryTabCursor> {Ok(SiqueryTabCursor::default())}
 }
 
 #[derive(Default)]
@@ -145,7 +140,7 @@ struct SiqueryTabCursor {
     /// rows
     rows : Vec<Vec<String>>,
     /// the end of the table
-    eot : bool
+    eot : bool,
 }
 
 impl VTabCursor for SiqueryTabCursor {
@@ -157,10 +152,9 @@ impl VTabCursor for SiqueryTabCursor {
         _idx_str: Option<&str>,
         _args: &Values,
     ) -> Result<()> {
-
         let siquery_table = unsafe {&*(self.base.pVtab as * const SiqueryTab)};
-
-        self.rows = siquery_table.table.to_owned();
+        // register table in memory
+        self.rows = query_table(siquery_table.table_name.as_str(), siquery_table.header.clone());
         self.row_id = 0;
         self.next()
     }
@@ -171,23 +165,21 @@ impl VTabCursor for SiqueryTabCursor {
                 return Ok(());
             } else {
                 self.cols = self.rows[self.row_id as usize].clone();
+                self.row_id += 1;
             }
         }
-        self.row_id += 1;
         Ok(())
     }
     fn eof(&self) -> bool {
         self.eot
     }
     fn column(&self, ctx: &mut Context, col: c_int) -> Result<()> {
-
         if col < 0 || col as usize >= self.cols.len() {
             return Err(Error::ModuleError(format!(
                 "column index out of bounds: {}",
                 col
             )));
         }
-
         if self.cols.is_empty() {
             return ctx.set_result(&Null);
         }
