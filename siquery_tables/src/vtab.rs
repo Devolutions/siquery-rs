@@ -1,6 +1,6 @@
 use rusqlite::vtab::{
-    sqlite3_vtab, sqlite3_vtab_cursor,
-    Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values, read_only_module,
+    sqlite3_vtab, sqlite3_vtab_cursor, Context, IndexInfo,
+    VTab, VTabConnection, VTabCursor, Values, read_only_module,
     dequote, Module, CreateVTab};
 
 use rusqlite::types::Null;
