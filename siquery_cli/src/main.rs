@@ -63,9 +63,9 @@ fn query_select(name: &str, select: &str) {
     //print_table_csv(result.clone(), query_header(name, columns).clone());
 }
 
-fn siquery_select(siquery: &str) {
+fn siquery_select(siquery: &str)-> Vec<Vec<String>> {
     let db = init_db();
-    execute_query(&db, siquery);
+    execute_query(&db, siquery)
 }
 
 fn main() {
@@ -82,10 +82,6 @@ fn main() {
         query_select(table.as_str(), select.as_str());
     }
     if siquery.len() > 0 {
-        siquery_select(&siquery);
+        print_table_pretty(siquery_select(&siquery));
     }
-
-    let difference = SystemTime::now().duration_since(sys_time)
-        .expect("SystemTime::duration_since failed");
-    println!("All duration: {:?}",  difference);
 }

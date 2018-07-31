@@ -3,6 +3,7 @@ use vtab::*;
 use rusqlite::{version_number, Connection};
 //use serde_json::value::Value;
 use rusqlite::types::*;//ValueRef;
+use std::time::{SystemTime};
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
     let mut res: Vec<Vec<String>> = Vec::new();
@@ -475,20 +476,30 @@ pub fn register_tables(db:  &Connection, tables: Vec<String>) {
     }
 }
 
-pub fn execute_query(db: &Connection, query: &str) {
+pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<String>>{
+    let sys_time = SystemTime::now();
+    let mut table_result: Vec<Vec<String>> = Vec::new();
+    let mut row: Vec<String> = Vec::new();
     let mut s = db.prepare(&query).unwrap();
-    let mut result = s.query(&[]).unwrap();
+    for col_name in s.column_names().iter() {
+        row.push(col_name.to_string());
+    }
+    table_result.push(row);
+    row = Vec::new();
+
+    let mut response = s.query(&[]).unwrap();
     loop {
-        let val = result.next();
+        let val = response.next();
         match val {
             Some(v) => {
                 match v {
                     Ok(res) => {
                         for i in 0..res.column_count() {
-                            let v: Value = res.get(i);
-                            print!("{:?} ", v);
+                            let v: String = res.get(i);
+                            row.push(v);
                         }
-                        println!();
+                        table_result.push(row.clone());
+                        row = Vec::new();
                     },
                     _ => break,
                 }
@@ -496,4 +507,5 @@ pub fn execute_query(db: &Connection, query: &str) {
             _ => break,
         }
     }
+    table_result
 }
