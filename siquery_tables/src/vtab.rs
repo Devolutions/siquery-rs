@@ -1,7 +1,7 @@
 use rusqlite::vtab::{
     sqlite3_vtab, sqlite3_vtab_cursor,
-    Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values, simple_module,
-    dequote, Module};
+    Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values, read_only_module,
+    dequote, Module, CreateVTab};
 
 use rusqlite::types::Null;
 use rusqlite::{Connection, Result, Error};
@@ -16,7 +16,7 @@ pub fn load_module(conn: &Connection) -> Result<()> {
 }
 
 lazy_static! {
-    static ref SIQUERY_MODULE: Module<SiqueryTab> = simple_module::<SiqueryTab>();
+    static ref SIQUERY_MODULE: Module<SiqueryTab> = read_only_module::<SiqueryTab>(1);
 }
 
 #[repr(C)]
@@ -128,6 +128,8 @@ impl VTab for SiqueryTab {
     fn open(&self) -> Result<SiqueryTabCursor> {Ok(SiqueryTabCursor::default())}
 }
 
+impl CreateVTab for SiqueryTab {}
+
 #[derive(Default)]
 #[repr(C)]
 struct SiqueryTabCursor {
@@ -144,7 +146,6 @@ struct SiqueryTabCursor {
 }
 
 impl VTabCursor for SiqueryTabCursor {
-    type Table = SiqueryTab;
 
     fn filter(
         &mut self,
