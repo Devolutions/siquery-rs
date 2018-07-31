@@ -13,7 +13,6 @@ use siquery::query::{query_table, init_db, execute_query};
 
 use clap::App;
 use csv::{WriterBuilder, Terminator};
-use std::time::{SystemTime};
 
 fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
     for i in 0..result.len() {
