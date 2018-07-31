@@ -1,9 +1,7 @@
 use tables::*;
 use vtab::*;
 use rusqlite::{version_number, Connection};
-//use serde_json::value::Value;
-use rusqlite::types::*;//ValueRef;
-use std::time::{SystemTime};
+use rusqlite::types::*;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
     let mut res: Vec<Vec<String>> = Vec::new();
@@ -477,7 +475,6 @@ pub fn register_tables(db:  &Connection, tables: Vec<String>) {
 }
 
 pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<String>>{
-    let sys_time = SystemTime::now();
     let mut table_result: Vec<Vec<String>> = Vec::new();
     let mut row: Vec<String> = Vec::new();
     let mut s = db.prepare(&query).unwrap();

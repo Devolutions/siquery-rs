@@ -69,8 +69,6 @@ fn siquery_select(siquery: &str)-> Vec<Vec<String>> {
 }
 
 fn main() {
-    let sys_time = SystemTime::now();
-
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
