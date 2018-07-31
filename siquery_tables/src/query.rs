@@ -1,7 +1,7 @@
 use tables::*;
-
 use vtab::*;
 use rusqlite::{version_number, Connection};
+use rusqlite::types::*;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<String>> where T:Table+Sized {
     let mut res: Vec<Vec<String>> = Vec::new();
@@ -36,7 +36,6 @@ fn select<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<Vec<String>> where T:T
     let mut res: Vec<Vec<String>> = Vec::new();
 
     let mut columns_id: Vec<u64> = Vec::new();
-
     for column in columns.iter() {
         // make sure the header exist in the table
         if table.len() > 0 {
@@ -454,64 +453,56 @@ pub fn get_table_list() -> Vec<String> {
 pub fn init_db()-> Connection {
     let db = Connection::open_in_memory().unwrap();
     load_module(&db).unwrap();
+    register_tables(&db, get_table_list());
     db
 }
 
-pub fn register_first(db:  &Connection, first_table: String) -> Option<bool> {
+pub fn register_tables(db:  &Connection, tables: Vec<String>) {
     let version = version_number();
-
-    if version < 3008012 {
-        println!("version: '{}' is not supported", version);
-        return None
-    }
-    for table in get_table_list().iter() {
-        if *table == first_table {
-            let command = format!("{}{}{}{}{}",
-                                  "CREATE VIRTUAL TABLE ",
-                                  table,
-                                  " USING siquery(table_name=",
-                                  table, ")");
-            &db.execute_batch(&command).unwrap();
-            return Some(true)
-        }
-    }
-    None
-}
-
-pub fn register_tables(db:  &Connection, tables: Vec<String>, first_table: String) {
-    let version = version_number();
-
     if version < 3008012 {
         println!("version: '{}' is not supported", version);
         return
     }
-    for table in tables.iter() {
-        if *table != first_table {
-            let command = format!("{}{}{}{}{}",
-                                  "CREATE VIRTUAL TABLE ",
-                                  table,
-                                  " USING siquery(table_name=",
-                                  table, ")");
-            &db.execute_batch(&command).unwrap();
-        }
+
+    for tab in tables.iter() {
+            let mut sql = String::from("CREATE VIRTUAL TABLE ");
+            sql.push_str(tab);
+            sql.push_str(" USING siquery(table_name=");
+            sql.push_str(tab);
+            sql.push(')');
+            &db.execute_batch(&sql).unwrap();
     }
 }
 
-pub fn get_form_query(query: &str) -> String {
-    let _args = query.clone().to_uppercase();
-    let v: Vec<_> = query.clone().split_whitespace().collect();
-    let k: Vec<_> = _args.split_whitespace().collect();
-    let mut table_name_idx;
-    let mut table_name: String = "".to_string();
+pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<String>>{
+    let mut table_result: Vec<Vec<String>> = Vec::new();
+    let mut row: Vec<String> = Vec::new();
+    let mut s = db.prepare(&query).unwrap();
+    for col_name in s.column_names().iter() {
+        row.push(col_name.to_string());
+    }
+    table_result.push(row);
+    row = Vec::new();
 
-    if _args.starts_with("SELECT") && _args.contains("FROM") {
-        for i in 0..k.len() {
-            if k[i] == "FROM" {
-                table_name_idx = i + 1;
-                table_name = v[table_name_idx].to_string();
+    let mut response = s.query(&[]).unwrap();
+    loop {
+        let val = response.next();
+        match val {
+            Some(v) => {
+                match v {
+                    Ok(res) => {
+                        for i in 0..res.column_count() {
+                            let v: String = res.get(i);
+                            row.push(v);
+                        }
+                        table_result.push(row.clone());
+                        row = Vec::new();
+                    },
+                    _ => break,
+                }
             }
+            _ => break,
         }
     }
-
-    table_name
+    table_result
 }

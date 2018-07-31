@@ -1,25 +1,48 @@
 #[macro_use]
 extern crate clap;
 extern crate siquery;
-
-#[allow(unused_imports)]    // TODO column names with macros
-#[macro_use]
+// TODO column names with macros\
 extern crate prettytable;
+extern crate serde;
+extern crate serde_json;
+extern crate csv;
 extern crate rusqlite;
-use rusqlite::{Result};
 
 use prettytable::Table;
-
-use siquery::query::{query_table, init_db, register_tables,
-                     get_table_list, get_form_query, register_first};
+use siquery::query::{query_table, init_db, execute_query};
 
 use clap::App;
+use csv::{WriterBuilder, Terminator};
 
+fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
+    for i in 0..result.len() {
+        for j in 0..header.len(){
+            result[i][j] = header[j].clone() + ": " + &result[i][j];
+        }
+    }
+    let serialized = serde_json::to_string_pretty(&result).unwrap();
+    println!("  {}", serialized);
+}
+fn print_table_csv(result: Vec<Vec<String>>, header: Vec<String>) {
+    let mut wtr = WriterBuilder::new()
+        .delimiter(b'|')
+        .has_headers(true)
+        .double_quote(true)
+        .terminator(Terminator::CRLF)
+        .from_writer(vec![]);
+
+    // insert the header to the result
+    wtr.write_record(header);
+    for res in result.iter(){
+        wtr.write_record(res);
+    }
+
+    println!("{:?}", String::from_utf8(wtr.into_inner().unwrap()).unwrap());
+}
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
     table.printstd();
 }
-
 fn query_select(name: &str, select: &str) {
     let mut columns: Vec<String> = vec![];
     if select != "*" {
@@ -32,35 +55,16 @@ fn query_select(name: &str, select: &str) {
             columns.push(col.to_string());
         }
     }
-    let result = query_table(name, columns);
-    print_table_pretty(result);
+    let _result = query_table(name, columns.clone());
+
+    //print_table_pretty(result.clone());
+    //print_table_json(result, query_header(name, columns));
+    //print_table_csv(result.clone(), query_header(name, columns).clone());
 }
 
-fn siquery_select(siquery: &str) {
-    let first_table = get_form_query(&siquery);
-
+fn siquery_select(siquery: &str)-> Vec<Vec<String>> {
     let db = init_db();
-
-    match register_first(&db, first_table.clone()) {
-        Some(true) => {
-            let mut s = db.prepare(&siquery).unwrap();
-            // bad type error if querying a counter
-            for i in 0..s.column_names().len() {
-                print!("{} ", s.column_names()[i]);
-
-                let value: Result<Vec<String>> = s
-                    .query_map(&[], |row| row.get::<_, String>(i))
-                    .unwrap()
-                    .collect();
-
-                println!("{:?} ", value.unwrap());
-            }
-        }
-        Some(false) => println!("Table {} does not exit ", first_table),
-        None => println!("Table {} does not exist ", first_table),
-    }
-
-    register_tables(&db, get_table_list(), first_table);
+    execute_query(&db, siquery)
 }
 
 fn main() {
@@ -70,10 +74,11 @@ fn main() {
     let table = matches.value_of("table").unwrap_or("").to_string();
     let select = matches.value_of("select").unwrap_or("").to_string();
     let siquery = matches.value_of("siquery").unwrap_or("").to_string();
+
     if table.len() > 0 {
         query_select(table.as_str(), select.as_str());
     }
     if siquery.len() > 0 {
-        siquery_select(&siquery);
+        print_table_pretty(siquery_select(&siquery));
     }
 }
