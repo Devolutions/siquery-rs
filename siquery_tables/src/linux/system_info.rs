@@ -65,7 +65,7 @@ impl SystemInfoData {
                 let n = s.split('\n').find(|line| line.starts_with("MemTotal"))
                          .and_then(|line| line.split(':').last())
                          .and_then(|v| v.trim_left_matches(' ').split(' ').next())
-                         .and_then(|v| v.parse::<u64>().ok());
+                         .and_then(|v| v.parse::<i64>().ok());
                 n.unwrap_or(0) * 1024
             }
 

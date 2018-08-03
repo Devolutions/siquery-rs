@@ -543,7 +543,6 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         "uptime" => {
             let column_names = Uptime::get_columns_name();
             let column_types = Uptime::get_columns_type();
-            println!("uptime schema {:?}",create_schema(&column_names, &column_types));
             schema = create_schema(&column_names, &column_types)
         },
         #[cfg(target_os = "windows")]
