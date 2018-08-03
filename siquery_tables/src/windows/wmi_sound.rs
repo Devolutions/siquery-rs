@@ -91,6 +91,6 @@ mod tests {
         assert_eq!(sound_info.name, "Fabrikam Audio");
         assert_eq!(sound_info.manufacturer, "Fabrikam, Inc.");
         assert_eq!(sound_info.status, "OK");
-        assert_eq!(sound_info.dma_buffer_size, "256");
+        assert_eq!(sound_info.dma_buffer_size, 256);
     }
 }

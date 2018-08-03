@@ -685,7 +685,6 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     };
     schema
 }
-
 pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
     let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();

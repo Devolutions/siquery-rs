@@ -281,7 +281,7 @@ mod tests {
         assert_eq!(video_info.name, "Graphic Design Institute 940MX");
         assert_eq!(video_info.adapter_compatibility, "Graphic Design Institute");
         assert_eq!(video_info.adapter_dac_type, "Integrated RAMDAC");
-        assert_eq!(video_info.adapter_ram, 2.0);
+        assert_eq!(video_info.adapter_ram, 2);
         assert_eq!(video_info.availability, "Power Cycle");
         assert_eq!(video_info.driver_version, "23.21.13.9065");
         assert_eq!(video_info.installed_display_driver.len(), 2);

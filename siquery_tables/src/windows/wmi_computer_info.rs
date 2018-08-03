@@ -95,7 +95,7 @@ mod tests {
         assert_eq!(wmi_computer_info.domain, "STANDALONE");
         assert_eq!(wmi_computer_info.manufacturer, "Lucerne Publishing");
         assert_eq!(wmi_computer_info.model, "TailSpin Toys");
-        assert_eq!(wmi_computer_info.number_of_processors, "18");
+        assert_eq!(wmi_computer_info.number_of_processors, 18);
         assert_eq!(wmi_computer_info.system_type, "x128-based PC");
     }
 }

@@ -126,12 +126,12 @@ mod tests {
         assert_eq!(physical_memory.capacity, "17179869184 bytes");
         assert_eq!(physical_memory.description, "Physical Memory");
         assert_eq!(physical_memory.device_locator, "DIMM A");
-        assert_eq!(physical_memory.form_factor, "12");
-        assert_eq!(physical_memory.interleave_data_depth, "0");
-        assert_eq!(physical_memory.interleave_position, "0");
+        assert_eq!(physical_memory.form_factor, 12);
+        assert_eq!(physical_memory.interleave_data_depth, 0);
+        assert_eq!(physical_memory.interleave_position, 0);
         assert_eq!(physical_memory.manufacturer, "Fabrikam, Inc.");
-        assert_eq!(physical_memory.memory_type, "0");
+        assert_eq!(physical_memory.memory_type, 0);
         assert_eq!(physical_memory.serial_number, "91A92B93C");
-        assert_eq!(physical_memory.speed, "2400");
+        assert_eq!(physical_memory.speed, 2400);
     }
 }

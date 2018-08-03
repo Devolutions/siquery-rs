@@ -165,21 +165,21 @@ mod tests {
         let reader: Box<WmiProcessorIface> = Box::new(Test{});
         let processor_info = &WmiProcessor::get_specific_ex(reader.borrow())[0];
         assert_eq!(processor_info.name, "Fabrikam Core(TM) i7-7500U CPU @ 2.70GHz");
-        assert_eq!(processor_info.address_width, "64");
+        assert_eq!(processor_info.address_width, 64);
         assert_eq!(processor_info.cpu_satus, "CPU Enabled");
-        assert_eq!(processor_info.current_clock_speed, "1600 Mhz");
-        assert_eq!(processor_info.current_voltage, "11");
+        assert_eq!(processor_info.current_clock_speed, 1600);
+        assert_eq!(processor_info.current_voltage, 11);
         assert_eq!(processor_info.description, "Fabrikam Family 6 Model 142 Stepping 9");
-        assert_eq!(processor_info.external_clock, "100");
+        assert_eq!(processor_info.external_clock, 100);
         assert_eq!(processor_info.hyper_threading_enabled, "FALSE");
-        assert_eq!(processor_info.l2_cache_size, "512");
-        assert_eq!(processor_info.l2_cache_speed, "0");
-        assert_eq!(processor_info.l3_cache_size, "4096");
-        assert_eq!(processor_info.l3_cache_speed, "0");
+        assert_eq!(processor_info.l2_cache_size, 512);
+        assert_eq!(processor_info.l2_cache_speed, 0);
+        assert_eq!(processor_info.l3_cache_size, 4096);
+        assert_eq!(processor_info.l3_cache_speed, 0);
         assert_eq!(processor_info.manufacturer, "Fabrikam, Inc.");
-        assert_eq!(processor_info.max_clock_speed, "2901 Mhz");
-        assert_eq!(processor_info.number_of_cores, "2");
-        assert_eq!(processor_info.number_of_logical_processors, "2");
+        assert_eq!(processor_info.max_clock_speed, 2901);
+        assert_eq!(processor_info.number_of_cores, 2);
+        assert_eq!(processor_info.number_of_logical_processors, 2);
         assert_eq!(processor_info.socket_designation, "U4E2");
     }
 }
