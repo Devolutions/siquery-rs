@@ -19,7 +19,7 @@ impl WmiSound {
             name: String::new(),
             manufacturer: String::new(),
             status: String::new(),
-            dma_buffer_size: String::new(),
+            dma_buffer_size: 0,
         }
     }
 
@@ -59,7 +59,7 @@ impl WmiSound {
                         sound.status = v;
                     },
                     "DMABufferSize" => {
-                        sound.dma_buffer_size = v;
+                        sound.dma_buffer_size = v.parse::<u16>().unwrap_or(0);
                     },
                     _ => ()
                 }

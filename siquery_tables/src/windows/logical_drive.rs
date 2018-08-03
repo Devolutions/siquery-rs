@@ -57,10 +57,10 @@ impl LogicalDrive {
                         drive.file_system = v;
                     },
                     "Size" => {
-                        drive.size = v.parse::<u64>().unwrap_or(0);
+                        drive.size = v.parse::<i64>().unwrap_or(0);
                     },
                     "FreeSpace" => {                        
-                        drive.free_space = v.parse::<u64>().unwrap_or(0);
+                        drive.free_space = v.parse::<i64>().unwrap_or(0);
                     },
                     "DriveType" => {
                         if v == "3" {

@@ -10,7 +10,6 @@ extern crate rusqlite;
 
 use prettytable::Table;
 use siquery::query::{query_table, init_db, execute_query};
-
 use clap::App;
 use csv::{WriterBuilder, Terminator};
 
@@ -61,10 +60,10 @@ fn query_select(name: &str, select: &str) {
     //print_table_json(result, query_header(name, columns));
     //print_table_csv(result.clone(), query_header(name, columns).clone());
 }
-
-fn siquery_select(siquery: &str)-> Vec<Vec<String>> {
+fn siquery_select(siquery: &str)/*-> Vec<Vec<Value>>*/ {
     let db = init_db();
-    execute_query(&db, siquery)
+    //println!("query result {:?}", exec_query(&db, siquery).unwrap());
+    println!("query result {:?}", execute_query(&db, siquery));
 }
 
 fn main() {
@@ -79,6 +78,6 @@ fn main() {
         query_select(table.as_str(), select.as_str());
     }
     if siquery.len() > 0 {
-        print_table_pretty(siquery_select(&siquery));
+        siquery_select(&siquery);
     }
 }

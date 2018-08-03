@@ -3,12 +3,13 @@ use rusqlite::vtab::{
     VTab, VTabConnection, VTabCursor, Values, read_only_module,
     dequote, Module, CreateVTab};
 
-use rusqlite::types::Null;
+use rusqlite::types::*;
 use rusqlite::{Connection, Result, Error};
 use std::os::raw::c_int;
 use std::str;
+use std::borrow::Borrow;
 
-use query::{query_table, query_header};
+use query::{query_table, query_header, get_schema};
 
 pub fn load_module(conn: &Connection) -> Result<()> {
     let aux: Option<()> = None;
@@ -26,7 +27,7 @@ struct SiqueryTab {
     table_name: String,
     table: Vec<Vec<String>>,
     columns: Vec<String>,
-    header: Vec<String>,
+    header:Vec<String>,
 }
 
 impl SiqueryTab {
@@ -102,21 +103,8 @@ impl VTab for SiqueryTab {
         // create the header
         vtab.header = query_header(vtab.table_name.as_str(), vtab.columns.clone());
 
-        let mut schema= None;
-        if schema.is_none() {
-            let mut sql = String::from("CREATE TABLE x(");
-            for (i, col) in vtab.header.iter().enumerate() {
-                sql.push('"');
-                sql.push_str(col);
-                sql.push_str("\" TEXT");
-                if i == vtab.header.len() - 1 {
-                    sql.push_str(");");
-                } else {
-                    sql.push_str(", ");
-                }
-            }
-            schema = Some(sql);
-        }
+        let mut schema;
+        schema = get_schema(vtab.table_name.as_str());
         Ok((schema.unwrap().to_owned(), vtab))
     }
 
@@ -135,12 +123,14 @@ impl CreateVTab for SiqueryTab {}
 struct SiqueryTabCursor {
     /// Base class. Must be first
     base: sqlite3_vtab_cursor,
+    /// table is in memory
+    table_in_memory: bool,
     /// The rowid
     row_id: i64,
     /// columns name
-    cols : Vec<String>,
+    cols : Vec<Value>,
     /// rows
-    rows : Vec<Vec<String>>,
+    rows : Vec<Vec<Value>>,
     /// the end of the table
     eot : bool,
 }
@@ -155,7 +145,10 @@ impl VTabCursor for SiqueryTabCursor {
     ) -> Result<()> {
         let siquery_table = unsafe {&*(self.base.pVtab as * const SiqueryTab)};
         // register table in memory
-        self.rows = query_table(siquery_table.table_name.as_str(), siquery_table.header.clone());
+        if !self.table_in_memory {
+            self.rows = query_table(siquery_table.table_name.as_str(), siquery_table.header.clone());
+            self.table_in_memory = true;
+        }
         self.row_id = 0;
         self.next()
     }

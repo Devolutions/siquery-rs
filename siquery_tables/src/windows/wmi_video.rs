@@ -20,7 +20,7 @@ impl WmiVideo {
             name: String::new(),
             adapter_compatibility: String::new(),
             adapter_dac_type: String::new(),
-            adapter_ram: 0.0,
+            adapter_ram: 0,
             availability: String::new(),
             driver_version: String::new(),
             installed_display_driver: Vec::new(),
@@ -66,7 +66,7 @@ impl WmiVideo {
                     },
                     "AdapterRAM" => {
                         // convert bytes to GB
-                        let mut ram = v.parse::<f32>().unwrap_or(0.0) / 1073741824.0;
+                        let mut ram = v.parse::<u32>().unwrap_or(0) / 1073741824;
                         video.adapter_ram = ram;
                     },
                     "Availability" => {

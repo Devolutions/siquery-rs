@@ -20,7 +20,7 @@ impl WmiComputerInfo {
             domain: String::new(),
             manufacturer: String::new(),
             model: String::new(),
-            number_of_processors: String::new(),
+            number_of_processors: 0,
             system_type: String::new(),
         }
     }
@@ -58,7 +58,7 @@ impl WmiComputerInfo {
                         computer.model = v;
                     },
                     "NumberOfProcessors" => {
-                        computer.number_of_processors = v;
+                        computer.number_of_processors = v.parse::<u32>().unwrap_or(0);
                     },
                     "SystemType" => {
                         computer.system_type = v;

@@ -123,13 +123,13 @@ impl WmiMonitors {
                         }
                     },
                     "Bandwidth" => {
-                        monitor.bandwidth = v.parse::<u64>().unwrap_or(0);
+                        monitor.bandwidth = v.parse::<u32>().unwrap_or(0);
                     },
                     "ScreenHeight" => {
-                        monitor.screen_height = v.parse::<u64>().unwrap_or(0);
+                        monitor.screen_height = v.parse::<u32>().unwrap_or(0);
                     },
                     "ScreenWidth" => {
-                        monitor.screen_width = v.parse::<u64>().unwrap_or(0);
+                        monitor.screen_width = v.parse::<u32>().unwrap_or(0);
                     },
                     "MonitorManufacturer" => {
                         monitor.manufacturer = v;

@@ -17,22 +17,22 @@ impl WmiProcessor {
     pub fn get_specific_ex(reader: &WmiProcessorIface) -> Vec<WmiProcessor> {
         let mut output : Vec<WmiProcessor> = Vec::new();
         let mut processor = WmiProcessor {
-            address_width: String::new(),
+            address_width: 0,
             cpu_satus: String::new(),
-            current_clock_speed: String::new(),
-            current_voltage: String::new(),
+            current_clock_speed: 0,
+            current_voltage: 0,
             description: String::new(),
-            external_clock: String::new(),
+            external_clock: 0,
             hyper_threading_enabled: "FALSE".to_string(),
-            l2_cache_size: String::new(),
-            l2_cache_speed: String::new(),
-            l3_cache_size: String::new(),
-            l3_cache_speed: String::new(),
+            l2_cache_size: 0,
+            l2_cache_speed: 0,
+            l3_cache_size: 0,
+            l3_cache_speed: 0,
             manufacturer: String::new(),
-            max_clock_speed: String::new(),
+            max_clock_speed: 0,
             name: String::new(),
-            number_of_cores: String::new(),
-            number_of_logical_processors: String::new(),
+            number_of_cores: 0,
+            number_of_logical_processors: 0,
             socket_designation: String::new(),
         };
 
@@ -55,7 +55,7 @@ impl WmiProcessor {
 
                 match k.as_str() {
                     "AddressWidth" => {
-                        processor.address_width = v;
+                        processor.address_width = v.parse::<u16>().unwrap_or(0);
                     },
                     "CpuStatus" => {
                         //https://msdn.microsoft.com/en-us/library/aa394373(v=vs.85).aspx
@@ -88,45 +88,45 @@ impl WmiProcessor {
                         }
                     },
                     "CurrentClockSpeed" => {
-                        processor.current_clock_speed = v;
+                        processor.current_clock_speed = v.parse::<u32>().unwrap_or(0);
                     },
                     "CurrentVoltage" => {
-                        processor.current_voltage = v;
+                        processor.current_voltage = v.parse::<u16>().unwrap_or(0);
                     },
                     "Description" => {
                         processor.description = v;
                     },
                     "ExtClock" => {
-                        processor.external_clock = v;
+                        processor.external_clock = v.parse::<u32>().unwrap_or(0);
                     },
                     "L2CacheSize" => {
-                        processor.l2_cache_size = v;
+                        processor.l2_cache_size = v.parse::<u32>().unwrap_or(0);
                     },
                     "L2CacheSpeed" => {
-                        processor.l2_cache_speed = v;
+                        processor.l2_cache_speed = v.parse::<u32>().unwrap_or(0);
                     },
                     "L3CacheSize" => {
-                        processor.l3_cache_size = v;
+                        processor.l3_cache_size = v.parse::<u32>().unwrap_or(0);
                     },
                     "L3CacheSpeed" => {
-                        processor.l3_cache_speed = v;
+                        processor.l3_cache_speed = v.parse::<u32>().unwrap_or(0);
                     },
                     "Manufacturer" => {
                         processor.manufacturer = v;
                     },
                     "MaxClockSpeed" => {
-                        processor.max_clock_speed = v;
+                        processor.max_clock_speed = v.parse::<u32>().unwrap_or(0);
                     },
                     "Name" => {
                         processor.name = v;
                     }
                     "NumberOfCores" => {
-                        nbr_cores = v.parse::<u64>().unwrap_or(0);
-                        processor.number_of_cores = v;
+                        nbr_cores = v.parse::<u32>().unwrap_or(0);
+                        processor.number_of_cores = nbr_cores;
                     },
                     "NumberOfLogicalProcessors" => {
-                        nbr_logical_cpu = v.parse::<u64>().unwrap_or(0);
-                        processor.number_of_logical_processors = v;
+                        nbr_logical_cpu = v.parse::<u32>().unwrap_or(0);
+                        processor.number_of_logical_processors = nbr_logical_cpu;
                     },
                     "SocketDesignation" => {
                         processor.socket_designation = v;
