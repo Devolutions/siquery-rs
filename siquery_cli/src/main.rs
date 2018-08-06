@@ -36,7 +36,7 @@ fn print_table_csv(result: Vec<Vec<String>>, header: Vec<String>) {
         wtr.write_record(res);
     }
 
-    println!("{:?}", String::from_utf8(wtr.into_inner().unwrap()).unwrap());
+    //println!("{:?}", String::from_utf8(wtr.into_inner().unwrap()).unwrap());
 }
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
@@ -63,7 +63,9 @@ fn query_select(name: &str, select: &str) {
 fn siquery_select(siquery: &str)/*-> Vec<Vec<Value>>*/ {
     let db = init_db();
     //println!("query result {:?}", exec_query(&db, siquery).unwrap());
-    println!("query result {:?}", execute_query(&db, siquery));
+    let begin = std::time::SystemTime::now();
+    execute_query(&db, siquery);
+    println!("{:?}", begin.elapsed());
 }
 
 fn main() {

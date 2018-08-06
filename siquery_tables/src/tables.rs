@@ -878,7 +878,7 @@ impl Table for Uptime {
             "minutes" => Value::from(self.minutes),
             "seconds" => Value::from(self.seconds),
             "total_seconds" => Value::from(self.total_seconds),
-            _ => Value::Integer(0),
+            _ => Value::from(0),
         }
     }
 
@@ -889,7 +889,7 @@ impl Table for Uptime {
             Self::MINUTES_ID => Value::from(self.minutes),
             Self::SECONDS_ID => Value::from(self.seconds),
             Self::TOTAL_SECONDS_ID => Value::from(self.total_seconds),
-            _ => Value::Integer(0)
+            _ => Value::from(0)
         }
     }
 
@@ -2862,4 +2862,63 @@ impl Table for ProcessEnvsRow {
             _ => 0
         }
     }
+}
+
+pub fn get_table_list() -> Vec<String> {
+    vec![
+        "etc_hosts".to_string(),
+        "etc_protocols".to_string(),
+        "etc_services".to_string(),
+        "system_info".to_string(),
+        "os_version".to_string(),
+        "logical_drives".to_string(),
+        "uptime".to_string(),
+        "processes".to_string(),
+        #[cfg(not(target_os = "macos"))]
+            "interface_address".to_string(),
+        #[cfg(not(target_os = "macos"))]
+            "interface_details".to_string(),
+        #[cfg(not(target_os = "macos"))]
+            "process_open_sockets".to_string(),
+        #[cfg(not(target_os = "macos"))]
+            "process_memory_map".to_string(),
+        #[cfg(target_os = "windows")]
+            "products".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_computer_info".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_os_version".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_printers".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_services".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_hotfixes".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_shares".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_network_adapters".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_local_accounts".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_bios".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_motherboard".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_processor".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_physical_memory".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_sound".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_video".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_monitors".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_keyboard".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_pointing_device".to_string(),
+        #[cfg(not(target_os = "windows"))]
+            "process_envs".to_string(),
+    ]
 }

@@ -1,10 +1,13 @@
 use tables::*;
 use vtab::*;
 use rusqlite::{version_number, Connection, Result};
-use rusqlite::types::*;
-use serde_json;
+use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef, Null, Value, Type};
 use std::borrow::Borrow;
 use std::time::{SystemTime};
+use serde_json::value;
+use std::str::FromStr;
+use std::fmt::Debug;
+use std::collections::HashMap;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();
@@ -393,65 +396,6 @@ pub fn query_header(name: &str, columns: Vec<String>) -> Vec<String> {
     res
 }
 
-pub fn get_table_list() -> Vec<String> {
-    vec![
-        "etc_hosts".to_string(),
-        "etc_protocols".to_string(),
-        "etc_services".to_string(),
-        "system_info".to_string(),
-        "os_version".to_string(),
-        "logical_drives".to_string(),
-        "uptime".to_string(),
-        "processes".to_string(),
-        #[cfg(not(target_os = "macos"))]
-        "interface_address".to_string(),
-        #[cfg(not(target_os = "macos"))]
-        "interface_details".to_string(),
-        #[cfg(not(target_os = "macos"))]
-        "process_open_sockets".to_string(),
-        #[cfg(not(target_os = "macos"))]
-        "process_memory_map".to_string(),
-        #[cfg(target_os = "windows")]
-        "products".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_computer_info".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_os_version".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_printers".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_services".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_hotfixes".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_shares".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_network_adapters".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_local_accounts".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_bios".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_motherboard".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_processor".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_physical_memory".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_sound".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_video".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_monitors".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_keyboard".to_string(),
-        #[cfg(target_os = "windows")]
-        "wmi_pointing_device".to_string(),
-        #[cfg(not(target_os = "windows"))]
-        "process_envs".to_string(),
-    ]
-}
-
 pub fn init_db()-> Connection {
     let db = Connection::open_in_memory().unwrap();
     load_module(&db).unwrap();
@@ -689,15 +633,19 @@ pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
     let mut row: Vec<Value> = Vec::new();
     let mut s = db.prepare(&query).unwrap();
 
+    let mut col_name_internal = Vec::new();
     //columns
-    /*for col_name in s.column_names().iter() {
+    for col_name in s.column_names().iter() {
+        col_name_internal.push(col_name.to_string());
+
         let v: Value = Value::Text(col_name.to_string());
         row.push(v);
     }
-    table_result.push(row);*/
+    table_result.push(row);
     row = Vec::new();
 
     let mut response = s.query(&[]).unwrap();
+    let mut out = String::new();
 
     loop {
         let val = response.next();
@@ -705,10 +653,60 @@ pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
             Some(v) => {
                 match v {
                     Ok(res) => {
+
+                        let mut row_to_json: String = "{".to_string();
+                        let mut value_to_json = String::new();
+
                         for i in 0..res.column_count() {
                             let v: Value = res.get(i);
+                            match Value::data_type(&v) {
+                                Type::Integer => {
+                                    let c: i64 = res.get(i);
+                                    //print!("{:?}: {:?}, ", col_name_internal[i], c);
+
+                                    value_to_json = format!("{}{:?}{}{:?}, ",
+                                                            value_to_json,
+                                                          col_name_internal[i],
+                                                          ": ",
+                                                          c.clone().to_string()
+                                    );
+
+                                },
+                                Type::Real => {
+                                    let c: i64 = res.get(i);
+                                    //print!("{:?}: {:?}, ", col_name_internal[i], c);
+                                    value_to_json = format!("{}{:?}{}{:?}, ",
+                                                            value_to_json,
+                                                            col_name_internal[i],
+                                                            ": ",
+                                                            c.clone().to_string()
+                                    );
+                                },
+                                Type::Text => {
+                                    let c: String = res.get(i);
+                                    //print!("{:?}: {:?}, ", col_name_internal[i], c);
+                                    value_to_json = format!("{}{:?}{}{:?}, ",
+                                                            value_to_json,
+                                                            col_name_internal[i],
+                                                            ": ",
+                                                            c.clone(),
+                                    );
+                                },
+                                _ => {
+                                    let c: Value = res.get(i);
+                                    //print!("{:?}: {:?}, ", col_name_internal[i], c);
+
+                                }
+                            }
                             row.push(v);
                         }
+
+                        row_to_json = format!("{}{}{}\n",
+                                              row_to_json,
+                                              value_to_json,
+                                              "}",
+                        );
+                        out.push_str(&row_to_json);
                         table_result.push(row.clone());
                         row = Vec::new();
                     },
@@ -718,5 +716,6 @@ pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
             _ => break,
         }
     }
+    println!("{}", out);
     table_result
 }
