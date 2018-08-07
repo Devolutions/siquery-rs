@@ -18,6 +18,7 @@ args:
     - siquery:
         short: q
         long: query
+        requires: print_mode
         value_name: siquery
         help: sqlite command
         takes_value: false
@@ -33,9 +34,11 @@ args:
     - csv_mode:
         long: csv
         help: set 'csv' output mode
-    - json_mode:
-        long: json
+    - print_mode:
+        long: print
+        value_name: print_mode
         help: set 'json' output mode
+        takes_value: false
     - verbose:
         short: v
         multiple: true
