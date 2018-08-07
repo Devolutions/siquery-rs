@@ -480,4 +480,3 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
             }
     }
 }
-
