@@ -1,6 +1,6 @@
 use tables::*;
 use vtab::*;
-use rusqlite::{version_number, Connection, Rows};
+use rusqlite::{version_number, Connection, Rows, Row as RusqliteRow};
 use rusqlite::types::{Value, Type};
 use std::time::{SystemTime};
 use csv::{WriterBuilder, Terminator};
@@ -449,7 +449,8 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     schema
 }
 
-pub fn execute_query(db: &Connection, query: &str) {
+pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
+    let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();
     let mut s = db.prepare(&query).unwrap();
 
@@ -457,16 +458,91 @@ pub fn execute_query(db: &Connection, query: &str) {
     //columns
     for col_name in s.column_names().iter() {
         col_name_internal.push(col_name.to_string());
+
         let v: Value = Value::Text(col_name.to_string());
         row.push(v);
     }
+    table_result.push(row);
+    row = Vec::new();
 
     let mut response = s.query(&[]).unwrap();
 
-    print_csv(col_name_internal, &mut response );
+    print_json(&col_name_internal,&mut response);
+    table_result
 }
 
-pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
+pub fn print_json (col_names: &Vec<String>, values: &mut Rows) {
+    let mut out = "[\n".to_owned();
+    loop {
+        if let Some(v) = values.next(){
+            if let Some (res) = v.ok() {
+                out.push_str(&format_to_json(&col_names, &res));
+            }
+        } else {
+            break
+        }
+    }
+    utils::trim_string(&mut out);
+    out.push_str("\n]");
+    println!("{}",out);
+}
+
+pub fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> String {
+    let mut value_to_json = String::new();
+    match Value::data_type(&row_value.get(0)) {
+        Type::Real | Type::Integer => {
+            value_to_json.push_str(
+                &format!(
+                    "{:?}:{:?}",
+                    col_names[0],
+                    row_value.get::<usize,i64>(0).to_string()
+                )
+            );
+        },
+        Type::Text => {
+            value_to_json.push_str(
+                &format!(
+                    "{:?}:{:?}",
+                    col_names[0],
+                    row_value.get::<usize,String>(0)
+                )
+            );
+        },
+        _ => {
+            // Do nothing.
+        }
+    }
+    for i in 1..row_value.column_count() {
+        let v: Value = row_value.get(i);
+        // todo add condition for flag
+        match Value::data_type(&v) {
+            Type::Real | Type::Integer => {
+                value_to_json.push_str(
+                    &format!(
+                        ",{:?}:{:?}",
+                        col_names[i],
+                        row_value.get::<usize,i64>(i).to_string()
+                    )
+                );
+            },
+            Type::Text => {
+                value_to_json.push_str(
+                    &format!(
+                        ",{:?}:{:?}",
+                        col_names[i],
+                        row_value.get::<usize,String>(i)
+                    )
+                );
+            },
+            _ => {
+                // Do nothing.
+            }
+        }
+    }
+    format!("  {{{}}},\n", value_to_json)
+}
+
+pub fn print_csv(columns: Vec<String>,  values: &mut Rows) {
     let mut row: Vec<String> = Vec::new();
     //init writer
     let mut wtr = WriterBuilder::new()
