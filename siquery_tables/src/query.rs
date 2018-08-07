@@ -2,7 +2,6 @@ use tables::*;
 use vtab::*;
 use rusqlite::{version_number, Connection, Rows, Row as RusqliteRow, Result, Error};
 use rusqlite::types::{Value, Type};
-use std::time::{SystemTime};
 use table_printer::*;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
@@ -446,7 +445,6 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     schema
 }
 
-
 pub fn execute_query(db: &Connection, query: &str, flag: u8) {
     let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();
@@ -476,7 +474,7 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
         Err(e) =>
             match e {
                 Error::SqliteFailure(_r, m) => {
-                    if let Some(msg) = m { println!("{:?}", msg) };
+                    if let Some(msg) = m { println!("{}", msg) };
                 },
                 _ => println!("{:?}", Error::ModuleError(format!("{}", e)))
             }
