@@ -10,16 +10,8 @@ extern crate rusqlite;
 use prettytable::Table;
 use siquery::query::{query_table, init_db, execute_query};
 use clap::App;
+use rusqlite::Connection;
 
-fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
-    for i in 0..result.len() {
-        for j in 0..header.len(){
-            result[i][j] = header[j].clone() + ": " + &result[i][j];
-        }
-    }
-    let serialized = serde_json::to_string_pretty(&result).unwrap();
-    println!("  {}", serialized);
-}
 
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
@@ -41,9 +33,7 @@ fn query_select(name: &str, select: &str) {
     let _result = query_table(name, columns.clone());
 }
 
-fn siquery_select(siquery: &str)/*-> Vec<Vec<Value>>*/ {
-    let db = init_db();
-    //println!("query result {:?}", exec_query(&db, siquery).unwrap());
+fn siquery_select(db: &Connection, siquery: &str){
     let begin = std::time::SystemTime::now();
     execute_query(&db, siquery);
     println!("{:?}", begin.elapsed());
@@ -61,6 +51,7 @@ fn main() {
         query_select(table.as_str(), select.as_str());
     }
     if siquery.len() > 0 {
-        siquery_select(&siquery);
+        let db = init_db();
+        siquery_select(&db, &siquery);
     }
 }

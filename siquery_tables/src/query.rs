@@ -3,8 +3,7 @@ use vtab::*;
 use rusqlite::{version_number, Connection, Rows, Row as RusqliteRow};
 use rusqlite::types::{Value, Type};
 use std::time::{SystemTime};
-use csv::{WriterBuilder, Terminator};
-use utils;
+use table_printer::*;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();
@@ -228,7 +227,6 @@ fn register_tables(db:  &Connection, tables: Vec<String>) {
         println!("version: '{}' is not supported", version);
         return
     }
-    let begin = SystemTime::now();
     for tab in tables.iter() {
         let mut sql = String::from("CREATE VIRTUAL TABLE ");
         sql.push_str(tab);
@@ -237,7 +235,6 @@ fn register_tables(db:  &Connection, tables: Vec<String>) {
         sql.push(')');
         &db.execute_batch(&sql).unwrap();
     }
-    println!("&db.execute_batch{:?}", begin.elapsed());
 }
 
 fn create_schema(column_name: &Vec<&'static str>, column_types: &Vec<&'static str>) -> Option<String> {
@@ -449,13 +446,11 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     schema
 }
 
-pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
+pub fn execute_query(db: &Connection, query: &str){
     let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();
     let mut s = db.prepare(&query).unwrap();
-
     let mut col_name_internal = Vec::new();
-    //columns
     for col_name in s.column_names().iter() {
         col_name_internal.push(col_name.to_string());
 
@@ -467,119 +462,8 @@ pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
 
     let mut response = s.query(&[]).unwrap();
 
-    print_json(&col_name_internal,&mut response);
-    table_result
-}
+    //print_json(&col_name_internal,&mut response);
 
-pub fn print_json (col_names: &Vec<String>, values: &mut Rows) {
-    let mut out = "[\n".to_owned();
-    loop {
-        if let Some(v) = values.next(){
-            if let Some (res) = v.ok() {
-                out.push_str(&format_to_json(&col_names, &res));
-            }
-        } else {
-            break
-        }
-    }
-    utils::trim_string(&mut out);
-    out.push_str("\n]");
-    println!("{}",out);
-}
-
-pub fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> String {
-    let mut value_to_json = String::new();
-    match Value::data_type(&row_value.get(0)) {
-        Type::Real | Type::Integer => {
-            value_to_json.push_str(
-                &format!(
-                    "{:?}:{:?}",
-                    col_names[0],
-                    row_value.get::<usize,i64>(0).to_string()
-                )
-            );
-        },
-        Type::Text => {
-            value_to_json.push_str(
-                &format!(
-                    "{:?}:{:?}",
-                    col_names[0],
-                    row_value.get::<usize,String>(0)
-                )
-            );
-        },
-        _ => {
-            // Do nothing.
-        }
-    }
-    for i in 1..row_value.column_count() {
-        let v: Value = row_value.get(i);
-        // todo add condition for flag
-        match Value::data_type(&v) {
-            Type::Real | Type::Integer => {
-                value_to_json.push_str(
-                    &format!(
-                        ",{:?}:{:?}",
-                        col_names[i],
-                        row_value.get::<usize,i64>(i).to_string()
-                    )
-                );
-            },
-            Type::Text => {
-                value_to_json.push_str(
-                    &format!(
-                        ",{:?}:{:?}",
-                        col_names[i],
-                        row_value.get::<usize,String>(i)
-                    )
-                );
-            },
-            _ => {
-                // Do nothing.
-            }
-        }
-    }
-    format!("  {{{}}},\n", value_to_json)
-}
-
-pub fn print_csv(columns: Vec<String>,  values: &mut Rows) {
-    let mut row: Vec<String> = Vec::new();
-    //init writer
-    let mut wtr = WriterBuilder::new()
-        .delimiter(b'|')
-        .has_headers(true)
-        .double_quote(true)
-        .terminator(Terminator::CRLF)
-        .from_writer(vec![]);
-
-    //write header first
-    wtr.write_record(columns);
-
-    loop {
-        if let Some(v) = values.next(){
-            if let Some (res) = v.ok() {
-                for i in 0..res.column_count() {
-                    let val = Value::data_type(&res.get(i));
-                    match val {
-                        Type::Real | Type::Integer => {
-                            row.push(res.get::<usize,i64>(i).to_string());
-                        },
-                        Type::Text => {
-                            row.push(res.get::<usize,String>(i))
-                        },
-                        _ => {
-                            // Do nothing.
-                        }
-                    }
-                }
-                // write the row
-                wtr.write_record(row);
-                row = Vec::new();
-            }
-        } else {
-            break
-        }
-    }
-
-    println!("{}", String::from_utf8(wtr.into_inner().unwrap()).unwrap());
+    //print_csv(col_name_internal, &mut response);
+    print_pretty(col_name_internal, &mut response);
 }
