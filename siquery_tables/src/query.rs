@@ -446,7 +446,8 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     schema
 }
 
-pub fn execute_query(db: &Connection, query: &str) {
+
+pub fn execute_query(db: &Connection, query: &str, flag: u8) {
     let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();
     let mut stmt = db.prepare(&query);
@@ -463,16 +464,19 @@ pub fn execute_query(db: &Connection, query: &str) {
             table_result.push(row);
             row = Vec::new();
 
-            let mut response = val.query(&[]).unwrap();
-
-            //print_json(&col_name_internal,&mut response);
-            //print_csv(col_name_internal, &mut response);
-            print_pretty(col_name_internal, &mut response);
+            let mut response = s.query(&[]).unwrap();
+            if flag == 2 {
+                print_csv(col_name_internal, &mut response);
+            } else if flag == 1 {
+                print_json(&col_name_internal, &mut response);
+            } else {
+                print_pretty(col_name_internal, &mut response);
+            }
         },
         Err(e) =>
             match e {
                 Error::SqliteFailure(_r, m) => {
-                    if let Some(msg) = m {println!("{:?}", msg)};
+                    if let Some(msg) = m { println!("{:?}", msg) };
                 },
                 _ => println!("{:?}", Error::ModuleError(format!("{}", e)))
             }

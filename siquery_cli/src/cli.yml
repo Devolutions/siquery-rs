@@ -36,6 +36,9 @@ args:
     - json_mode:
         long: json
         help: set 'json' output mode
+    - pretty_mode:
+        long: pretty
+        help: set 'print_pretty' output mode
     - verbose:
         short: v
         multiple: true

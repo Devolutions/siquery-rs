@@ -32,9 +32,9 @@ fn query_select(name: &str, select: &str) {
     let _result = query_table(name, columns.clone());
 }
 
-fn siquery_select(db: &Connection, siquery: &str){
+fn siquery_select(db: &Connection, siquery: &str, flag: u8){
     let begin = std::time::SystemTime::now();
-    execute_query(&db, siquery);
+    execute_query(&db, siquery, flag);
     println!("{:?}", begin.elapsed());
 }
 
@@ -45,12 +45,18 @@ fn main() {
     let table = matches.value_of("table").unwrap_or("").to_string();
     let select = matches.value_of("select").unwrap_or("").to_string();
     let siquery = matches.value_of("siquery").unwrap_or("").to_string();
-
-    if table.len() > 0 {
-        query_select(table.as_str(), select.as_str());
-    }
-    if siquery.len() > 0 {
-        let db = init_db();
-        siquery_select(&db, &siquery);
+    let db = init_db();
+    if matches.is_present("json_mode") {
+        if siquery.len() > 0 {
+            siquery_select(&db, &siquery, 1);
+        }
+    } else if matches.is_present("csv_mode") {
+        if siquery.len() > 0 {
+            siquery_select(&db, &siquery, 2);
+        }
+    } else {
+        if siquery.len() > 0 {
+            siquery_select(&db, &siquery, 0);
+        }
     }
 }
