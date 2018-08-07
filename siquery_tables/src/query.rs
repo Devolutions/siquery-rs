@@ -1,6 +1,6 @@
 use tables::*;
 use vtab::*;
-use rusqlite::{version_number, Connection, Rows, Row as RusqliteRow};
+use rusqlite::{version_number, Connection, Rows, Row as RusqliteRow, Result, Error};
 use rusqlite::types::{Value, Type};
 use std::time::{SystemTime};
 use table_printer::*;
@@ -446,24 +446,36 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     schema
 }
 
-pub fn execute_query(db: &Connection, query: &str){
+pub fn execute_query(db: &Connection, query: &str) {
     let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();
-    let mut s = db.prepare(&query).unwrap();
-    let mut col_name_internal = Vec::new();
-    for col_name in s.column_names().iter() {
-        col_name_internal.push(col_name.to_string());
+    let mut stmt = db.prepare(&query);
 
-        let v: Value = Value::Text(col_name.to_string());
-        row.push(v);
+    match stmt {
+        Ok(mut val) => {
+            let mut col_name_internal = Vec::new();
+            for col_name in val.column_names().iter() {
+                col_name_internal.push(col_name.to_string());
+
+                let v: Value = Value::Text(col_name.to_string());
+                row.push(v);
+            }
+            table_result.push(row);
+            row = Vec::new();
+
+            let mut response = val.query(&[]).unwrap();
+
+            //print_json(&col_name_internal,&mut response);
+            //print_csv(col_name_internal, &mut response);
+            print_pretty(col_name_internal, &mut response);
+        },
+        Err(e) =>
+            match e {
+                Error::SqliteFailure(_r, m) => {
+                    if let Some(msg) = m {println!("{:?}", msg)};
+                },
+                _ => println!("{:?}", Error::ModuleError(format!("{}", e)))
+            }
     }
-    table_result.push(row);
-    row = Vec::new();
-
-    let mut response = s.query(&[]).unwrap();
-
-    //print_json(&col_name_internal,&mut response);
-
-    //print_csv(col_name_internal, &mut response);
-    print_pretty(col_name_internal, &mut response);
 }
+

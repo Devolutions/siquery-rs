@@ -45,17 +45,12 @@ fn main() {
     let table = matches.value_of("table").unwrap_or("").to_string();
     let select = matches.value_of("select").unwrap_or("").to_string();
     let siquery = matches.value_of("siquery").unwrap_or("").to_string();
-    let mode = matches.value_of("print_mode").unwrap_or("").to_string();
-    println!("mode {:?}", mode);
+
     if table.len() > 0 {
         query_select(table.as_str(), select.as_str());
     }
-    if mode.len() > 0 {
-        //let siquery = matches.value_of("siquery").unwrap_or("").to_string();
-        if siquery.len() > 0 {
-            let db = init_db();
-            siquery_select(&db, &siquery);
-        }
-
+    if siquery.len() > 0 {
+        let db = init_db();
+        siquery_select(&db, &siquery);
     }
 }
