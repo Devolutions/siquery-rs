@@ -446,7 +446,7 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     schema
 }
 
-pub fn execute_query(db: &Connection, query: &str){
+pub fn execute_query(db: &Connection, query: &str, flag: u8){
     let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();
     let mut s = db.prepare(&query).unwrap();
@@ -461,9 +461,11 @@ pub fn execute_query(db: &Connection, query: &str){
     row = Vec::new();
 
     let mut response = s.query(&[]).unwrap();
-
-    //print_json(&col_name_internal,&mut response);
-
-    //print_csv(col_name_internal, &mut response);
-    print_pretty(col_name_internal, &mut response);
+    if flag == 2 {
+        print_csv(col_name_internal, &mut response);
+    } else if flag == 1 {
+        print_json(&col_name_internal,&mut response);
+    } else {
+        print_pretty(col_name_internal, &mut response);
+    }
 }
