@@ -1,6 +1,6 @@
 use tables::*;
 use vtab::*;
-use rusqlite::{version_number, Connection};
+use rusqlite::{version_number, Connection, Rows};
 use rusqlite::types::{Value, Type};
 use std::time::{SystemTime};
 use csv::{WriterBuilder, Terminator};
@@ -449,8 +449,7 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     schema
 }
 
-pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
-    let mut table_result: Vec<Vec<Value>> = Vec::new();
+pub fn execute_query(db: &Connection, query: &str) {
     let mut row: Vec<Value> = Vec::new();
     let mut s = db.prepare(&query).unwrap();
 
@@ -458,82 +457,53 @@ pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
     //columns
     for col_name in s.column_names().iter() {
         col_name_internal.push(col_name.to_string());
-
         let v: Value = Value::Text(col_name.to_string());
         row.push(v);
     }
-    table_result.push(row);
-    row = Vec::new();
 
     let mut response = s.query(&[]).unwrap();
-    let mut out = "[\n".to_owned();
+
+    print_csv(col_name_internal, &mut response );
+}
+
+pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
+    let mut row: Vec<String> = Vec::new();
+    //init writer
+    let mut wtr = WriterBuilder::new()
+        .delimiter(b'|')
+        .has_headers(true)
+        .double_quote(true)
+        .terminator(Terminator::CRLF)
+        .from_writer(vec![]);
+
+    //write header first
+    wtr.write_record(columns);
 
     loop {
-        if let Some(v) = response.next(){
-            let mut value_to_json = String::new();
+        if let Some(v) = values.next(){
             if let Some (res) = v.ok() {
-                match Value::data_type(&res.get(0)) {
-                    Type::Real | Type::Integer => {
-                        value_to_json.push_str(
-                            &format!(
-                                "{:?}:{:?}",
-                                col_name_internal[0],
-                                res.get::<usize,i64>(0).to_string()
-                            )
-                        );
-                    },
-                    Type::Text => {
-                        value_to_json.push_str(
-                            &format!(
-                                "{:?}:{:?}",
-                                col_name_internal[0],
-                                res.get::<usize,String>(0)
-                            )
-                        );
-                    },
-                    _ => {
-                        // Do nothing.
-                    }
-                }
-                for i in 1..res.column_count() {
-                    let v: Value = res.get(i);
-                    // todo add condition for flag
-                    match Value::data_type(&v) {
+                for i in 0..res.column_count() {
+                    let val = Value::data_type(&res.get(i));
+                    match val {
                         Type::Real | Type::Integer => {
-                            value_to_json.push_str(
-                                &format!(
-                                    ",{:?}:{:?}",
-                                    col_name_internal[i],
-                                    res.get::<usize,i64>(i).to_string()
-                                )
-                            );
+                            row.push(res.get::<usize,i64>(i).to_string());
                         },
                         Type::Text => {
-                            value_to_json.push_str(
-                                &format!(
-                                    ",{:?}:{:?}",
-                                    col_name_internal[i],
-                                    res.get::<usize,String>(i)
-                                )
-                            );
+                            row.push(res.get::<usize,String>(i))
                         },
                         _ => {
                             // Do nothing.
                         }
                     }
-                    row.push(v);
                 }
-                out.push_str(&format!("  {{{}}},\n", value_to_json));
-                table_result.push(row.clone());
+                // write the row
+                wtr.write_record(row);
                 row = Vec::new();
             }
         } else {
             break
         }
     }
-    utils::trim_string(&mut out);
-    out.push_str("\n]");
 
-    println!("{}", out);
-    table_result
+    println!("{}", String::from_utf8(wtr.into_inner().unwrap()).unwrap());
 }

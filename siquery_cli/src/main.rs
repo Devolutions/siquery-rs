@@ -5,13 +5,11 @@ extern crate siquery;
 extern crate prettytable;
 extern crate serde;
 extern crate serde_json;
-
 extern crate rusqlite;
 
 use prettytable::Table;
 use siquery::query::{query_table, init_db, execute_query};
 use clap::App;
-
 
 fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
     for i in 0..result.len() {
