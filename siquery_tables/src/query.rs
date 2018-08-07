@@ -453,9 +453,9 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
     let mut stmt = db.prepare(&query);
 
     match stmt {
-        Ok(mut val) => {
+        Ok(mut statement_res) => {
             let mut col_name_internal = Vec::new();
-            for col_name in val.column_names().iter() {
+            for col_name in statement_res.column_names().iter() {
                 col_name_internal.push(col_name.to_string());
 
                 let v: Value = Value::Text(col_name.to_string());
@@ -464,7 +464,7 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
             table_result.push(row);
             row = Vec::new();
 
-            let mut response = s.query(&[]).unwrap();
+            let mut response = statement_res.query(&[]).unwrap();
             if flag == 2 {
                 print_csv(col_name_internal, &mut response);
             } else if flag == 1 {
