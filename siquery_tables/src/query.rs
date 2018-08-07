@@ -3,8 +3,8 @@ use vtab::*;
 use rusqlite::{version_number, Connection, Rows};
 use rusqlite::types::{Value, Type};
 use std::time::{SystemTime};
-use csv::{WriterBuilder, Terminator};
 use utils;
+use table_printer::*;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();
@@ -228,7 +228,6 @@ fn register_tables(db:  &Connection, tables: Vec<String>) {
         println!("version: '{}' is not supported", version);
         return
     }
-    let begin = SystemTime::now();
     for tab in tables.iter() {
         let mut sql = String::from("CREATE VIRTUAL TABLE ");
         sql.push_str(tab);
@@ -237,7 +236,6 @@ fn register_tables(db:  &Connection, tables: Vec<String>) {
         sql.push(')');
         &db.execute_batch(&sql).unwrap();
     }
-    println!("&db.execute_batch{:?}", begin.elapsed());
 }
 
 fn create_schema(column_name: &Vec<&'static str>, column_types: &Vec<&'static str>) -> Option<String> {
@@ -452,58 +450,14 @@ pub fn get_schema(table_name: &str) -> Option<String> {
 pub fn execute_query(db: &Connection, query: &str) {
     let mut row: Vec<Value> = Vec::new();
     let mut s = db.prepare(&query).unwrap();
-
     let mut col_name_internal = Vec::new();
-    //columns
     for col_name in s.column_names().iter() {
         col_name_internal.push(col_name.to_string());
         let v: Value = Value::Text(col_name.to_string());
         row.push(v);
     }
-
     let mut response = s.query(&[]).unwrap();
-
-    print_csv(col_name_internal, &mut response );
+    //print_csv(col_name_internal, &mut response);
+    print_pretty(col_name_internal, &mut response);
 }
 
-pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
-    let mut row: Vec<String> = Vec::new();
-    //init writer
-    let mut wtr = WriterBuilder::new()
-        .delimiter(b'|')
-        .has_headers(true)
-        .double_quote(true)
-        .terminator(Terminator::CRLF)
-        .from_writer(vec![]);
-
-    //write header first
-    wtr.write_record(columns);
-
-    loop {
-        if let Some(v) = values.next(){
-            if let Some (res) = v.ok() {
-                for i in 0..res.column_count() {
-                    let val = Value::data_type(&res.get(i));
-                    match val {
-                        Type::Real | Type::Integer => {
-                            row.push(res.get::<usize,i64>(i).to_string());
-                        },
-                        Type::Text => {
-                            row.push(res.get::<usize,String>(i))
-                        },
-                        _ => {
-                            // Do nothing.
-                        }
-                    }
-                }
-                // write the row
-                wtr.write_record(row);
-                row = Vec::new();
-            }
-        } else {
-            break
-        }
-    }
-
-    println!("{}", String::from_utf8(wtr.into_inner().unwrap()).unwrap());
-}
