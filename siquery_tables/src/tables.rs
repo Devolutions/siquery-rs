@@ -1,8 +1,5 @@
 use serde::ser::{Serialize, SerializeStruct, Serializer};
-#[macro_use]
 use rusqlite::types::*;
-use std::borrow::Borrow;
-
 
 pub trait Table {
     const COLUMN_NAMES: &'static [&'static str];

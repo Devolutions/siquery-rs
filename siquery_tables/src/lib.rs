@@ -12,6 +12,7 @@ extern crate regex;
 extern crate lazy_static;
 extern crate time;
 extern crate rusqlite;
+extern crate csv;
 
 
 pub mod vtab;

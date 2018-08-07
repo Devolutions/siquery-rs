@@ -5,13 +5,13 @@ extern crate siquery;
 extern crate prettytable;
 extern crate serde;
 extern crate serde_json;
-extern crate csv;
+
 extern crate rusqlite;
 
 use prettytable::Table;
 use siquery::query::{query_table, init_db, execute_query};
 use clap::App;
-use csv::{WriterBuilder, Terminator};
+
 
 fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
     for i in 0..result.len() {
@@ -22,26 +22,12 @@ fn print_table_json(mut result: Vec<Vec<String>>, header: Vec<String>){
     let serialized = serde_json::to_string_pretty(&result).unwrap();
     println!("  {}", serialized);
 }
-fn print_table_csv(result: Vec<Vec<String>>, header: Vec<String>) {
-    let mut wtr = WriterBuilder::new()
-        .delimiter(b'|')
-        .has_headers(true)
-        .double_quote(true)
-        .terminator(Terminator::CRLF)
-        .from_writer(vec![]);
 
-    // insert the header to the result
-    wtr.write_record(header);
-    for res in result.iter(){
-        wtr.write_record(res);
-    }
-
-    //println!("{:?}", String::from_utf8(wtr.into_inner().unwrap()).unwrap());
-}
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
     table.printstd();
 }
+
 fn query_select(name: &str, select: &str) {
     let mut columns: Vec<String> = vec![];
     if select != "*" {
@@ -55,11 +41,8 @@ fn query_select(name: &str, select: &str) {
         }
     }
     let _result = query_table(name, columns.clone());
-
-    //print_table_pretty(result.clone());
-    //print_table_json(result, query_header(name, columns));
-    //print_table_csv(result.clone(), query_header(name, columns).clone());
 }
+
 fn siquery_select(siquery: &str)/*-> Vec<Vec<Value>>*/ {
     let db = init_db();
     //println!("query result {:?}", exec_query(&db, siquery).unwrap());

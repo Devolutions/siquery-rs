@@ -7,9 +7,8 @@ use rusqlite::types::*;
 use rusqlite::{Connection, Result, Error};
 use std::os::raw::c_int;
 use std::str;
-use std::borrow::Borrow;
 
-use query::{query_table, query_header, get_schema};
+use query::{query_table, get_schema};
 
 pub fn load_module(conn: &Connection) -> Result<()> {
     let aux: Option<()> = None;
@@ -25,9 +24,6 @@ struct SiqueryTab {
     /// Base class. Must be first
     base: sqlite3_vtab,
     table_name: String,
-    table: Vec<Vec<String>>,
-    columns: Vec<String>,
-    header:Vec<String>,
 }
 
 impl SiqueryTab {
@@ -42,17 +38,6 @@ impl SiqueryTab {
             }
         }
         Err(Error::ModuleError(format!("illegal argument: '{}'", arg)))
-    }
-
-    fn get_from_args(args: &str)-> Vec<String>{
-        let mut v : Vec<String> = Vec::new();
-        let split : Vec<_>= args.split(';').collect();
-        for value in split {
-            if value.len() > 0 {
-                v.push(value.to_string());
-            }
-        }
-        v
     }
 }
 
@@ -72,11 +57,8 @@ impl VTab for SiqueryTab {
         let mut vtab = SiqueryTab {
             base: sqlite3_vtab::default(),
             table_name: String::new(),
-            table: Vec::new(),
-            columns: Vec::new(),
-            header: Vec::new(),
         };
-
+        let schema;
         let args= &_args[3..];
 
         for c_slice in args {
@@ -84,13 +66,6 @@ impl VTab for SiqueryTab {
             match param {
                 "table_name" => {
                     vtab.table_name = value.to_string();
-                }
-                "columns" => {
-                    if value.len() > 1 {
-                        vtab.columns = SiqueryTab::get_from_args(value);
-                    } else{
-                        vtab.columns = Vec::new();
-                    }
                 }
                 _ => {
                     return Err(Error::ModuleError(format!(
@@ -100,10 +75,7 @@ impl VTab for SiqueryTab {
                 }
             }
         }
-        // create the header
-        vtab.header = query_header(vtab.table_name.as_str(), vtab.columns.clone());
 
-        let mut schema;
         schema = get_schema(vtab.table_name.as_str());
         Ok((schema.unwrap().to_owned(), vtab))
     }
@@ -146,7 +118,7 @@ impl VTabCursor for SiqueryTabCursor {
         let siquery_table = unsafe {&*(self.base.pVtab as * const SiqueryTab)};
         // register table in memory
         if !self.table_in_memory {
-            self.rows = query_table(siquery_table.table_name.as_str(), siquery_table.header.clone());
+            self.rows = query_table(siquery_table.table_name.as_str(), vec![]);
             self.table_in_memory = true;
         }
         self.row_id = 0;

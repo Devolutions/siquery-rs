@@ -1,13 +1,10 @@
 use tables::*;
 use vtab::*;
-use rusqlite::{version_number, Connection, Result};
-use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef, Null, Value, Type};
-use std::borrow::Borrow;
+use rusqlite::{version_number, Connection};
+use rusqlite::types::{Value, Type};
 use std::time::{SystemTime};
-use serde_json::value;
-use std::str::FromStr;
-use std::fmt::Debug;
-use std::collections::HashMap;
+use csv::{WriterBuilder, Terminator};
+use utils;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();
@@ -218,184 +215,6 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
     res
 }
 
-fn select_header<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<String> where T:Table+Sized {
-    let mut hdr: Vec<String> = Vec::new();
-    if columns.len() < 1 {
-        for col in table.column_names().iter(){
-            hdr.push(col.to_string());
-        }
-        return hdr;
-    }
-
-    for column in columns.iter() {
-        // make sure the header exist in the table
-        let id = table[0].get_id(column);
-        if id != 0 {
-            hdr.push(column.to_string());
-        }
-    }
-
-    hdr
-}
-
-pub fn query_header(name: &str, columns: Vec<String>) -> Vec<String> {
-
-    let res = match name {
-        "etc_hosts" => {
-            let table = EtcHosts::get_specific();
-            select_header(&table, columns)
-        },
-        "etc_protocols" => {
-            let table = EtcProtocols::get_specific();
-            select_header(&table, columns)
-        },
-        "etc_services" => {
-            let table = EtcServices::get_specific();
-            select_header(&table, columns)
-        },
-        "system_info" => {
-            let table = SystemInfoData::get_specific();
-            select_header(&table, columns)
-        },
-        "os_version" => {
-            let table = OsVersion::get_specific();
-            select_header(&table, columns)
-        },
-        "logical_drives" => {
-            let table = LogicalDrive::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(not(target_os = "macos"))]
-        "interface_address" => {
-            let table = InterfaceAddress::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(not(target_os = "macos"))]
-        "interface_details" => {
-            let table = InterfaceDetails::get_specific();
-            select_header(&table, columns)
-        },
-        "uptime" => {
-            let table = Uptime::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "products" => {
-            let table = Products::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_computer_info" => {
-            let table = WmiComputerInfo::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_os_version" => {
-            let table = WmiOsVersion::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_printers" => {
-            let table = WmiPrinters::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_services" => {
-            let table = WmiServices::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_hotfixes" => {
-            let table = WmiHotfixes::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_shares" => {
-            let table = WmiShares::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_network_adapters" => {
-            let table = WmiNetworkAdapters::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_local_accounts" => {
-            let table = WmiLocalAccounts::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_bios" => {
-            let table = WmiBios::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_motherboard" => {
-            let table = WmiMotherboard::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_processor" => {
-            let table = WmiProcessor::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_physical_memory" => {
-            let table = WmiMemory::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_sound" => {
-            let table = WmiSound::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_video" => {
-            let table = WmiVideo::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_monitors" => {
-            let table = WmiMonitors::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_keyboard" => {
-            let table = WmiKeyboard::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(target_os = "windows")]
-        "wmi_pointing_device" => {
-            let table = WmiPointingDevice::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(not(target_os = "macos"))]
-        "process_open_sockets" => {
-            let table = ProcessOpenSocketsRow::get_specific();
-            select_header(&table, columns)
-        },
-        "processes" => {
-            let table = ProcessesRow::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(not(target_os = "macos"))]
-        "process_memory_map" => {
-            let table = ProcessMemoryMapRow::get_specific();
-            select_header(&table, columns)
-        },
-        #[cfg(not(target_os = "windows"))]
-        "process_envs" => {
-            let table = ProcessEnvsRow::get_specific();
-            select_header(&table, columns)
-        },
-        _ => {
-            let table: Vec<Dummy> = Vec::new();
-            select_header(&table, columns)
-        }
-    };
-    res
-}
-
 pub fn init_db()-> Connection {
     let db = Connection::open_in_memory().unwrap();
     load_module(&db).unwrap();
@@ -409,15 +228,16 @@ fn register_tables(db:  &Connection, tables: Vec<String>) {
         println!("version: '{}' is not supported", version);
         return
     }
-
+    let begin = SystemTime::now();
     for tab in tables.iter() {
-            let mut sql = String::from("CREATE VIRTUAL TABLE ");
-            sql.push_str(tab);
-            sql.push_str(" USING siquery(table_name=");
-            sql.push_str(tab);
-            sql.push(')');
-            &db.execute_batch(&sql).unwrap();
+        let mut sql = String::from("CREATE VIRTUAL TABLE ");
+        sql.push_str(tab);
+        sql.push_str(" USING siquery(table_name=");
+        sql.push_str(tab);
+        sql.push(')');
+        &db.execute_batch(&sql).unwrap();
     }
+    println!("&db.execute_batch{:?}", begin.elapsed());
 }
 
 fn create_schema(column_name: &Vec<&'static str>, column_types: &Vec<&'static str>) -> Option<String> {
@@ -628,6 +448,7 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     };
     schema
 }
+
 pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
     let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();
@@ -645,77 +466,74 @@ pub fn execute_query(db: &Connection, query: &str) -> Vec<Vec<Value>> {
     row = Vec::new();
 
     let mut response = s.query(&[]).unwrap();
-    let mut out = String::new();
+    let mut out = "[\n".to_owned();
 
     loop {
-        let val = response.next();
-        match val {
-            Some(v) => {
-                match v {
-                    Ok(res) => {
-
-                        let mut row_to_json: String = "{".to_string();
-                        let mut value_to_json = String::new();
-
-                        for i in 0..res.column_count() {
-                            let v: Value = res.get(i);
-                            match Value::data_type(&v) {
-                                Type::Integer => {
-                                    let c: i64 = res.get(i);
-                                    //print!("{:?}: {:?}, ", col_name_internal[i], c);
-
-                                    value_to_json = format!("{}{:?}{}{:?}, ",
-                                                            value_to_json,
-                                                          col_name_internal[i],
-                                                          ": ",
-                                                          c.clone().to_string()
-                                    );
-
-                                },
-                                Type::Real => {
-                                    let c: i64 = res.get(i);
-                                    //print!("{:?}: {:?}, ", col_name_internal[i], c);
-                                    value_to_json = format!("{}{:?}{}{:?}, ",
-                                                            value_to_json,
-                                                            col_name_internal[i],
-                                                            ": ",
-                                                            c.clone().to_string()
-                                    );
-                                },
-                                Type::Text => {
-                                    let c: String = res.get(i);
-                                    //print!("{:?}: {:?}, ", col_name_internal[i], c);
-                                    value_to_json = format!("{}{:?}{}{:?}, ",
-                                                            value_to_json,
-                                                            col_name_internal[i],
-                                                            ": ",
-                                                            c.clone(),
-                                    );
-                                },
-                                _ => {
-                                    let c: Value = res.get(i);
-                                    //print!("{:?}: {:?}, ", col_name_internal[i], c);
-
-                                }
-                            }
-                            row.push(v);
-                        }
-
-                        row_to_json = format!("{}{}{}\n",
-                                              row_to_json,
-                                              value_to_json,
-                                              "}",
+        if let Some(v) = response.next(){
+            let mut value_to_json = String::new();
+            if let Some (res) = v.ok() {
+                match Value::data_type(&res.get(0)) {
+                    Type::Real | Type::Integer => {
+                        value_to_json.push_str(
+                            &format!(
+                                "{:?}:{:?}",
+                                col_name_internal[0],
+                                res.get::<usize,i64>(0).to_string()
+                            )
                         );
-                        out.push_str(&row_to_json);
-                        table_result.push(row.clone());
-                        row = Vec::new();
                     },
-                    _ => break,
+                    Type::Text => {
+                        value_to_json.push_str(
+                            &format!(
+                                "{:?}:{:?}",
+                                col_name_internal[0],
+                                res.get::<usize,String>(0)
+                            )
+                        );
+                    },
+                    _ => {
+                        // Do nothing.
+                    }
                 }
+                for i in 1..res.column_count() {
+                    let v: Value = res.get(i);
+                    // todo add condition for flag
+                    match Value::data_type(&v) {
+                        Type::Real | Type::Integer => {
+                            value_to_json.push_str(
+                                &format!(
+                                    ",{:?}:{:?}",
+                                    col_name_internal[i],
+                                    res.get::<usize,i64>(i).to_string()
+                                )
+                            );
+                        },
+                        Type::Text => {
+                            value_to_json.push_str(
+                                &format!(
+                                    ",{:?}:{:?}",
+                                    col_name_internal[i],
+                                    res.get::<usize,String>(i)
+                                )
+                            );
+                        },
+                        _ => {
+                            // Do nothing.
+                        }
+                    }
+                    row.push(v);
+                }
+                out.push_str(&format!("  {{{}}},\n", value_to_json));
+                table_result.push(row.clone());
+                row = Vec::new();
             }
-            _ => break,
+        } else {
+            break
         }
     }
+    utils::trim_string(&mut out);
+    out.push_str("\n]");
+
     println!("{}", out);
     table_result
 }
