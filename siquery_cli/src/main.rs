@@ -12,7 +12,6 @@ use siquery::query::{query_table, init_db, execute_query};
 use clap::App;
 use rusqlite::Connection;
 
-
 fn print_table_pretty(result: Vec<Vec<String>>) {
     let table = Table::from(result);
     table.printstd();

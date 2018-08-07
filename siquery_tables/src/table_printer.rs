@@ -1,7 +1,7 @@
 use csv::{WriterBuilder, Terminator};
 use rusqlite::{version_number, Connection, Rows};
 use rusqlite::types::{Value, Type};
-use prettytable::{Table};
+use prettytable::Table;
 use prettytable::row::Row;
 use prettytable::cell::Cell;
 
@@ -46,7 +46,6 @@ pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
 
 pub fn print_pretty(columns: Vec<String>, values: &mut Rows) {
     let mut row = Row::empty();
-    let mut result: Vec<Vec<String>> = Vec::new();
     let mut table: Table = Table::new();
     //write header first
     table.set_titles(columns.iter().collect());
