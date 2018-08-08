@@ -40,7 +40,6 @@ macro_rules! table_proprieties {
         }
 
         impl $name {
-            // This is purely an example—not a good one.
             pub fn get_columns_name() -> Vec<&'static str> {
                 vec![$(stringify!($field_name)),*]
             }

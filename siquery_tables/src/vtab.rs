@@ -156,12 +156,10 @@ impl VTabCursor for SiqueryTabCursor {
     }
 }
 
-
 #[test]
 fn test_siquery_module() {
     use query::init_db;
 
-    //create db && load siquery module
     let db = init_db();
     let stmt = db.prepare("select * from Dummy");
 
