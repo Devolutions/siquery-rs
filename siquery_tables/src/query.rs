@@ -222,7 +222,7 @@ pub fn init_db()-> Connection {
     db
 }
 
-fn register_tables(db:  &Connection, tables: Vec<String>) {
+fn register_tables(db: &Connection, tables: Vec<String>) {
     let version = version_number();
     if version < 3008012 {
         println!("version: '{}' is not supported", version);

@@ -75,7 +75,6 @@ macro_rules! table_proprieties {
     }
 }
 
-
 table_proprieties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Dummy {
@@ -2929,4 +2928,49 @@ pub fn get_table_list() -> Vec<String> {
         #[cfg(test)]
             "Dummy".to_string(),
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_by_name(){
+        let table = Dummy {
+            a: 25,
+            b: 30,
+        };
+        assert_eq!(table.get_by_name("a"), Value::from(25));
+        assert_eq!(table.get_by_name("b"), Value::from(30));
+        assert_ne!(table.get_by_name("b"), Value::from(35));
+        assert_eq!(table.get_by_name("c"), Value::from("".to_owned()));
+    }
+    #[test]
+    fn test_get_by_id(){
+        let table = Dummy {
+            a: 25,
+            b: 30,
+        };
+        assert_eq!(table.get_by_id(1), Value::from(25));
+        assert_eq!(table.get_by_id(2), Value::from(30));
+        assert_ne!(table.get_by_id(2), Value::from(35));
+        assert_eq!(table.get_by_id(0), Value::from("".to_owned()));
+    }
+    #[test]
+    fn test_get_id(){
+        let table = Dummy {
+            a: 25,
+            b: 30,
+        };
+        assert_eq!(table.get_id("a"), 1);
+        assert_eq!(table.get_id("b"), 2);
+        assert_ne!(table.get_id("c"), 2);
+        assert_eq!(table.get_id("c"), 0);
+    }
+    #[test]
+    fn test_table_proprieties(){
+        assert_eq!(Dummy::get_columns_name(), vec!["a", "b"]);
+        assert_eq!(Dummy::get_fields_type(), vec!["u32", "i32"]);
+        assert_eq!(Dummy::get_columns_type(), vec!["\" INTEGER", "\" INTEGER"]);
+    }
 }
