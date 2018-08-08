@@ -155,3 +155,42 @@ impl VTabCursor for SiqueryTabCursor {
         Ok(self.row_id)
     }
 }
+
+
+#[test]
+fn test_siquery_module() {
+    use query::init_db;
+
+    //create db && load siquery module
+    let db = init_db();
+    let stmt = db.prepare("select * from Dummy");
+
+    match stmt {
+        Ok(mut stmt_resp) => {
+            let mut resp = stmt_resp.query(&[]).unwrap();
+            loop {
+                if let Some(val) = resp.next() {
+                    if let Some(v) = val.ok() {
+                        assert_eq!(25, v.get::<usize, u32>(0));
+                        assert_eq!(25, v.get::<usize, i32>(1));
+                    } else {
+                        break
+                    }
+                } else {
+                    break
+                }
+            }
+        }
+        Err(e) =>
+            {   // use --nocapture flag
+                match e {
+                    Error::SqliteFailure(_r, m) => {
+                        if let Some(msg) = m { println!("{}", msg) };
+                    },
+                    _ => println!("{:?}", Error::ModuleError(format!("{}", e)))
+                };
+                assert_eq!(0, 1);
+            }
+    }
+}
+

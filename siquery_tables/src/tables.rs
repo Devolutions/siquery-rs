@@ -79,29 +79,38 @@ macro_rules! table_proprieties {
 table_proprieties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Dummy {
-    pub aa: u32,
-    pub bb: i32,
+    pub a: u32,
+    pub b: i32,
 }}
 
-impl Dummy {}
+impl Dummy {
+    const A_ID: u64 = 0x00000001;
+    const B_ID: u64 = 0x00000002;
+}
 
 impl Table for Dummy {
-    const COLUMN_NAMES: &'static [&'static str] = &[];
+    const COLUMN_NAMES: &'static [&'static str] = &["a", "b"];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
+            "a" => Value::from(self.a),
+            "b" => Value::from(self.b),
             _ => Value::from("".to_owned())
         }
     }
 
     fn get_by_id(&self, _id: u64) -> Value {
         match _id {
+            Self::A_ID => Value::from(self.a),
+            Self::B_ID => Value::from(self.b),
             _ => Value::from("".to_owned())
         }
     }
 
     fn get_id(&self, _name: &str) -> u64 {
         match _name {
+            "a" => Self::A_ID,
+            "b" => Self::B_ID,
             _ => 0
         }
     }
@@ -146,8 +155,8 @@ impl Table for EtcHosts {
 
     fn get_id(&self, _name: &str) -> u64 {
         match _name {
-            "address" => Self::ADDRESS_ID as u64,
-            "hostnames" => Self::HOSTNAMES_ID as u64,
+            "address" => Self::ADDRESS_ID,
+            "hostnames" => Self::HOSTNAMES_ID,
             _ => 0
         }
     }
@@ -2917,5 +2926,7 @@ pub fn get_table_list() -> Vec<String> {
             "wmi_pointing_device".to_string(),
         #[cfg(not(target_os = "windows"))]
             "process_envs".to_string(),
+        #[cfg(test)]
+            "Dummy".to_string(),
     ]
 }

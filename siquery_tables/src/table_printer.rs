@@ -1,5 +1,5 @@
 use csv::{WriterBuilder, Terminator};
-use rusqlite::{version_number, Connection, Rows, Row as RusqliteRow};
+use rusqlite::{Rows, Row as RusqliteRow};
 use rusqlite::types::{Value, Type};
 use prettytable::Table;
 use prettytable::row::Row;
@@ -16,7 +16,7 @@ pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
         .terminator(Terminator::CRLF)
         .from_writer(vec![]);
     //write header first
-    wtr.write_record(columns);
+    wtr.write_record(columns).expect("could not write columns");
     loop {
         if let Some(v) = values.next(){
             if let Some (res) = v.ok() {
@@ -35,7 +35,7 @@ pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
                     }
                 }
                 // write row values
-                wtr.write_record(row);
+                wtr.write_record(row).expect("could not write row");;
                 row = Vec::new();
             }
         } else {
