@@ -8,13 +8,6 @@ args:
         value_name: table
         help: select all from table
         takes_value: true
-    - select:
-        short: s
-        long: S
-        value_name: select
-        help: columns to select
-        takes_value: true
-        requires: table
     - siquery:
         short: q
         long: query
@@ -27,7 +20,6 @@ args:
         help: sqlite query command
         index: 1
     - list_all:
-        short: l
         long: L
         help: list all table names
     - csv_mode:
@@ -36,9 +28,10 @@ args:
     - json_mode:
         long: json
         help: set 'json' output mode
+    - pretty_mode:
+        long: pretty
+        help: set 'print_pretty' output mode
     - verbose:
         short: v
         multiple: true
         help: Sets the level of verbosity
-
-

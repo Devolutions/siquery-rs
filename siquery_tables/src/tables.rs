@@ -1,4 +1,5 @@
 use serde::ser::{Serialize, SerializeStruct, Serializer};
+use rusqlite::types::*;
 
 pub trait Table {
     const COLUMN_NAMES: &'static [&'static str];
@@ -7,18 +8,18 @@ pub trait Table {
         Self::COLUMN_NAMES
     }
 
-    fn get_by_name(&self, _name: &str) -> String;
-    fn get_by_id(&self, _id: u64) -> String;
+    fn get_by_name(&self, _name: &str) -> Value;
+    fn get_by_id(&self, _id: u64) -> Value;
     fn get_id(&self, _name: &str) -> u64;
 }
 
 impl<T: Table> Table for Vec<T> {
     const COLUMN_NAMES: &'static [&'static str] = T::COLUMN_NAMES;
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         unimplemented!()
     }
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         unimplemented!()
     }
     fn get_id(&self, _name: &str) -> u64 {
@@ -26,39 +27,101 @@ impl<T: Table> Table for Vec<T> {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Dummy {}
+#[macro_export]
+macro_rules! table_properties {
+    (
+    $(#[$attr:meta])*
+    pub struct $name:ident {
+            $(pub $field_name:ident: $field_type:ty,)*
+    }) => {
+        $(#[$attr])*
+        pub struct $name {
+            $(pub $field_name: $field_type,)*
+        }
 
-impl Dummy {}
+        impl $name {
+            pub fn get_columns_name() -> Vec<&'static str> {
+                vec![$(stringify!($field_name)),*]
+            }
+
+            pub fn get_fields_type() -> Vec<&'static str> {
+                vec![$(stringify!($field_type)),*]
+            }
+
+            pub fn get_columns_type() -> Vec<&'static str> {
+                let mut columns_type = Vec::new();
+                for t in $name::get_fields_type().iter() {
+                    match *t {
+                        "String" => columns_type.push("\" TEXT"),
+                        "u8" => columns_type.push("\" INTEGER"),
+                        "u16" => columns_type.push("\" INTEGER"),
+                        "u32" => columns_type.push("\" INTEGER"),
+                        "i8" => columns_type.push("\" INTEGER"),
+                        "i16" => columns_type.push("\" INTEGER"),
+                        "i32" => columns_type.push("\" INTEGER"),
+                        "i64" => columns_type.push("\" INTEGER"),
+                        "f64" => columns_type.push("\" REAL"),
+                        "f32" => columns_type.push("\" TEXT"),
+                        "isize" => columns_type.push("\" TEXT"),
+                        "usize" => columns_type.push("\" TEXT"),
+                        "Vec<String>" => columns_type.push("\" TEXT"),
+                        _ => columns_type.push("\" NULL"),
+                    }
+                }
+                    columns_type
+            }
+        }
+    }
+}
+
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Dummy {
+    pub a: u32,
+    pub b: i32,
+}}
+
+impl Dummy {
+    const A_ID: u64 = 0x00000001;
+    const B_ID: u64 = 0x00000002;
+}
 
 impl Table for Dummy {
-    const COLUMN_NAMES: &'static [&'static str] = &[];
+    const COLUMN_NAMES: &'static [&'static str] = &["a", "b"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            _ => "".to_string()
+            "a" => Value::from(self.a),
+            "b" => Value::from(self.b),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            _ => "".to_string()
+            Self::A_ID => Value::from(self.a),
+            Self::B_ID => Value::from(self.b),
+            _ => Value::from("".to_owned())
         }
     }
 
     fn get_id(&self, _name: &str) -> u64 {
         match _name {
+            "a" => Self::A_ID,
+            "b" => Self::B_ID,
             _ => 0
         }
     }
 }
 
+
+table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcHosts {
     pub address: String,
     pub hostnames: String,
 }
-
+}
 pub trait EtcHostsIface {
     fn get_hosts_file(&self) -> Option<String>;
 }
@@ -72,31 +135,31 @@ impl Table for EtcHosts {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "address", "hostnames"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "address" => self.address.clone(),
-            "hostnames" => self.hostnames.clone(),
-            _ => "".to_string()
+            "address" => Value::from(self.address.to_owned()),
+            "hostnames" => Value::from(self.hostnames.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::ADDRESS_ID => self.address.clone(),
-            Self::HOSTNAMES_ID => self.hostnames.clone(),
-            _ => "".to_string()
+            Self::ADDRESS_ID => Value::from(self.address.to_owned()),
+            Self::HOSTNAMES_ID => Value::from(self.hostnames.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
     fn get_id(&self, _name: &str) -> u64 {
         match _name {
-            "address" => Self::ADDRESS_ID as u64,
-            "hostnames" => Self::HOSTNAMES_ID as u64,
+            "address" => Self::ADDRESS_ID,
+            "hostnames" => Self::HOSTNAMES_ID,
             _ => 0
         }
     }
 }
-
+table_properties! {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcProtocols {
     pub name: String,
@@ -104,7 +167,7 @@ pub struct EtcProtocols {
     pub alias: String,
     pub comment: String,
 }
-
+}
 pub trait EtcProtocolsIface {
     fn get_protocols_file(&self) -> Option<String>;
 }
@@ -121,24 +184,24 @@ impl Table for EtcProtocols {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name", "number", "alias", "comment"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         let value = match _name {
-            "name" => self.name.clone(),
-            "number" => self.number.to_string(),
-            "alias" => self.alias.clone(),
-            "comment" => self.comment.clone(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "number" => Value::from(self.number),
+            "alias" => Value::from(self.alias.to_owned()),
+            "comment" => Value::from(self.comment.to_owned()),
+            _ => Value::from("".to_owned())
         };
         value
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::NUMBER_ID => self.number.to_string(),
-            Self::ALIAS_ID => self.alias.clone(),
-            Self::COMMENT_ID => self.comment.clone(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::NUMBER_ID => Value::from(self.number),
+            Self::ALIAS_ID => Value::from(self.alias.to_owned()),
+            Self::COMMENT_ID => Value::from(self.comment.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -152,7 +215,7 @@ impl Table for EtcProtocols {
         }
     }
 }
-
+table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcServices {
     pub name: String,
@@ -160,7 +223,7 @@ pub struct EtcServices {
     pub protocol: String,
     pub aliases: String,
     pub comment: String,
-}
+}}
 
 pub trait EtcServicesIface {
     fn get_services_file(&self) -> Option<String>;
@@ -179,25 +242,25 @@ impl Table for EtcServices {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name", "port", "protocol", "aliases", "comment"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "port" => self.port.to_string(),
-            "protocol" => self.protocol.clone(),
-            "aliases" => self.aliases.clone(),
-            "comment" => self.comment.clone(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "port" => Value::from(self.port),
+            "protocol" => Value::from(self.protocol.to_owned()),
+            "aliases" => Value::from(self.aliases.to_owned()),
+            "comment" => Value::from(self.comment.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::PORT_ID => self.port.to_string(),
-            Self::PROTOCOL_ID => self.protocol.clone(),
-            Self::ALIASES_ID => self.aliases.clone(),
-            Self::COMMENT_ID => self.comment.clone(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::PORT_ID => Value::from(self.port),
+            Self::PROTOCOL_ID => Value::from(self.protocol.to_owned()),
+            Self::ALIASES_ID => Value::from(self.aliases.to_owned()),
+            Self::COMMENT_ID => Value::from(self.comment.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -214,15 +277,16 @@ impl Table for EtcServices {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize)]
 pub struct WmiComputerInfo {
     pub computer_name: String,
     pub domain: String,
     pub manufacturer: String,
     pub model: String,
-    pub number_of_processors: String,
+    pub number_of_processors: u32,
     pub system_type: String,
-}
+}}
 
 pub trait WmiComputerInfoIface {
     fn get_wmi_computer_info(&self) -> Option<String>;
@@ -248,27 +312,27 @@ impl Table for WmiComputerInfo {
         "number_of_processors",
         "system_type"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "computer_name" => self.computer_name.clone(),
-            "domain" => self.domain.to_string(),
-            "manufacturer" => self.manufacturer.clone(),
-            "model" => self.model.clone(),
-            "number_of_processors" => self.number_of_processors.clone(),
-            "system_type" => self.system_type.clone(),
-            _ => "".to_string()
+            "computer_name" => Value::from(self.computer_name.to_owned()),
+            "domain" => Value::from(self.domain.to_owned()),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "model" => Value::from(self.model.to_owned()),
+            "number_of_processors" => Value::from(self.number_of_processors),
+            "system_type" => Value::from(self.system_type.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::COMPUTER_NAME_ID => self.computer_name.clone(),
-            Self::DOMAIN_ID => self.domain.to_string(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::MODEL_ID => self.model.clone(),
-            Self::NUMBER_OF_PROCESSORS_ID => self.number_of_processors.clone(),
-            Self::SYSTEM_TYPE_ID => self.system_type.clone(),
-            _ => "".to_string()
+            Self::COMPUTER_NAME_ID => Value::from(self.computer_name.to_owned()),
+            Self::DOMAIN_ID => Value::from(self.domain.to_owned()),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::MODEL_ID => Value::from(self.model.to_owned()),
+            Self::NUMBER_OF_PROCESSORS_ID => Value::from(self.number_of_processors.to_owned()),
+            Self::SYSTEM_TYPE_ID => Value::from(self.system_type.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -284,14 +348,14 @@ impl Table for WmiComputerInfo {
         }
     }
 }
-
+table_properties!{
 #[derive(Serialize)]
 pub struct SystemInfoData {
     pub computer_name: String,
     pub cpu_brand: String,
     pub cpu_logical_cores: u32,
-    pub physical_memory: u64,
-}
+    pub physical_memory: i64,
+}}
 
 pub trait SystemInfoDataIface {
     fn get_wmi_cpu_info(&self) -> Option<String>;
@@ -316,23 +380,23 @@ impl Table for SystemInfoData {
         "cpu_logical_cores",
         "physical_memory"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "computer_name" => self.computer_name.clone(),
-            "cpu_brand" => self.cpu_brand.clone(),
-            "cpu_logical_cores" => self.cpu_logical_cores.to_string(),
-            "physical_memory" => self.physical_memory.to_string(),
-            _ => "".to_string()
+            "computer_name" => Value::from(self.computer_name.to_owned()),
+            "cpu_brand" => Value::from(self.cpu_brand.to_owned()),
+            "cpu_logical_cores" => Value::from(self.cpu_logical_cores),
+            "physical_memory" => Value::from(self.physical_memory),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::COMPUTER_NAME_ID => self.computer_name.clone(),
-            Self::CPU_BRAND_ID => self.cpu_brand.clone(),
-            Self::CPU_LOGICAL_CORES_ID => self.cpu_logical_cores.to_string(),
-            Self::PHYSICAL_MEMORY_ID => self.physical_memory.to_string(),
-            _ => "".to_string()
+            Self::COMPUTER_NAME_ID => Value::from(self.computer_name.to_owned()),
+            Self::CPU_BRAND_ID => Value::from(self.cpu_brand.to_owned()),
+            Self::CPU_LOGICAL_CORES_ID => Value::from(self.cpu_logical_cores),
+            Self::PHYSICAL_MEMORY_ID => Value::from(self.physical_memory),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -348,6 +412,7 @@ impl Table for SystemInfoData {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize)]
 pub struct WmiOsVersion {
     pub build_number: String,
@@ -367,7 +432,7 @@ pub struct WmiOsVersion {
     pub total_virtual_mem_size: String,
     pub total_visible_mem_size: String,
     pub win_directory: String,
-}
+}}
 
 pub trait WmiOsVersionIface {
     fn get_wmi_os_info(&self) -> Option<String>;
@@ -416,49 +481,49 @@ impl Table for WmiOsVersion {
         "total_visible_mem_size",
         "win_directory"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "build_number" => self.build_number.clone(),
-            "csname" => self.csname.to_string(),
-            "caption" => self.caption.clone(),
-            "free_physical_mem" => self.free_physical_mem.clone(),
-            "free_virtual_mem" => self.free_virtual_mem.clone(),
-            "platform" => self.platform.clone(),
-            "version" => self.version.to_string(),
-            "major" => self.major.clone(),
-            "manufacturer" => self.manufacturer.clone(),
-            "minor" => self.minor.clone(),
-            "name" => self.name.to_string(),
-            "service_pack_major" => self.service_pack_major.clone(),
-            "service_pack_minor" => self.service_pack_minor.clone(),
-            "size_stored_in_paging_file" => self.size_stored_in_paging_file.clone(),
-            "total_virtual_mem_size" => self.total_virtual_mem_size.to_string(),
-            "total_visible_mem_size" => self.total_visible_mem_size.clone(),
-            "win_directory" => self.win_directory.clone(),
-            _ => "".to_string()
+            "build_number" => Value::from(self.build_number.to_owned()),
+            "csname" => Value::from(self.csname.to_owned()),
+            "caption" => Value::from(self.caption.to_owned()),
+            "free_physical_mem" => Value::from(self.free_physical_mem.to_owned()),
+            "free_virtual_mem" => Value::from(self.free_virtual_mem.to_owned()),
+            "platform" => Value::from(self.platform.to_owned()),
+            "version" => Value::from(self.version.to_owned()),
+            "major" => Value::from(self.major.to_owned()),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "minor" => Value::from(self.minor.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "service_pack_major" => Value::from(self.service_pack_major.to_owned()),
+            "service_pack_minor" => Value::from(self.service_pack_minor.to_owned()),
+            "size_stored_in_paging_file" => Value::from(self.size_stored_in_paging_file.to_owned()),
+            "total_virtual_mem_size" => Value::from(self.total_virtual_mem_size.to_owned()),
+            "total_visible_mem_size" => Value::from(self.total_visible_mem_size.to_owned()),
+            "win_directory" => Value::from(self.win_directory.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::BUILDER_NUMBER_ID => self.build_number.clone(),
-            Self::CSNAME_ID => self.csname.to_string(),
-            Self::CAPTION_ID => self.caption.clone(),
-            Self::FREE_PHYSICAL_MEMORY_ID => self.free_physical_mem.clone(),
-            Self::FREE_VIRTUAL_MEMORY_ID => self.free_virtual_mem.clone(),
-            Self::PLATFORM_ID => self.platform.clone(),
-            Self::VERSION_ID => self.version.to_string(),
-            Self::MAJOR_ID => self.major.clone(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::MINOR_ID => self.minor.clone(),
-            Self::NAME_ID => self.name.to_string(),
-            Self::SERVICE_PACK_MAJOR_ID => self.service_pack_major.clone(),
-            Self::SERVICE_PACK_MINOR_ID => self.service_pack_minor.clone(),
-            Self::SIZE_STORED_IN_PAGING_FILE_ID => self.size_stored_in_paging_file.clone(),
-            Self::TOTAL_VIRTUAL_MEM_SIZE_ID => self.total_virtual_mem_size.to_string(),
-            Self::TOTAL_VISIBLE_MEM_SIZE_ID => self.total_visible_mem_size.clone(),
-            Self::WIN_DIRECTORY_ID => self.win_directory.clone(),
-            _ => "".to_string()
+            Self::BUILDER_NUMBER_ID => Value::from(self.build_number.to_owned()),
+            Self::CSNAME_ID => Value::from(self.csname.to_owned()),
+            Self::CAPTION_ID => Value::from(self.caption.to_owned()),
+            Self::FREE_PHYSICAL_MEMORY_ID => Value::from(self.free_physical_mem.to_owned()),
+            Self::FREE_VIRTUAL_MEMORY_ID => Value::from(self.free_virtual_mem.to_owned()),
+            Self::PLATFORM_ID => Value::from(self.platform.to_owned()),
+            Self::VERSION_ID => Value::from(self.version.to_owned()),
+            Self::MAJOR_ID => Value::from(self.major.to_owned()),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::MINOR_ID => Value::from(self.minor.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::SERVICE_PACK_MAJOR_ID => Value::from(self.service_pack_major.to_owned()),
+            Self::SERVICE_PACK_MINOR_ID => Value::from(self.service_pack_minor.to_owned()),
+            Self::SIZE_STORED_IN_PAGING_FILE_ID => Value::from(self.size_stored_in_paging_file.to_owned()),
+            Self::TOTAL_VIRTUAL_MEM_SIZE_ID => Value::from(self.total_virtual_mem_size.to_owned()),
+            Self::TOTAL_VISIBLE_MEM_SIZE_ID => Value::from(self.total_visible_mem_size.to_owned()),
+            Self::WIN_DIRECTORY_ID => Value::from(self.win_directory.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -486,6 +551,7 @@ impl Table for WmiOsVersion {
     }
 }
 
+table_properties!{
 #[derive(Serialize, Deserialize)]
 pub struct OsVersion {
     pub name: String,
@@ -493,7 +559,7 @@ pub struct OsVersion {
     pub version: String,
     pub major: u32,
     pub minor: u32,
-}
+}}
 
 pub trait OsVersionIface {
     fn get_os_info(&self) -> Option<String>;
@@ -519,25 +585,25 @@ impl Table for OsVersion {
         "major",
         "minor"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "platform" => self.platform.clone(),
-            "version" => self.version.clone(),
-            "major" => self.major.to_string(),
-            "minor" => self.minor.to_string(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "platform" => Value::from(self.platform.to_owned()),
+            "version" => Value::from(self.version.to_owned()),
+            "major" => Value::from(self.major),
+            "minor" => Value::from(self.minor),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::PLATFORM_ID => self.platform.clone(),
-            Self::VERSION_ID => self.version.clone(),
-            Self::MAJOR_ID => self.major.to_string(),
-            Self::MINOR_ID => self.minor.to_string(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::PLATFORM_ID => Value::from(self.platform.to_owned()),
+            Self::VERSION_ID => Value::from(self.version.to_owned()),
+            Self::MAJOR_ID => Value::from(self.major),
+            Self::MINOR_ID => Value::from(self.minor),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -553,14 +619,15 @@ impl Table for OsVersion {
     }
 }
 
+table_properties!{
 #[derive(Debug)]
 pub struct LogicalDrive {
     pub device_id: String,
     pub drive_type: String,
-    pub free_space: u64,
-    pub size: u64,
+    pub free_space: i64,
+    pub size: i64,
     pub file_system: String,
-}
+}}
 
 pub trait LogicalDriveIface {
     fn get_wmi_drives_info(&self) -> Option<String>;
@@ -583,26 +650,26 @@ impl Table for LogicalDrive {
         "size",
         "file_system"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "device_id" => self.device_id.clone(),
-            "drive_type" => self.drive_type.clone(),
-            "free_space" => self.free_space.to_string(),
-            "size" => self.size.to_string(),
-            "file_system" => self.file_system.clone(),
-            _ => "".to_string()
+            "device_id" => Value::from(self.device_id.to_owned()),
+            "drive_type" => Value::from(self.drive_type.to_owned()),
+            "free_space" => Value::from(self.free_space),
+            "size" => Value::from(self.size),
+            "file_system" => Value::from(self.file_system.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::DEVICE_ID => self.device_id.clone(),
-            Self::DRIVE_TYPE_ID => self.drive_type.clone(),
-            Self::FREE_SPACE_ID => self.free_space.to_string(),
-            Self::SIZE_ID => self.size.to_string(),
-            Self::FILE_SYSTEM_ID => self.file_system.clone(),
+            Self::DEVICE_ID => Value::from(self.device_id.to_owned()),
+            Self::DRIVE_TYPE_ID => Value::from(self.drive_type.to_owned()),
+            Self::FREE_SPACE_ID => Value::from(self.free_space),
+            Self::SIZE_ID => Value::from(self.size),
+            Self::FILE_SYSTEM_ID => Value::from(self.file_system.to_owned()),
 
-            _ => "".to_string()
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -634,6 +701,7 @@ impl Serialize for LogicalDrive {
 }
 
 #[cfg(not(target_os = "macos"))]
+table_properties!{
 #[derive(Debug)]
 pub struct InterfaceAddress {
     pub interface: String,
@@ -641,7 +709,7 @@ pub struct InterfaceAddress {
     pub mask: String,
     pub interface_type: String,
     pub friendly_name: String,
-}
+}}
 
 pub trait InterfaceAddressIface {
     fn get_wmi_nicconfig(&self) -> Option<String>;
@@ -666,26 +734,26 @@ impl Table for InterfaceAddress {
         "interface_type",
         "friendly_name"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "interface" => self.interface.clone(),
-            "address" => self.address.clone(),
-            "mask" => self.mask.to_string(),
-            "interface_type" => self.interface_type.to_string(),
-            "friendly_name" => self.friendly_name.clone(),
-            _ => "".to_string()
+            "interface" => Value::from(self.interface.to_owned()),
+            "address" => Value::from(self.address.to_owned()),
+            "mask" => Value::from(self.mask.to_owned()),
+            "interface_type" => Value::from(self.interface_type.to_owned()),
+            "friendly_name" => Value::from(self.friendly_name.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::INTERFACE_ID => self.interface.clone(),
-            Self::ADDRESS_ID => self.address.clone(),
-            Self::MASK_ID => self.mask.to_string(),
-            Self::INTERFACE_TYPE_ID => self.interface_type.to_string(),
-            Self::FRIENDLY_NAME_ID => self.friendly_name.clone(),
+            Self::INTERFACE_ID => Value::from(self.interface.to_owned()),
+            Self::ADDRESS_ID => Value::from(self.address.to_owned()),
+            Self::MASK_ID => Value::from(self.mask.to_owned()),
+            Self::INTERFACE_TYPE_ID => Value::from(self.interface_type.to_owned()),
+            Self::FRIENDLY_NAME_ID => Value::from(self.friendly_name.to_owned()),
 
-            _ => "".to_string()
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -718,13 +786,14 @@ impl Serialize for InterfaceAddress {
 }
 
 #[cfg(not(target_os = "macos"))]
+table_properties!{
 #[derive(Debug, Serialize)]
 pub struct InterfaceDetails {
     pub interface: String,
     pub mac: String,
     pub mtu: u32,
     pub enabled: u8,
-}
+}}
 
 pub trait InterfaceDetailsIface {
     fn get_wmi_nicconfig_details(&self) -> Option<String>;
@@ -747,23 +816,23 @@ impl Table for InterfaceDetails {
         "mtu",
         "enabled", ];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "interface" => self.interface.clone(),
-            "mac" => self.mac.clone(),
-            "mtu" => self.mtu.to_string(),
-            "enabled" => self.enabled.to_string(),
-            _ => "".to_string()
+            "interface" => Value::from(self.interface.to_owned()),
+            "mac" => Value::from(self.mac.to_owned()),
+            "mtu" => Value::from(self.mtu),
+            "enabled" => Value::from(self.enabled),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::INTERFACE_ID => self.interface.clone(),
-            Self::MAC_ID => self.mac.clone(),
-            Self::MTU_ID => self.mtu.to_string(),
-            Self::ENABLED_ID => self.enabled.to_string(),
-            _ => "".to_string()
+            Self::INTERFACE_ID => Value::from(self.interface.to_owned()),
+            Self::MAC_ID => Value::from(self.mac.to_owned()),
+            Self::MTU_ID => Value::from(self.mtu),
+            Self::ENABLED_ID => Value::from(self.enabled),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -779,14 +848,15 @@ impl Table for InterfaceDetails {
     }
 }
 
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Uptime {
-    pub days: u64,
-    pub hours: u64,
-    pub minutes: u64,
-    pub seconds: u64,
-    pub total_seconds: f64,
-}
+    pub days: i64,
+    pub hours: i64,
+    pub minutes: i64,
+    pub seconds: i64,
+    pub total_seconds: i64,
+}}
 
 #[allow(non_upper_case_globals)]
 impl Uptime {
@@ -805,25 +875,25 @@ impl Table for Uptime {
         "seconds",
         "total_seconds", ];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "days" => self.days.to_string(),
-            "hours" => self.hours.to_string(),
-            "minutes" => self.minutes.to_string(),
-            "seconds" => self.seconds.to_string(),
-            "total_seconds" => self.total_seconds.to_string(),
-            _ => "".to_string()
+            "days" => Value::from(self.days),
+            "hours" => Value::from(self.hours),
+            "minutes" => Value::from(self.minutes),
+            "seconds" => Value::from(self.seconds),
+            "total_seconds" => Value::from(self.total_seconds),
+            _ => Value::from(0),
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::DAYS_ID => self.days.to_string(),
-            Self::HOURS_ID => self.hours.to_string(),
-            Self::MINUTES_ID => self.minutes.to_string(),
-            Self::SECONDS_ID => self.seconds.to_string(),
-            Self::TOTAL_SECONDS_ID => self.total_seconds.to_string(),
-            _ => "".to_string()
+            Self::DAYS_ID => Value::from(self.days),
+            Self::HOURS_ID => Value::from(self.hours),
+            Self::MINUTES_ID => Value::from(self.minutes),
+            Self::SECONDS_ID => Value::from(self.seconds),
+            Self::TOTAL_SECONDS_ID => Value::from(self.total_seconds),
+            _ => Value::from(0)
         }
     }
 
@@ -840,28 +910,29 @@ impl Table for Uptime {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPrinters {
-    pub attributes: String,
+    pub attributes: u32,
     pub caption: String,
     pub creation_class_name: String,
     pub device_id: String,
     pub do_complete_first: String,
     pub driver_name: String,
-    pub extended_printer_status: String,
-    pub horizontal_resolution: String,
+    pub extended_printer_status: u16,
+    pub horizontal_resolution: u32,
     pub local: String,
     pub name: String,
     pub port_name: String,
-    pub printer_status: String,
+    pub printer_status: u16,
     pub print_job_data_type: String,
     pub print_processor: String,
-    pub priority: String,
+    pub priority: u32,
     pub status: String,
     pub system_creation_class_name: String,
     pub system_name: String,
-    pub vertical_resolution: String,
-}
+    pub vertical_resolution: u32,
+}}
 
 pub trait WmiPrintersIface {
     fn get_wmi_printers_info(&self)-> Option<String>;
@@ -914,53 +985,53 @@ impl Table for WmiPrinters {
         "system_name",
         "vertical_resolution"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "attributes" => self.attributes.clone(),
-            "caption" => self.caption.clone(),
-            "creation_class_name" => self.creation_class_name.clone(),
-            "device_id" => self.device_id.clone(),
-            "do_complete_first" => self.do_complete_first.clone(),
-            "driver_name" => self.driver_name.clone(),
-            "extended_printer_status" => self.extended_printer_status.clone(),
-            "horizontal_resolution" => self.horizontal_resolution.clone(),
-            "local" => self.local.clone(),
-            "name" => self.name.clone(),
-            "port_name" => self.port_name.clone(),
-            "printer_status" => self.printer_status.clone(),
-            "print_job_data_type" => self.print_job_data_type.clone(),
-            "print_processor" => self.print_processor.clone(),
-            "priority" => self.priority.clone(),
-            "status" => self.status.clone(),
-            "system_creation_class_name" => self.system_creation_class_name.clone(),
-            "system_name" => self.system_name.clone(),
-            "vertical_resolution" => self.vertical_resolution.clone(),
-            _ => "".to_string()
+            "attributes" => Value::from(self.attributes),
+            "caption" => Value::from(self.caption.to_owned()),
+            "creation_class_name" => Value::from(self.creation_class_name.to_owned()),
+            "device_id" => Value::from(self.device_id.to_owned()),
+            "do_complete_first" => Value::from(self.do_complete_first.to_owned()),
+            "driver_name" => Value::from(self.driver_name.to_owned()),
+            "extended_printer_status" => Value::from(self.extended_printer_status),
+            "horizontal_resolution" => Value::from(self.horizontal_resolution),
+            "local" => Value::from(self.local.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "port_name" => Value::from(self.port_name.to_owned()),
+            "printer_status" => Value::from(self.printer_status),
+            "print_job_data_type" => Value::from(self.print_job_data_type.to_owned()),
+            "print_processor" => Value::from(self.print_processor.to_owned()),
+            "priority" => Value::from(self.priority),
+            "status" => Value::from(self.status.to_owned()),
+            "system_creation_class_name" => Value::from(self.system_creation_class_name.to_owned()),
+            "system_name" => Value::from(self.system_name.to_owned()),
+            "vertical_resolution" => Value::from(self.vertical_resolution),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::ATTRIBUTES_ID => self.attributes.clone(),
-            Self::CAPTION_ID => self.caption.clone(),
-            Self::CREATION_CLASS_ID => self.creation_class_name.clone(),
-            Self::DEVICE_ID => self.device_id.clone(),
-            Self::DO_COMPLETE_FIRST_ID => self.do_complete_first.clone(),
-            Self::DRIVER_NAME_ID => self.driver_name.clone(),
-            Self::EXTENDED_PRINTER_STATUS_ID => self.extended_printer_status.clone(),
-            Self::HORIZONTAL_RESOLUTION_ID => self.horizontal_resolution.clone(),
-            Self::LOCAL_ID => self.local.clone(),
-            Self::NAME_ID => self.name.clone(),
-            Self::PORT_NAME_ID => self.port_name.clone(),
-            Self::PRINTER_STATUS_ID => self.printer_status.clone(),
-            Self::PRINT_JOB_DATA_TYPE_ID => self.print_job_data_type.clone(),
-            Self::PRINT_PROCESSOR_ID => self.print_processor.clone(),
-            Self::PRIORITY_ID => self.priority.clone(),
-            Self::STATUS_ID => self.status.clone(),
-            Self::SYSTEM_CREATION_CLASS_NAME_ID => self.system_creation_class_name.clone(),
-            Self::SYSTEM_NAME_ID => self.system_name.clone(),
-            Self::VERTICAL_RESOLUTION_ID => self.vertical_resolution.clone(),
-            _ => "".to_string()
+            Self::ATTRIBUTES_ID => Value::from(self.attributes),
+            Self::CAPTION_ID => Value::from(self.caption.to_owned()),
+            Self::CREATION_CLASS_ID => Value::from(self.creation_class_name.to_owned()),
+            Self::DEVICE_ID => Value::from(self.device_id.to_owned()),
+            Self::DO_COMPLETE_FIRST_ID => Value::from(self.do_complete_first.to_owned()),
+            Self::DRIVER_NAME_ID => Value::from(self.driver_name.to_owned()),
+            Self::EXTENDED_PRINTER_STATUS_ID => Value::from(self.extended_printer_status),
+            Self::HORIZONTAL_RESOLUTION_ID => Value::from(self.horizontal_resolution),
+            Self::LOCAL_ID => Value::from(self.local.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::PORT_NAME_ID => Value::from(self.port_name.to_owned()),
+            Self::PRINTER_STATUS_ID => Value::from(self.printer_status),
+            Self::PRINT_JOB_DATA_TYPE_ID => Value::from(self.print_job_data_type.to_owned()),
+            Self::PRINT_PROCESSOR_ID => Value::from(self.print_processor.to_owned()),
+            Self::PRIORITY_ID => Value::from(self.priority),
+            Self::STATUS_ID => Value::from(self.status.to_owned()),
+            Self::SYSTEM_CREATION_CLASS_NAME_ID => Value::from(self.system_creation_class_name.to_owned()),
+            Self::SYSTEM_NAME_ID => Value::from(self.system_name.to_owned()),
+            Self::VERTICAL_RESOLUTION_ID => Value::from(self.vertical_resolution),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -991,6 +1062,7 @@ impl Table for WmiPrinters {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiServices {
     pub accept_pause: String,
@@ -1012,7 +1084,7 @@ pub struct WmiServices {
     pub status: String,
     pub system_creation_class_name: String,
     pub system_name: String,
-}
+}}
 
 pub trait WmiServicesIface {
     fn get_wmi_services_info(&self)-> Option<String>;
@@ -1065,53 +1137,53 @@ impl Table for WmiServices {
         "system_creation_class_name",
         "system_name"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "accept_pause" => self.accept_pause.clone(),
-            "accept_stop" => self.accept_stop.clone(),
-            "caption" => self.caption.clone(),
-            "creation_class_name" => self.creation_class_name.clone(),
-            "description" => self.description.clone(),
-            "desktop_interact" => self.desktop_interact.clone(),
-            "display_name" => self.display_name.clone(),
-            "error_control" => self.error_control.clone(),
-            "exit_code" => self.exit_code.to_string(),
-            "name" => self.name.clone(),
-            "path_name" => self.path_name.clone(),
-            "service_type" => self.service_type.clone(),
-            "started" => self.started.clone(),
-            "start_mode" => self.start_mode.clone(),
-            "start_name" => self.start_name.clone(),
-            "state" => self.state.clone(),
-            "status" => self.status.clone(),
-            "system_creation_class_name" => self.system_creation_class_name.clone(),
-            "system_name" => self.system_name.clone(),
-            _ => "".to_string()
+            "accept_pause" => Value::from(self.accept_pause.to_owned()),
+            "accept_stop" => Value::from(self.accept_stop.to_owned()),
+            "caption" => Value::from(self.caption.to_owned()),
+            "creation_class_name" => Value::from(self.creation_class_name.to_owned()),
+            "description" => Value::from(self.description.to_owned()),
+            "desktop_interact" => Value::from(self.desktop_interact.to_owned()),
+            "display_name" => Value::from(self.display_name.to_owned()),
+            "error_control" => Value::from(self.error_control.to_owned()),
+            "exit_code" => Value::from(self.exit_code),
+            "name" => Value::from(self.name.to_owned()),
+            "path_name" => Value::from(self.path_name.to_owned()),
+            "service_type" => Value::from(self.service_type.to_owned()),
+            "started" => Value::from(self.started.to_owned()),
+            "start_mode" => Value::from(self.start_mode.to_owned()),
+            "start_name" => Value::from(self.start_name.to_owned()),
+            "state" => Value::from(self.state.to_owned()),
+            "status" => Value::from(self.status.to_owned()),
+            "system_creation_class_name" => Value::from(self.system_creation_class_name.to_owned()),
+            "system_name" => Value::from(self.system_name.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::ACCEPT_PAUSE_ID => self.accept_pause.clone(),
-            Self::ACCEPT_STOP_ID => self.accept_stop.clone(),
-            Self::CAPTION_ID => self.caption.clone(),
-            Self::CREATION_CLASS_NAME_ID => self.creation_class_name.clone(),
-            Self::DESCRIPTION_ID => self.description.clone(),
-            Self::DESKTOP_INTERACT_ID => self.desktop_interact.clone(),
-            Self::DISPLAY_NAME_ID => self.display_name.clone(),
-            Self::ERROR_CONTROL_ID => self.error_control.clone(),
-            Self::EXIT_CODE_ID => self.exit_code.to_string(),
-            Self::NAME_ID => self.name.clone(),
-            Self::PATH_NAME_ID => self.path_name.clone(),
-            Self::SERVICE_TYPE_ID => self.service_type.clone(),
-            Self::STARTED_ID => self.started.clone(),
-            Self::START_MODE_ID => self.start_mode.clone(),
-            Self::START_NAME_ID => self.start_name.clone(),
-            Self::STATE_ID => self.state.clone(),
-            Self::STATUS_ID => self.status.clone(),
-            Self::SYSTEM_CREATION_CLASS_NAME_ID => self.system_creation_class_name.clone(),
-            Self::SYSTEM_NAME_ID => self.system_name.clone(),
-            _ => "".to_string()
+            Self::ACCEPT_PAUSE_ID => Value::from(self.accept_pause.to_owned()),
+            Self::ACCEPT_STOP_ID => Value::from(self.accept_stop.to_owned()),
+            Self::CAPTION_ID => Value::from(self.caption.to_owned()),
+            Self::CREATION_CLASS_NAME_ID => Value::from(self.creation_class_name.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::DESKTOP_INTERACT_ID => Value::from(self.desktop_interact.to_owned()),
+            Self::DISPLAY_NAME_ID => Value::from(self.display_name.to_owned()),
+            Self::ERROR_CONTROL_ID => Value::from(self.error_control.to_owned()),
+            Self::EXIT_CODE_ID => Value::from(self.exit_code),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::PATH_NAME_ID => Value::from(self.path_name.to_owned()),
+            Self::SERVICE_TYPE_ID => Value::from(self.service_type.to_owned()),
+            Self::STARTED_ID => Value::from(self.started.to_owned()),
+            Self::START_MODE_ID => Value::from(self.start_mode.to_owned()),
+            Self::START_NAME_ID => Value::from(self.start_name.to_owned()),
+            Self::STATE_ID => Value::from(self.state.to_owned()),
+            Self::STATUS_ID => Value::from(self.status.to_owned()),
+            Self::SYSTEM_CREATION_CLASS_NAME_ID => Value::from(self.system_creation_class_name.to_owned()),
+            Self::SYSTEM_NAME_ID => Value::from(self.system_name.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1142,6 +1214,7 @@ impl Table for WmiServices {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiHotfixes {
     pub caption: String,
@@ -1150,7 +1223,7 @@ pub struct WmiHotfixes {
     pub hotfix_id: String,
     pub installed_by: String,
     pub installed_on: String,
-}
+}}
 
 pub trait WmiHotfixesIface {
     fn get_wmi_hotfixes_info(&self)-> Option<String>;
@@ -1178,27 +1251,27 @@ impl Table for WmiHotfixes {
         "installed_by",
         "installed_ON"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "caption" => self.caption.clone(),
-            "csname" => self.csname.clone(),
-            "description" => self.description.clone(),
-            "hotfix_id" => self.hotfix_id.clone(),
-            "installed_by" => self.installed_by.clone(),
-            "installed_on" => self.installed_on.clone(),
-            _ => "".to_string()
+            "caption" => Value::from(self.caption.to_owned()),
+            "csname" => Value::from(self.csname.to_owned()),
+            "description" => Value::from(self.description.to_owned()),
+            "hotfix_id" => Value::from(self.hotfix_id.to_owned()),
+            "installed_by" => Value::from(self.installed_by.to_owned()),
+            "installed_on" => Value::from(self.installed_on.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::CAPTION_ID => self.caption.clone(),
-            Self::CSNAME_ID => self.csname.clone(),
-            Self::DESCRIPTION_ID => self.description.clone(),
-            Self::HOTFIX_ID => self.hotfix_id.clone(),
-            Self::INSTALLED_BY_ID => self.installed_by.clone(),
-            Self::INSTALLED_ON_ID => self.installed_on.clone(),
-            _ => "".to_string()
+            Self::CAPTION_ID => Value::from(self.caption.to_owned()),
+            Self::CSNAME_ID => Value::from(self.csname.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::HOTFIX_ID => Value::from(self.hotfix_id.to_owned()),
+            Self::INSTALLED_BY_ID => Value::from(self.installed_by.to_owned()),
+            Self::INSTALLED_ON_ID => Value::from(self.installed_on.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1216,6 +1289,7 @@ impl Table for WmiHotfixes {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Products {
     pub install_date: String,
@@ -1224,7 +1298,7 @@ pub struct Products {
     pub name: String,
     pub vendor: String,
     pub version: String,
-}
+}}
 
 #[cfg(target_os = "windows")]
 #[allow(non_upper_case_globals)]
@@ -1247,27 +1321,27 @@ impl Table for Products {
         "vendor",
         "version"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "install_date" => self.install_date.clone(),
-            "install_location" => self.install_location.clone(),
-            "help_link" => self.help_link.clone(),
-            "name" => self.name.clone(),
-            "vendor" => self.vendor.clone(),
-            "version" => self.version.clone(),
-            _ => "".to_string()
+            "install_date" => Value::from(self.install_date.to_owned()),
+            "install_location" => Value::from(self.install_location.to_owned()),
+            "help_link" => Value::from(self.help_link.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "vendor" => Value::from(self.vendor.to_owned()),
+            "version" => Value::from(self.version.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::INSTALL_DATE_ID => self.install_date.clone(),
-            Self::INSTALL_LOCATION_ID => self.install_location.clone(),
-            Self::HELP_LINK_ID => self.help_link.clone(),
-            Self::NAME_ID => self.name.clone(),
-            Self::VENDOR_ID => self.vendor.clone(),
-            Self::VERSION_ID => self.version.clone(),
-            _ => "".to_string()
+            Self::INSTALL_DATE_ID => Value::from(self.install_date.to_owned()),
+            Self::INSTALL_LOCATION_ID => Value::from(self.install_location.to_owned()),
+            Self::HELP_LINK_ID => Value::from(self.help_link.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::VENDOR_ID => Value::from(self.vendor.to_owned()),
+            Self::VERSION_ID => Value::from(self.version.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1285,7 +1359,7 @@ impl Table for Products {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-#[derive(Serialize, Deserialize, Debug)]
+table_properties!{
 pub struct WmiNetworkAdapters {
     pub description: String,
     pub database_path: String,
@@ -1294,7 +1368,8 @@ pub struct WmiNetworkAdapters {
     pub ip_enabled: String,
     pub ip_subnet: Vec<String>,
     pub mac_address: String,
-}
+}}
+
 
 pub trait WmiNetworkAdaptersIface {
     fn get_wmi_network_adapters_info(&self)-> Option<String>;
@@ -1320,18 +1395,18 @@ impl Table for WmiNetworkAdapters {
         "ip_subnet",
         "mac_address"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "description" => self.description.clone(),
-            "database_path" => self.database_path.clone(),
-            "dhcp_enabled" => self.dhcp_enabled.clone(),
+            "description" => Value::from(self.description.to_owned()),
+            "database_path" => Value::from(self.database_path.to_owned()),
+            "dhcp_enabled" => Value::from(self.dhcp_enabled.to_owned()),
             "ip_address" => {
                 let mut ip_address_str: String = "".to_owned();
                 for address in self.ip_address.iter() {
                     ip_address_str.push_str(&address);
                     ip_address_str.push_str("\t");
                 }
-                ip_address_str
+                Value::from(ip_address_str)
             }
             "ip_subnet" => {
                 let mut ip_subnet_str: String = "".to_owned();
@@ -1339,25 +1414,25 @@ impl Table for WmiNetworkAdapters {
                     ip_subnet_str.push_str(&subnet);
                     ip_subnet_str.push_str("\t");
                 }
-                ip_subnet_str
+                Value::from(ip_subnet_str)
             }
-            "mac_address" => self.mac_address.clone(),
-            _ => "".to_string()
+            "mac_address" => Value::from(self.mac_address.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::DESCRIPTION_ID => self.description.clone(),
-            Self::DATE_BASE_PATH_ID => self.database_path.clone(),
-            Self::DHCP_ENABLED_ID => self.dhcp_enabled.clone(),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::DATE_BASE_PATH_ID => Value::from(self.database_path.to_owned()),
+            Self::DHCP_ENABLED_ID => Value::from(self.dhcp_enabled.to_owned()),
             Self::IP_ADDRESS_ID => {
                 let mut ip_address_str: String = "".to_owned();
                 for address in self.ip_address.iter() {
                     ip_address_str.push_str(&address);
                     ip_address_str.push_str("\t");
                 }
-                ip_address_str
+                Value::from(ip_address_str)
             }
             Self::IP_SUBNET_ID => {
                 let mut ip_subnet_str: String = "".to_owned();
@@ -1365,10 +1440,10 @@ impl Table for WmiNetworkAdapters {
                     ip_subnet_str.push_str(&subnet);
                     ip_subnet_str.push_str("\t");
                 }
-                ip_subnet_str
+                Value::from(ip_subnet_str)
             }
-            Self::MAC_ADDRESS_ID => self.mac_address.clone(),
-            _ => "".to_string()
+            Self::MAC_ADDRESS_ID => Value::from(self.mac_address.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1386,6 +1461,7 @@ impl Table for WmiNetworkAdapters {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiShares {
     pub caption: String,
@@ -1395,7 +1471,7 @@ pub struct WmiShares {
     pub status: String,
     pub _type: String,
     pub allow_maximum: String,
-}
+}}
 
 pub trait WmiSharesIface {
     fn get_wmi_shares_info(&self)-> Option<String>;
@@ -1423,29 +1499,29 @@ impl Table for WmiShares {
         "type",
         "allow_maximum"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "caption" => self.caption.clone(),
-            "description" => self.description.clone(),
-            "name" => self.name.clone(),
-            "path" => self.path.clone(),
-            "status" => self.status.clone(),
-            "type" => self._type.clone(),
-            "allow_maximum" => self.allow_maximum.clone(),
-            _ => "".to_string()
+            "caption" => Value::from(self.caption.to_owned()),
+            "description" => Value::from(self.description.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "path" => Value::from(self.path.to_owned()),
+            "status" => Value::from(self.status.to_owned()),
+            "type" => Value::from(self._type.to_owned()),
+            "allow_maximum" => Value::from(self.allow_maximum.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::CAPTION_ID => self.caption.clone(),
-            Self::DESCRIPTION_ID => self.description.clone(),
-            Self::NAME_ID => self.name.clone(),
-            Self::PATH_ID => self.path.clone(),
-            Self::STATUS_ID => self.status.clone(),
-            Self::TYPE_ID => self._type.clone(),
-            Self::ALLOW_MAXIMUM_ID => self.allow_maximum.clone(),
-            _ => "".to_string()
+            Self::CAPTION_ID => Value::from(self.caption.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::PATH_ID => Value::from(self.path.to_owned()),
+            Self::STATUS_ID => Value::from(self.status.to_owned()),
+            Self::TYPE_ID => Value::from(self._type.to_owned()),
+            Self::ALLOW_MAXIMUM_ID => Value::from(self.allow_maximum.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1464,6 +1540,7 @@ impl Table for WmiShares {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiLocalAccounts {
     pub account_type: String,
@@ -1473,9 +1550,9 @@ pub struct WmiLocalAccounts {
     pub local_account: String,
     pub name: String,
     pub sid: String,
-    pub sid_type: String,
+    pub sid_type: u8,
     pub status: String,
-}
+}}
 
 pub trait WmiLocalAccountsIface {
     fn get_wmi_local_accounts_info(&self)-> Option<String>;
@@ -1507,33 +1584,33 @@ impl Table for WmiLocalAccounts {
         "sid_type",
         "status"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "account_type" => self.account_type.clone(),
-            "caption" => self.caption.clone(),
-            "description" => self.description.clone(),
-            "domain" => self._domain.clone(),
-            "local_account" => self.local_account.clone(),
-            "name" => self.name.clone(),
-            "sid" => self.sid.clone(),
-            "sid_type" => self.sid_type.clone(),
-            "status" => self.status.clone(),
-            _ => "".to_string()
+            "account_type" => Value::from(self.account_type.to_owned()),
+            "caption" => Value::from(self.caption.to_owned()),
+            "description" => Value::from(self.description.to_owned()),
+            "domain" => Value::from(self._domain.to_owned()),
+            "local_account" => Value::from(self.local_account.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "sid" => Value::from(self.sid.to_owned()),
+            "sid_type" => Value::from(self.sid_type),
+            "status" => Value::from(self.status.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::ACCOUNT_TYPE_ID => self.account_type.clone(),
-            Self::CAPTION_ID => self.caption.clone(),
-            Self::DESCRIPTION_ID => self.description.clone(),
-            Self::DOMAIN_ID => self._domain.clone(),
-            Self::LOCAL_ACCOUNT_ID => self.local_account.clone(),
-            Self::NAME_ID => self.name.clone(),
-            Self::SID_ID => self.sid.clone(),
-            Self::SID_TYPE_ID => self.sid_type.clone(),
-            Self::STATUS_ID => self.status.clone(),
-            _ => "".to_string()
+            Self::ACCOUNT_TYPE_ID => Value::from(self.account_type.to_owned()),
+            Self::CAPTION_ID => Value::from(self.caption.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::DOMAIN_ID => Value::from(self._domain.to_owned()),
+            Self::LOCAL_ACCOUNT_ID => Value::from(self.local_account.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::SID_ID => Value::from(self.sid.to_owned()),
+            Self::SID_TYPE_ID => Value::from(self.sid_type),
+            Self::STATUS_ID => Value::from(self.status.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1554,6 +1631,7 @@ impl Table for WmiLocalAccounts {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiBios {
     pub caption: String,
@@ -1561,7 +1639,7 @@ pub struct WmiBios {
     pub release_date: String,
     pub serial_number: String,
     pub smbios_version: String,
-}
+}}
 
 pub trait WmiBiosIface {
     fn get_wmi_bios_info(&self)-> Option<String>;
@@ -1585,25 +1663,25 @@ impl Table for WmiBios {
         "serial_number",
         "smbios_version"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "caption" => self.caption.clone(),
-            "manufacturer" => self.manufacturer.clone(),
-            "release_date" => self.release_date.clone(),
-            "serial_number" => self.serial_number.clone(),
-            "smbios_version" => self.smbios_version.clone(),
-            _ => "".to_string()
+            "caption" => Value::from(self.caption.to_owned()),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "release_date" => Value::from(self.release_date.to_owned()),
+            "serial_number" => Value::from(self.serial_number.to_owned()),
+            "smbios_version" => Value::from(self.smbios_version.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::CAPTION_ID => self.caption.clone(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::RELEASE_DATE_ID => self.release_date.clone(),
-            Self::SERIAL_NUMBER_ID => self.serial_number.clone(),
-            Self::SMBIOS_VERSION_ID => self.smbios_version.clone(),
-            _ => "".to_string()
+            Self::CAPTION_ID => Value::from(self.caption.to_owned()),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::RELEASE_DATE_ID => Value::from(self.release_date.to_owned()),
+            Self::SERIAL_NUMBER_ID => Value::from(self.serial_number.to_owned()),
+            Self::SMBIOS_VERSION_ID => Value::from(self.smbios_version.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1620,6 +1698,7 @@ impl Table for WmiBios {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMotherboard {
     pub name: String,
@@ -1627,7 +1706,7 @@ pub struct WmiMotherboard {
     pub product: String,
     pub serial_number: String,
     pub version: String,
-}
+}}
 
 pub trait WmiMotherboardIface {
     fn get_wmi_motherboard_info(&self)-> Option<String>;
@@ -1651,25 +1730,25 @@ impl Table for WmiMotherboard {
         "serial_number",
         "version"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "manufacturer" => self.manufacturer.clone(),
-            "product" => self.product.clone(),
-            "serial_number" => self.serial_number.clone(),
-            "version" => self.version.clone(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "product" => Value::from(self.product.to_owned()),
+            "serial_number" => Value::from(self.serial_number.to_owned()),
+            "version" => Value::from(self.version.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::PRODUCT_ID => self.product.clone(),
-            Self::SERIAL_NUMBER_ID => self.serial_number.clone(),
-            Self::VERSION_ID => self.version.clone(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::PRODUCT_ID => Value::from(self.product.to_owned()),
+            Self::SERIAL_NUMBER_ID => Value::from(self.serial_number.to_owned()),
+            Self::VERSION_ID => Value::from(self.version.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1686,26 +1765,27 @@ impl Table for WmiMotherboard {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiProcessor {
-    pub address_width: String,
+    pub address_width: u16,
     pub cpu_satus: String,
-    pub current_clock_speed: String,
-    pub current_voltage: String,
+    pub current_clock_speed: u32,
+    pub current_voltage: u16,
     pub description: String,
-    pub external_clock: String,
+    pub external_clock: u32,
     pub hyper_threading_enabled: String,
-    pub l2_cache_size: String,
-    pub l2_cache_speed: String,
-    pub l3_cache_size: String,
-    pub l3_cache_speed: String,
+    pub l2_cache_size: u32,
+    pub l2_cache_speed: u32,
+    pub l3_cache_size: u32,
+    pub l3_cache_speed: u32,
     pub manufacturer: String,
-    pub max_clock_speed: String,
+    pub max_clock_speed: u32,
     pub name: String,
-    pub number_of_cores: String,
-    pub number_of_logical_processors: String,
+    pub number_of_cores: u32,
+    pub number_of_logical_processors: u32,
     pub socket_designation: String,
-}
+}}
 
 pub trait WmiProcessorIface {
     fn get_wmi_processor_info(&self)-> Option<String>;
@@ -1752,49 +1832,49 @@ impl Table for WmiProcessor {
         "number_of_logical_processors",
         "socket_designation", ];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "address_width" => self.address_width.clone(),
-            "cpu_satus" => self.cpu_satus.clone(),
-            "current_clock_speed" => self.current_clock_speed.clone(),
-            "current_voltage" => self.current_voltage.clone(),
-            "description" => self.description.clone(),
-            "external_clock" => self.external_clock.clone(),
-            "hyper_threading_enabled" => self.hyper_threading_enabled.clone(),
-            "l2_cache_size" => self.l2_cache_size.clone(),
-            "l2_cache_speed" => self.l2_cache_speed.clone(),
-            "l3_cache_size" => self.l3_cache_size.clone(),
-            "l3_cache_speed" => self.l3_cache_speed.clone(),
-            "manufacturer" => self.manufacturer.clone(),
-            "max_clock_speed" => self.max_clock_speed.clone(),
-            "name" => self.name.clone(),
-            "number_of_cores" => self.number_of_cores.clone(),
-            "number_of_logical_processors" => self.number_of_logical_processors.clone(),
-            "socket_designation" => self.socket_designation.clone(),
-            _ => "".to_string()
+            "address_width" => Value::from(self.address_width),
+            "cpu_satus" => Value::from(self.cpu_satus.to_owned()),
+            "current_clock_speed" => Value::from(self.current_clock_speed),
+            "current_voltage" => Value::from(self.current_voltage),
+            "description" => Value::from(self.description.to_owned()),
+            "external_clock" => Value::from(self.external_clock),
+            "hyper_threading_enabled" => Value::from(self.hyper_threading_enabled.to_owned()),
+            "l2_cache_size" => Value::from(self.l2_cache_size),
+            "l2_cache_speed" => Value::from(self.l2_cache_speed),
+            "l3_cache_size" => Value::from(self.l3_cache_size),
+            "l3_cache_speed" => Value::from(self.l3_cache_speed),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "max_clock_speed" => Value::from(self.max_clock_speed),
+            "name" => Value::from(self.name.to_owned()),
+            "number_of_cores" => Value::from(self.number_of_cores),
+            "number_of_logical_processors" => Value::from(self.number_of_logical_processors),
+            "socket_designation" => Value::from(self.socket_designation.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::ADDRESS_WIDTH_ID => self.address_width.clone(),
-            Self::CPU_STATUS_ID => self.cpu_satus.clone(),
-            Self::CURRENT_CLOCK_SPEED_ID => self.current_clock_speed.clone(),
-            Self::CURRENT_VOLTAGE_ID => self.current_voltage.clone(),
-            Self::DESCRIPTION_ID => self.description.clone(),
-            Self::EXTERNAL_CLOCK_ID => self.external_clock.clone(),
-            Self::HYPER_THREADING_ENABLED_ID => self.hyper_threading_enabled.clone(),
-            Self::L2_CACHE_SIZE_ID => self.l2_cache_size.clone(),
-            Self::L2_CACHE_SPEED_ID => self.l2_cache_speed.clone(),
-            Self::L3_CACHE_SIZE_ID => self.l3_cache_size.clone(),
-            Self::L3_CACHE_SPEED_ID => self.l3_cache_speed.clone(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::MAX_CLOCK_SPEED_ID => self.max_clock_speed.clone(),
-            Self::NAME_ID => self.name.clone(),
-            Self::NUMBER_OF_CORES_ID => self.number_of_cores.clone(),
-            Self::NUMBER_OF_LOGICAL_PROCESSORS_ID => self.number_of_logical_processors.clone(),
-            Self::SOCKET_DESIGNATION_ID => self.socket_designation.clone(),
-            _ => "".to_string()
+            Self::ADDRESS_WIDTH_ID => Value::from(self.address_width),
+            Self::CPU_STATUS_ID => Value::from(self.cpu_satus.to_owned()),
+            Self::CURRENT_CLOCK_SPEED_ID => Value::from(self.current_clock_speed),
+            Self::CURRENT_VOLTAGE_ID => Value::from(self.current_voltage),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::EXTERNAL_CLOCK_ID => Value::from(self.external_clock),
+            Self::HYPER_THREADING_ENABLED_ID => Value::from(self.hyper_threading_enabled.to_owned()),
+            Self::L2_CACHE_SIZE_ID => Value::from(self.l2_cache_size),
+            Self::L2_CACHE_SPEED_ID => Value::from(self.l2_cache_speed),
+            Self::L3_CACHE_SIZE_ID => Value::from(self.l3_cache_size),
+            Self::L3_CACHE_SPEED_ID => Value::from(self.l3_cache_speed),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::MAX_CLOCK_SPEED_ID => Value::from(self.max_clock_speed),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::NUMBER_OF_CORES_ID => Value::from(self.number_of_cores),
+            Self::NUMBER_OF_LOGICAL_PROCESSORS_ID => Value::from(self.number_of_logical_processors),
+            Self::SOCKET_DESIGNATION_ID => Value::from(self.socket_designation.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1823,6 +1903,7 @@ impl Table for WmiProcessor {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMemory {
     pub name: String,
@@ -1830,14 +1911,14 @@ pub struct WmiMemory {
     pub capacity: String,
     pub description: String,
     pub device_locator: String,
-    pub form_factor: String,
-    pub interleave_data_depth: String,
-    pub interleave_position: String,
+    pub form_factor: u16,
+    pub interleave_data_depth: u16,
+    pub interleave_position: u32,
     pub manufacturer: String,
-    pub memory_type: String,
+    pub memory_type: u16,
     pub serial_number: String,
-    pub speed: String,
-}
+    pub speed: u32,
+}}
 
 pub trait WmiMemoryIface {
     fn get_wmi_physical_memory(&self)-> Option<String>;
@@ -1875,39 +1956,39 @@ impl Table for WmiMemory {
         "serial_number",
         "speed", ];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "bank_label" => self.bank_label.clone(),
-            "capacity" => self.capacity.clone(),
-            "description" => self.description.clone(),
-            "device_locator" => self.device_locator.clone(),
-            "form_factor" => self.form_factor.clone(),
-            "interleave_data_depth" => self.interleave_data_depth.clone(),
-            "interleave_position" => self.interleave_position.clone(),
-            "manufacturer" => self.manufacturer.clone(),
-            "memory_type" => self.memory_type.clone(),
-            "serial_number" => self.serial_number.clone(),
-            "speed" => self.speed.clone(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "bank_label" => Value::from(self.bank_label.to_owned()),
+            "capacity" => Value::from(self.capacity.to_owned()),
+            "description" => Value::from(self.description.to_owned()),
+            "device_locator" => Value::from(self.device_locator.to_owned()),
+            "form_factor" => Value::from(self.form_factor),
+            "interleave_data_depth" => Value::from(self.interleave_data_depth),
+            "interleave_position" => Value::from(self.interleave_position),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "memory_type" => Value::from(self.memory_type),
+            "serial_number" => Value::from(self.serial_number.to_owned()),
+            "speed" => Value::from(self.speed),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::BANK_LABEL_ID => self.bank_label.clone(),
-            Self::CAPACITY_ID => self.capacity.clone(),
-            Self::DESCRIPTION_ID => self.description.clone(),
-            Self::DEVICE_LOCATOR_ID => self.device_locator.clone(),
-            Self::FORM_FACTOR_ID => self.form_factor.clone(),
-            Self::INTERLEAVE_DATA_DEPTH_ID => self.interleave_data_depth.clone(),
-            Self::INTERLEAVE_POSITION_ID => self.interleave_position.clone(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::MEMORY_TYPE_ID => self.memory_type.clone(),
-            Self::SERIAL_NUMBER_ID => self.serial_number.clone(),
-            Self::SPEED_ID => self.speed.clone(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::BANK_LABEL_ID => Value::from(self.bank_label.to_owned()),
+            Self::CAPACITY_ID => Value::from(self.capacity.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::DEVICE_LOCATOR_ID => Value::from(self.device_locator.to_owned()),
+            Self::FORM_FACTOR_ID => Value::from(self.form_factor),
+            Self::INTERLEAVE_DATA_DEPTH_ID => Value::from(self.interleave_data_depth),
+            Self::INTERLEAVE_POSITION_ID => Value::from(self.interleave_position),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::MEMORY_TYPE_ID => Value::from(self.memory_type),
+            Self::SERIAL_NUMBER_ID => Value::from(self.serial_number.to_owned()),
+            Self::SPEED_ID => Value::from(self.speed),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1931,13 +2012,14 @@ impl Table for WmiMemory {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiSound {
     pub name: String,
     pub status: String,
     pub manufacturer: String,
-    pub dma_buffer_size: String,
-}
+    pub dma_buffer_size: u16,
+}}
 
 pub trait WmiSoundIface {
     fn get_wmi_sound_info(&self)-> Option<String>;
@@ -1959,23 +2041,23 @@ impl Table for WmiSound {
         "manufacturer",
         "dma_buffer_size"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "status" => self.status.clone(),
-            "manufacturer" => self.manufacturer.clone(),
-            "dma_buffer_size" => self.dma_buffer_size.clone(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "status" => Value::from(self.status.to_owned()),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "dma_buffer_size" => Value::from(self.dma_buffer_size),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::STATUS_ID => self.status.clone(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::DMA_BUFFER_SIZE_ID => self.dma_buffer_size.clone(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::STATUS_ID => Value::from(self.status.to_owned()),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::DMA_BUFFER_SIZE_ID => Value::from(self.dma_buffer_size),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -1991,22 +2073,23 @@ impl Table for WmiSound {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-#[derive(Serialize, Deserialize, Debug)]
-pub struct WmiVideo {
-    pub name: String,
-    pub adapter_compatibility: String,
-    pub adapter_dac_type: String,
-    pub adapter_ram: f32,
-    pub availability: String,
-    pub driver_version: String,
-    pub installed_display_driver: Vec<String>,
-    pub refresh_rate: String,
-    pub screen_info: String,
-    pub status: String,
-    pub video_architecture: String,
-    pub video_memory_type: String,
+table_properties! {
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct WmiVideo {
+        pub name: String,
+        pub adapter_compatibility: String,
+        pub adapter_dac_type: String,
+        pub adapter_ram: u32,
+        pub availability: String,
+        pub driver_version: String,
+        pub installed_display_driver: Vec<String>,
+        pub refresh_rate: String,
+        pub screen_info: String,
+        pub status: String,
+        pub video_architecture: String,
+        pub video_memory_type: String,
+    }
 }
-
 pub trait WmiVideoIface {
     fn get_wmi_video_info(&self)-> Option<String>;
 }
@@ -2043,53 +2126,53 @@ impl Table for WmiVideo {
         "video_architecture",
         "video_memory_type", ];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "adapter_compatibility" => self.adapter_compatibility.clone(),
-            "adapter_dac_type" => self.adapter_dac_type.clone(),
-            "adapter_ram" => self.adapter_ram.to_string(),
-            "availability" => self.availability.clone(),
-            "driver_version" => self.driver_version.clone(),
+            "name" => Value::from(self.name.to_owned()),
+            "adapter_compatibility" => Value::from(self.adapter_compatibility.to_owned()),
+            "adapter_dac_type" => Value::from(self.adapter_dac_type.to_owned()),
+            "adapter_ram" => Value::from(self.adapter_ram),
+            "availability" => Value::from(self.availability.to_owned()),
+            "driver_version" => Value::from(self.driver_version.to_owned()),
             "installed_display_driver" => {
                 let mut installed_display_driver: String = "".to_owned();
                 for driver in self.installed_display_driver.iter() {
                     installed_display_driver.push_str(&driver);
                     installed_display_driver.push_str("\t");
                 }
-                installed_display_driver
+                Value::from(installed_display_driver)
             }
-            "refresh_rate" => self.refresh_rate.clone(),
-            "screen_info" => self.screen_info.clone(),
-            "status" => self.status.clone(),
-            "video_architecture" => self.video_architecture.clone(),
-            "video_memory_type" => self.video_memory_type.clone(),
-            _ => "".to_string()
+            "refresh_rate" => Value::from(self.refresh_rate.to_owned()),
+            "screen_info" => Value::from(self.screen_info.to_owned()),
+            "status" => Value::from(self.status.to_owned()),
+            "video_architecture" => Value::from(self.video_architecture.to_owned()),
+            "video_memory_type" => Value::from(self.video_memory_type.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::ADAPTER_COMPATIBILITY_ID => self.adapter_compatibility.clone(),
-            Self::ADAPTER_DAC_TYPE_ID => self.adapter_dac_type.clone(),
-            Self::ADAPTER_RAM_ID => self.adapter_ram.to_string(),
-            Self::AVAILABILITY_ID => self.availability.clone(),
-            Self::DRIVER_VERSION_ID => self.driver_version.clone(),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::ADAPTER_COMPATIBILITY_ID => Value::from(self.adapter_compatibility.to_owned()),
+            Self::ADAPTER_DAC_TYPE_ID => Value::from(self.adapter_dac_type.to_owned()),
+            Self::ADAPTER_RAM_ID => Value::from(self.adapter_ram),
+            Self::AVAILABILITY_ID => Value::from(self.availability.to_owned()),
+            Self::DRIVER_VERSION_ID => Value::from(self.driver_version.to_owned()),
             Self::INSTALLED_DISPLAY_DRIVER_ID => {
                 let mut installed_display_driver: String = "".to_owned();
                 for driver in self.installed_display_driver.iter() {
                     installed_display_driver.push_str(&driver);
                     installed_display_driver.push_str("\t");
                 }
-                installed_display_driver
+                Value::from(installed_display_driver)
             }
-            Self::REFRESH_RATE_ID => self.refresh_rate.clone(),
-            Self::SCREEN_INFO_ID => self.screen_info.clone(),
-            Self::STATUS_ID => self.status.clone(),
-            Self::VIDEO_ARCHITECTURE_ID => self.video_architecture.clone(),
-            Self::VIDEO_MEMORY_TYPE_ID => self.video_memory_type.clone(),
-            _ => "".to_string()
+            Self::REFRESH_RATE_ID => Value::from(self.refresh_rate.to_owned()),
+            Self::SCREEN_INFO_ID => Value::from(self.screen_info.to_owned()),
+            Self::STATUS_ID => Value::from(self.status.to_owned()),
+            Self::VIDEO_ARCHITECTURE_ID => Value::from(self.video_architecture.to_owned()),
+            Self::VIDEO_MEMORY_TYPE_ID => Value::from(self.video_memory_type.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -2113,15 +2196,16 @@ impl Table for WmiVideo {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMonitors {
     pub name: String,
     pub availability: String,
-    pub bandwidth: u64,
+    pub bandwidth: u32,
     pub manufacturer: String,
-    pub screen_height: u64,
-    pub screen_width: u64,
-}
+    pub screen_height: u32,
+    pub screen_width: u32,
+}}
 
 pub trait WmiMonitorsIface {
     fn get_wmi_monitor_info(&self)-> Option<String>;
@@ -2147,27 +2231,27 @@ impl Table for WmiMonitors {
         "screen_height",
         "screen_width"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "availability" => self.availability.clone(),
-            "bandwidth" => self.bandwidth.to_string(),
-            "manufacturer" => self.manufacturer.clone(),
-            "screen_height" => self.screen_height.to_string(),
-            "screen_width" => self.screen_width.to_string(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "availability" => Value::from(self.availability.to_owned()),
+            "bandwidth" => Value::from(self.bandwidth),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "screen_height" => Value::from(self.screen_height),
+            "screen_width" => Value::from(self.screen_width),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::AVAILABILITY_ID => self.availability.clone(),
-            Self::BANDWIDTH_ID => self.bandwidth.to_string(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::SCREEN_HEIGHT_ID => self.screen_height.to_string(),
-            Self::SCREEN_WIDTH_ID => self.screen_width.to_string(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::AVAILABILITY_ID => Value::from(self.availability.to_owned()),
+            Self::BANDWIDTH_ID => Value::from(self.bandwidth),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::SCREEN_HEIGHT_ID => Value::from(self.screen_height),
+            Self::SCREEN_WIDTH_ID => Value::from(self.screen_width),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -2185,13 +2269,14 @@ impl Table for WmiMonitors {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiKeyboard {
     pub name: String,
     pub description: String,
     pub device_id: String,
     pub status: String,
-}
+}}
 
 pub trait WmiKeyboardIface {
     fn get_wmi_keyboard_info(&self)-> Option<String>;
@@ -2213,23 +2298,23 @@ impl Table for WmiKeyboard {
         "device_id",
         "status"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "description" => self.description.clone(),
-            "device_id" => self.device_id.to_string(),
-            "status" => self.status.clone(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "description" => Value::from(self.description.to_owned()),
+            "device_id" => Value::from(self.device_id.to_owned()),
+            "status" => Value::from(self.status.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::DESCRIPTION_ID => self.description.clone(),
-            Self::DEVICE_ID => self.device_id.to_string(),
-            Self::STATUS_ID => self.status.clone(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::DEVICE_ID => Value::from(self.device_id.to_owned()),
+            Self::STATUS_ID => Value::from(self.status.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -2245,6 +2330,7 @@ impl Table for WmiKeyboard {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPointingDevice {
     pub name: String,
@@ -2252,7 +2338,7 @@ pub struct WmiPointingDevice {
     pub description: String,
     pub pointing_type: String,
     pub status: String,
-}
+}}
 
 pub trait WmiPointingDeviceIface {
     fn get_wmi_pointing_device(&self)-> Option<String>;
@@ -2276,25 +2362,25 @@ impl Table for WmiPointingDevice {
         "pointing_type",
         "status"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "name" => self.name.clone(),
-            "manufacturer" => self.manufacturer.clone(),
-            "description" => self.description.to_string(),
-            "pointing_type" => self.pointing_type.clone(),
-            "status" => self.status.clone(),
-            _ => "".to_string()
+            "name" => Value::from(self.name.to_owned()),
+            "manufacturer" => Value::from(self.manufacturer.to_owned()),
+            "description" => Value::from(self.description.to_owned()),
+            "pointing_type" => Value::from(self.pointing_type.to_owned()),
+            "status" => Value::from(self.status.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::NAME_ID => self.name.clone(),
-            Self::MANUFACTURER_ID => self.manufacturer.clone(),
-            Self::DESCRIPTION_ID => self.description.to_string(),
-            Self::POINTING_TYPE_ID => self.pointing_type.clone(),
-            Self::STATUS_ID => self.status.clone(),
-            _ => "".to_string()
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::MANUFACTURER_ID => Value::from(self.manufacturer.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            Self::POINTING_TYPE_ID => Value::from(self.pointing_type.to_owned()),
+            Self::STATUS_ID => Value::from(self.status.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -2310,6 +2396,7 @@ impl Table for WmiPointingDevice {
     }
 }
 
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessOpenSocketsRow {
     pub pid: i64,
@@ -2324,7 +2411,7 @@ pub struct ProcessOpenSocketsRow {
     pub path: String,
     pub state: String,
     pub net_namespace: String,
-}
+}}
 
 impl ProcessOpenSocketsRow {
     const PID_ID: u64 = 0x00000001;
@@ -2356,39 +2443,39 @@ impl Table for ProcessOpenSocketsRow {
         "state",
         "net_namespace"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "pid" => self.pid.to_string(),
-            "fd" => self.fd.to_string(),
-            "socket" => self.socket.to_string(),
-            "family" => self.family.to_string(),
-            "protocol" => self.protocol.to_string(),
-            "local_address" => self.local_address.clone(),
-            "remote_address" => self.remote_address.clone(),
-            "local_port" => self.local_port.to_string(),
-            "remote_port" => self.remote_port.to_string(),
-            "path" => self.path.clone(),
-            "state" => self.state.clone(),
-            "net_namespace" => self.net_namespace.clone(),
-            _ => "".to_string()
+            "pid" => Value::from(self.pid),
+            "fd" => Value::from(self.fd),
+            "socket" => Value::from(self.socket),
+            "family" => Value::from(self.family),
+            "protocol" => Value::from(self.protocol),
+            "local_address" => Value::from(self.local_address.to_owned()),
+            "remote_address" => Value::from(self.remote_address.to_owned()),
+            "local_port" => Value::from(self.local_port),
+            "remote_port" => Value::from(self.remote_port),
+            "path" => Value::from(self.path.to_owned()),
+            "state" => Value::from(self.state.to_owned()),
+            "net_namespace" => Value::from(self.net_namespace.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::PID_ID => self.pid.to_string(),
-            Self::FD_ID => self.fd.to_string(),
-            Self::SOCKET_ID => self.socket.to_string(),
-            Self::FAMILY_ID => self.family.to_string(),
-            Self::PROTOCOL_ID => self.protocol.to_string(),
-            Self::LOCAL_ADDRESS_ID => self.local_address.clone(),
-            Self::REMOTE_ADDRESS_ID => self.remote_address.clone(),
-            Self::LOCAL_PORT_ID => self.local_port.to_string(),
-            Self::REMOTE_PORT_ID => self.remote_port.to_string(),
-            Self::PATH_ID => self.path.clone(),
-            Self::STATE_ID => self.state.clone(),
-            Self::NET_NAMESPACE_ID => self.net_namespace.clone(),
-            _ => "".to_string()
+            Self::PID_ID => Value::from(self.pid.to_owned()),
+            Self::FD_ID => Value::from(self.fd.to_owned()),
+            Self::SOCKET_ID => Value::from(self.socket.to_owned()),
+            Self::FAMILY_ID => Value::from(self.family.to_owned()),
+            Self::PROTOCOL_ID => Value::from(self.protocol.to_owned()),
+            Self::LOCAL_ADDRESS_ID => Value::from(self.local_address.to_owned()),
+            Self::REMOTE_ADDRESS_ID => Value::from(self.remote_address.to_owned()),
+            Self::LOCAL_PORT_ID => Value::from(self.local_port.to_owned()),
+            Self::REMOTE_PORT_ID => Value::from(self.remote_port.to_owned()),
+            Self::PATH_ID => Value::from(self.path.to_owned()),
+            Self::STATE_ID => Value::from(self.state.to_owned()),
+            Self::NET_NAMESPACE_ID => Value::from(self.net_namespace.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -2411,6 +2498,7 @@ impl Table for ProcessOpenSocketsRow {
     }
 }
 
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessesRow {
     pub pid: i64,
@@ -2447,7 +2535,7 @@ pub struct ProcessesRow {
     pub pid_namespace: String,
     pub user_namespace: String,
     pub uts_namespace: String,
-}
+}}
 
 pub trait ProcessesIface {
     fn get_wmi_process_info(&self) -> Option<String>;
@@ -2527,83 +2615,83 @@ impl Table for ProcessesRow {
         "user_namespace",
         "uts_namespace"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "pid" => self.pid.to_string(),
-            "name" => self.name.clone(),
-            "path" => self.path.clone(),
-            "cmdline" => self.cmdline.clone(),
-            "state" => self.state.clone(),
-            "cwd" => self.cwd.clone(),
-            "root" => self.root.clone(),
-            "uid" => self.uid.to_string(),
-            "gid" => self.gid.to_string(),
-            "euid" => self.euid.to_string(),
-            "egid" => self.egid.to_string(),
-            "suid" => self.suid.to_string(),
-            "sgid" => self.sgid.to_string(),
-            "on_disk" => self.on_disk.to_string(),
-            "wired_size" => self.wired_size.to_string(),
-            "resident_size" => self.resident_size.to_string(),
-            "total_size" => self.total_size.to_string(),
-            "user_time" => self.user_time.to_string(),
-            "system_time" => self.system_time.to_string(),
-            "disk_bytes_read" => self.disk_bytes_read.to_string(),
-            "disk_bytes_written" => self.disk_bytes_written.to_string(),
-            "start_time" => self.start_time.to_string(),
-            "parent" => self.parent.to_string(),
-            "pgroup" => self.pgroup.to_string(),
-            "threads" => self.threads.to_string(),
-            "nice" => self.nice.to_string(),
-            "is_elevated_token" => self.is_elevated_token.to_string(),
-            "cgroup_namespace" => self.cgroup_namespace.clone(),
-            "ipc_namespace" => self.ipc_namespace.clone(),
-            "mnt_namespace" => self.mnt_namespace.clone(),
-            "net_namespace" => self.net_namespace.clone(),
-            "pid_namespace" => self.pid_namespace.clone(),
-            "user_namespace" => self.user_namespace.clone(),
-            "uts_namespace" => self.uts_namespace.clone(),
-            _ => "".to_string()
+            "pid" => Value::from(self.pid),
+            "name" => Value::from(self.name.to_owned()),
+            "path" => Value::from(self.path.to_owned()),
+            "cmdline" => Value::from(self.cmdline.to_owned()),
+            "state" => Value::from(self.state.to_owned()),
+            "cwd" => Value::from(self.cwd.to_owned()),
+            "root" => Value::from(self.root.to_owned()),
+            "uid" => Value::from(self.uid),
+            "gid" => Value::from(self.gid),
+            "euid" => Value::from(self.euid),
+            "egid" => Value::from(self.egid),
+            "suid" => Value::from(self.suid),
+            "sgid" => Value::from(self.sgid),
+            "on_disk" => Value::from(self.on_disk),
+            "wired_size" => Value::from(self.wired_size),
+            "resident_size" => Value::from(self.resident_size),
+            "total_size" => Value::from(self.total_size),
+            "user_time" => Value::from(self.user_time),
+            "system_time" => Value::from(self.system_time),
+            "disk_bytes_read" => Value::from(self.disk_bytes_read),
+            "disk_bytes_written" => Value::from(self.disk_bytes_written),
+            "start_time" => Value::from(self.start_time),
+            "parent" => Value::from(self.parent),
+            "pgroup" => Value::from(self.pgroup),
+            "threads" => Value::from(self.threads),
+            "nice" => Value::from(self.nice),
+            "is_elevated_token" => Value::from(self.is_elevated_token),
+            "cgroup_namespace" => Value::from(self.cgroup_namespace.to_owned()),
+            "ipc_namespace" => Value::from(self.ipc_namespace.to_owned()),
+            "mnt_namespace" => Value::from(self.mnt_namespace.to_owned()),
+            "net_namespace" => Value::from(self.net_namespace.to_owned()),
+            "pid_namespace" => Value::from(self.pid_namespace.to_owned()),
+            "user_namespace" => Value::from(self.user_namespace.to_owned()),
+            "uts_namespace" => Value::from(self.uts_namespace.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::PID_ID => self.pid.to_string(),
-            Self::NAME_ID => self.name.clone(),
-            Self::PATH_ID => self.path.clone(),
-            Self::CMDLINE_ID => self.cmdline.clone(),
-            Self::STATE_ID => self.state.clone(),
-            Self::CWD_ID => self.cwd.clone(),
-            Self::ROOT_ID => self.root.clone(),
-            Self::UID_ID => self.uid.to_string(),
-            Self::GID_ID => self.gid.to_string(),
-            Self::EUID_ID => self.euid.to_string(),
-            Self::EGID_ID => self.egid.to_string(),
-            Self::SUID_ID => self.suid.to_string(),
-            Self::SGID_ID => self.sgid.to_string(),
-            Self::ON_DISK_ID => self.on_disk.to_string(),
-            Self::WIRED_SIZE_ID => self.wired_size.to_string(),
-            Self::RESIDENT_SIZE_ID => self.resident_size.to_string(),
-            Self::TOTAL_SIZE_ID => self.total_size.to_string(),
-            Self::USER_TIME_ID => self.user_time.to_string(),
-            Self::SYSTEM_TIME_ID => self.system_time.to_string(),
-            Self::DISK_BYTES_READ_ID => self.disk_bytes_read.to_string(),
-            Self::DISK_BYTES_WRITTEN_ID => self.disk_bytes_written.to_string(),
-            Self::START_TIME_ID => self.start_time.to_string(),
-            Self::PARENT_ID => self.parent.to_string(),
-            Self::PGROUP_ID => self.pgroup.to_string(),
-            Self::THREADS_ID => self.threads.to_string(),
-            Self::NICE_ID => self.nice.to_string(),
-            Self::IS_ELEVATED_TOKEN_ID => self.is_elevated_token.to_string(),
-            Self::CGROUPE_NAMESPACE_ID => self.cgroup_namespace.clone(),
-            Self::IPC_NAMESPACE_ID => self.ipc_namespace.clone(),
-            Self::MNT_NAMESPACE_ID => self.mnt_namespace.clone(),
-            Self::NET_NAMESPACE_ID => self.net_namespace.clone(),
-            Self::PID_NAMESPACE_ID => self.pid_namespace.clone(),
-            Self::USER_NAMESPACE_ID => self.user_namespace.clone(),
-            Self::UTS_NAMESPACE_ID => self.uts_namespace.clone(),
-            _ => "".to_string()
+            Self::PID_ID => Value::from(self.pid),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::PATH_ID => Value::from(self.path.to_owned()),
+            Self::CMDLINE_ID => Value::from(self.cmdline.to_owned()),
+            Self::STATE_ID => Value::from(self.state.to_owned()),
+            Self::CWD_ID => Value::from(self.cwd.to_owned()),
+            Self::ROOT_ID => Value::from(self.root.to_owned()),
+            Self::UID_ID => Value::from(self.uid),
+            Self::GID_ID => Value::from(self.gid),
+            Self::EUID_ID => Value::from(self.euid),
+            Self::EGID_ID => Value::from(self.egid),
+            Self::SUID_ID => Value::from(self.suid),
+            Self::SGID_ID => Value::from(self.sgid),
+            Self::ON_DISK_ID => Value::from(self.on_disk),
+            Self::WIRED_SIZE_ID => Value::from(self.wired_size),
+            Self::RESIDENT_SIZE_ID => Value::from(self.resident_size),
+            Self::TOTAL_SIZE_ID => Value::from(self.total_size),
+            Self::USER_TIME_ID => Value::from(self.user_time),
+            Self::SYSTEM_TIME_ID => Value::from(self.system_time),
+            Self::DISK_BYTES_READ_ID => Value::from(self.disk_bytes_read),
+            Self::DISK_BYTES_WRITTEN_ID => Value::from(self.disk_bytes_written),
+            Self::START_TIME_ID => Value::from(self.start_time),
+            Self::PARENT_ID => Value::from(self.parent),
+            Self::PGROUP_ID => Value::from(self.pgroup),
+            Self::THREADS_ID => Value::from(self.threads),
+            Self::NICE_ID => Value::from(self.nice),
+            Self::IS_ELEVATED_TOKEN_ID => Value::from(self.is_elevated_token),
+            Self::CGROUPE_NAMESPACE_ID => Value::from(self.cgroup_namespace.to_owned()),
+            Self::IPC_NAMESPACE_ID => Value::from(self.ipc_namespace.to_owned()),
+            Self::MNT_NAMESPACE_ID => Value::from(self.mnt_namespace.to_owned()),
+            Self::NET_NAMESPACE_ID => Value::from(self.net_namespace.to_owned()),
+            Self::PID_NAMESPACE_ID => Value::from(self.pid_namespace.to_owned()),
+            Self::USER_NAMESPACE_ID => Value::from(self.user_namespace.to_owned()),
+            Self::UTS_NAMESPACE_ID => Value::from(self.uts_namespace.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -2648,6 +2736,7 @@ impl Table for ProcessesRow {
     }
 }
 
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessMemoryMapRow {
     pub pid: i32,
@@ -2659,7 +2748,7 @@ pub struct ProcessMemoryMapRow {
     pub inode: i32,
     pub path: String,
     pub pseudo: i32,
-}
+}}
 
 impl ProcessMemoryMapRow {
     const PID_ID: u64 = 0x00000001;
@@ -2685,33 +2774,33 @@ impl Table for ProcessMemoryMapRow {
         "path",
         "pseudo"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "pid" => self.pid.to_string(),
-            "start" => self.start.clone(),
-            "end" => self.end.clone(),
-            "permissions" => self.permissions.clone(),
-            "offset" => self.offset.to_string(),
-            "device" => self.device.clone(),
-            "inode" => self.inode.to_string(),
-            "path" => self.path.clone(),
-            "pseudo" => self.pseudo.to_string(),
-            _ => "".to_string()
+            "pid" => Value::from(self.pid),
+            "start" => Value::from(self.start.to_owned()),
+            "end" => Value::from(self.end.to_owned()),
+            "permissions" => Value::from(self.permissions.to_owned()),
+            "offset" => Value::from(self.offset),
+            "device" => Value::from(self.device.to_owned()),
+            "inode" => Value::from(self.inode),
+            "path" => Value::from(self.path.to_owned()),
+            "pseudo" => Value::from(self.pseudo),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::PID_ID => self.pid.to_string(),
-            Self::START_ID => self.start.clone(),
-            Self::END_ID => self.end.clone(),
-            Self::PERMISSION_ID => self.permissions.clone(),
-            Self::OFFSET_ID => self.offset.to_string(),
-            Self::DEVICE_ID => self.device.clone(),
-            Self::INODE_ID => self.inode.to_string(),
-            Self::PATH_ID => self.path.clone(),
-            Self::PSEUDO_ID => self.pseudo.to_string(),
-            _ => "".to_string()
+            Self::PID_ID => Value::from(self.pid),
+            Self::START_ID => Value::from(self.start.to_owned()),
+            Self::END_ID => Value::from(self.end.to_owned()),
+            Self::PERMISSION_ID => Value::from(self.permissions.to_owned()),
+            Self::OFFSET_ID => Value::from(self.offset),
+            Self::DEVICE_ID => Value::from(self.device.to_owned()),
+            Self::INODE_ID => Value::from(self.inode),
+            Self::PATH_ID => Value::from(self.path.to_owned()),
+            Self::PSEUDO_ID => Value::from(self.pseudo),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -2731,12 +2820,13 @@ impl Table for ProcessMemoryMapRow {
     }
 }
 
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessEnvsRow {
     pub pid: i32,
     pub key: String,
     pub value: String,
-}
+}}
 
 impl ProcessEnvsRow {
     const PID_ID: u64 = 0x00000001;
@@ -2750,21 +2840,21 @@ impl Table for ProcessEnvsRow {
         "key",
         "value"];
 
-    fn get_by_name(&self, _name: &str) -> String {
+    fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "pid" => self.pid.to_string(),
-            "key" => self.key.clone(),
-            "value" => self.value.clone(),
-            _ => "".to_string()
+            "pid" => Value::from(self.pid),
+            "key" => Value::from(self.key.to_owned()),
+            "value" => Value::from(self.value.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
-    fn get_by_id(&self, _id: u64) -> String {
+    fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::PID_ID => self.pid.to_string(),
-            Self::KEY_ID => self.key.clone(),
-            Self::VALUE_ID => self.value.clone(),
-            _ => "".to_string()
+            Self::PID_ID => Value::from(self.pid),
+            Self::KEY_ID => Value::from(self.key.to_owned()),
+            Self::VALUE_ID => Value::from(self.value.to_owned()),
+            _ => Value::from("".to_owned())
         }
     }
 
@@ -2775,5 +2865,111 @@ impl Table for ProcessEnvsRow {
             "value" => Self::VALUE_ID,
             _ => 0
         }
+    }
+}
+
+pub fn get_table_list() -> Vec<String> {
+    vec![
+        "etc_hosts".to_string(),
+        "etc_protocols".to_string(),
+        "etc_services".to_string(),
+        "system_info".to_string(),
+        "os_version".to_string(),
+        "logical_drives".to_string(),
+        "uptime".to_string(),
+        "processes".to_string(),
+        #[cfg(not(target_os = "macos"))]
+            "interface_address".to_string(),
+        #[cfg(not(target_os = "macos"))]
+            "interface_details".to_string(),
+        #[cfg(not(target_os = "macos"))]
+            "process_open_sockets".to_string(),
+        #[cfg(not(target_os = "macos"))]
+            "process_memory_map".to_string(),
+        #[cfg(target_os = "windows")]
+            "products".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_computer_info".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_os_version".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_printers".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_services".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_hotfixes".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_shares".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_network_adapters".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_local_accounts".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_bios".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_motherboard".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_processor".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_physical_memory".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_sound".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_video".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_monitors".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_keyboard".to_string(),
+        #[cfg(target_os = "windows")]
+            "wmi_pointing_device".to_string(),
+        #[cfg(not(target_os = "windows"))]
+            "process_envs".to_string(),
+        #[cfg(test)]
+            "Dummy".to_string(),
+    ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_by_name(){
+        let table = Dummy {
+            a: 25,
+            b: 30,
+        };
+        assert_eq!(table.get_by_name("a"), Value::from(25));
+        assert_eq!(table.get_by_name("b"), Value::from(30));
+        assert_ne!(table.get_by_name("b"), Value::from(35));
+        assert_eq!(table.get_by_name("c"), Value::from("".to_owned()));
+    }
+    #[test]
+    fn test_get_by_id(){
+        let table = Dummy {
+            a: 25,
+            b: 30,
+        };
+        assert_eq!(table.get_by_id(1), Value::from(25));
+        assert_eq!(table.get_by_id(2), Value::from(30));
+        assert_ne!(table.get_by_id(2), Value::from(35));
+        assert_eq!(table.get_by_id(0), Value::from("".to_owned()));
+    }
+    #[test]
+    fn test_get_id(){
+        let table = Dummy {
+            a: 25,
+            b: 30,
+        };
+        assert_eq!(table.get_id("a"), 1);
+        assert_eq!(table.get_id("b"), 2);
+        assert_ne!(table.get_id("c"), 2);
+        assert_eq!(table.get_id("c"), 0);
+    }
+    #[test]
+    fn test_table_properties(){
+        assert_eq!(Dummy::get_columns_name(), vec!["a", "b"]);
+        assert_eq!(Dummy::get_fields_type(), vec!["u32", "i32"]);
+        assert_eq!(Dummy::get_columns_type(), vec!["\" INTEGER", "\" INTEGER"]);
     }
 }

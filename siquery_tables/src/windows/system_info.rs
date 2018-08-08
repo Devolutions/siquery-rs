@@ -71,7 +71,7 @@ impl SystemInfoData {
                 } else if v[0].starts_with("TotalPhysicalMemory") {
                     let mut n = String::from(v[1]);
                     utils::trim_string(&mut n);
-                    system_info.physical_memory = n.parse::<u64>().unwrap_or(0);
+                    system_info.physical_memory = n.parse::<i64>().unwrap_or(0);
                 }
             }
         }

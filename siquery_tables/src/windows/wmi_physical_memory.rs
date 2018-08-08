@@ -21,13 +21,13 @@ impl WmiMemory {
             capacity: String::new(),
             description: String::new(),
             device_locator: String::new(),
-            form_factor: String::new(),
-            interleave_data_depth: String::new(),
-            interleave_position: String::new(),
+            form_factor: 0,
+            interleave_data_depth: 0,
+            interleave_position: 0,
             manufacturer: String::new(),
-            memory_type: String::new(),
+            memory_type: 0,
             serial_number: String::new(),
-            speed: String::new(),
+            speed: 0,
         }
     }
 
@@ -73,25 +73,25 @@ impl WmiMemory {
                         physical_memory.device_locator = v;
                     },
                     "FormFactor" => {
-                        physical_memory.form_factor = v;
+                        physical_memory.form_factor = v.parse::<u16>().unwrap_or(0);
                     },
                     "InterleaveDataDepth" => {
-                        physical_memory.interleave_data_depth = v;
+                        physical_memory.interleave_data_depth = v.parse::<u16>().unwrap_or(0);
                     },
                     "InterleavePosition" => {
-                        physical_memory.interleave_position = v;
+                        physical_memory.interleave_position = v.parse::<u32>().unwrap_or(0);
                     },
                     "Manufacturer" => {
                         physical_memory.manufacturer = v;
                     },
                     "MemoryType" => {
-                        physical_memory.memory_type = v;
+                        physical_memory.memory_type = v.parse::<u16>().unwrap_or(0);
                     },
                     "SerialNumber" => {
                         physical_memory.serial_number = v;
                     },
                     "Speed" => {
-                        physical_memory.speed = v;
+                        physical_memory.speed = v.parse::<u32>().unwrap_or(0);
                     },
                     _ => ()
                 }
@@ -126,12 +126,12 @@ mod tests {
         assert_eq!(physical_memory.capacity, "17179869184 bytes");
         assert_eq!(physical_memory.description, "Physical Memory");
         assert_eq!(physical_memory.device_locator, "DIMM A");
-        assert_eq!(physical_memory.form_factor, "12");
-        assert_eq!(physical_memory.interleave_data_depth, "0");
-        assert_eq!(physical_memory.interleave_position, "0");
+        assert_eq!(physical_memory.form_factor, 12);
+        assert_eq!(physical_memory.interleave_data_depth, 0);
+        assert_eq!(physical_memory.interleave_position, 0);
         assert_eq!(physical_memory.manufacturer, "Fabrikam, Inc.");
-        assert_eq!(physical_memory.memory_type, "0");
+        assert_eq!(physical_memory.memory_type, 0);
         assert_eq!(physical_memory.serial_number, "91A92B93C");
-        assert_eq!(physical_memory.speed, "2400");
+        assert_eq!(physical_memory.speed, 2400);
     }
 }

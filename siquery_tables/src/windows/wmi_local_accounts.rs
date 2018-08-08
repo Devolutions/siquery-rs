@@ -23,7 +23,7 @@ impl WmiLocalAccounts {
             local_account: String::new(),
             name: String::new(),
             sid: String::new(),
-            sid_type: String::new(),
+            sid_type: 0,
             status: String::new(),
         }
     }
@@ -94,7 +94,7 @@ impl WmiLocalAccounts {
                         local_account.sid = v;
                     },
                     "SIDType" => {
-                        local_account.sid_type = v;
+                        local_account.sid_type = v.parse::<u8>().unwrap_or(0);
                     },
                     "Status" => {
                         local_account.status = v;
@@ -134,7 +134,7 @@ mod tests {
         assert_eq!(wmi_local_accounts.local_account, "TRUE");
         assert_eq!(wmi_local_accounts.name, "UtilityAccount");
         assert_eq!(wmi_local_accounts.sid, "S-0-0-11-1111111111-111111111-111111111-111");
-        assert_eq!(wmi_local_accounts.sid_type, "1");
+        assert_eq!(wmi_local_accounts.sid_type, 1);
         assert_eq!(wmi_local_accounts.status, "Degraded");
         assert_eq!(WmiLocalAccounts::get_specific_ex(reader.borrow()).len(), 2);
     }

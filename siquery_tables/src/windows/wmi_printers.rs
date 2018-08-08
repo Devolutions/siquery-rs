@@ -22,25 +22,25 @@ impl WmiPrintersIface for Reader {
 impl WmiPrinters {
     pub(crate) fn new() -> WmiPrinters {
         WmiPrinters {
-            attributes: String::new(),
+            attributes: 99999,
             caption: String::new(),
             creation_class_name: String::new(),
             device_id: String::new(),
             do_complete_first: String::new(),
             driver_name: String::new(),
-            extended_printer_status: String::new(),
-            horizontal_resolution: String::new(),
+            extended_printer_status: 0,
+            horizontal_resolution: 0,
             local: String::new(),
             name: String::new(),
             port_name: String::new(),
-            printer_status: String::new(),
+            printer_status: 0,
             print_job_data_type: String::new(),
             print_processor: String::new(),
-            priority: String::new(),
+            priority: 0,
             status: String::new(),
             system_creation_class_name: String::new(),
             system_name: String::new(),
-            vertical_resolution: String::new(),
+            vertical_resolution: 0,
         }
     }
 
@@ -54,7 +54,7 @@ impl WmiPrinters {
 
             for line in lines {
                 if line.len() <= 2 {
-                    if printer.attributes != "" {
+                    if printer.attributes != 99999 {
                         output.push(printer);
                     }
                     printer = WmiPrinters::new();
@@ -71,7 +71,7 @@ impl WmiPrinters {
 
                 match k.as_str() {
                     "Attributes" => {
-                        printer.attributes = v;
+                        printer.attributes = v.parse::<u32>().unwrap_or(0);
                     },
                     "Caption" => {
                         printer.caption = v;
@@ -89,10 +89,10 @@ impl WmiPrinters {
                         printer.driver_name = v;
                     },
                     "ExtendedPrinterStatus" => {
-                        printer.extended_printer_status = v;
+                        printer.extended_printer_status = v.parse::<u16>().unwrap_or(0);
                     },
                     "HorizontalResolution" => {
-                        printer.horizontal_resolution = v;
+                        printer.horizontal_resolution = v.parse::<u32>().unwrap_or(0);
                     },
                     "Local" => {
                         printer.local = v;
@@ -104,7 +104,7 @@ impl WmiPrinters {
                         printer.port_name = v;
                     },
                     "PrinterStatus" => {
-                        printer.printer_status = v;
+                        printer.printer_status = v.parse::<u16>().unwrap_or(0);
                     },
                     "PrintJobDataType" => {
                         printer.print_job_data_type = v;
@@ -113,7 +113,7 @@ impl WmiPrinters {
                         printer.print_processor = v;
                     },
                     "Priority" => {
-                        printer.priority = v;
+                        printer.priority = v.parse::<u32>().unwrap_or(0);
                     },
                     "Status" => {
                         printer.status = v;
@@ -125,7 +125,7 @@ impl WmiPrinters {
                         printer.system_name = v;
                     },
                     "VerticalResolution" => {
-                        printer.vertical_resolution = v;
+                        printer.vertical_resolution = v.parse::<u32>().unwrap_or(0);
                     },
                     _ => ()
                 }
@@ -160,18 +160,18 @@ mod tests {
         assert_eq!(test_printers.device_id, "Snagit 2018");
         assert_eq!(test_printers.do_complete_first, "FALSE");
         assert_eq!(test_printers.driver_name, "Snagit 18 Printer");
-        assert_eq!(test_printers.extended_printer_status, "2");
-        assert_eq!(test_printers.horizontal_resolution, "200");
+        assert_eq!(test_printers.extended_printer_status, 2);
+        assert_eq!(test_printers.horizontal_resolution, 200);
         assert_eq!(test_printers.local, "TRUE");
         assert_eq!(test_printers.name, "Snagit 2018");
         assert_eq!(test_printers.port_name, "C:\\ProgramData\\TechSmith\\Snagit18\\PrinterPortFile");
-        assert_eq!(test_printers.printer_status, "3");
+        assert_eq!(test_printers.printer_status, 3);
         assert_eq!(test_printers.print_job_data_type, "RAW");
         assert_eq!(test_printers.print_processor, "winprint");
-        assert_eq!(test_printers.priority, "1");
+        assert_eq!(test_printers.priority, 1);
         assert_eq!(test_printers.status, "Unknown");
         assert_eq!(test_printers.system_creation_class_name, "Win32_ComputerSystem");
         assert_eq!(test_printers.system_name, "ekyaw");
-        assert_eq!(test_printers.vertical_resolution, "200");
+        assert_eq!(test_printers.vertical_resolution, 200);
     }
 }

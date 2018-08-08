@@ -10,10 +10,10 @@ impl Uptime {
             hours: 0,
             minutes: 0,
             seconds: 0,
-            total_seconds: 0.0,
+            total_seconds: 0,
         };
 
-        let t: u64 = unsafe { kernel32::GetTickCount64() };
+        let t: i64 = unsafe { kernel32::GetTickCount64() } as i64;
         let mut remaining_time;
         let milli_to_days_converter = 1000 * 60 * 60 * 24;
         let milli_to_hours_converter = 1000 * 60 * 60;
@@ -35,7 +35,7 @@ impl Uptime {
         upt.hours = get_hours ;
         upt.minutes = get_minutes;
         upt.seconds = get_seconds;
-        upt.total_seconds = t as f64 / 1000.0;
+        upt.total_seconds = t as i64 / 1000;
 
         output.push(upt);
         output

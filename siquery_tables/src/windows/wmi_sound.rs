@@ -19,7 +19,7 @@ impl WmiSound {
             name: String::new(),
             manufacturer: String::new(),
             status: String::new(),
-            dma_buffer_size: String::new(),
+            dma_buffer_size: 0,
         }
     }
 
@@ -59,7 +59,7 @@ impl WmiSound {
                         sound.status = v;
                     },
                     "DMABufferSize" => {
-                        sound.dma_buffer_size = v;
+                        sound.dma_buffer_size = v.parse::<u16>().unwrap_or(0);
                     },
                     _ => ()
                 }
@@ -91,6 +91,6 @@ mod tests {
         assert_eq!(sound_info.name, "Fabrikam Audio");
         assert_eq!(sound_info.manufacturer, "Fabrikam, Inc.");
         assert_eq!(sound_info.status, "OK");
-        assert_eq!(sound_info.dma_buffer_size, "256");
+        assert_eq!(sound_info.dma_buffer_size, 256);
     }
 }

@@ -1,7 +1,7 @@
 Name=Fabrikam Core(TM) i7-7500U CPU @ 2.70GHz
 AddressWidth=64
 CpuStatus=1
-CurrentClockSpeed=1600 Mhz
+CurrentClockSpeed=1600
 CurrentVoltage=11
 Description=Fabrikam Family 6 Model 142 Stepping 9
 ExtClock=100
@@ -10,7 +10,7 @@ L2CacheSpeed=0
 L3CacheSize=4096
 L3CacheSpeed=0
 Manufacturer=Fabrikam, Inc.
-MaxClockSpeed=2901 Mhz
+MaxClockSpeed=2901
 NumberOfCores=2
 NumberOfLogicalProcessors=2
 SocketDesignation=U4E2

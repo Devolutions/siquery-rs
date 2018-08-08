@@ -1,14 +1,14 @@
 use rusqlite::vtab::{
-    sqlite3_vtab, sqlite3_vtab_cursor,
-    Context, IndexInfo, VTab, VTabConnection, VTabCursor, Values, simple_module,
-    dequote, Module};
+    sqlite3_vtab, sqlite3_vtab_cursor, Context, IndexInfo,
+    VTab, VTabConnection, VTabCursor, Values, read_only_module,
+    dequote, Module, CreateVTab};
 
-use rusqlite::types::Null;
+use rusqlite::types::*;
 use rusqlite::{Connection, Result, Error};
 use std::os::raw::c_int;
 use std::str;
 
-use query::{query_table, query_header};
+use query::{query_table, get_schema};
 
 pub fn load_module(conn: &Connection) -> Result<()> {
     let aux: Option<()> = None;
@@ -16,7 +16,7 @@ pub fn load_module(conn: &Connection) -> Result<()> {
 }
 
 lazy_static! {
-    static ref SIQUERY_MODULE: Module<SiqueryTab> = simple_module::<SiqueryTab>();
+    static ref SIQUERY_MODULE: Module<SiqueryTab> = read_only_module::<SiqueryTab>(1);
 }
 
 #[repr(C)]
@@ -24,9 +24,6 @@ struct SiqueryTab {
     /// Base class. Must be first
     base: sqlite3_vtab,
     table_name: String,
-    table: Vec<Vec<String>>,
-    columns: Vec<String>,
-    header: Vec<String>,
 }
 
 impl SiqueryTab {
@@ -41,17 +38,6 @@ impl SiqueryTab {
             }
         }
         Err(Error::ModuleError(format!("illegal argument: '{}'", arg)))
-    }
-
-    fn get_from_args(args: &str)-> Vec<String>{
-        let mut v : Vec<String> = Vec::new();
-        let split : Vec<_>= args.split(';').collect();
-        for value in split {
-            if value.len() > 0 {
-                v.push(value.to_string());
-            }
-        }
-        v
     }
 }
 
@@ -71,11 +57,8 @@ impl VTab for SiqueryTab {
         let mut vtab = SiqueryTab {
             base: sqlite3_vtab::default(),
             table_name: String::new(),
-            table: Vec::new(),
-            columns: Vec::new(),
-            header: Vec::new(),
         };
-
+        let schema;
         let args= &_args[3..];
 
         for c_slice in args {
@@ -83,13 +66,6 @@ impl VTab for SiqueryTab {
             match param {
                 "table_name" => {
                     vtab.table_name = value.to_string();
-                }
-                "columns" => {
-                    if value.len() > 1 {
-                        vtab.columns = SiqueryTab::get_from_args(value);
-                    } else{
-                        vtab.columns = Vec::new();
-                    }
                 }
                 _ => {
                     return Err(Error::ModuleError(format!(
@@ -99,24 +75,8 @@ impl VTab for SiqueryTab {
                 }
             }
         }
-        // create the header
-        vtab.header = query_header(vtab.table_name.as_str(), vtab.columns.clone());
 
-        let mut schema= None;
-        if schema.is_none() {
-            let mut sql = String::from("CREATE TABLE x(");
-            for (i, col) in vtab.header.iter().enumerate() {
-                sql.push('"');
-                sql.push_str(col);
-                sql.push_str("\" TEXT");
-                if i == vtab.header.len() - 1 {
-                    sql.push_str(");");
-                } else {
-                    sql.push_str(", ");
-                }
-            }
-            schema = Some(sql);
-        }
+        schema = get_schema(vtab.table_name.as_str());
         Ok((schema.unwrap().to_owned(), vtab))
     }
 
@@ -128,23 +88,26 @@ impl VTab for SiqueryTab {
     fn open(&self) -> Result<SiqueryTabCursor> {Ok(SiqueryTabCursor::default())}
 }
 
+impl CreateVTab for SiqueryTab {}
+
 #[derive(Default)]
 #[repr(C)]
 struct SiqueryTabCursor {
     /// Base class. Must be first
     base: sqlite3_vtab_cursor,
+    /// table is in memory
+    table_in_memory: bool,
     /// The rowid
     row_id: i64,
     /// columns name
-    cols : Vec<String>,
+    cols : Vec<Value>,
     /// rows
-    rows : Vec<Vec<String>>,
+    rows : Vec<Vec<Value>>,
     /// the end of the table
     eot : bool,
 }
 
 impl VTabCursor for SiqueryTabCursor {
-    type Table = SiqueryTab;
 
     fn filter(
         &mut self,
@@ -154,7 +117,10 @@ impl VTabCursor for SiqueryTabCursor {
     ) -> Result<()> {
         let siquery_table = unsafe {&*(self.base.pVtab as * const SiqueryTab)};
         // register table in memory
-        self.rows = query_table(siquery_table.table_name.as_str(), siquery_table.header.clone());
+        if !self.table_in_memory {
+            self.rows = query_table(siquery_table.table_name.as_str(), vec![]);
+            self.table_in_memory = true;
+        }
         self.row_id = 0;
         self.next()
     }
@@ -189,3 +155,40 @@ impl VTabCursor for SiqueryTabCursor {
         Ok(self.row_id)
     }
 }
+
+#[test]
+fn test_siquery_module() {
+    use query::init_db;
+
+    let db = init_db();
+    let stmt = db.prepare("select * from Dummy");
+
+    match stmt {
+        Ok(mut stmt_resp) => {
+            let mut resp = stmt_resp.query(&[]).unwrap();
+            loop {
+                if let Some(val) = resp.next() {
+                    if let Some(v) = val.ok() {
+                        assert_eq!(25, v.get::<usize, u32>(0));
+                        assert_eq!(25, v.get::<usize, i32>(1));
+                    } else {
+                        break
+                    }
+                } else {
+                    break
+                }
+            }
+        }
+        Err(e) =>
+            {   // use --nocapture flag
+                match e {
+                    Error::SqliteFailure(_r, m) => {
+                        if let Some(msg) = m { println!("{}", msg) };
+                    },
+                    _ => println!("{:?}", Error::ModuleError(format!("{}", e)))
+                };
+                assert_eq!(0, 1);
+            }
+    }
+}
+

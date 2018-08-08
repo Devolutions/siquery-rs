@@ -14,7 +14,6 @@ lazy_static = "1.0"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-csv = "1.0"
 time = "0.1.40"
 
 [dependencies.siquery]
@@ -22,5 +21,5 @@ path = "../siquery_tables"
 
 [dependencies.rusqlite]
 git = "https://github.com/gwenn/rusqlite.git"
-rev = "849dbda"
+rev = "ce9d325"
 features = ["vtab", "bundled"]

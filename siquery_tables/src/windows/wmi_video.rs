@@ -20,7 +20,7 @@ impl WmiVideo {
             name: String::new(),
             adapter_compatibility: String::new(),
             adapter_dac_type: String::new(),
-            adapter_ram: 0.0,
+            adapter_ram: 0,
             availability: String::new(),
             driver_version: String::new(),
             installed_display_driver: Vec::new(),
@@ -66,7 +66,7 @@ impl WmiVideo {
                     },
                     "AdapterRAM" => {
                         // convert bytes to GB
-                        let mut ram = v.parse::<f32>().unwrap_or(0.0) / 1073741824.0;
+                        let mut ram = v.parse::<u32>().unwrap_or(0) / 1073741824;
                         video.adapter_ram = ram;
                     },
                     "Availability" => {
@@ -281,7 +281,7 @@ mod tests {
         assert_eq!(video_info.name, "Graphic Design Institute 940MX");
         assert_eq!(video_info.adapter_compatibility, "Graphic Design Institute");
         assert_eq!(video_info.adapter_dac_type, "Integrated RAMDAC");
-        assert_eq!(video_info.adapter_ram, 2.0);
+        assert_eq!(video_info.adapter_ram, 2);
         assert_eq!(video_info.availability, "Power Cycle");
         assert_eq!(video_info.driver_version, "23.21.13.9065");
         assert_eq!(video_info.installed_display_driver.len(), 2);
