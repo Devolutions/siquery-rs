@@ -28,7 +28,7 @@ impl<T: Table> Table for Vec<T> {
 }
 
 #[macro_export]
-macro_rules! table_proprieties {
+macro_rules! table_properties {
     (
     $(#[$attr:meta])*
     pub struct $name:ident {
@@ -74,7 +74,7 @@ macro_rules! table_proprieties {
     }
 }
 
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Dummy {
     pub a: u32,
@@ -115,7 +115,7 @@ impl Table for Dummy {
 }
 
 
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcHosts {
     pub address: String,
@@ -159,7 +159,7 @@ impl Table for EtcHosts {
         }
     }
 }
-table_proprieties! {
+table_properties! {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcProtocols {
     pub name: String,
@@ -215,7 +215,7 @@ impl Table for EtcProtocols {
         }
     }
 }
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcServices {
     pub name: String,
@@ -277,7 +277,7 @@ impl Table for EtcServices {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize)]
 pub struct WmiComputerInfo {
     pub computer_name: String,
@@ -348,7 +348,7 @@ impl Table for WmiComputerInfo {
         }
     }
 }
-table_proprieties!{
+table_properties!{
 #[derive(Serialize)]
 pub struct SystemInfoData {
     pub computer_name: String,
@@ -412,7 +412,7 @@ impl Table for SystemInfoData {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize)]
 pub struct WmiOsVersion {
     pub build_number: String,
@@ -551,7 +551,7 @@ impl Table for WmiOsVersion {
     }
 }
 
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize)]
 pub struct OsVersion {
     pub name: String,
@@ -619,7 +619,7 @@ impl Table for OsVersion {
     }
 }
 
-table_proprieties!{
+table_properties!{
 #[derive(Debug)]
 pub struct LogicalDrive {
     pub device_id: String,
@@ -701,7 +701,7 @@ impl Serialize for LogicalDrive {
 }
 
 #[cfg(not(target_os = "macos"))]
-table_proprieties!{
+table_properties!{
 #[derive(Debug)]
 pub struct InterfaceAddress {
     pub interface: String,
@@ -786,7 +786,7 @@ impl Serialize for InterfaceAddress {
 }
 
 #[cfg(not(target_os = "macos"))]
-table_proprieties!{
+table_properties!{
 #[derive(Debug, Serialize)]
 pub struct InterfaceDetails {
     pub interface: String,
@@ -848,7 +848,7 @@ impl Table for InterfaceDetails {
     }
 }
 
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Uptime {
     pub days: i64,
@@ -910,7 +910,7 @@ impl Table for Uptime {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPrinters {
     pub attributes: u32,
@@ -1062,7 +1062,7 @@ impl Table for WmiPrinters {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiServices {
     pub accept_pause: String,
@@ -1214,7 +1214,7 @@ impl Table for WmiServices {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiHotfixes {
     pub caption: String,
@@ -1289,7 +1289,7 @@ impl Table for WmiHotfixes {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Products {
     pub install_date: String,
@@ -1359,7 +1359,7 @@ impl Table for Products {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 pub struct WmiNetworkAdapters {
     pub description: String,
     pub database_path: String,
@@ -1461,7 +1461,7 @@ impl Table for WmiNetworkAdapters {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiShares {
     pub caption: String,
@@ -1540,7 +1540,7 @@ impl Table for WmiShares {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiLocalAccounts {
     pub account_type: String,
@@ -1631,7 +1631,7 @@ impl Table for WmiLocalAccounts {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiBios {
     pub caption: String,
@@ -1698,7 +1698,7 @@ impl Table for WmiBios {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMotherboard {
     pub name: String,
@@ -1765,7 +1765,7 @@ impl Table for WmiMotherboard {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiProcessor {
     pub address_width: u16,
@@ -1903,7 +1903,7 @@ impl Table for WmiProcessor {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMemory {
     pub name: String,
@@ -2012,7 +2012,7 @@ impl Table for WmiMemory {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiSound {
     pub name: String,
@@ -2073,7 +2073,7 @@ impl Table for WmiSound {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties! {
+table_properties! {
     #[derive(Serialize, Deserialize, Debug)]
     pub struct WmiVideo {
         pub name: String,
@@ -2196,7 +2196,7 @@ impl Table for WmiVideo {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMonitors {
     pub name: String,
@@ -2269,7 +2269,7 @@ impl Table for WmiMonitors {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiKeyboard {
     pub name: String,
@@ -2330,7 +2330,7 @@ impl Table for WmiKeyboard {
 }
 
 #[cfg(any(target_os = "windows",fuzzing))]
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPointingDevice {
     pub name: String,
@@ -2396,7 +2396,7 @@ impl Table for WmiPointingDevice {
     }
 }
 
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessOpenSocketsRow {
     pub pid: i64,
@@ -2498,7 +2498,7 @@ impl Table for ProcessOpenSocketsRow {
     }
 }
 
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessesRow {
     pub pid: i64,
@@ -2736,7 +2736,7 @@ impl Table for ProcessesRow {
     }
 }
 
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessMemoryMapRow {
     pub pid: i32,
@@ -2820,7 +2820,7 @@ impl Table for ProcessMemoryMapRow {
     }
 }
 
-table_proprieties!{
+table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessEnvsRow {
     pub pid: i32,
@@ -2967,7 +2967,7 @@ mod tests {
         assert_eq!(table.get_id("c"), 0);
     }
     #[test]
-    fn test_table_proprieties(){
+    fn test_table_properties(){
         assert_eq!(Dummy::get_columns_name(), vec!["a", "b"]);
         assert_eq!(Dummy::get_fields_type(), vec!["u32", "i32"]);
         assert_eq!(Dummy::get_columns_type(), vec!["\" INTEGER", "\" INTEGER"]);
