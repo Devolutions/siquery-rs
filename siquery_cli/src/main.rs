@@ -1,11 +1,6 @@
 #[macro_use]
 extern crate clap;
 extern crate siquery;
-// TODO column names with macros\
-extern crate prettytable;
-extern crate serde;
-extern crate serde_json;
-extern crate rusqlite;
 
 use siquery::query::{init_db, execute_query};
 use siquery::tables::get_table_list;
