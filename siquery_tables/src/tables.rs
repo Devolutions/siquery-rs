@@ -162,7 +162,6 @@ impl Table for EtcHosts {
         }
     }
 }
-
 #[cfg(feature = "etc_protocols")]
 table_properties! {
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -3000,6 +2999,7 @@ pub fn get_table_list() -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn test_get_by_name(){
         let table = Dummy {

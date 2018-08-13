@@ -15,7 +15,6 @@ extern crate rusqlite;
 extern crate csv;
 extern crate prettytable;
 
-
 pub mod vtab;
 mod common;
 mod utils;
