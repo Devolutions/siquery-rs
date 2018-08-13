@@ -4,7 +4,7 @@ extern crate siquery;
 
 use siquery::query::{init_db, execute_query};
 use siquery::tables::get_table_list;
-use siquery::table_printer::print_schema;
+use siquery::printer::print_schema;
 use clap::App;
 
 fn main() {

@@ -163,7 +163,7 @@ impl Table for EtcHosts {
     }
 }
 
-#[cfg(feature = "etc_hosts")]
+#[cfg(feature = "etc_protocols")]
 table_properties! {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcProtocols {

@@ -2,7 +2,7 @@ use tables::*;
 use vtab::*;
 use rusqlite::{version_number, Connection, Error};
 use rusqlite::types::Value;
-use table_printer::*;
+use printer::*;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();
@@ -294,14 +294,14 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         },
         #[cfg(feature = "os_version")]
         "os_version" => {
-            let column_names = SystemInfoData::get_columns_name();
-            let column_types = SystemInfoData::get_columns_type();
+            let column_names = OsVersion::get_columns_name();
+            let column_types = OsVersion::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         #[cfg(feature = "logical_drives")]
         "logical_drives" => {
-            let column_names = SystemInfoData::get_columns_name();
-            let column_types = SystemInfoData::get_columns_type();
+            let column_names = LogicalDrive::get_columns_name();
+            let column_types = LogicalDrive::get_columns_type();
             _schema = create_schema(& column_names, & column_types)
         },
         #[cfg(feature = "interface_address")]
@@ -414,8 +414,8 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         },
         #[cfg(feature = "wmi_monitors")]
         "wmi_monitors" => {
-            let column_names = InterfaceDetails::get_columns_name();
-            let column_types = InterfaceDetails::get_columns_type();
+            let column_names = WmiMonitors::get_columns_name();
+            let column_types = WmiMonitors::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         #[cfg(feature = "wmi_keyboard")]
