@@ -31,6 +31,9 @@ args:
     - pretty_mode:
         long: pretty
         help: set 'print_pretty' output mode
+    - schema:
+        long : schema
+        help : list all table schemas
     - verbose:
         short: v
         multiple: true

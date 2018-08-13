@@ -2,6 +2,7 @@
 name = "siquery"
 version = "0.1.0"
 authors = ["Sébastien Duquette <sduquette@devolutions.net>"]
+build = "build.rs"
 
 [dependencies]
 cfg-if = "0.1"

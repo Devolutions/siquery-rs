@@ -19,7 +19,7 @@ extern crate prettytable;
 pub mod vtab;
 mod common;
 mod utils;
-pub mod table_printer;
+pub mod printer;
 pub mod query;
 pub mod tables;
 

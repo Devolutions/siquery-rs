@@ -3,19 +3,20 @@ use std::io::Read;
 #[allow(unused_imports)]
 // TODO implement to_json
 use serde_json;
-
-use tables::{EtcHostsIface,EtcProtocolsIface,EtcServicesIface};
-
-mod logical_drive;
-mod interface_address;
-mod interface_details;
-mod os_version;
-mod system_info;
-mod uptime;
-mod process_open_sockets;
-mod processes;
+#[cfg(feature = "etc_hosts")] use tables::EtcHostsIface;
+#[cfg(feature = "etc_services")] use tables::EtcServicesIface;
+#[cfg(feature = "etc_protocols")] use tables::EtcProtocolsIface;
+#[cfg(feature = "logical_drive")] mod logical_drive;
+#[cfg(feature = "interface_address")] mod interface_address;
+#[cfg(feature = "interface_details")] mod interface_details;
+#[cfg(feature = "os_version")] mod os_version;
+#[cfg(feature = "system_info")] mod system_info;
+#[cfg(feature = "uptime")] mod uptime;
+#[cfg(feature = "process_open_sockets")] mod process_open_sockets;
+#[cfg(feature = "processes")] mod processes;
 
 pub struct EtcHostsReader {}
+#[cfg(feature = "etc_hosts")]
 impl EtcHostsIface for EtcHostsReader {
     fn get_hosts_file(&self) -> Option<String> {
         let mut s = String::new();
@@ -25,6 +26,7 @@ impl EtcHostsIface for EtcHostsReader {
 }
 
 pub struct EtcProtocolsReader {}
+#[cfg(feature = "etc_protocols")]
 impl EtcProtocolsIface for EtcProtocolsReader {
     fn get_protocols_file(&self) -> Option<String> {
         let mut s = String::new();
@@ -34,6 +36,7 @@ impl EtcProtocolsIface for EtcProtocolsReader {
 }
 
 pub struct EtcServicesReader {}
+#[cfg(feature = "etc_services")]
 impl EtcServicesIface for EtcServicesReader {
     fn get_services_file(&self) -> Option<String> {
         let mut s = String::new();
