@@ -4,9 +4,11 @@ extern crate siquery;
 
 use siquery::query::{init_db, execute_query};
 use siquery::tables::get_table_list;
+use siquery::printer::print_schema;
 use clap::App;
 
 fn main() {
+    let t = std::time::SystemTime::now();
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
@@ -18,8 +20,9 @@ fn main() {
         for table in get_table_list().iter() {
             println!("{}", table);
         }
-    }
-    if matches.is_present("json_mode") {
+    } else if matches.is_present("schema") {
+        print_schema();
+    } else if matches.is_present("json_mode") {
         if table.len() > 0 {
             let query = format!("select * from {}", table);
             execute_query(&db, &query, 1);
@@ -41,4 +44,6 @@ fn main() {
             execute_query(&db, &siquery, 0);
         }
     }
+
+    println!("running : {:?}", t.elapsed() );
 }

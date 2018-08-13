@@ -2,7 +2,8 @@ use tables::*;
 use vtab::*;
 use rusqlite::{version_number, Connection, Error};
 use rusqlite::types::Value;
-use table_printer::*;
+use printer::*;
+
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();
@@ -58,149 +59,157 @@ fn select<T>(table: &Vec<T>, columns: Vec<String>) -> Vec<Vec<Value>> where T:Ta
 
 pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
     let res = match name {
+        #[cfg(feature = "etc_hosts")]
         "etc_hosts" => {
             let table = EtcHosts::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "etc_protocols")]
         "etc_protocols" => {
             let table = EtcProtocols::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "etc_services")]
         "etc_services" => {
             let table = EtcServices::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "system_info")]
         "system_info" => {
             let table = SystemInfoData::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "os_version")]
         "os_version" => {
             let table = OsVersion::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "logical_drives")]
         "logical_drives" => {
             let table = LogicalDrive::get_specific();
             select(&table, columns)
         },
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(feature = "interface_address")]
         "interface_address" => {
             let table = InterfaceAddress::get_specific();
             select(&table, columns)
         },
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(feature = "interface_details")]
         "interface_details" => {
             let table = InterfaceDetails::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "uptime")]
         "uptime" => {
             let table = Uptime::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "products")]
         "products" => {
             let table = Products::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_computer_info")]
         "wmi_computer_info" => {
             let table = WmiComputerInfo::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_os_version")]
         "wmi_os_version" => {
             let table = WmiOsVersion::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_printers")]
         "wmi_printers" => {
             let table = WmiPrinters::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_services")]
         "wmi_services" => {
             let table = WmiServices::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_hotfixes")]
         "wmi_hotfixes" => {
             let table = WmiHotfixes::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_shares")]
         "wmi_shares" => {
             let table = WmiShares::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_network_adapters")]
         "wmi_network_adapters" => {
             let table = WmiNetworkAdapters::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_local_accounts")]
         "wmi_local_accounts" => {
             let table = WmiLocalAccounts::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_bios")]
         "wmi_bios" => {
             let table = WmiBios::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_motherboard")]
         "wmi_motherboard" => {
             let table = WmiMotherboard::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_processor")]
         "wmi_processor" => {
             let table = WmiProcessor::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_physical_memory")]
         "wmi_physical_memory" => {
             let table = WmiMemory::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_sound")]
         "wmi_sound" => {
             let table = WmiSound::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_video")]
         "wmi_video" => {
             let table = WmiVideo::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_monitors")]
         "wmi_monitors" => {
             let table = WmiMonitors::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_keyboard")]
         "wmi_keyboard" => {
             let table = WmiKeyboard::get_specific();
             select(&table, columns)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_pointing_device")]
         "wmi_pointing_device" => {
             let table = WmiPointingDevice::get_specific();
             select(&table, columns)
         },
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(feature = "process_open_sockets")]
         "process_open_sockets" => {
             let table = ProcessOpenSocketsRow::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "processes")]
         "processes" => {
             let table = ProcessesRow::get_specific();
             select(&table, columns)
         },
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(feature = "process_memory_map")]
         "process_memory_map" => {
             let table = ProcessMemoryMapRow::get_specific();
             select(&table, columns)
         },
-        #[cfg(not(target_os = "windows"))]
+        #[cfg(feature = "process_envs")]
         "process_envs" => {
             let table = ProcessEnvsRow::get_specific();
             select(&table, columns)
@@ -260,179 +269,187 @@ fn create_schema(column_name: &Vec<&'static str>, column_types: &Vec<&'static st
 pub fn get_schema(table_name: &str) -> Option<String> {
     let mut _schema = None;
     match table_name {
+        #[cfg(feature = "etc_hosts")]
         "etc_hosts" => {
             let column_names = EtcHosts::get_columns_name();
             let column_types = EtcHosts::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "etc_protocols")]
         "etc_protocols" => {
             let column_names = EtcProtocols::get_columns_name();
             let column_types = EtcProtocols::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "etc_services")]
         "etc_services" => {
             let column_names = EtcServices::get_columns_name();
             let column_types = EtcServices::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "system_info")]
         "system_info" => {
             let column_names = SystemInfoData::get_columns_name();
             let column_types = SystemInfoData::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "os_version")]
         "os_version" => {
-            let column_names = SystemInfoData::get_columns_name();
-            let column_types = SystemInfoData::get_columns_type();
+            let column_names = OsVersion::get_columns_name();
+            let column_types = OsVersion::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "logical_drives")]
         "logical_drives" => {
-            let column_names = SystemInfoData::get_columns_name();
-            let column_types = SystemInfoData::get_columns_type();
+            let column_names = LogicalDrive::get_columns_name();
+            let column_types = LogicalDrive::get_columns_type();
             _schema = create_schema(& column_names, & column_types)
         },
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(feature = "interface_address")]
         "interface_address" => {
             let column_names = InterfaceAddress::get_columns_name();
             let column_types = InterfaceAddress::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(feature = "interface_details")]
         "interface_details" => {
             let column_names = InterfaceDetails::get_columns_name();
             let column_types = InterfaceDetails::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "uptime")]
         "uptime" => {
             let column_names = Uptime::get_columns_name();
             let column_types = Uptime::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "products")]
         "products" => {
             let column_names = Products::get_columns_name();
             let column_types = Products::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_computer_info")]
         "wmi_computer_info" => {
             let column_names = WmiComputerInfo::get_columns_name();
             let column_types = WmiComputerInfo::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_os_version")]
         "wmi_os_version" => {
             let column_names = WmiOsVersion::get_columns_name();
             let column_types = WmiOsVersion::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_printers")]
         "wmi_printers" => {
             let column_names = WmiPrinters::get_columns_name();
             let column_types = WmiPrinters::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_services")]
         "wmi_services" => {
             let column_names = WmiServices::get_columns_name();
             let column_types = WmiServices::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_hotfixes")]
         "wmi_hotfixes" => {
             let column_names = WmiHotfixes::get_columns_name();
             let column_types = WmiHotfixes::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_shares")]
         "wmi_shares" => {
             let column_names = WmiShares::get_columns_name();
             let column_types = WmiShares::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_network_adapters")]
         "wmi_network_adapters" => {
             let column_names = WmiNetworkAdapters::get_columns_name();
             let column_types = WmiNetworkAdapters::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_local_accounts")]
         "wmi_local_accounts" => {
             let column_names = WmiLocalAccounts::get_columns_name();
             let column_types = WmiLocalAccounts::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_bios")]
         "wmi_bios" => {
             let column_names = WmiBios::get_columns_name();
             let column_types = WmiBios::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_motherboard")]
         "wmi_motherboard" => {
             let column_names = WmiMotherboard::get_columns_name();
             let column_types = WmiMotherboard::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_processor")]
         "wmi_processor" => {
             let column_names = WmiProcessor::get_columns_name();
             let column_types = WmiProcessor::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_physical_memory")]
         "wmi_physical_memory" => {
             let column_names = WmiMemory::get_columns_name();
             let column_types = WmiMemory::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_sound")]
         "wmi_sound" => {
             let column_names = WmiSound::get_columns_name();
             let column_types = WmiSound::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_video")]
         "wmi_video" => {
             let column_names = WmiVideo::get_columns_name();
             let column_types = WmiVideo::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_monitors")]
         "wmi_monitors" => {
-            let column_names = InterfaceDetails::get_columns_name();
-            let column_types = InterfaceDetails::get_columns_type();
+            let column_names = WmiMonitors::get_columns_name();
+            let column_types = WmiMonitors::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_keyboard")]
         "wmi_keyboard" => {
             let column_names = WmiKeyboard::get_columns_name();
             let column_types = WmiKeyboard::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(target_os = "windows")]
+        #[cfg(feature = "wmi_pointing_device")]
         "wmi_pointing_device" => {
             let column_names = WmiPointingDevice::get_columns_name();
             let column_types = WmiPointingDevice::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(feature = "process_open_sockets")]
         "process_open_sockets" => {
             let column_names = ProcessOpenSocketsRow::get_columns_name();
             let column_types = ProcessOpenSocketsRow::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "processes")]
         "processes" => {
             let column_names = ProcessesRow::get_columns_name();
             let column_types = ProcessesRow::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(feature = "process_memory_map")]
         "process_memory_map" => {
             let column_names = ProcessMemoryMapRow::get_columns_name();
             let column_types = ProcessMemoryMapRow::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
-        #[cfg(not(target_os = "windows"))]
+        #[cfg(feature = "process_envs")]
         "process_envs" => {
             let column_names = ProcessEnvsRow::get_columns_name();
             let column_types = ProcessEnvsRow::get_columns_type();

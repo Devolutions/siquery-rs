@@ -114,23 +114,26 @@ impl Table for Dummy {
     }
 }
 
-
+#[cfg(feature = "etc_hosts")]
 table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcHosts {
     pub address: String,
     pub hostnames: String,
-}
-}
+}}
+
+#[cfg(feature = "etc_hosts")]
 pub trait EtcHostsIface {
     fn get_hosts_file(&self) -> Option<String>;
 }
 
+#[cfg(feature = "etc_hosts")]
 impl EtcHosts {
     const ADDRESS_ID: u64 = 0x00000001;
     const HOSTNAMES_ID: u64 = 0x00000002;
 }
 
+#[cfg(feature = "etc_hosts")]
 impl Table for EtcHosts {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "address", "hostnames"];
@@ -159,6 +162,7 @@ impl Table for EtcHosts {
         }
     }
 }
+#[cfg(feature = "etc_protocols")]
 table_properties! {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcProtocols {
@@ -166,12 +170,14 @@ pub struct EtcProtocols {
     pub number: u16,
     pub alias: String,
     pub comment: String,
-}
-}
+}}
+
+#[cfg(feature = "etc_protocols")]
 pub trait EtcProtocolsIface {
     fn get_protocols_file(&self) -> Option<String>;
 }
 
+#[cfg(feature = "etc_protocols")]
 #[allow(non_upper_case_globals)]
 impl EtcProtocols {
     const NAME_ID: u64 = 0x00000001;
@@ -180,6 +186,7 @@ impl EtcProtocols {
     const COMMENT_ID: u64 = 0x00000008;
 }
 
+#[cfg(feature = "etc_protocols")]
 impl Table for EtcProtocols {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name", "number", "alias", "comment"];
@@ -215,6 +222,8 @@ impl Table for EtcProtocols {
         }
     }
 }
+
+#[cfg(feature = "etc_services")]
 table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EtcServices {
@@ -225,10 +234,12 @@ pub struct EtcServices {
     pub comment: String,
 }}
 
+#[cfg(feature = "etc_services")]
 pub trait EtcServicesIface {
     fn get_services_file(&self) -> Option<String>;
 }
 
+#[cfg(feature = "etc_services")]
 #[allow(non_upper_case_globals)]
 impl EtcServices {
     const NAME_ID: u64 = 0x00000001;
@@ -238,6 +249,7 @@ impl EtcServices {
     const COMMENT_ID: u64 = 0x00000010;
 }
 
+#[cfg(feature = "etc_services")]
 impl Table for EtcServices {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name", "port", "protocol", "aliases", "comment"];
@@ -276,7 +288,7 @@ impl Table for EtcServices {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_computer_info" , fuzzing))]
 table_properties!{
 #[derive(Serialize)]
 pub struct WmiComputerInfo {
@@ -288,10 +300,12 @@ pub struct WmiComputerInfo {
     pub system_type: String,
 }}
 
+#[cfg(feature = "wmi_computer_info")]
 pub trait WmiComputerInfoIface {
     fn get_wmi_computer_info(&self) -> Option<String>;
 }
-#[cfg(any(target_os = "windows",fuzzing))]
+
+#[cfg(any(feature = "wmi_computer_info", fuzzing))]
 #[allow(non_upper_case_globals)]
 impl WmiComputerInfo {
     const COMPUTER_NAME_ID: u64 = 0x00000001;
@@ -302,7 +316,7 @@ impl WmiComputerInfo {
     const SYSTEM_TYPE_ID: u64 = 0x00000020;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_computer_info")]
 impl Table for WmiComputerInfo {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "computer_name",
@@ -357,6 +371,7 @@ pub struct SystemInfoData {
     pub physical_memory: i64,
 }}
 
+#[cfg(feature = "system_info")]
 pub trait SystemInfoDataIface {
     fn get_wmi_cpu_info(&self) -> Option<String>;
     fn get_wmi_system_info(&self) -> Option<String>;
@@ -365,6 +380,8 @@ pub trait SystemInfoDataIface {
     fn cpuinfo(&self) -> Option<String>;
     fn cpu_count(&self) -> u32;
 }
+
+#[cfg(feature = "system_info")]
 #[allow(non_upper_case_globals)]
 impl SystemInfoData {
     const COMPUTER_NAME_ID: u64 = 0x00000001;
@@ -373,6 +390,7 @@ impl SystemInfoData {
     const PHYSICAL_MEMORY_ID: u64 = 0x00000008;
 }
 
+#[cfg(feature = "system_info")]
 impl Table for SystemInfoData {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "computer_name",
@@ -411,7 +429,7 @@ impl Table for SystemInfoData {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_os_version", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize)]
 pub struct WmiOsVersion {
@@ -434,11 +452,12 @@ pub struct WmiOsVersion {
     pub win_directory: String,
 }}
 
+#[cfg(feature = "wmi_os_version")]
 pub trait WmiOsVersionIface {
     fn get_wmi_os_info(&self) -> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_os_version")]
 #[allow(non_upper_case_globals)]
 impl WmiOsVersion {
     const BUILDER_NUMBER_ID: u64 = 0x00000001;
@@ -460,7 +479,7 @@ impl WmiOsVersion {
     const WIN_DIRECTORY_ID: u64 = 0x00010000;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_os_version")]
 impl Table for WmiOsVersion {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "build_number",
@@ -551,6 +570,7 @@ impl Table for WmiOsVersion {
     }
 }
 
+#[cfg(feature = "os_version")]
 table_properties!{
 #[derive(Serialize, Deserialize)]
 pub struct OsVersion {
@@ -561,13 +581,14 @@ pub struct OsVersion {
     pub minor: u32,
 }}
 
+#[cfg(feature = "os_version")]
 pub trait OsVersionIface {
     fn get_os_info(&self) -> Option<String>;
     fn os_release(&self) -> Option<String>;
     fn os_platform(&self) -> Option<String>;
 }
 
-
+#[cfg(feature = "os_version")]
 #[allow(non_upper_case_globals)]
 impl OsVersion {
     const NAME_ID: u64 = 0x00000001;
@@ -577,6 +598,7 @@ impl OsVersion {
     const MINOR_ID: u64 = 0x00000010;
 }
 
+#[cfg(feature = "os_version")]
 impl Table for OsVersion {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -619,6 +641,7 @@ impl Table for OsVersion {
     }
 }
 
+#[cfg(feature = "logical_drives")]
 table_properties!{
 #[derive(Debug)]
 pub struct LogicalDrive {
@@ -629,10 +652,12 @@ pub struct LogicalDrive {
     pub file_system: String,
 }}
 
+#[cfg(feature = "logical_drives")]
 pub trait LogicalDriveIface {
     fn get_wmi_drives_info(&self) -> Option<String>;
 }
 
+#[cfg(feature = "logical_drives")]
 #[allow(non_upper_case_globals)]
 impl LogicalDrive {
     const DEVICE_ID: u64 = 0x00000001;
@@ -642,6 +667,7 @@ impl LogicalDrive {
     const FILE_SYSTEM_ID: u64 = 0x00000010;
 }
 
+#[cfg(feature = "logical_drives")]
 impl Table for LogicalDrive {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "device_id",
@@ -685,6 +711,7 @@ impl Table for LogicalDrive {
     }
 }
 
+#[cfg(feature = "logical_drives")]
 impl Serialize for LogicalDrive {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
@@ -700,7 +727,7 @@ impl Serialize for LogicalDrive {
     }
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(feature = "interface_address")]
 table_properties!{
 #[derive(Debug)]
 pub struct InterfaceAddress {
@@ -711,11 +738,12 @@ pub struct InterfaceAddress {
     pub friendly_name: String,
 }}
 
+#[cfg(feature = "interface_address")]
 pub trait InterfaceAddressIface {
     fn get_wmi_nicconfig(&self) -> Option<String>;
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(feature = "interface_address")]
 #[allow(non_upper_case_globals)]
 impl InterfaceAddress {
     const INTERFACE_ID: u64 = 0x00000001;
@@ -725,7 +753,7 @@ impl InterfaceAddress {
     const FRIENDLY_NAME_ID: u64 = 0x00000010;
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(feature = "interface_address")]
 impl Table for InterfaceAddress {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "interface",
@@ -769,7 +797,7 @@ impl Table for InterfaceAddress {
     }
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(feature = "interface_address")]
 impl Serialize for InterfaceAddress {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
@@ -785,7 +813,7 @@ impl Serialize for InterfaceAddress {
     }
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(feature = "interface_details")]
 table_properties!{
 #[derive(Debug, Serialize)]
 pub struct InterfaceDetails {
@@ -795,11 +823,12 @@ pub struct InterfaceDetails {
     pub enabled: u8,
 }}
 
+#[cfg(feature = "interface_details")]
 pub trait InterfaceDetailsIface {
     fn get_wmi_nicconfig_details(&self) -> Option<String>;
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(feature = "interface_details")]
 #[allow(non_upper_case_globals)]
 impl InterfaceDetails {
     const INTERFACE_ID: u64 = 0x00000001;
@@ -808,7 +837,7 @@ impl InterfaceDetails {
     const ENABLED_ID: u64 = 0x00000008;
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(feature = "interface_details")]
 impl Table for InterfaceDetails {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "interface",
@@ -848,6 +877,7 @@ impl Table for InterfaceDetails {
     }
 }
 
+#[cfg(feature = "uptime")]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Uptime {
@@ -858,6 +888,7 @@ pub struct Uptime {
     pub total_seconds: i64,
 }}
 
+#[cfg(feature = "uptime")]
 #[allow(non_upper_case_globals)]
 impl Uptime {
     const DAYS_ID: u64 = 0x00000001;
@@ -867,6 +898,7 @@ impl Uptime {
     const TOTAL_SECONDS_ID: u64 = 0x00000010;
 }
 
+#[cfg(feature = "uptime")]
 impl Table for Uptime {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "days",
@@ -909,7 +941,7 @@ impl Table for Uptime {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_printers", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPrinters {
@@ -934,11 +966,12 @@ pub struct WmiPrinters {
     pub vertical_resolution: u32,
 }}
 
+#[cfg(feature = "wmi_printers")]
 pub trait WmiPrintersIface {
     fn get_wmi_printers_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_printers")]
 #[allow(non_upper_case_globals)]
 impl WmiPrinters {
     const ATTRIBUTES_ID: u64 = 0x00000001;
@@ -962,7 +995,7 @@ impl WmiPrinters {
     const VERTICAL_RESOLUTION_ID: u64 = 0x00040000;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_printers")]
 impl Table for WmiPrinters {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "attributes",
@@ -1061,7 +1094,7 @@ impl Table for WmiPrinters {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_services", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiServices {
@@ -1086,11 +1119,12 @@ pub struct WmiServices {
     pub system_name: String,
 }}
 
+#[cfg(feature = "wmi_services")]
 pub trait WmiServicesIface {
     fn get_wmi_services_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_services")]
 #[allow(non_upper_case_globals)]
 impl WmiServices {
     const ACCEPT_PAUSE_ID: u64 = 0x00000001;
@@ -1114,7 +1148,7 @@ impl WmiServices {
     const SYSTEM_NAME_ID: u64 = 0x00040000;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_services")]
 impl Table for WmiServices {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "accept_pause",
@@ -1213,7 +1247,7 @@ impl Table for WmiServices {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_hotfixes", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiHotfixes {
@@ -1225,11 +1259,12 @@ pub struct WmiHotfixes {
     pub installed_on: String,
 }}
 
+#[cfg(feature = "wmi_hotfixes")]
 pub trait WmiHotfixesIface {
     fn get_wmi_hotfixes_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_hotfixes")]
 #[allow(non_upper_case_globals)]
 impl WmiHotfixes {
     const CAPTION_ID: u64 = 0x00000001;
@@ -1240,8 +1275,7 @@ impl WmiHotfixes {
     const INSTALLED_ON_ID: u64 = 0x00000020;
 }
 
-#[cfg(target_os = "windows")]
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_hotfixes")]
 impl Table for WmiHotfixes {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "caption",
@@ -1288,7 +1322,7 @@ impl Table for WmiHotfixes {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "products", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Products {
@@ -1300,7 +1334,7 @@ pub struct Products {
     pub version: String,
 }}
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "products")]
 #[allow(non_upper_case_globals)]
 impl Products {
     const INSTALL_DATE_ID: u64 = 0x00000001;
@@ -1311,7 +1345,7 @@ impl Products {
     const VERSION_ID: u64 = 0x00000020;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "products")]
 impl Table for Products {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "install_date",
@@ -1358,7 +1392,7 @@ impl Table for Products {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_network_adapters", fuzzing))]
 table_properties!{
 pub struct WmiNetworkAdapters {
     pub description: String,
@@ -1370,12 +1404,12 @@ pub struct WmiNetworkAdapters {
     pub mac_address: String,
 }}
 
-
+#[cfg(feature = "wmi_network_adapters")]
 pub trait WmiNetworkAdaptersIface {
     fn get_wmi_network_adapters_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_network_adapters")]
 impl WmiNetworkAdapters {
     const DESCRIPTION_ID: u64 = 0x00000001;
     const DATE_BASE_PATH_ID: u64 = 0x00000002;
@@ -1385,7 +1419,7 @@ impl WmiNetworkAdapters {
     const MAC_ADDRESS_ID: u64 = 0x00000020;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_network_adapters")]
 impl Table for WmiNetworkAdapters {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "description",
@@ -1460,7 +1494,7 @@ impl Table for WmiNetworkAdapters {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_shares", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiShares {
@@ -1473,11 +1507,12 @@ pub struct WmiShares {
     pub allow_maximum: String,
 }}
 
+#[cfg(feature = "wmi_shares")]
 pub trait WmiSharesIface {
     fn get_wmi_shares_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_shares")]
 impl WmiShares {
     const CAPTION_ID: u64 = 0x00000001;
     const DESCRIPTION_ID: u64 = 0x00000002;
@@ -1488,7 +1523,7 @@ impl WmiShares {
     const ALLOW_MAXIMUM_ID: u64 = 0x00000040;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_shares")]
 impl Table for WmiShares {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "caption",
@@ -1539,7 +1574,7 @@ impl Table for WmiShares {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_local_accounts",fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiLocalAccounts {
@@ -1554,11 +1589,12 @@ pub struct WmiLocalAccounts {
     pub status: String,
 }}
 
+#[cfg(feature = "wmi_local_accounts")]
 pub trait WmiLocalAccountsIface {
     fn get_wmi_local_accounts_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_local_accounts")]
 impl WmiLocalAccounts {
     const ACCOUNT_TYPE_ID: u64 = 0x00000001;
     const CAPTION_ID: u64 = 0x00000002;
@@ -1571,7 +1607,7 @@ impl WmiLocalAccounts {
     const STATUS_ID: u64 = 0x00000100;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_local_accounts")]
 impl Table for WmiLocalAccounts {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "account_type",
@@ -1630,7 +1666,7 @@ impl Table for WmiLocalAccounts {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_bios",fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiBios {
@@ -1641,11 +1677,12 @@ pub struct WmiBios {
     pub smbios_version: String,
 }}
 
+#[cfg(feature = "wmi_bios")]
 pub trait WmiBiosIface {
     fn get_wmi_bios_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_bios")]
 impl WmiBios {
     const CAPTION_ID: u64 = 0x00000001;
     const MANUFACTURER_ID: u64 = 0x00000002;
@@ -1654,7 +1691,7 @@ impl WmiBios {
     const SMBIOS_VERSION_ID: u64 = 0x00000010;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_bios")]
 impl Table for WmiBios {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "caption",
@@ -1697,7 +1734,7 @@ impl Table for WmiBios {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_motherboard", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMotherboard {
@@ -1708,11 +1745,12 @@ pub struct WmiMotherboard {
     pub version: String,
 }}
 
+#[cfg(feature = "wmi_motherboard")]
 pub trait WmiMotherboardIface {
     fn get_wmi_motherboard_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_motherboard")]
 impl WmiMotherboard {
     const NAME_ID: u64 = 0x00000001;
     const MANUFACTURER_ID: u64 = 0x00000002;
@@ -1721,7 +1759,7 @@ impl WmiMotherboard {
     const VERSION_ID: u64 = 0x00000010;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_motherboard")]
 impl Table for WmiMotherboard {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -1764,7 +1802,7 @@ impl Table for WmiMotherboard {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_processor", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiProcessor {
@@ -1787,10 +1825,12 @@ pub struct WmiProcessor {
     pub socket_designation: String,
 }}
 
+#[cfg(feature = "wmi_processor")]
 pub trait WmiProcessorIface {
     fn get_wmi_processor_info(&self)-> Option<String>;
 }
-#[cfg(target_os = "windows")]
+
+#[cfg(feature = "wmi_processor")]
 impl WmiProcessor {
     const ADDRESS_WIDTH_ID: u64 = 0x00000001;
     const CPU_STATUS_ID: u64 = 0x00000002;
@@ -1811,7 +1851,7 @@ impl WmiProcessor {
     const SOCKET_DESIGNATION_ID: u64 = 0x00010000;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_processor")]
 impl Table for WmiProcessor {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "address_width",
@@ -1902,7 +1942,7 @@ impl Table for WmiProcessor {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_physical_memory",fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMemory {
@@ -1920,11 +1960,12 @@ pub struct WmiMemory {
     pub speed: u32,
 }}
 
+#[cfg(feature = "wmi_physical_memory")]
 pub trait WmiMemoryIface {
     fn get_wmi_physical_memory(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_physical_memory")]
 impl WmiMemory {
     const NAME_ID: u64 = 0x00000001;
     const BANK_LABEL_ID: u64 = 0x00000002;
@@ -1940,7 +1981,7 @@ impl WmiMemory {
     const SPEED_ID: u64 = 0x00000800;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_physical_memory")]
 impl Table for WmiMemory {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -2011,7 +2052,7 @@ impl Table for WmiMemory {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_sound", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiSound {
@@ -2021,11 +2062,12 @@ pub struct WmiSound {
     pub dma_buffer_size: u16,
 }}
 
+#[cfg(feature = "wmi_sound")]
 pub trait WmiSoundIface {
     fn get_wmi_sound_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_sound")]
 impl WmiSound {
     const NAME_ID: u64 = 0x00000001;
     const STATUS_ID: u64 = 0x00000002;
@@ -2033,7 +2075,7 @@ impl WmiSound {
     const DMA_BUFFER_SIZE_ID: u64 = 0x00000008;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_sound")]
 impl Table for WmiSound {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -2072,7 +2114,7 @@ impl Table for WmiSound {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_video",fuzzing))]
 table_properties! {
     #[derive(Serialize, Deserialize, Debug)]
     pub struct WmiVideo {
@@ -2090,11 +2132,13 @@ table_properties! {
         pub video_memory_type: String,
     }
 }
+
+#[cfg(feature = "wmi_video")]
 pub trait WmiVideoIface {
     fn get_wmi_video_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_video")]
 impl WmiVideo {
     const NAME_ID: u64 = 0x00000001;
     const ADAPTER_COMPATIBILITY_ID: u64 = 0x00000002;
@@ -2110,7 +2154,7 @@ impl WmiVideo {
     const VIDEO_MEMORY_TYPE_ID: u64 = 0x00000800;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_video")]
 impl Table for WmiVideo {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -2195,7 +2239,7 @@ impl Table for WmiVideo {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_monitors",fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMonitors {
@@ -2207,11 +2251,12 @@ pub struct WmiMonitors {
     pub screen_width: u32,
 }}
 
+#[cfg(feature = "wmi_monitors")]
 pub trait WmiMonitorsIface {
     fn get_wmi_monitor_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_monitors")]
 impl WmiMonitors {
     const NAME_ID: u64 = 0x00000001;
     const AVAILABILITY_ID: u64 = 0x00000002;
@@ -2221,7 +2266,7 @@ impl WmiMonitors {
     const SCREEN_WIDTH_ID: u64 = 0x00000020;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_monitors")]
 impl Table for WmiMonitors {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -2268,7 +2313,7 @@ impl Table for WmiMonitors {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_keyboard", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiKeyboard {
@@ -2278,11 +2323,12 @@ pub struct WmiKeyboard {
     pub status: String,
 }}
 
+#[cfg(feature = "wmi_keyboard")]
 pub trait WmiKeyboardIface {
     fn get_wmi_keyboard_info(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_keyboard")]
 impl WmiKeyboard {
     const NAME_ID: u64 = 0x00000001;
     const DESCRIPTION_ID: u64 = 0x00000002;
@@ -2290,7 +2336,7 @@ impl WmiKeyboard {
     const STATUS_ID: u64 = 0x00000008;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_keyboard")]
 impl Table for WmiKeyboard {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -2329,7 +2375,7 @@ impl Table for WmiKeyboard {
     }
 }
 
-#[cfg(any(target_os = "windows",fuzzing))]
+#[cfg(any(feature = "wmi_pointing_device", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiPointingDevice {
@@ -2340,11 +2386,12 @@ pub struct WmiPointingDevice {
     pub status: String,
 }}
 
+#[cfg(feature = "wmi_pointing_device")]
 pub trait WmiPointingDeviceIface {
     fn get_wmi_pointing_device(&self)-> Option<String>;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_pointing_device")]
 impl WmiPointingDevice {
     const NAME_ID: u64 = 0x00000001;
     const MANUFACTURER_ID: u64 = 0x00000002;
@@ -2353,7 +2400,7 @@ impl WmiPointingDevice {
     const STATUS_ID: u64 = 0x00000010;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(feature = "wmi_pointing_device")]
 impl Table for WmiPointingDevice {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "name",
@@ -2396,6 +2443,7 @@ impl Table for WmiPointingDevice {
     }
 }
 
+#[cfg(feature = "process_open_sockets")]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessOpenSocketsRow {
@@ -2428,6 +2476,7 @@ impl ProcessOpenSocketsRow {
     const NET_NAMESPACE_ID: u64 = 0x00000800;
 }
 
+#[cfg(feature = "process_open_sockets")]
 impl Table for ProcessOpenSocketsRow {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "pid",
@@ -2498,6 +2547,7 @@ impl Table for ProcessOpenSocketsRow {
     }
 }
 
+#[cfg(feature = "processes")]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessesRow {
@@ -2537,10 +2587,12 @@ pub struct ProcessesRow {
     pub uts_namespace: String,
 }}
 
+#[cfg(feature = "processes")]
 pub trait ProcessesIface {
     fn get_wmi_process_info(&self) -> Option<String>;
 }
 
+#[cfg(feature = "processes")]
 impl ProcessesRow {
     const PID_ID: u64 = 0x00000001;
     const NAME_ID: u64 = 0x00000002;
@@ -2578,6 +2630,7 @@ impl ProcessesRow {
     const UTS_NAMESPACE_ID: u64 = 0x200000000;
 }
 
+#[cfg(feature = "processes")]
 impl Table for ProcessesRow {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "pid",
@@ -2736,6 +2789,7 @@ impl Table for ProcessesRow {
     }
 }
 
+#[cfg(feature = "process_memory_map")]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessMemoryMapRow {
@@ -2750,6 +2804,7 @@ pub struct ProcessMemoryMapRow {
     pub pseudo: i32,
 }}
 
+#[cfg(feature = "process_memory_map")]
 impl ProcessMemoryMapRow {
     const PID_ID: u64 = 0x00000001;
     const START_ID: u64 = 0x00000002;
@@ -2762,6 +2817,7 @@ impl ProcessMemoryMapRow {
     const PSEUDO_ID: u64 = 0x00000100;
 }
 
+#[cfg(feature = "process_memory_map")]
 impl Table for ProcessMemoryMapRow {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "pid",
@@ -2820,6 +2876,7 @@ impl Table for ProcessMemoryMapRow {
     }
 }
 
+#[cfg(feature = "process_envs")]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ProcessEnvsRow {
@@ -2828,12 +2885,14 @@ pub struct ProcessEnvsRow {
     pub value: String,
 }}
 
+#[cfg(feature = "process_envs")]
 impl ProcessEnvsRow {
     const PID_ID: u64 = 0x00000001;
     const KEY_ID: u64 = 0x00000002;
     const VALUE_ID: u64 = 0x00000004;
 }
 
+#[cfg(feature = "process_envs")]
 impl Table for ProcessEnvsRow {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "pid",
@@ -2870,62 +2929,70 @@ impl Table for ProcessEnvsRow {
 
 pub fn get_table_list() -> Vec<String> {
     vec![
+        #[cfg(feature = "etc_hosts")]
         "etc_hosts".to_string(),
+        #[cfg(feature = "etc_protocols")]
         "etc_protocols".to_string(),
+        #[cfg(feature = "etc_services")]
         "etc_services".to_string(),
+        #[cfg(feature = "system_info")]
         "system_info".to_string(),
+        #[cfg(feature = "os_version")]
         "os_version".to_string(),
+        #[cfg(feature = "logical_drives")]
         "logical_drives".to_string(),
+        #[cfg(feature = "uptime")]
         "uptime".to_string(),
+        #[cfg(feature = "processes")]
         "processes".to_string(),
-        #[cfg(not(target_os = "macos"))]
-            "interface_address".to_string(),
-        #[cfg(not(target_os = "macos"))]
-            "interface_details".to_string(),
-        #[cfg(not(target_os = "macos"))]
-            "process_open_sockets".to_string(),
-        #[cfg(not(target_os = "macos"))]
-            "process_memory_map".to_string(),
-        #[cfg(target_os = "windows")]
-            "products".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_computer_info".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_os_version".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_printers".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_services".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_hotfixes".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_shares".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_network_adapters".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_local_accounts".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_bios".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_motherboard".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_processor".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_physical_memory".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_sound".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_video".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_monitors".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_keyboard".to_string(),
-        #[cfg(target_os = "windows")]
-            "wmi_pointing_device".to_string(),
-        #[cfg(not(target_os = "windows"))]
-            "process_envs".to_string(),
+        #[cfg(feature = "interface_address")]
+        "interface_address".to_string(),
+        #[cfg(feature = "interface_details")]
+        "interface_details".to_string(),
+        #[cfg(feature = "process_open_sockets")]
+        "process_open_sockets".to_string(),
+        #[cfg(feature = "process_memory_map")]
+        "process_memory_map".to_string(),
+        #[cfg(feature = "products")]
+        "products".to_string(),
+        #[cfg(feature = "wmi_computer_info")]
+        "wmi_computer_info".to_string(),
+        #[cfg(feature = "wmi_os_version")]
+        "wmi_os_version".to_string(),
+        #[cfg(feature = "wmi_printers")]
+        "wmi_printers".to_string(),
+        #[cfg(feature = "wmi_services")]
+        "wmi_services".to_string(),
+        #[cfg(feature = "wmi_hotfixes")]
+        "wmi_hotfixes".to_string(),
+        #[cfg(feature = "wmi_shares")]
+        "wmi_shares".to_string(),
+        #[cfg(feature = "wmi_network_adapters")]
+        "wmi_network_adapters".to_string(),
+        #[cfg(feature = "wmi_local_accounts")]
+        "wmi_local_accounts".to_string(),
+        #[cfg(feature = "wmi_bios")]
+        "wmi_bios".to_string(),
+        #[cfg(feature = "wmi_motherboard")]
+        "wmi_motherboard".to_string(),
+        #[cfg(feature = "wmi_processor")]
+        "wmi_processor".to_string(),
+        #[cfg(feature = "wmi_physical_memory")]
+        "wmi_physical_memory".to_string(),
+        #[cfg(feature = "wmi_sound")]
+        "wmi_sound".to_string(),
+        #[cfg(feature = "wmi_video")]
+        "wmi_video".to_string(),
+        #[cfg(feature = "wmi_monitors")]
+        "wmi_monitors".to_string(),
+        #[cfg(feature = "wmi_keyboard")]
+        "wmi_keyboard".to_string(),
+        #[cfg(feature = "wmi_pointing_device")]
+        "wmi_pointing_device".to_string(),
+        #[cfg(feature = "process_envs")]
+        "process_envs".to_string(),
         #[cfg(test)]
-            "Dummy".to_string(),
+        "Dummy".to_string(),
     ]
 }
 

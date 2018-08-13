@@ -5,6 +5,8 @@ use prettytable::Table;
 use prettytable::row::Row;
 use prettytable::cell::Cell;
 use utils;
+use tables::get_table_list;
+use query::get_schema;
 
 pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
     let mut row: Vec<String> = Vec::new();
@@ -146,4 +148,12 @@ fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> String 
         }
     }
     format!("  {{{}}},\n", value_to_json)
+}
+
+pub fn print_schema() {
+    for table in get_table_list().iter() {
+        let mut schema = get_schema(table.as_str()).unwrap();
+        schema = schema.replace("x(", &format!("{}{}", table.as_str(),"("));
+        println!("{}", schema);
+    }
 }
