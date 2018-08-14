@@ -150,10 +150,20 @@ fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> String 
     format!("  {{{}}},\n", value_to_json)
 }
 
-pub fn print_schema() {
-    for table in get_table_list().iter() {
-        let mut schema = get_schema(table.as_str()).unwrap();
-        schema = schema.replace("x(", &format!("{}{}", table.as_str(),"("));
-        println!("{}", schema);
+pub fn print_schema(table: String) {
+    if table.len() > 0 {
+        if let Some(value) = get_table_list().iter().find(| x| *x.as_str() == *table) {
+            let mut schema = get_schema(value.as_str()).unwrap();
+            schema = schema.replace("x(", &format!("{}{}", value.as_str(), "("));
+            println!("{}", schema);
+        } else {
+            println!("no such table {}", table);
+        }
+    } else {
+        for table in get_table_list().iter() {
+            let mut schema = get_schema(table.as_str()).unwrap();
+            schema = schema.replace("x(", &format!("{}{}", table.as_str(),"("));
+            println!("{}", schema);
+        }
     }
 }

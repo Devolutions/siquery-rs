@@ -8,12 +8,12 @@ use siquery::printer::print_schema;
 use clap::App;
 
 fn main() {
-    let t = std::time::SystemTime::now();
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
     let table = matches.value_of("table").unwrap_or("").to_string();
     let siquery = matches.value_of("siquery").unwrap_or("").to_string();
+    let schema  = matches.value_of("schema").unwrap_or("").to_string();
     let db = init_db();
 
     if matches.is_present("list_all") {
@@ -21,7 +21,7 @@ fn main() {
             println!("{}", table);
         }
     } else if matches.is_present("schema") {
-        print_schema();
+        print_schema(schema);
     } else if matches.is_present("json_mode") {
         if table.len() > 0 {
             let query = format!("select * from {}", table);
@@ -44,6 +44,4 @@ fn main() {
             execute_query(&db, &siquery, 0);
         }
     }
-
-    println!("running : {:?}", t.elapsed() );
 }
