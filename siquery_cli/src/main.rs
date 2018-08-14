@@ -14,14 +14,18 @@ fn main() {
     let matches = app.version(crate_version!()).get_matches();
     let table = matches.value_of("table").unwrap_or("").to_string();
     let siquery = matches.value_of("siquery").unwrap_or("").to_string();
+    let schema  = matches.value_of("schema").unwrap_or("").to_string();
     let db = init_db();
 
     if matches.is_present("list_all") {
         for table in get_table_list().iter() {
             println!("{}", table);
         }
+
     } else if matches.is_present("schema") {
-        print_schema();
+        println!("got in the schema {:?}", schema.len());
+        print_schema(schema);
+
     } else if matches.is_present("json_mode") {
         if table.len() > 0 {
             let query = format!("select * from {}", table);
@@ -29,6 +33,7 @@ fn main() {
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 1);
         }
+
     } else if matches.is_present("csv_mode") {
         if table.len() > 0 {
             let query = format!("select * from {}", table);
@@ -36,6 +41,7 @@ fn main() {
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 2);
         }
+
     } else {
         if table.len() > 0 {
             let query = format!("select * from {}", table);

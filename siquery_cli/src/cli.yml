@@ -18,7 +18,6 @@ args:
         requires: siquery
         value_name: input
         help: sqlite query command
-        index: 1
     - list_all:
         long: L
         help: list all table names
@@ -33,7 +32,8 @@ args:
         help: set 'print_pretty' output mode
     - schema:
         long : schema
-        help : list all table schemas
+        help : print schema of the given table name
+        min_values: 0
     - verbose:
         short: v
         multiple: true
