@@ -8,7 +8,6 @@ use siquery::printer::print_schema;
 use clap::App;
 
 fn main() {
-    let t = std::time::SystemTime::now();
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();
@@ -50,6 +49,4 @@ fn main() {
             execute_query(&db, &siquery, 0);
         }
     }
-
-    println!("running : {:?}", t.elapsed() );
 }
