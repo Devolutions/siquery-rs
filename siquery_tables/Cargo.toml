@@ -36,4 +36,5 @@ libc = "0.2"
 
 [dependencies.rusqlite]
 git = "https://github.com/jgallagher/rusqlite.git"
+rev = "199fe2c"
 features = ["vtab", "bundled"]
