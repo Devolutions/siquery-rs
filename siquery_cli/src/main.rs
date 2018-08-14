@@ -20,11 +20,8 @@ fn main() {
         for table in get_table_list().iter() {
             println!("{}", table);
         }
-
     } else if matches.is_present("schema") {
-        println!("got in the schema {:?}", schema.len());
         print_schema(schema);
-
     } else if matches.is_present("json_mode") {
         if table.len() > 0 {
             let query = format!("select * from {}", table);
@@ -32,7 +29,6 @@ fn main() {
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 1);
         }
-
     } else if matches.is_present("csv_mode") {
         if table.len() > 0 {
             let query = format!("select * from {}", table);
@@ -40,7 +36,6 @@ fn main() {
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 2);
         }
-
     } else {
         if table.len() > 0 {
             let query = format!("select * from {}", table);
