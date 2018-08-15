@@ -32,7 +32,8 @@ ARGS:
 ```
 ## Examples
 ```
-'SELECT DISTINCT process.name, env.key, process.pid FROM processes AS process JOIN process_envs AS env ON process.pid = env.pid where process.name = 'siquery' AND process.pid > 38000 LIMIT 3' 
+cargo run -- -q "SELECT DISTINCT process.name, env.key, process.pid FROM processes AS process JOIN process_envs AS env ON process.pid = env.pid where process.name = 'siquery' AND process.pid > 38000 LIMIT 3" 
+
 +---------+----------------+-------+
 | name    | key            | pid   |
 +=========+================+=======+
@@ -44,7 +45,7 @@ ARGS:
 +---------+----------------+-------+
 ```
 ```
-'SELECT DISTINCT process.name, process.pid FROM process_memory_map AS memory JOIN processes as process ON process.path = memory.path where process.pid < 7900 limit 1`
+cargo run -- -q "SELECT DISTINCT process.name, process.pid FROM process_memory_map AS memory JOIN processes as process ON process.path = memory.path where process.pid < 7900 limit 1"
 
 +-----------------+------+
 | name            | pid  |
@@ -53,7 +54,7 @@ ARGS:
 +-----------------+------+
 ```
 ```
-'Pragma table_info(process_memory_map)'
+cargo run -- -q "PRAGMA table_info(process_memory_map)"
 
 +-----+-------------+---------+---------+------------+
 | cid | name        | type    | notnull | dflt_value |
