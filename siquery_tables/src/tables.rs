@@ -736,6 +736,8 @@ pub struct InterfaceAddress {
     pub mask: String,
     pub interface_type: String,
     pub friendly_name: String,
+    pub broadcast: String,
+    pub point_to_point: String,
 }}
 
 #[cfg(feature = "interface_address")]
@@ -751,6 +753,8 @@ impl InterfaceAddress {
     const MASK_ID: u64 = 0x00000004;
     const INTERFACE_TYPE_ID: u64 = 0x00000008;
     const FRIENDLY_NAME_ID: u64 = 0x00000010;
+    const BROADCAST_ID: u64 = 0x00000020;
+    const POINT_TO_POINT_ID: u64 = 0x00000040;
 }
 
 #[cfg(feature = "interface_address")]
@@ -760,7 +764,9 @@ impl Table for InterfaceAddress {
         "address",
         "mask",
         "interface_type",
-        "friendly_name"];
+        "friendly_name",
+        "broadcast",
+        "point_to_point",];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
@@ -769,6 +775,8 @@ impl Table for InterfaceAddress {
             "mask" => Value::from(self.mask.to_owned()),
             "interface_type" => Value::from(self.interface_type.to_owned()),
             "friendly_name" => Value::from(self.friendly_name.to_owned()),
+            "broadcast" => Value::from(self.broadcast.to_owned()),
+            "point_to_point" => Value::from(self.point_to_point.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
@@ -780,6 +788,8 @@ impl Table for InterfaceAddress {
             Self::MASK_ID => Value::from(self.mask.to_owned()),
             Self::INTERFACE_TYPE_ID => Value::from(self.interface_type.to_owned()),
             Self::FRIENDLY_NAME_ID => Value::from(self.friendly_name.to_owned()),
+            Self::BROADCAST_ID => Value::from(self.broadcast.to_owned()),
+            Self::POINT_TO_POINT_ID => Value::from(self.point_to_point.to_owned()),
 
             _ => Value::from("".to_owned())
         }
@@ -792,6 +802,8 @@ impl Table for InterfaceAddress {
             "mask" => Self::MASK_ID,
             "interface_type" => Self::INTERFACE_TYPE_ID,
             "friendly_name" => Self::FRIENDLY_NAME_ID,
+            "broadcast" => Self::BROADCAST_ID,
+            "point_to_point" => Self::POINT_TO_POINT_ID,
             _ => 0
         }
     }

@@ -33,6 +33,8 @@ cfg_if! {
     } else if #[cfg(all(target_os = "linux",not(fuzzing)))] {
         extern crate sysconf;
         extern crate uname;
+        extern crate nix;
+        extern crate libc;
 
         pub mod linux;
         pub use linux as sys;
