@@ -30,6 +30,8 @@ impl InterfaceAddress {
             mask: String::new(),
             interface_type: String::from("manual"),
             friendly_name: String::new(),
+            broadcast: String::new(),
+            point_to_point: String::new(),
         }
     }
 
