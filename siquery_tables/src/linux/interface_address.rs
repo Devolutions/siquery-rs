@@ -1,6 +1,5 @@
 use tables::InterfaceAddress;
 use nix::ifaddrs;
-use nix::net;
 use libc::*;
 
 #[cfg(not(fuzzing))]    // Since not yet implemented for linux, disable this implementation when fuzzing to allow fuzzing interface_address for windows
