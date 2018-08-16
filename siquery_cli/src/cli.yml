@@ -6,33 +6,33 @@ args:
         short: a
         long: A
         value_name: table
-        help: select all from table
+        help: Selects all from table
         takes_value: true
     - siquery:
         short: q
         long: query
         value_name: siquery
-        help: sqlite command
+        help: Sqlite command
         takes_value: false
     - SIQUERY_INPUT:
         requires: siquery
         value_name: input
-        help: sqlite query command
+        help: Sqlite query command
     - list_all:
         long: L
-        help: list all table names
+        help: Lists all table names
     - csv_mode:
         long: csv
-        help: set 'csv' output mode
+        help: Sets 'csv' output mode
     - json_mode:
         long: json
-        help: set 'json' output mode
+        help: Sets 'json' output mode
     - pretty_mode:
         long: pretty
-        help: set 'print_pretty' output mode
+        help: Sets 'print_pretty' output mode
     - schema:
         long : schema
-        help : print schema of the given table name
+        help : Prints schema of the given table name
         min_values: 0
     - verbose:
         short: v
