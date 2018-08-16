@@ -38,7 +38,7 @@ use std::env;
 pub struct EtcHostsReader {}
 #[cfg(feature = "etc_hosts")]
 impl EtcHostsIface for EtcHostsReader {
-    fn get_hosts_file(&self) -> Option<String>{s
+    fn get_hosts_file(&self) -> Option<String>{
         let mut string = String::new();
         let file_location = env::var("SYSTEMROOT").unwrap_or("".to_string()).to_string();
         File::open(file_location + "\\system32\\drivers\\etc\\hosts").ok()?.read_to_string(&mut string).ok()?;
