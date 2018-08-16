@@ -2461,6 +2461,7 @@ pub struct ProcessOpenSocketsRow {
     pub net_namespace: String,
 }}
 
+#[cfg(feature = "process_open_sockets")]
 impl ProcessOpenSocketsRow {
     const PID_ID: u64 = 0x00000001;
     const FD_ID: u64 = 0x00000002;
