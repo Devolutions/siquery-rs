@@ -833,6 +833,19 @@ pub struct InterfaceDetails {
     pub mac: String,
     pub mtu: u32,
     pub enabled: u8,
+    pub flags: u32,
+    pub ipackets: u32,
+    pub opackets: u32,
+    pub ibytes: u32,
+    pub obytes: u32,
+    pub ierrors: u32,
+    pub oerrors: u32,
+    pub idrops: u32,
+    pub odrops: u32,
+    pub collisions: u32,
+    pub last_change: i64,
+    pub link_speed : i64,
+    pub pci_slot: String,
 }}
 
 #[cfg(feature = "interface_details")]
@@ -847,6 +860,19 @@ impl InterfaceDetails {
     const MAC_ID: u64 = 0x00000002;
     const MTU_ID: u64 = 0x00000004;
     const ENABLED_ID: u64 = 0x00000008;
+    const FLAGS_ID: u64 = 0x00000010;
+    const IPACKETS_ID: u64 = 0x00000020;
+    const OPACKETS_ID: u64 = 0x00000040;
+    const IBYTES_ID: u64 = 0x00000080;
+    const OBYTES_ID: u64 = 0x00000100;
+    const IERRORS_ID: u64 = 0x00000200;
+    const OERRORS_ID: u64 = 0x00000400;
+    const IDROPS_ID: u64 = 0x00000800;
+    const ODROPS_ID: u64 = 0x00001000;
+    const COLLISIONS_ID: u64 = 0x00002000;
+    const LAST_CHANGE_ID: u64 = 0x00004000;
+    const LINK_SPEED_ID: u64 = 0x00008000;
+    const PCI_SLOT_ID: u64 = 0x00010000;
 }
 
 #[cfg(feature = "interface_details")]
@@ -855,7 +881,21 @@ impl Table for InterfaceDetails {
         "interface",
         "mac",
         "mtu",
-        "enabled", ];
+        "enabled",
+        "flags",
+        "ipackets",
+        "opackets",
+        "ibytes",
+        "obytes",
+        "ierrors",
+        "oerrors",
+        "idrops",
+        "odrops",
+        "collisions",
+        "last_change",
+        "link_speed",
+        "pci_slot",
+    ];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
@@ -863,6 +903,19 @@ impl Table for InterfaceDetails {
             "mac" => Value::from(self.mac.to_owned()),
             "mtu" => Value::from(self.mtu),
             "enabled" => Value::from(self.enabled),
+            "flags" => Value::from(self.flags),
+            "ipackets" => Value::from(self.ipackets),
+            "opackets" => Value::from(self.opackets),
+            "ibytes" => Value::from(self.ibytes),
+            "obytes" => Value::from(self.obytes),
+            "ierrors" => Value::from(self.ierrors),
+            "oerrors" => Value::from(self.oerrors),
+            "idrops" => Value::from(self.idrops),
+            "odrops" => Value::from(self.odrops),
+            "collisions" => Value::from(self.collisions),
+            "last_change" => Value::from(self.last_change),
+            "link_speed" => Value::from(self.link_speed),
+            "pci_slot" => Value::from(self.pci_slot.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
@@ -873,10 +926,22 @@ impl Table for InterfaceDetails {
             Self::MAC_ID => Value::from(self.mac.to_owned()),
             Self::MTU_ID => Value::from(self.mtu),
             Self::ENABLED_ID => Value::from(self.enabled),
+            Self::FLAGS_ID => Value::from(self.flags),
+            Self::IPACKETS_ID => Value::from(self.ipackets),
+            Self::OPACKETS_ID => Value::from(self.opackets),
+            Self::IBYTES_ID => Value::from(self.ibytes),
+            Self::OBYTES_ID => Value::from(self.obytes),
+            Self::IERRORS_ID => Value::from(self.ierrors),
+            Self::OERRORS_ID => Value::from(self.oerrors),
+            Self::IDROPS_ID => Value::from(self.idrops),
+            Self::ODROPS_ID => Value::from(self.odrops),
+            Self::COLLISIONS_ID => Value::from(self.collisions),
+            Self::LAST_CHANGE_ID => Value::from(self.last_change),
+            Self::LINK_SPEED_ID => Value::from(self.link_speed),
+            Self::PCI_SLOT_ID => Value::from(self.pci_slot.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
-
 
     fn get_id(&self, _name: &str) -> u64 {
         match _name {
@@ -884,6 +949,19 @@ impl Table for InterfaceDetails {
             "mac" => Self::MAC_ID,
             "mtu" => Self::MTU_ID,
             "enabled" => Self::ENABLED_ID,
+            "flags" => Self::FLAGS_ID,
+            "ipackets" => Self::IPACKETS_ID,
+            "opackets" => Self::OPACKETS_ID,
+            "ibytes" => Self::IBYTES_ID,
+            "obytes" => Self::OBYTES_ID,
+            "ierrors" => Self::IERRORS_ID,
+            "oerrors" => Self::OERRORS_ID,
+            "idrops" => Self::IDROPS_ID,
+            "odrops" => Self::ODROPS_ID,
+            "collisions" => Self::COLLISIONS_ID,
+            "last_change" => Self::LAST_CHANGE_ID,
+            "link_speed" => Self::LINK_SPEED_ID,
+            "pci_slot" => Self::PCI_SLOT_ID,
             _ => 0
         }
     }

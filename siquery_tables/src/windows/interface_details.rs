@@ -21,6 +21,19 @@ impl InterfaceDetails {
             mac: String::new(),
             mtu: 1500,
             enabled: 1,
+            flags: 0,
+            ipackets: 0,
+            opackets: 0,
+            ibytes: 0,
+            obytes: 0,
+            ierrors: 0,
+            oerrors: 0,
+            idrops: 0,
+            odrops: 0,
+            collisions: 0,
+            last_change: 0,
+            link_speed : 0,
+            pci_slot: String::new(),
         }
     }
 
@@ -65,7 +78,7 @@ impl InterfaceDetails {
                     "IPEnabled" => {
                         ip_enabled = v;
                     }
-                    _ => ()
+                    _ => () //todo continue implementation of fields
                 }
             }
         }
