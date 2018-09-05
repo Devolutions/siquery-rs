@@ -2973,7 +2973,7 @@ impl MountsRow {
 }
 
 #[cfg(feature = "mounts")]
-impl Table for EtcHosts {
+impl Table for MountsRow {
     const COLUMN_NAMES: &'static [&'static str] = &[
         "device",
         "device_alias",
@@ -3011,7 +3011,7 @@ impl Table for EtcHosts {
             Self::DEVICE_ALIAS_ID => Value::from(self.device_alias.to_owned()),
             Self::PATH_ID => Value::from(self.path.to_owned()),
             Self::TYPE_ID => Value::from(self.device_type.to_owned()),
-            Self::BLOCKS_SYZE_ID => Value::from(self.blocks_size.to_owned()),
+            Self::BLOCKS_SIZE_ID => Value::from(self.blocks_size.to_owned()),
             Self::BLOCKS_ID => Value::from(self.blocks.to_owned()),
             Self::BLOCKS_FREE_ID => Value::from(self.blocks_free.to_owned()),
             Self::BLOCKS_AVAILABLE_ID => Value::from(self.blocks_available.to_owned()),
@@ -3028,7 +3028,7 @@ impl Table for EtcHosts {
             "device_alias" => Self::DEVICE_ALIAS_ID,
             "path" => Self::PATH_ID,
             "type" => Self::TYPE_ID,
-            "blocks_size" => Self::BLOCKS_SYZE_ID,
+            "blocks_size" => Self::BLOCKS_SIZE_ID,
             "blocks" => Self::BLOCKS_ID,
             "blocks_free" => Self::BLOCKS_FREE_ID,
             "blocks_available" => Self::BLOCKS_AVAILABLE_ID,
@@ -3104,6 +3104,8 @@ pub fn get_table_list() -> Vec<String> {
         "wmi_pointing_device".to_string(),
         #[cfg(feature = "process_envs")]
         "process_envs".to_string(),
+        #[cfg(feature = "mounts")]
+        "mounts".to_string(),
         #[cfg(test)]
         "Dummy".to_string(),
     ]
