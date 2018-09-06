@@ -19,7 +19,9 @@ impl InterfaceDetails {
         InterfaceDetails {
             interface: String::new(),
             mac: String::new(),
+            type_: 0,
             mtu: 1500,
+            metric: 0,
             enabled: 1,
             flags: 0,
             ipackets: 0,
@@ -31,7 +33,7 @@ impl InterfaceDetails {
             idrops: 0,
             odrops: 0,
             collisions: 0,
-            last_change: 0,
+            last_change: -1,
             link_speed : 0,
             pci_slot: String::new(),
         }
