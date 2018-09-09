@@ -11,6 +11,7 @@ use libc::{c_int, c_char, c_short, ioctl, IF_NAMESIZE};
 use std::io::Write;
 use std::ffi::CStr;
 use std::str;
+use std::fs::{read_dir, File, read_link};
 
 #[repr(C)]
 pub struct rtnl_link_stats {
@@ -38,7 +39,6 @@ pub struct rtnl_link_stats {
     rx_compressed: u32,
     tx_compressed: u32,
 }
-
 
 #[cfg(not(fuzzing))]
 impl InterfaceDetails {
@@ -77,7 +77,7 @@ impl InterfaceDetails {
         }
 
         while addrs != ptr::null_mut(){
-            interface_detail = genDetailsFromAddr(addrs);
+            interface_detail = gen_details_from_addr(addrs);
             if interface_detail.ibytes > 0 {
                 output.push(interface_detail);
             }
@@ -88,7 +88,7 @@ impl InterfaceDetails {
     }
 }
 
-fn genDetailsFromAddr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
+fn gen_details_from_addr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
     let mut interface_detail = InterfaceDetails::new();
 
     unsafe {
@@ -107,15 +107,15 @@ fn genDetailsFromAddr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
         let mut ifd = interface_address_data as *const rtnl_link_stats;
 
         if ifd != ptr::null_mut() {
-            interface_detail.ipackets = unsafe { (*ifd).rx_packets };
-            interface_detail.opackets = unsafe { (*ifd).tx_packets };
-            interface_detail.ibytes = unsafe { (*ifd).rx_bytes };
-            interface_detail.obytes = unsafe { (*ifd).tx_bytes };
-            interface_detail.ierrors = unsafe { (*ifd).rx_errors };
-            interface_detail.oerrors = unsafe { (*ifd).tx_errors };
-            interface_detail.idrops = unsafe { (*ifd).rx_dropped };
-            interface_detail.odrops = unsafe { (*ifd).tx_dropped };
-            interface_detail.collisions = unsafe { (*ifd).collisions };
+            interface_detail.ipackets = (*ifd).rx_packets;
+            interface_detail.opackets = (*ifd).tx_packets;
+            interface_detail.ibytes = (*ifd).rx_bytes;
+            interface_detail.obytes = (*ifd).tx_bytes;
+            interface_detail.ierrors = (*ifd).rx_errors;
+            interface_detail.oerrors = (*ifd).tx_errors;
+            interface_detail.idrops = (*ifd).rx_dropped;
+            interface_detail.odrops = (*ifd).tx_dropped;
+            interface_detail.collisions = (*ifd).collisions;
         }
 
         let mut fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -133,21 +133,49 @@ fn genDetailsFromAddr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
                 if ioctl(fd, SIOCGIFHWADDR, &ifreq) >= 0 {
                     interface_detail.type_ = ifreq.ifr_hwaddr().sa_family as u32;
                 }
+
+                // todo separate function
+                let path = format!("/sys/class/net/{}/", interface_detail.interface.as_str());
+                let dir_entries = read_dir(path);
+                match dir_entries {
+                    Ok(dir) => {
+                       for interface_info_file_dir in dir {
+                           let file = interface_info_file_dir;
+                           match file {
+                               Ok(interface_info) => {
+                                   let info_file_name =  interface_info.file_name().into_string();
+                                   match info_file_name {
+                                       Ok(info) => {
+                                           match info.as_str() {
+                                               "speed" => {
+                                                   // todo read the info in the text file
+                                                   interface_detail.link_speed = 0;
+                                               }
+                                               _ => {}
+                                           }
+                                       }
+                                       Err(e) => {}
+                                   }}
+                               Err(e) => {}
+                           }
+                       }
+                    },
+                    Err(e) => {}
+                }
+
             }
         }
     }
-
     interface_detail
 }
 
-
+//https://hermanradtke.com/2016/03/17/unions-rust-ffi.html for more info about C unions in Rust FFI
 #[repr(C)]
 struct IfReq {
     ifr_name: [c_char; IF_NAMESIZE],
     union: IfReqUnion,
 }
 
-#[warn(dead_code)]
 impl IfReq {
 
     fn new() -> Self {
@@ -207,6 +235,10 @@ impl IfReq {
         self.union.as_short()
     }
 
+    pub fn ifr_data(&self) -> *mut c_char {
+        self.union.as_char_ptr()
+    }
+
 
 }
 
@@ -242,5 +274,8 @@ impl IfReqUnion {
             (self.data[1] as c_short))
     }
 
-}
+    fn as_char_ptr (&self) -> *mut c_char {
+        c_char::from_be((self.data[0]) as c_char) as *mut c_char
+    }
 
+}
