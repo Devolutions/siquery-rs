@@ -119,8 +119,8 @@ os_version | ✔ | ✔ | ✔
 logical_drives | ✔ |  | 
 uptime | ✔ | ✔ | ✔
 processes | ✔ | ✔ | ✔
-process_open_sockets | ✔ | ✔ | ✔
-process_memory_map | ✔ | ✔ | ✔
+process_open_sockets | ✔ | ✔ | 
+process_memory_map | ✔ | ✔ | 
 products | ✔ |  | 
 process_envs |  | ✔ | ✔
 wmi_computer_info | ✔ |  | 
