@@ -1,25 +1,36 @@
-use libc::statfs;
+use std::ffi::CStr;
+use libc::{c_int,c_char,statfs};
+use std::{ptr,slice};
 
 use tables::MountsRow;
 
 extern "C" {
-    pub fn getmntinfo (mntbufp: *const statfs, flags: i32) -> c_int;
+    pub fn getmntinfo (mntbufp: *mut *mut statfs, flags: c_int) -> c_int;
     pub fn canonicalize_file_name (name : *const c_char) -> *mut c_char;
 }
 
+const MNT_WAIT : i32 = 1;
+
 impl MountsRow {
 
-    fn get_specific() -> Vec<MountsRow> {
-        let mntbuf: *mut statfs;
-        let ret_val = unsafe {
-            getmntinfo(mntbuf,MNT_WAIT)
-        };
-        if ret_val == 0 {
+    pub fn get_specific() -> Vec<MountsRow> {
+        let mut mptr: *mut statfs = ptr::null_mut();
+        let len = unsafe {
+            getmntinfo(&mut mptr,MNT_WAIT)
+        } as usize;
+        let mounts = unsafe { slice::from_raw_parts(mptr, len) };
+        println!("{:?}", mounts.iter().map(|m| m.f_bavail).collect::<Vec<_>>());
+
+        if len == 0 {
             return Vec::new()
         } else {
             let mut out = Vec::new();
-            for i in ret_val {
-                let mnt = unsafe {*mntbuf};
+            //let mnt = slice::from_raw_parts(mntbufp,ret_val);
+/*
+            for i in 0..ret_val {  //tODO retval or retval-1?
+                //use std::ffi::CString;
+                //println!("{:?}",CString::from_raw(&mnt[i].f_fstypename));
+
                 out.push (
                     MountsRow {
                         device: CStr::from_ptr(mnt[i].f_mntfromname).to_str().unwrap_or("invalid data").to_owned(),
@@ -37,6 +48,8 @@ impl MountsRow {
                     }
                 )
             }
+*/
+            out
         }
     }
 }
