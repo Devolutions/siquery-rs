@@ -45,7 +45,6 @@ const LINUX_TABLES: &'static [(&'static str)] = &[
     "process_open_sockets",
     "process_memory_map",
     "process_envs",
-    "mounts",
 ];
 
 const MACOS_TABLES: &'static [(&'static str)] = &[
