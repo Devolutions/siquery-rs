@@ -52,10 +52,8 @@ const MACOS_TABLES: &'static [(&'static str)] = &[
     "etc_protocols",
     "etc_services",
     "os_version",
-    "process_open_sockets",
     "processes",
     "process_envs",
-    "process_memory_map",
     "system_info",
     "uptime",
 ];
@@ -78,7 +76,7 @@ fn main() {
             &"linux"=> {
                 emit_features(LINUX_TABLES.clone());
             },
-            &"macos"=> {
+            &"darwin"=> {
                 emit_features(MACOS_TABLES.clone());
             },
             _ => {}
