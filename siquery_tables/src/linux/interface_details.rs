@@ -12,6 +12,9 @@ use std::io::Write;
 use std::ffi::CStr;
 use std::str;
 use std::fs::{read_dir, File, read_link};
+use std::io;
+use std::io::prelude::*;
+use std::borrow::Borrow;
 
 #[repr(C)]
 pub struct rtnl_link_stats {
@@ -92,18 +95,17 @@ fn gen_details_from_addr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
     let mut interface_detail = InterfaceDetails::new();
 
     unsafe {
-
-        // convert a *c_char to string to get the interface name
-        let c_buf: *const c_char = unsafe { (*addrs).ifa_name };
-        let c_str: &CStr = unsafe { CStr::from_ptr(c_buf) };
+        // interface name
+        let c_buf: *const c_char = (*addrs).ifa_name;
+        let c_str: &CStr = CStr::from_ptr(c_buf);
         let str_slice: &str = c_str.to_str().unwrap();
         interface_detail.interface = str_slice.to_string();
 
         // mac address
-        let address = unsafe { SockAddr::from_libc_sockaddr((*addrs).ifa_addr) };
+        let address = SockAddr::from_libc_sockaddr((*addrs).ifa_addr);
         interface_detail.mac = address.unwrap().to_string();
 
-        let mut interface_address_data = unsafe { (*addrs).ifa_data };
+        let mut interface_address_data = (*addrs).ifa_data;
         let mut ifd = interface_address_data as *const rtnl_link_stats;
 
         if ifd != ptr::null_mut() {
@@ -134,39 +136,73 @@ fn gen_details_from_addr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
                     interface_detail.type_ = ifreq.ifr_hwaddr().sa_family as u32;
                 }
 
-                // todo separate function
-                let path = format!("/sys/class/net/{}/", interface_detail.interface.as_str());
-                let dir_entries = read_dir(path);
-                match dir_entries {
-                    Ok(dir) => {
-                       for interface_info_file_dir in dir {
-                           let file = interface_info_file_dir;
-                           match file {
-                               Ok(interface_info) => {
-                                   let info_file_name =  interface_info.file_name().into_string();
-                                   match info_file_name {
-                                       Ok(info) => {
-                                           match info.as_str() {
-                                               "speed" => {
-                                                   // todo read the info in the text file
-                                                   interface_detail.link_speed = 0;
-                                               }
-                                               _ => {}
-                                           }
-                                       }
-                                       Err(e) => {}
-                                   }}
-                               Err(e) => {}
-                           }
-                       }
-                    },
-                    Err(e) => {}
-                }
+                let net_path = format!("/sys/class/net/{}/", interface_detail.interface.as_str());
+                gen_details_from_path(&net_path, &mut interface_detail);
+
+                /*let pci_path = "/sys/bus/pci/devices/";
+                gen_details_from_path(&pci_path, &mut interface_detail);*/
 
             }
         }
     }
     interface_detail
+}
+
+fn gen_details_from_path (path : &str, interface_detail: &mut InterfaceDetails) -> Option<bool> {
+    let dir_entries = read_dir(path).ok()?;
+    let mut rsp = false;
+
+    for interface_info_file_dir in dir_entries {
+        let file = interface_info_file_dir.ok()?;
+        let info_file_name = file.file_name().into_string().ok()?;
+
+        match info_file_name.as_str() {
+            "speed" => {
+                let speed_file_path = file.path();
+                let f = File::open(speed_file_path);
+                let mut buffer = String::new();
+                f.unwrap().read_to_string(&mut buffer);
+
+                let speed: Vec<_> = buffer.split('\n').collect();
+                interface_detail.link_speed = speed[0].parse::<i64>().unwrap_or(0);
+
+                break;
+            }
+            // todo implement a separated function to get pci_slot info
+            _ => {
+
+                /*let pci_file_path = file.path();
+                let pci_entries = read_dir(pci_file_path.clone()).ok()?;
+                for pci_entry in pci_entries{
+                    let f = pci_entry.ok()?;
+                    let info_file = f.file_name().into_string().ok()?;
+                    match info_file.as_str(){
+                        "net" => {
+                            let net_file_path = format!("{}/net/{}",
+                                                        pci_file_path.clone().into_os_string().to_str().unwrap(),
+                                                        interface_detail.interface);
+
+                            let ifa = read_dir(net_file_path);
+                            match ifa {
+                                Ok(val) => {interface_detail.pci_slot = file.file_name().clone().into_string().ok()?;
+
+                                rsp = true;
+                            return Some(rsp);
+                                }
+                                Err(e) => {}
+                            }
+
+
+                        }
+                        _ => {}
+                    }
+                }*/
+            }
+        }
+        rsp = true;
+    }
+
+    Some(rsp)
 }
 
 //https://hermanradtke.com/2016/03/17/unions-rust-ffi.html for more info about C unions in Rust FFI
@@ -238,8 +274,6 @@ impl IfReq {
     pub fn ifr_data(&self) -> *mut c_char {
         self.union.as_char_ptr()
     }
-
-
 }
 
 #[repr(C)]
