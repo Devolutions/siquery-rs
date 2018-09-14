@@ -36,6 +36,5 @@ libc = "0.2"
 nix = "0.11.0"
 
 [dependencies.rusqlite]
-git = "https://github.com/jgallagher/rusqlite.git"
-rev = "199fe2c"
+version = "^0.14"
 features = ["vtab", "bundled"]

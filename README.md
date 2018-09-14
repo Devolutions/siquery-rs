@@ -112,8 +112,8 @@ Table name | Windows | Linux | MacOS
 etc_hosts | ✔ | ✔ | ✔
 etc_protocols | ✔ | ✔ | ✔
 etc_services | ✔ | ✔ | ✔
-interface_address | ✔ |  | 
-interface_details | ✔ |  | 
+interface_address | ✔ | ✔ |
+interface_details | ✔ | ✔ |
 system_info | ✔ | ✔ | ✔
 os_version | ✔ | ✔ | ✔
 logical_drives | ✔ |  | 

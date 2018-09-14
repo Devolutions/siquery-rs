@@ -38,6 +38,7 @@ const LINUX_TABLES: &'static [(&'static str)] = &[
     "etc_protocols",
     "etc_services",
     "interface_address",
+    "interface_details",
     "system_info",
     "os_version",
     "uptime",

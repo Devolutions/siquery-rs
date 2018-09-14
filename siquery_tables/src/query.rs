@@ -498,3 +498,14 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
             }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_schema_creation(){
+        let schema =  create_schema(&vec!["name", "id"], &vec!["\" TEXT", "\" INTEGER"] );
+        assert_eq!(schema.unwrap(), "CREATE TABLE x(\"name\" TEXT, \"id\" INTEGER);");
+    }
+}
