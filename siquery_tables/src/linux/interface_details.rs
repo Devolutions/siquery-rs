@@ -1,20 +1,7 @@
 use tables::InterfaceDetails;
 use nix::sys::socket::SockAddr;
 use libc::*;
-use libc::ifaddrs;
-use std::mem;
-use std::{ptr,net::Ipv4Addr,net::Ipv6Addr};
-use utils::*;
-use std::fs::OpenOptions;
-use std::os::unix::io::IntoRawFd;
-use libc::{c_int, c_char, c_short, ioctl, IF_NAMESIZE};
-use std::io::Write;
-use std::ffi::CStr;
-use std::str;
-use std::fs::{read_dir, File, read_link};
-use std::io;
-use std::io::prelude::*;
-use std::borrow::Borrow;
+use std::{mem, ptr, ffi::CStr, str, fs::{read_dir, File}, io::prelude::*};
 
 #[repr(C)]
 pub struct rtnl_link_stats {
@@ -64,34 +51,34 @@ impl InterfaceDetails {
             odrops: 0,
             collisions: 0,
             last_change: -1,
-            link_speed : 0,
+            link_speed: 0,
             pci_slot: String::new(),
         }
     }
 
     pub fn get_specific() -> Vec<InterfaceDetails> {
         let mut output: Vec<InterfaceDetails> = Vec::new();
-        let mut interface_detail = InterfaceDetails::new();
+        let mut interface_detail;
 
         let mut addrs: *mut ifaddrs = unsafe { mem::uninitialized() };
 
-        if unsafe { getifaddrs(&mut addrs)} != 0 || addrs == ptr::null_mut() {
+        if unsafe { getifaddrs(&mut addrs) } != 0 || addrs == ptr::null_mut() {
             return output
         }
 
-        while addrs != ptr::null_mut(){
+        while addrs != ptr::null_mut() {
             interface_detail = gen_details_from_addr(addrs);
             if interface_detail.ibytes > 0 {
                 output.push(interface_detail);
             }
-            interface_detail = InterfaceDetails::new();
-            addrs = unsafe{(*addrs).ifa_next};
+            addrs = unsafe { (*addrs).ifa_next };
         }
+
         output
     }
 }
 
-fn gen_details_from_addr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
+fn gen_details_from_addr(addrs: *mut ifaddrs) -> InterfaceDetails {
     let mut interface_detail = InterfaceDetails::new();
 
     unsafe {
@@ -105,8 +92,8 @@ fn gen_details_from_addr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
         let address = SockAddr::from_libc_sockaddr((*addrs).ifa_addr);
         interface_detail.mac = address.unwrap().to_string();
 
-        let mut interface_address_data = (*addrs).ifa_data;
-        let mut ifd = interface_address_data as *const rtnl_link_stats;
+        let interface_address_data = (*addrs).ifa_data;
+        let ifd = interface_address_data as *const rtnl_link_stats;
 
         if ifd != ptr::null_mut() {
             interface_detail.ipackets = (*ifd).rx_packets;
@@ -120,10 +107,10 @@ fn gen_details_from_addr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
             interface_detail.collisions = (*ifd).collisions;
         }
 
-        let mut fd = socket(AF_INET, SOCK_DGRAM, 0);
+        let fd = socket(AF_INET, SOCK_DGRAM, 0);
 
         if fd >= 0 {
-            if let Some(mut ifreq) = IfReq::from_name(&interface_detail.interface.as_str()) {
+            if let Some(ifreq) = IfReq::from_name(&interface_detail.interface.as_str()) {
                 if ioctl(fd, SIOCGIFMTU, &ifreq) >= 0 {
                     interface_detail.mtu = ifreq.ifr_mtu() as u32;
                 }
@@ -137,18 +124,18 @@ fn gen_details_from_addr(mut addrs: *mut ifaddrs) -> InterfaceDetails {
                 }
 
                 let net_path = format!("/sys/class/net/{}/", interface_detail.interface.as_str());
-                gen_details_from_path(&net_path, &mut interface_detail);
+                get_link_speed(&net_path, &mut interface_detail);
 
-                /*let pci_path = "/sys/bus/pci/devices/";
-                gen_details_from_path(&pci_path, &mut interface_detail);*/
-
+                let pci_path = "/sys/bus/pci/devices/";
+                get_pci_slot(&pci_path, &mut interface_detail);
             }
         }
     }
+
     interface_detail
 }
 
-fn gen_details_from_path (path : &str, interface_detail: &mut InterfaceDetails) -> Option<bool> {
+fn get_link_speed (path : &str, interface_detail: &mut InterfaceDetails) -> Option<bool> {
     let dir_entries = read_dir(path).ok()?;
     let mut rsp = false;
 
@@ -161,49 +148,57 @@ fn gen_details_from_path (path : &str, interface_detail: &mut InterfaceDetails) 
                 let speed_file_path = file.path();
                 let f = File::open(speed_file_path);
                 let mut buffer = String::new();
-                f.unwrap().read_to_string(&mut buffer);
+                f.ok()?.read_to_string(&mut buffer).ok()?;
 
                 let speed: Vec<_> = buffer.split('\n').collect();
                 interface_detail.link_speed = speed[0].parse::<i64>().unwrap_or(0);
 
+                rsp = true;
                 break;
             }
-            // todo implement a separated function to get pci_slot info
-            _ => {
-
-                /*let pci_file_path = file.path();
-                let pci_entries = read_dir(pci_file_path.clone()).ok()?;
-                for pci_entry in pci_entries{
-                    let f = pci_entry.ok()?;
-                    let info_file = f.file_name().into_string().ok()?;
-                    match info_file.as_str(){
-                        "net" => {
-                            let net_file_path = format!("{}/net/{}",
-                                                        pci_file_path.clone().into_os_string().to_str().unwrap(),
-                                                        interface_detail.interface);
-
-                            let ifa = read_dir(net_file_path);
-                            match ifa {
-                                Ok(val) => {interface_detail.pci_slot = file.file_name().clone().into_string().ok()?;
-
-                                rsp = true;
-                            return Some(rsp);
-                                }
-                                Err(e) => {}
-                            }
-
-
-                        }
-                        _ => {}
-                    }
-                }*/
-            }
+            _ => {/*do nothing*/}
         }
-        rsp = true;
     }
 
     Some(rsp)
 }
+
+
+fn get_pci_slot (path : &str, interface_detail: &mut InterfaceDetails) -> Option<bool> {
+    let dir_entries = read_dir(path).ok()?;
+    let mut rsp = false;
+
+
+    for interface_info_file_dir in dir_entries {
+        let file = interface_info_file_dir.ok()?;
+
+        let pci_file_path = file.path();
+        let pci_entries = read_dir(pci_file_path.clone()).ok()?;
+
+        for pci_entry in pci_entries {
+            let f = pci_entry.ok()?;
+            let info_file = f.file_name().into_string().ok()?;
+            match info_file.as_str() {
+                "net" => {
+                    let net_file_path = format!("{}/net/{}",
+                                                pci_file_path.clone().into_os_string().to_str().unwrap(),
+                                                interface_detail.interface);
+
+                    let _ifa = read_dir(net_file_path).ok()?;
+                    interface_detail.pci_slot = file.file_name().clone().into_string().ok()?;
+
+                    rsp = true;
+                    break;
+                }
+                _ => {/*do nothing*/}
+            }
+        }
+    }
+
+    Some(rsp)
+}
+
+
 
 //https://hermanradtke.com/2016/03/17/unions-rust-ffi.html for more info about C unions in Rust FFI
 #[repr(C)]
@@ -243,36 +238,8 @@ impl IfReq {
         self.union.as_int()
     }
 
-    pub fn ifr_type(&self) -> c_int {
-        self.union.as_int()
-    }
-
     pub fn ifr_hwaddr(&self) -> sockaddr {
         self.union.as_sockaddr()
-    }
-
-    pub fn ifr_dstaddr(&self) -> sockaddr {
-        self.union.as_sockaddr()
-    }
-
-    pub fn ifr_broadaddr(&self) -> sockaddr {
-        self.union.as_sockaddr()
-    }
-
-    pub fn ifr_ifindex(&self) -> c_int {
-        self.union.as_int()
-    }
-
-    pub fn ifr_media(&self) -> c_int {
-        self.union.as_int()
-    }
-
-    pub fn ifr_flags(&self) -> c_short {
-        self.union.as_short()
-    }
-
-    pub fn ifr_data(&self) -> *mut c_char {
-        self.union.as_char_ptr()
     }
 }
 
@@ -301,15 +268,6 @@ impl IfReqUnion {
             (self.data[1] as c_int) << 16 |
             (self.data[2] as c_int) <<  8 |
             (self.data[3] as c_int))
-    }
-
-    fn as_short(&self) -> c_short {
-        c_short::from_be((self.data[0] as c_short) << 8 |
-            (self.data[1] as c_short))
-    }
-
-    fn as_char_ptr (&self) -> *mut c_char {
-        c_char::from_be((self.data[0]) as c_char) as *mut c_char
     }
 
 }
