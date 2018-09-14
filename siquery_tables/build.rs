@@ -30,7 +30,8 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "wmi_video",
     "wmi_monitors",
     "wmi_keyboard",
-    "wmi_pointing_device"
+    "wmi_pointing_device",
+    "users"
 ];
 
 const LINUX_TABLES: &'static [(&'static str)] = &[
