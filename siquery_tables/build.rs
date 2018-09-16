@@ -67,6 +67,19 @@ fn emit_features(features: &'static [(&'static str)]) {
 }
 
 fn main() {
+    match env::var("_DARWIN_FEATURE_64_BIT_INODE") {
+        // If macro _DARWIN_FEATURE_64_BIT_INODE is defined, use the new statfs struct.
+        Ok(_) => {
+            // _DARWIN_FEATURE_64_BIT_INODE macro IS defined.
+            // Set the "darwin_feature_64_bit_inode" flag.
+            println!("cargo:rustc-cfg=env=\"darwin_feature_64_bit_inode\"");
+        }
+        Err(_) => {
+            // _DARWIN_FEATURE_64_BIT_INODE macro is NOT defined.
+            // Do nothing.
+        }
+    }
+
     let target = env::var("TARGET").unwrap();
     let target: Vec<_> = target.split('-').collect();
 
