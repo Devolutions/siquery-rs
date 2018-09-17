@@ -14,6 +14,7 @@ use serde_json;
 #[cfg(feature = "uptime")] mod uptime;
 #[cfg(feature = "process_open_sockets")] mod process_open_sockets;
 #[cfg(feature = "processes")] mod processes;
+#[cfg(feature = "mounts")] mod mounts;
 
 pub struct EtcHostsReader {}
 #[cfg(feature = "etc_hosts")]

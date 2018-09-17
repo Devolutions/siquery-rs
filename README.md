@@ -123,6 +123,7 @@ process_open_sockets | ✔ | ✔ |
 process_memory_map | ✔ | ✔ | 
 products | ✔ |  | 
 process_envs |  | ✔ | ✔
+mounts |  | ✔ | ✔
 wmi_computer_info | ✔ |  | 
 wmi_os_version  | ✔ |  |
 wmi_printers | ✔ |  |

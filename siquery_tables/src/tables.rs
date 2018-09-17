@@ -3030,6 +3030,106 @@ impl Table for ProcessEnvsRow {
     }
 }
 
+#[cfg(feature = "mounts")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct MountsRow {
+    pub device: String,
+    pub device_alias: String,
+    pub path: String,
+    pub device_type: String,
+    pub blocks_size: i64,
+    pub blocks: i64,
+    pub blocks_free: i64,
+    pub blocks_available: i64,
+    pub inodes: i64,
+    pub inodes_free: i64,
+    pub flags: String,
+}}
+
+#[cfg(feature = "mounts")]
+impl MountsRow {
+    const DEVICE_ID: u64 = 0x00000001;
+    const DEVICE_ALIAS_ID: u64 = 0x00000002;
+    const PATH_ID: u64 = 0x00000004;
+    const TYPE_ID: u64 = 0x00000008;
+    const BLOCKS_SIZE_ID: u64 = 0x00000010;
+    const BLOCKS_ID: u64 = 0x00000020;
+    const BLOCKS_FREE_ID: u64 = 0x00000040;
+    const BLOCKS_AVAILABLE_ID: u64 = 0x00000080;
+    const INODES_ID: u64 = 0x00000100;
+    const INODES_FREE_ID: u64 = 0x00000200;
+    const FLAGS_ID: u64 = 0x00000400;
+}
+
+#[cfg(feature = "mounts")]
+impl Table for MountsRow {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "device",
+        "device_alias",
+        "path",
+        "type",
+        "blocks_size",
+        "blocks",
+        "blocks_free",
+        "blocks_available",
+        "inodes",
+        "inodes_free",
+        "flags"
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "device" => Value::from(self.device.to_owned()),
+            "device_alias" => Value::from(self.device_alias.to_owned()),
+            "path" => Value::from(self.path.to_owned()),
+            "type" => Value::from(self.device_type.to_owned()),
+            "blocks_size" => Value::from(self.blocks_size.to_owned()),
+            "blocks" => Value::from(self.blocks.to_owned()),
+            "blocks_free" => Value::from(self.blocks_free.to_owned()),
+            "blocks_available" => Value::from(self.blocks_available.to_owned()),
+            "inodes" => Value::from(self.inodes.to_owned()),
+            "inodes_free" => Value::from(self.inodes_free.to_owned()),
+            "flags" => Value::from(self.flags.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::DEVICE_ID => Value::from(self.device.to_owned()),
+            Self::DEVICE_ALIAS_ID => Value::from(self.device_alias.to_owned()),
+            Self::PATH_ID => Value::from(self.path.to_owned()),
+            Self::TYPE_ID => Value::from(self.device_type.to_owned()),
+            Self::BLOCKS_SIZE_ID => Value::from(self.blocks_size.to_owned()),
+            Self::BLOCKS_ID => Value::from(self.blocks.to_owned()),
+            Self::BLOCKS_FREE_ID => Value::from(self.blocks_free.to_owned()),
+            Self::BLOCKS_AVAILABLE_ID => Value::from(self.blocks_available.to_owned()),
+            Self::INODES_ID => Value::from(self.inodes.to_owned()),
+            Self::INODES_FREE_ID => Value::from(self.inodes_free.to_owned()),
+            Self::FLAGS_ID => Value::from(self.flags.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "device" => Self::DEVICE_ID,
+            "device_alias" => Self::DEVICE_ALIAS_ID,
+            "path" => Self::PATH_ID,
+            "type" => Self::TYPE_ID,
+            "blocks_size" => Self::BLOCKS_SIZE_ID,
+            "blocks" => Self::BLOCKS_ID,
+            "blocks_free" => Self::BLOCKS_FREE_ID,
+            "blocks_available" => Self::BLOCKS_AVAILABLE_ID,
+            "inodes" => Self::INODES_ID,
+            "inodes_free" => Self::INODES_FREE_ID,
+            "flags" => Self::FLAGS_ID,
+            _ => 0
+        }
+    }
+}
+
 pub fn get_table_list() -> Vec<String> {
     vec![
         #[cfg(feature = "etc_hosts")]
@@ -3094,6 +3194,8 @@ pub fn get_table_list() -> Vec<String> {
         "wmi_pointing_device".to_string(),
         #[cfg(feature = "process_envs")]
         "process_envs".to_string(),
+        #[cfg(feature = "mounts")]
+        "mounts".to_string(),
         #[cfg(test)]
         "Dummy".to_string(),
     ]
