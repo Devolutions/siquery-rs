@@ -1,7 +1,6 @@
-extern crate winreg;
-
 use tables::Products;
-use windows::products::winreg::enums::{HKEY_LOCAL_MACHINE, KEY_READ};
+use winreg::RegKey;
+use winreg::enums::*;
 
 impl Products {
     pub(crate) fn new() -> Products {
@@ -19,7 +18,7 @@ impl Products {
         let mut products: Vec<Products> = Vec::new();
         let mut product = Products::new();
 
-        let hklm = &winreg::RegKey::predef(HKEY_LOCAL_MACHINE);
+        let hklm = &RegKey::predef(HKEY_LOCAL_MACHINE);
 
         let subkey = hklm.open_subkey_with_flags(r#"Software\Microsoft\Windows\CurrentVersion\Uninstall"#, KEY_READ)
             .expect("Failed to open subkey");
@@ -83,7 +82,3 @@ impl Products {
         products
     }
 }
-
-
-
-
