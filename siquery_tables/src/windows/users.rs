@@ -1,8 +1,6 @@
-extern crate winreg;
-
-use windows::products::winreg::enums::{HKEY_LOCAL_MACHINE, KEY_READ};
-
 use tables::Users;
+use winreg::RegKey;
+use winreg::enums::*;
 
 impl Users {
     pub(crate) fn new() -> Users {
