@@ -1517,8 +1517,9 @@ impl WmiNetworkAdapters {
     const DATE_BASE_PATH_ID: u64 = 0x00000002;
     const DHCP_ENABLED_ID: u64 = 0x00000004;
     const IP_ADDRESS_ID: u64 = 0x00000008;
-    const IP_SUBNET_ID: u64 = 0x00000010;
-    const MAC_ADDRESS_ID: u64 = 0x00000020;
+    const IP_ENABLED_ID: u64 = 0x00000010;
+    const IP_SUBNET_ID: u64 = 0x00000020;
+    const MAC_ADDRESS_ID: u64 = 0x00000040;
 }
 
 #[cfg(feature = "wmi_network_adapters")]
@@ -1528,6 +1529,7 @@ impl Table for WmiNetworkAdapters {
         "database_path",
         "dhcp_enabled",
         "ip_address",
+        "ip_enabled",
         "ip_subnet",
         "mac_address"];
 
@@ -1537,15 +1539,16 @@ impl Table for WmiNetworkAdapters {
             "database_path" => Value::from(self.database_path.to_owned()),
             "dhcp_enabled" => Value::from(self.dhcp_enabled.to_owned()),
             "ip_address" => {
-                let mut ip_address_str: String = "".to_owned();
+                let mut ip_address_str: String = "".to_string().to_owned();
                 for address in self.ip_address.iter() {
                     ip_address_str.push_str(&address);
                     ip_address_str.push_str("\t");
                 }
                 Value::from(ip_address_str)
             }
+            "ip_enabled" => Value::from(self.ip_enabled.to_owned()),
             "ip_subnet" => {
-                let mut ip_subnet_str: String = "".to_owned();
+                let mut ip_subnet_str: String = "".to_string().to_owned();
                 for subnet in self.ip_subnet.iter() {
                     ip_subnet_str.push_str(&subnet);
                     ip_subnet_str.push_str("\t");
@@ -1563,15 +1566,16 @@ impl Table for WmiNetworkAdapters {
             Self::DATE_BASE_PATH_ID => Value::from(self.database_path.to_owned()),
             Self::DHCP_ENABLED_ID => Value::from(self.dhcp_enabled.to_owned()),
             Self::IP_ADDRESS_ID => {
-                let mut ip_address_str: String = "".to_owned();
+                let mut ip_address_str: String = "".to_string().to_owned();
                 for address in self.ip_address.iter() {
                     ip_address_str.push_str(&address);
                     ip_address_str.push_str("\t");
                 }
                 Value::from(ip_address_str)
             }
+            Self::IP_ENABLED_ID => Value::from(self.ip_enabled.to_owned()),
             Self::IP_SUBNET_ID => {
-                let mut ip_subnet_str: String = "".to_owned();
+                let mut ip_subnet_str: String = "".to_string().to_owned();
                 for subnet in self.ip_subnet.iter() {
                     ip_subnet_str.push_str(&subnet);
                     ip_subnet_str.push_str("\t");
@@ -1589,6 +1593,7 @@ impl Table for WmiNetworkAdapters {
             "database_path" => Self::DATE_BASE_PATH_ID,
             "dhcp_enabled" => Self::DHCP_ENABLED_ID,
             "ip_address" => Self::IP_ADDRESS_ID,
+            "ip_enabled"=>  Self::IP_ENABLED_ID,
             "ip_subnet" => Self::IP_SUBNET_ID,
             "mac_address" => Self::MAC_ADDRESS_ID,
             _ => 0
@@ -3030,6 +3035,106 @@ impl Table for ProcessEnvsRow {
     }
 }
 
+#[cfg(feature = "mounts")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct MountsRow {
+    pub device: String,
+    pub device_alias: String,
+    pub path: String,
+    pub device_type: String,
+    pub blocks_size: i64,
+    pub blocks: i64,
+    pub blocks_free: i64,
+    pub blocks_available: i64,
+    pub inodes: i64,
+    pub inodes_free: i64,
+    pub flags: String,
+}}
+
+#[cfg(feature = "mounts")]
+impl MountsRow {
+    const DEVICE_ID: u64 = 0x00000001;
+    const DEVICE_ALIAS_ID: u64 = 0x00000002;
+    const PATH_ID: u64 = 0x00000004;
+    const TYPE_ID: u64 = 0x00000008;
+    const BLOCKS_SIZE_ID: u64 = 0x00000010;
+    const BLOCKS_ID: u64 = 0x00000020;
+    const BLOCKS_FREE_ID: u64 = 0x00000040;
+    const BLOCKS_AVAILABLE_ID: u64 = 0x00000080;
+    const INODES_ID: u64 = 0x00000100;
+    const INODES_FREE_ID: u64 = 0x00000200;
+    const FLAGS_ID: u64 = 0x00000400;
+}
+
+#[cfg(feature = "mounts")]
+impl Table for MountsRow {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "device",
+        "device_alias",
+        "path",
+        "type",
+        "blocks_size",
+        "blocks",
+        "blocks_free",
+        "blocks_available",
+        "inodes",
+        "inodes_free",
+        "flags"
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "device" => Value::from(self.device.to_owned()),
+            "device_alias" => Value::from(self.device_alias.to_owned()),
+            "path" => Value::from(self.path.to_owned()),
+            "type" => Value::from(self.device_type.to_owned()),
+            "blocks_size" => Value::from(self.blocks_size.to_owned()),
+            "blocks" => Value::from(self.blocks.to_owned()),
+            "blocks_free" => Value::from(self.blocks_free.to_owned()),
+            "blocks_available" => Value::from(self.blocks_available.to_owned()),
+            "inodes" => Value::from(self.inodes.to_owned()),
+            "inodes_free" => Value::from(self.inodes_free.to_owned()),
+            "flags" => Value::from(self.flags.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::DEVICE_ID => Value::from(self.device.to_owned()),
+            Self::DEVICE_ALIAS_ID => Value::from(self.device_alias.to_owned()),
+            Self::PATH_ID => Value::from(self.path.to_owned()),
+            Self::TYPE_ID => Value::from(self.device_type.to_owned()),
+            Self::BLOCKS_SIZE_ID => Value::from(self.blocks_size.to_owned()),
+            Self::BLOCKS_ID => Value::from(self.blocks.to_owned()),
+            Self::BLOCKS_FREE_ID => Value::from(self.blocks_free.to_owned()),
+            Self::BLOCKS_AVAILABLE_ID => Value::from(self.blocks_available.to_owned()),
+            Self::INODES_ID => Value::from(self.inodes.to_owned()),
+            Self::INODES_FREE_ID => Value::from(self.inodes_free.to_owned()),
+            Self::FLAGS_ID => Value::from(self.flags.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "device" => Self::DEVICE_ID,
+            "device_alias" => Self::DEVICE_ALIAS_ID,
+            "path" => Self::PATH_ID,
+            "type" => Self::TYPE_ID,
+            "blocks_size" => Self::BLOCKS_SIZE_ID,
+            "blocks" => Self::BLOCKS_ID,
+            "blocks_free" => Self::BLOCKS_FREE_ID,
+            "blocks_available" => Self::BLOCKS_AVAILABLE_ID,
+            "inodes" => Self::INODES_ID,
+            "inodes_free" => Self::INODES_FREE_ID,
+            "flags" => Self::FLAGS_ID,
+            _ => 0
+        }
+    }
+}
+
 #[cfg(feature = "users")]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
@@ -3126,71 +3231,73 @@ impl Table for Users {
 pub fn get_table_list() -> Vec<String> {
     vec![
         #[cfg(feature = "etc_hosts")]
-        "etc_hosts".to_string(),
+            "etc_hosts".to_string(),
         #[cfg(feature = "etc_protocols")]
-        "etc_protocols".to_string(),
+            "etc_protocols".to_string(),
         #[cfg(feature = "etc_services")]
-        "etc_services".to_string(),
+            "etc_services".to_string(),
         #[cfg(feature = "system_info")]
-        "system_info".to_string(),
+            "system_info".to_string(),
         #[cfg(feature = "os_version")]
-        "os_version".to_string(),
+            "os_version".to_string(),
         #[cfg(feature = "logical_drives")]
-        "logical_drives".to_string(),
+            "logical_drives".to_string(),
         #[cfg(feature = "uptime")]
-        "uptime".to_string(),
+            "uptime".to_string(),
         #[cfg(feature = "processes")]
-        "processes".to_string(),
+            "processes".to_string(),
         #[cfg(feature = "interface_address")]
-        "interface_address".to_string(),
+            "interface_address".to_string(),
         #[cfg(feature = "interface_details")]
-        "interface_details".to_string(),
+            "interface_details".to_string(),
         #[cfg(feature = "process_open_sockets")]
-        "process_open_sockets".to_string(),
+            "process_open_sockets".to_string(),
         #[cfg(feature = "process_memory_map")]
-        "process_memory_map".to_string(),
+            "process_memory_map".to_string(),
         #[cfg(feature = "products")]
-        "products".to_string(),
+            "products".to_string(),
         #[cfg(feature = "wmi_computer_info")]
-        "wmi_computer_info".to_string(),
+            "wmi_computer_info".to_string(),
         #[cfg(feature = "wmi_os_version")]
-        "wmi_os_version".to_string(),
+            "wmi_os_version".to_string(),
         #[cfg(feature = "wmi_printers")]
-        "wmi_printers".to_string(),
+            "wmi_printers".to_string(),
         #[cfg(feature = "wmi_services")]
-        "wmi_services".to_string(),
+            "wmi_services".to_string(),
         #[cfg(feature = "wmi_hotfixes")]
-        "wmi_hotfixes".to_string(),
+            "wmi_hotfixes".to_string(),
         #[cfg(feature = "wmi_shares")]
-        "wmi_shares".to_string(),
+            "wmi_shares".to_string(),
         #[cfg(feature = "wmi_network_adapters")]
-        "wmi_network_adapters".to_string(),
+            "wmi_network_adapters".to_string(),
         #[cfg(feature = "wmi_local_accounts")]
-        "wmi_local_accounts".to_string(),
+            "wmi_local_accounts".to_string(),
         #[cfg(feature = "wmi_bios")]
-        "wmi_bios".to_string(),
+            "wmi_bios".to_string(),
         #[cfg(feature = "wmi_motherboard")]
-        "wmi_motherboard".to_string(),
+            "wmi_motherboard".to_string(),
         #[cfg(feature = "wmi_processor")]
-        "wmi_processor".to_string(),
+            "wmi_processor".to_string(),
         #[cfg(feature = "wmi_physical_memory")]
-        "wmi_physical_memory".to_string(),
+            "wmi_physical_memory".to_string(),
         #[cfg(feature = "wmi_sound")]
-        "wmi_sound".to_string(),
+            "wmi_sound".to_string(),
         #[cfg(feature = "wmi_video")]
-        "wmi_video".to_string(),
+            "wmi_video".to_string(),
         #[cfg(feature = "wmi_monitors")]
-        "wmi_monitors".to_string(),
+            "wmi_monitors".to_string(),
         #[cfg(feature = "wmi_keyboard")]
-        "wmi_keyboard".to_string(),
+            "wmi_keyboard".to_string(),
         #[cfg(feature = "wmi_pointing_device")]
-        "wmi_pointing_device".to_string(),
+            "wmi_pointing_device".to_string(),
         #[cfg(feature = "process_envs")]
-        "process_envs".to_string(),
+            "process_envs".to_string(),
+        #[cfg(feature = "mounts")]
+            "mounts".to_string(),
         #[cfg(feature = "users")]
-        "users".to_string(),
+            "users".to_string(),
         #[cfg(test)]
-        "Dummy".to_string(),
+            "Dummy".to_string(),
     ]
 }
 

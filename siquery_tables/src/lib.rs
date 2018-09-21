@@ -49,7 +49,6 @@ cfg_if! {
     } else if #[cfg(target_os = "windows")] {
         extern crate kernel32;
         extern crate winreg;
-
         #[macro_use]
         extern crate winapi;
 
