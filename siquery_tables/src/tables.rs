@@ -1517,8 +1517,9 @@ impl WmiNetworkAdapters {
     const DATE_BASE_PATH_ID: u64 = 0x00000002;
     const DHCP_ENABLED_ID: u64 = 0x00000004;
     const IP_ADDRESS_ID: u64 = 0x00000008;
-    const IP_SUBNET_ID: u64 = 0x00000010;
-    const MAC_ADDRESS_ID: u64 = 0x00000020;
+    const IP_ENABLED_ID: u64 = 0x00000010;
+    const IP_SUBNET_ID: u64 = 0x00000020;
+    const MAC_ADDRESS_ID: u64 = 0x00000040;
 }
 
 #[cfg(feature = "wmi_network_adapters")]
@@ -1528,6 +1529,7 @@ impl Table for WmiNetworkAdapters {
         "database_path",
         "dhcp_enabled",
         "ip_address",
+        "ip_enabled",
         "ip_subnet",
         "mac_address"];
 
@@ -1537,15 +1539,16 @@ impl Table for WmiNetworkAdapters {
             "database_path" => Value::from(self.database_path.to_owned()),
             "dhcp_enabled" => Value::from(self.dhcp_enabled.to_owned()),
             "ip_address" => {
-                let mut ip_address_str: String = "".to_owned();
+                let mut ip_address_str: String = "".to_string().to_owned();
                 for address in self.ip_address.iter() {
                     ip_address_str.push_str(&address);
                     ip_address_str.push_str("\t");
                 }
                 Value::from(ip_address_str)
             }
+            "ip_enabled" => Value::from(self.ip_enabled.to_owned()),
             "ip_subnet" => {
-                let mut ip_subnet_str: String = "".to_owned();
+                let mut ip_subnet_str: String = "".to_string().to_owned();
                 for subnet in self.ip_subnet.iter() {
                     ip_subnet_str.push_str(&subnet);
                     ip_subnet_str.push_str("\t");
@@ -1563,15 +1566,16 @@ impl Table for WmiNetworkAdapters {
             Self::DATE_BASE_PATH_ID => Value::from(self.database_path.to_owned()),
             Self::DHCP_ENABLED_ID => Value::from(self.dhcp_enabled.to_owned()),
             Self::IP_ADDRESS_ID => {
-                let mut ip_address_str: String = "".to_owned();
+                let mut ip_address_str: String = "".to_string().to_owned();
                 for address in self.ip_address.iter() {
                     ip_address_str.push_str(&address);
                     ip_address_str.push_str("\t");
                 }
                 Value::from(ip_address_str)
             }
+            Self::IP_ENABLED_ID => Value::from(self.ip_enabled.to_owned()),
             Self::IP_SUBNET_ID => {
-                let mut ip_subnet_str: String = "".to_owned();
+                let mut ip_subnet_str: String = "".to_string().to_owned();
                 for subnet in self.ip_subnet.iter() {
                     ip_subnet_str.push_str(&subnet);
                     ip_subnet_str.push_str("\t");
@@ -1589,6 +1593,7 @@ impl Table for WmiNetworkAdapters {
             "database_path" => Self::DATE_BASE_PATH_ID,
             "dhcp_enabled" => Self::DHCP_ENABLED_ID,
             "ip_address" => Self::IP_ADDRESS_ID,
+            "ip_enabled"=>  Self::IP_ENABLED_ID,
             "ip_subnet" => Self::IP_SUBNET_ID,
             "mac_address" => Self::MAC_ADDRESS_ID,
             _ => 0
