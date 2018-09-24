@@ -23,6 +23,13 @@ use std::process::Command;
 use std::borrow::Borrow;
 
 use tables::{ProcessesRow,ProcessesIface};
+use winapi::um::winnt::PSID;
+use std::i64::MAX;
+use winapi::shared::sddl::ConvertSidToStringSidW;
+use winapi::um::winnt::TOKEN_OWNER;
+use winapi::um::winnt::TOKEN_ELEVATION;
+use winapi::ctypes::c_char;
+use std::ffi::CStr;
 
 pub struct Reader {}
 impl ProcessesIface for Reader {
@@ -43,8 +50,8 @@ impl ProcessesRow {
             state: "".to_owned(),   // NA for windows
             cwd: "".to_owned(), //TODO
             root: "".to_owned(),    //TODO
-            uid: 0, //TODO
-            gid: 0, //TODO
+            uid: -1, //TODO
+            gid: -1, //TODO
             euid:  -1,  // NA for windows
             egid: -1,   // NA for windows
             suid: -1,   // NA for windows
@@ -101,6 +108,27 @@ impl ProcessesRow {
         pids
     }
 
+    pub fn get_uid_from_sid (sid: PSID) -> i64 {
+        let mut buf: Vec<u16> = Vec::with_capacity(1024);
+
+        if unsafe { ConvertSidToStringSidW(sid,&mut buf.as_mut_ptr()) } == 0 {
+            // if verbose println!("get_uid_from_sid() failed because ConvertSidToStringSid() returned {}", unsafe{GetLastError()})
+            return MAX
+        }
+        //println!("{}");
+
+        let sid_string = String::from_utf16(buf.as_slice()).unwrap_or("error parsing components".to_string());
+        let components : Vec<_> = sid_string.as_str().split('-').collect();
+        if components.len() < 1 {
+            println!("returning MAX!");
+            return MAX
+        }
+        println!("compontents: {:?}", components);
+        let uid = components[components.len()-1].parse::<i64>().unwrap_or(MAX);
+        //println!("-<{}",uid);
+        uid
+    }
+
     //TODO getUidFromSid()
     //TODO getGidFromSid()
 
@@ -142,10 +170,9 @@ impl ProcessesRow {
 
                         let pid = v.to_owned().parse::<i64>().unwrap_or(-1);
                         let null_pointer = ptr::null::<c_void>() as *mut c_void;
+                        //TODO replace null_pointer by ptr::null_mut()!
                         processes_row.pid = pid;
                         let mut h_process: *mut winapi::ctypes::c_void = 0 as *mut c_void;
-                        let gid : i64 = -1;
-                        let uid : i64 = -1;
                         if pid == current_pid {
                             h_process = unsafe {GetCurrentProcess()};
                         } else {
@@ -200,44 +227,55 @@ impl ProcessesRow {
                             processes_row.system_time = 0;//TODO QuadPart of utime / 10000000
                             processes_row.start_time = 0;//TODO filetime to unix time
                         }
+
                         let mut tok: *mut HANDLE = &mut null_pointer.clone();
-                        let mut tok_owner: TOKEN_OWNER = TOKEN_OWNER {
-                            Owner: 0 as *mut c_void,
-                        };
-                        let mut buffer: Vec<u8> = Vec::new();
+                        let mut tok_owner: Vec<c_char> = Vec::with_capacity(size_of::<TOKEN_OWNER>());
+                                //let mut buffer: Vec<u8> = Vec::new();
                         let mut ret = unsafe {OpenProcessToken(h_process, TOKEN_READ, tok)};
                         if ret != 0 && tok != &mut null_pointer.clone() {
                             let mut tok_owner_buff_len : u32 = 0;
                             ret = unsafe {GetTokenInformation(*tok, TokenUser, null_pointer.clone(), 0, &mut tok_owner_buff_len)};
                             if ret == 0 && unsafe{GetLastError()} == ERROR_INSUFFICIENT_BUFFER {
-                                buffer = Vec::with_capacity(tok_owner_buff_len as usize);
-                                ret = unsafe{GetTokenInformation(*tok, TokenUser,buffer.as_mut_ptr() as *mut c_void , tok_owner_buff_len, &mut tok_owner_buff_len)};
+                                tok_owner = Vec::with_capacity(tok_owner_buff_len as usize);
+                                ret = unsafe{GetTokenInformation(*tok, TokenUser,tok_owner.as_mut_ptr() as *mut c_void , tok_owner_buff_len, &mut tok_owner_buff_len)};
+                                unsafe {tok_owner.set_len(tok_owner_buff_len as usize)};
+                                //println!("-<{:?}",unsafe {CStr::from_ptr(tok_owner.as_mut_ptr())});
+
                             }
                             // Check if the process is using an elevated token
-                            let elevation = TOKEN_ELEVATION{
+                            let mut elevation = TOKEN_ELEVATION {
                                 TokenIsElevated: 0
                             };
 
                             let mut cb_size: DWORD = size_of::<TOKEN_ELEVATION>() as u32;
-                            if unsafe {GetTokenInformation(*tok, TokenElevation, buffer.as_mut_ptr() as *mut c_void, size_of::<TOKEN_ELEVATION>() as u32, &mut cb_size)} != 0 {
+                            if unsafe {GetTokenInformation(*tok, TokenElevation, &mut elevation as *mut _ as *mut c_void, size_of::<TOKEN_ELEVATION>() as u32, &mut cb_size)} != 0 {
                                 processes_row.is_elevated_token = elevation.TokenIsElevated as i32;
                             }
-                            if processes_row.uid != 0 && ret != 0 && tok_owner.Owner != 0 as *mut c_void {
-                                //TODO let sid = &mut tok_owner;
-                                processes_row.uid = 0;//TODO getUidFromSid(sid);
+                        }
+
+                        /*let mut tok_owner_struct: TOKEN_OWNER = TOKEN_OWNER {
+                            Owner: 0 as *mut c_void,
+                        };*/
+                        //println!("{}-{}-{:?}",processes_row.uid,ret,tok_owner);
+
+                        if processes_row.uid != 0 && ret != 0 && tok_owner.len() != 0  /*.Owner != ptr::null_mut()*/ {
+                                //println!("got in first if statement");
+                                let sid_ptr = &mut tok_owner as *mut _ as *mut TOKEN_OWNER/*.Owner*/;
+                            let sid = unsafe{*sid_ptr}.Owner;
+                            //println!("sid: {:?}",sid);
+                                processes_row.uid = ProcessesRow::get_uid_from_sid(sid);
                                 processes_row.gid = 0;//TODO INTEGER(getGidFromSid(sid));
-                            } else {
+                            }/*else {
                                 processes_row.uid = uid;
                                 processes_row.gid = gid;
-                            }
-                            if h_process != null_pointer.clone() {
+                            }*/ //unnecessary since it is already initialized as -1 and then 0 if it doesnt have acces rights.
+                        if h_process != null_pointer.clone() {
                                 unsafe {CloseHandle(h_process)};
                             }
-                            if tok != &mut null_pointer.clone() {
+                        if tok != &mut null_pointer.clone() {
                                 unsafe {CloseHandle(*tok)};
                                 tok = &mut null_pointer.clone();
                             }
-                        };
                     },
                     "ExecutionState" => {
                         processes_row.state = v;
