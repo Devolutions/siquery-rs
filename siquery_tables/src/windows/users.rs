@@ -7,7 +7,14 @@ use winapi::um::winbase::LocalFree;
 use winapi::ctypes::*;
 use std::ffi::CStr;
 use std::ptr;
-
+use winapi::shared::minwindef::DWORD;
+use winapi::shared::lmcons::MAX_PREFERRED_LENGTH;
+use winapi::shared::minwindef::LPBYTE;
+use winapi::shared::minwindef::LPDWORD;
+use winapi::shared::ntdef::LPCWSTR;
+use winapi::shared::winerror::*;
+use std::mem;
+use winapi::um::lmaccess::NetUserEnum;
 
 extern "C" {
     pub fn ConvertSidToStringSidA (sid : PSID, sid_out: *mut c_void) -> bool;
@@ -63,16 +70,48 @@ impl Users {
     }
 
     pub fn get_specific() -> Vec<Users> {
+        process_local_acounts();
         let mut users: Vec<Users> = Vec::new();
         let mut user = Users::new();
 
         users
     }
-
-
 }
 
 fn process_local_acounts(){
+    let mut dw_user_info_level : c_ulong  = 3;
+
+    let mut dw_num_users_read_int = 0u32;
+    let mut dw_num_users_read: *mut c_ulong  = &mut dw_num_users_read_int as *mut c_ulong;
+
+    let mut dw_total_users_int = 0u32;
+    let mut dw_total_users: *mut c_ulong  =  &mut dw_total_users_int as *mut c_ulong;
+
+    let mut resume_handle_int = 0u32;
+    let mut resume_handle: *mut c_ulong  = &mut resume_handle_int as *mut c_ulong;
+
+    let mut ret: u32 = 0;
+
+    let mut user_buffer: Vec<*mut u8> = Vec::with_capacity((MAX_PREFERRED_LENGTH) as usize);
+
+    ret = unsafe { NetUserEnum(ptr::null(),
+                      dw_user_info_level,
+                      0 as DWORD,
+                      user_buffer.as_mut_ptr(),
+                      MAX_PREFERRED_LENGTH,
+                      dw_num_users_read,
+                      dw_total_users,
+                      resume_handle) };
+
+    const NERR_Success: u32 = 0;
+
+    if (ret == NERR_Success || ret == ERROR_MORE_DATA) &&
+        user_buffer.as_mut_ptr() != ptr::null_mut() {
+
+        println!("ret value {:?}", ret);
+    }
+
+
 
 }
 
