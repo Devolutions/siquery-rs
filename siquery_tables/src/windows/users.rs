@@ -15,6 +15,10 @@ use winapi::shared::ntdef::LPCWSTR;
 use winapi::shared::winerror::*;
 use std::mem;
 use winapi::um::lmaccess::NetUserEnum;
+use winapi::um::lmaccess::LPUSER_INFO_3;
+use winapi::um::lmaccess::NetUserGetInfo;
+
+const NERR_Success: u32 = 0;
 
 extern "C" {
     pub fn ConvertSidToStringSidA (sid : PSID, sid_out: *mut c_void) -> bool;
@@ -103,16 +107,26 @@ fn process_local_acounts(){
                       dw_total_users,
                       resume_handle) };
 
-    const NERR_Success: u32 = 0;
-
     if (ret == NERR_Success || ret == ERROR_MORE_DATA) &&
         user_buffer.as_mut_ptr() != ptr::null_mut() {
 
-        println!("ret value {:?}", ret);
+        let mut iter_buff: LPUSER_INFO_3 = user_buffer.as_ptr() as LPUSER_INFO_3;
+
+        for i in 0..unsafe{*dw_num_users_read} {
+            let mut dw_detailed_user_info_level: c_ulong  = 4;
+
+            // todo : get the right size of the buffer
+            // see : https://docs.microsoft.com/en-us/windows/desktop/NetMgmt/network-management-function-buffer-lengths
+            let mut user_lvl_4buff: Vec<*mut u8> = Vec::new();
+
+            println!("LPUSER_INFO_3 value {:?}", unsafe{(*iter_buff).usri3_name});
+
+            ret = unsafe { NetUserGetInfo(ptr::null(),
+                            (*iter_buff).usri3_name,
+                            dw_detailed_user_info_level,
+                            user_lvl_4buff.as_mut_ptr())};
+        }
     }
-
-
-
 }
 
 fn process_roaming_profiles(){
