@@ -25,11 +25,10 @@ use std::borrow::Borrow;
 use tables::{ProcessesRow,ProcessesIface};
 use winapi::um::winnt::PSID;
 use std::i64::MAX;
-use winapi::shared::sddl::ConvertSidToStringSidW;
-use winapi::um::winnt::TOKEN_OWNER;
+use winapi::um::winnt::TOKEN_USER;
 use winapi::um::winnt::TOKEN_ELEVATION;
 use winapi::ctypes::c_char;
-use std::ffi::CStr;
+use utils::sid_to_string;
 
 pub struct Reader {}
 impl ProcessesIface for Reader {
@@ -109,27 +108,18 @@ impl ProcessesRow {
     }
 
     pub fn get_uid_from_sid (sid: PSID) -> i64 {
-        let mut buf: Vec<u16> = Vec::with_capacity(1024);
-
-        if unsafe { ConvertSidToStringSidW(sid,&mut buf.as_mut_ptr()) } == 0 {
-            // if verbose println!("get_uid_from_sid() failed because ConvertSidToStringSid() returned {}", unsafe{GetLastError()})
+        if let Ok(sid_string) = sid_to_string(sid) {
+            let components : Vec<_> = sid_string.as_str().split('-').collect();
+            if components.len() < 1 {
+                return MAX
+            }
+            let uid = components[components.len()-1].parse::<i64>().unwrap_or(MAX);
+            return uid
+        } else {
             return MAX
         }
-        //println!("{}");
-
-        let sid_string = String::from_utf16(buf.as_slice()).unwrap_or("error parsing components".to_string());
-        let components : Vec<_> = sid_string.as_str().split('-').collect();
-        if components.len() < 1 {
-            println!("returning MAX!");
-            return MAX
-        }
-        println!("compontents: {:?}", components);
-        let uid = components[components.len()-1].parse::<i64>().unwrap_or(MAX);
-        //println!("-<{}",uid);
-        uid
     }
 
-    //TODO getUidFromSid()
     //TODO getGidFromSid()
 
     pub(crate) fn get_specific_ex (reader: &ProcessesIface) -> Vec<ProcessesRow> {
@@ -260,8 +250,8 @@ impl ProcessesRow {
 
                         if processes_row.uid != 0 && ret != 0 && tok_owner.len() != 0  /*.Owner != ptr::null_mut()*/ {
                                 //println!("got in first if statement");
-                                let sid_ptr = &mut tok_owner as *mut _ as *mut TOKEN_OWNER/*.Owner*/;
-                            let sid = unsafe{*sid_ptr}.Owner;
+                                let sid_ptr = tok_owner.as_ptr() as *mut TOKEN_USER/*.Owner*/;
+                            let sid = unsafe{*sid_ptr}.User.Sid;
                             //println!("sid: {:?}",sid);
                                 processes_row.uid = ProcessesRow::get_uid_from_sid(sid);
                                 processes_row.gid = 0;//TODO INTEGER(getGidFromSid(sid));
