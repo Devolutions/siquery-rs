@@ -16,7 +16,16 @@ use winapi::shared::winerror::*;
 use std::mem;
 use winapi::um::lmaccess::NetUserEnum;
 use winapi::um::lmaccess::LPUSER_INFO_3;
+use winapi::um::lmaccess::LPUSER_INFO_4;
 use winapi::um::lmaccess::NetUserGetInfo;
+use winapi::um::lmaccess::USER_INFO_4;
+use winapi::um::lmaccess::USER_INFO_3;
+use winapi::um::lmaccess::PUSER_INFO_4;
+use winapi::um::lmaccess::PUSER_INFO_3;
+use winapi::um::lmapibuf::NetApiBufferFree;
+use winapi::shared::winerror::*;
+use winapi::ctypes::wchar_t;
+
 
 const NERR_Success: u32 = 0;
 
@@ -82,49 +91,73 @@ impl Users {
     }
 }
 
-fn process_local_acounts(){
-    let mut dw_user_info_level : c_ulong  = 3;
+fn process_local_acounts() {
+    let mut dw_user_info_level: c_ulong = 3;
 
     let mut dw_num_users_read_int = 0u32;
-    let mut dw_num_users_read: *mut c_ulong  = &mut dw_num_users_read_int as *mut c_ulong;
+    let mut dw_num_users_read: *mut c_ulong = &mut dw_num_users_read_int as *mut c_ulong;
 
     let mut dw_total_users_int = 0u32;
-    let mut dw_total_users: *mut c_ulong  =  &mut dw_total_users_int as *mut c_ulong;
+    let mut dw_total_users: *mut c_ulong = &mut dw_total_users_int as *mut c_ulong;
 
     let mut resume_handle_int = 0u32;
-    let mut resume_handle: *mut c_ulong  = &mut resume_handle_int as *mut c_ulong;
+    let mut resume_handle: *mut c_ulong = &mut resume_handle_int as *mut c_ulong;
 
     let mut ret: u32 = 0;
 
     let mut user_buffer: Vec<*mut u8> = Vec::with_capacity((MAX_PREFERRED_LENGTH) as usize);
+    loop {
+        ret = unsafe {
+            NetUserEnum(ptr::null(),
+                        dw_user_info_level,
+                        0 as DWORD,
+                        user_buffer.as_mut_ptr(),
+                        MAX_PREFERRED_LENGTH,
+                        dw_num_users_read,
+                        dw_total_users,
+                        resume_handle)
+        };
 
-    ret = unsafe { NetUserEnum(ptr::null(),
-                      dw_user_info_level,
-                      0 as DWORD,
-                      user_buffer.as_mut_ptr(),
-                      MAX_PREFERRED_LENGTH,
-                      dw_num_users_read,
-                      dw_total_users,
-                      resume_handle) };
+        if (ret == NERR_Success || ret == ERROR_MORE_DATA) &&
+            user_buffer.as_mut_ptr() != ptr::null_mut() {
 
-    if (ret == NERR_Success || ret == ERROR_MORE_DATA) &&
-        user_buffer.as_mut_ptr() != ptr::null_mut() {
+            let mut iter_buff: LPUSER_INFO_3 = unsafe { ptr::read(user_buffer.as_mut_ptr() as *mut _) };
 
-        let mut iter_buff: LPUSER_INFO_3 = user_buffer.as_ptr() as LPUSER_INFO_3;
+            for i in 0..unsafe { *dw_num_users_read } {
+                let mut dw_detailed_user_info_level: c_ulong = 4;
+                let mut user_lvl_4buff: Vec<*mut u8> = Vec::with_capacity((mem::size_of::<USER_INFO_4>()) as usize);
 
-        for i in 0..unsafe{*dw_num_users_read} {
-            let mut dw_detailed_user_info_level: c_ulong  = 4;
+                ret = unsafe {
+                    NetUserGetInfo(ptr::null(),
+                                   (*iter_buff).usri3_name,
+                                   dw_detailed_user_info_level,
+                                   user_lvl_4buff.as_mut_ptr())
+                };
 
-            // todo : get the right size of the buffer
-            // see : https://docs.microsoft.com/en-us/windows/desktop/NetMgmt/network-management-function-buffer-lengths
-            let mut user_lvl_4buff: Vec<*mut u8> = Vec::new();
+                if ret != NERR_Success || user_lvl_4buff.as_mut_ptr() == ptr::null_mut() {
+                    if user_lvl_4buff.as_mut_ptr() != ptr::null_mut() {
+                        unsafe{NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void )};
+                    }
+                    println!("with error code {:?}", ret);
 
-            println!("LPUSER_INFO_3 value {:?}", unsafe{(*iter_buff).usri3_name});
+                    //todo incr iter_buff
+                    //iter_buff +=1;
+                    continue;
+                }
 
-            ret = unsafe { NetUserGetInfo(ptr::null(),
-                            (*iter_buff).usri3_name,
-                            dw_detailed_user_info_level,
-                            user_lvl_4buff.as_mut_ptr())};
+                // Will return empty string on fail
+                // todo get the sid and convert to string
+            }
+        } else {
+            println!("NetUserEnum failed with {:?}", ret);
+        }
+
+        if user_buffer.as_mut_ptr() != ptr::null_mut() {
+            unsafe{NetApiBufferFree(*user_buffer.as_mut_ptr() as *mut c_void )};
+        }
+
+        if ret != ERROR_MORE_DATA {
+            break;
         }
     }
 }
@@ -135,4 +168,11 @@ fn process_roaming_profiles(){
 
 fn get_user_home_dir()->String {
     "".to_string()
+}
+
+fn from_wide_string(s: &[u16]) -> String {
+    use std::ffi::OsString;
+    use std::os::windows::ffi::OsStringExt;
+    let slice = s.split(|&v| v == 0).next().unwrap();
+    OsString::from_wide(slice).to_string_lossy().into()
 }
