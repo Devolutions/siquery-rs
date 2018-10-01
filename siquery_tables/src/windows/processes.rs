@@ -3,32 +3,121 @@
 extern crate winapi;
 
 use utils;
-use std::os::raw::c_void;
-use winapi::um::tlhelp32::*;
-use winapi::shared::minwindef::*;
-use std::mem::size_of;
-use winapi::um::handleapi::*;
-use winapi::um::winnt::*;
-use std::ptr;
-use winapi::shared::ntdef::*;
-use winapi::um::errhandlingapi::*;
-use winapi::um::processthreadsapi::*;
-use winapi::shared::winerror::*;
-use winapi::um::psapi::*;
-use winapi::shared::minwindef::FALSE;
-use winapi::shared::ntdef::HANDLE;
-use winapi::um::libloaderapi::*;
-use winapi::um::securitybaseapi::*;
-use std::process::Command;
-use std::borrow::Borrow;
+use std::{
+    os::raw::c_void,
+    mem::size_of,
+    ptr,
+    process::Command,
+    borrow::Borrow,
+    i64::MAX
+};
+use winapi::{
+    um::{
+        tlhelp32::{
+            CreateToolhelp32Snapshot,
+            TH32CS_SNAPPROCESS,
+            Process32First,
+            Process32Next,
+            PROCESSENTRY32,
+        },
+        winnt::{
+            PROCESS_QUERY_INFORMATION,
+            PROCESS_VM_READ,
+            TOKEN_OWNER,
+            TOKEN_READ,
+            TokenUser,
+            TokenElevation,
+            PSID,
+            TOKEN_USER,
+            TOKEN_ELEVATION,
+            PSID_NAME_USE,
+            SID_NAME_USE,
+            SidTypeUnknown
+        },
+        handleapi::CloseHandle,
+        errhandlingapi::GetLastError,
+        processthreadsapi::{
+            GetCurrentProcessId,
+            GetCurrentProcess,
+            OpenProcess,
+            GetProcessTimes,
+            OpenProcessToken
+        },
+        psapi::GetModuleFileNameExW,
+        libloaderapi::GetModuleFileNameW,
+        securitybaseapi::GetTokenInformation,
+        lmaccess::{
+            NetUserGetInfo,
+            USER_INFO_3
+        }
+    },
+    shared::{
+        minwindef::{
+            MAX_PATH,
+            HINSTANCE__,
+            FILETIME,
+            DWORD,
+            FALSE,
+            LPDWORD,
+            BOOL
+        },
+        ntdef::{
+            ULARGE_INTEGER_s,
+            HANDLE,
+            LPCSTR,
+            LPWSTR,
+            NULL
+        },
+        winerror::{
+            ERROR_ACCESS_DENIED,
+            ERROR_INSUFFICIENT_BUFFER
+        }
+    },
+    ctypes::c_char
 
-use tables::{ProcessesRow,ProcessesIface};
-use winapi::um::winnt::PSID;
-use std::i64::MAX;
-use winapi::um::winnt::TOKEN_USER;
-use winapi::um::winnt::TOKEN_ELEVATION;
-use winapi::ctypes::c_char;
-use utils::sid_to_string;
+};
+
+use tables::{
+    ProcessesRow,
+    ProcessesIface
+};
+
+extern "C" {
+    pub fn LookupAccountSidW (
+        lpSystemName: LPCSTR,
+        Sid: PSID,
+        Name: LPWSTR,
+        cchName: LPDWORD,
+        ReferencedDomainName: LPWSTR,
+        cchReferencedDomainName: LPDWORD,
+        peUse: PSID_NAME_USE
+    ) -> BOOL;
+}
+
+static NERR_UserNotFound: DWORD = 2221;
+static NERR_Success: DWORD = 0;
+
+pub fn lookup_account_sid_internal (
+    lp_system_name: LPCSTR,
+    sid: PSID,
+    name: LPWSTR,
+    cch_name: LPDWORD,
+    referenced_domain_name: LPWSTR,
+    cch_referenced_domain_name: LPDWORD,
+    pe_use: PSID_NAME_USE
+) -> BOOL {
+    unsafe {
+        LookupAccountSidW (
+            lp_system_name,
+            sid,
+            name,
+            cch_name,
+            referenced_domain_name,
+            cch_referenced_domain_name,
+            pe_use
+        )
+    }
+}
 
 pub struct Reader {}
 impl ProcessesIface for Reader {
@@ -108,7 +197,7 @@ impl ProcessesRow {
     }
 
     pub fn get_uid_from_sid (sid: PSID) -> i64 {
-        if let Ok(sid_string) = sid_to_string(sid) {
+        if let Ok(sid_string) = utils::sid_to_string(sid) {
             let components : Vec<_> = sid_string.as_str().split('-').collect();
             if components.len() < 1 {
                 return MAX
@@ -121,6 +210,61 @@ impl ProcessesRow {
     }
 
     //TODO getGidFromSid()
+    pub fn get_gid_from_sid (sid: PSID) -> i64 {
+        let mut gid = -1;
+
+        // Parameters.
+        let mut e_use: SID_NAME_USE = SidTypeUnknown as SID_NAME_USE;
+        let e_use_p: PSID_NAME_USE = &mut e_use as PSID_NAME_USE;
+        let mut uname_size: DWORD = 0u32;
+        let uname_size_p: LPDWORD = &mut uname_size as LPDWORD;
+        let mut dom_name_size: DWORD = 0u32;
+        let dom_name_size_p: LPDWORD = &mut dom_name_size as LPDWORD;
+
+        // Get the buffers sizes.
+        lookup_account_sid_internal(
+            ptr::null(),
+            sid,
+            ptr::null_mut(),
+            uname_size_p,
+            ptr::null_mut(),
+            dom_name_size_p,
+            e_use_p
+        );
+
+        // Buffers.
+        let mut uname: Vec<u16> = Vec::with_capacity(uname_size as usize);
+        let uname_p: LPWSTR = uname.as_mut_ptr() as LPWSTR;
+        let mut dom_name: Vec<u16> = Vec::with_capacity(dom_name_size as usize);
+        let dom_name_p: LPWSTR = dom_name.as_mut_ptr() as LPWSTR;
+
+        if lookup_account_sid_internal(
+            ptr::null(),
+            sid,
+            uname_p,
+            uname_size_p,
+            dom_name_p,
+            dom_name_size_p,
+            e_use_p
+        ) == 0 {
+            return -1
+        };
+
+        let mut user_buf: Vec<u8> = Vec::with_capacity(size_of::<USER_INFO_3>());
+        let user_buf_p: *mut *mut u8 = &mut user_buf.as_mut_ptr();
+        let ret = unsafe {NetUserGetInfo(ptr::null(), uname_p, 3, user_buf_p)};
+        if ret == NERR_UserNotFound {
+            if let Ok(sid_string) = utils::sid_to_string(sid) {
+                let components : Vec<_> = sid_string.as_str().split('-').collect();
+                // TODO What is the default return value? 10?
+                gid = components[components.len()-1].parse::<i64>().unwrap_or(10);
+            }
+        } else if ret == NERR_Success {
+            let user_info_3_p = user_buf_p as *mut _ as *mut USER_INFO_3;
+            gid = unsafe{*user_info_3_p}.usri3_primary_group_id as i64;
+        }
+        gid
+    }
 
     pub(crate) fn get_specific_ex (reader: &ProcessesIface) -> Vec<ProcessesRow> {
         let mut out: Vec<ProcessesRow> = Vec::new();
@@ -254,7 +398,7 @@ impl ProcessesRow {
                             let sid = unsafe{*sid_ptr}.User.Sid;
                             //println!("sid: {:?}",sid);
                                 processes_row.uid = ProcessesRow::get_uid_from_sid(sid);
-                                processes_row.gid = 0;//TODO INTEGER(getGidFromSid(sid));
+                                processes_row.gid = ProcessesRow::get_gid_from_sid(sid);
                             }/*else {
                                 processes_row.uid = uid;
                                 processes_row.gid = gid;
