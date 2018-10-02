@@ -98,15 +98,16 @@ impl Users {
     }
 
     pub fn get_specific() -> Vec<Users> {
-        process_local_acounts();
         let mut users: Vec<Users> = Vec::new();
+        process_local_acounts(&mut users);
+
         let mut user = Users::new();
 
         users
     }
 }
 
-fn process_local_acounts() {
+fn process_local_acounts(users: &mut Vec<Users>) {
     let mut dw_user_info_level: c_ulong = 3;
 
     let mut dw_num_users_read_int = 0u32;
@@ -138,6 +139,7 @@ fn process_local_acounts() {
 
             let mut iter_buff: LPUSER_INFO_3 = unsafe { ptr::read(user_buffer.as_mut_ptr() as *mut _) };
 
+            let mut user = Users::new();
             for i in 0..unsafe { *dw_num_users_read } {
                 let mut dw_detailed_user_info_level: c_ulong = 4;
                 let mut user_lvl_4buff: Vec<*mut u8> = Vec::with_capacity((mem::size_of::<USER_INFO_4>()) as usize);
@@ -164,11 +166,29 @@ fn process_local_acounts() {
                 let mut lp_user_info_4: LPUSER_INFO_4 = unsafe { ptr::read(user_lvl_4buff.as_mut_ptr() as _) };
                 let mut sid: *mut c_void = unsafe {(*lp_user_info_4).usri4_user_sid};
 
+                // todo prossecedSids
                 let sid_string = sid_to_string(sid);
-                println!("sid_string {:?}", sid_string);
 
                 // todo fill user row
+                /*
+                username: String::new(),
+                description: String::new(),
+                directory: String::new(),*/
+
+                user.shell = "C:\\Windows\\System32\\cmd.exe".to_string();
+                user.type_ = "local".to_string();
+                if let Ok(sid_string) = sid_to_string(sid) {
+                    user.uuid = sid_string;
+                }
+
+                unsafe {
+                    user.uid = (*iter_buff).usri3_user_id as i64;
+                    user.gid = (*iter_buff).usri3_primary_group_id as i64;
+                    user.uid_signed = user.uid;
+                    user.gid_signed = user.gid;
+                }
             }
+            users.push(user);
         } else {
             println!("NetUserEnum failed with {:?}", ret);
         }
@@ -186,7 +206,7 @@ fn process_local_acounts() {
 fn process_roaming_profiles(){
 
 }
-
+// todo get home dir using RegKey
 fn get_user_home_dir()->String {
     "".to_string()
 }
