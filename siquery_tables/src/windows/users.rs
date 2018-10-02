@@ -25,15 +25,32 @@ use winapi::um::lmaccess::PUSER_INFO_3;
 use winapi::um::lmapibuf::NetApiBufferFree;
 use winapi::shared::winerror::*;
 use winapi::ctypes::wchar_t;
+use winapi::shared::minwindef::BOOL;
+use utils::sid_to_string;
 
 
 const NERR_Success: u32 = 0;
 
-extern "C" {
-    pub fn ConvertSidToStringSidA (sid : PSID, sid_out: *mut c_void) -> bool;
-}
+const COLUMN_NAMES: [&'static str; 17 ] = [
+    "S-1-5-1",
+    "S-1-5-2",
+    "S-1-5-3",
+    "S-1-5-4",
+    "S-1-5-6",
+    "S-1-5-7",
+    "S-1-5-8",
+    "S-1-5-9",
+    "S-1-5-10",
+    "S-1-5-11",
+    "S-1-5-12",
+    "S-1-5-13",
+    "S-1-5-18",
+    "S-1-5-19",
+    "S-1-5-20",
+    "S-1-5-21",
+    "S-1-5-32",];
 
-pub fn get_uid_from_sid(sid: PSID) -> u64 {
+/*pub fn get_uid_from_sid(sid: PSID) -> u64 {
 
     const UID_DEFAULT : u64 = 1;
     let sid_string : *mut c_void = ptr::null_mut();
@@ -62,9 +79,7 @@ pub fn get_uid_from_sid(sid: PSID) -> u64 {
 
     unsafe {LocalFree(sid_string)};
     return uid_exp;
-}
-
-
+}*/
 
 impl Users {
     pub(crate) fn new() -> Users {
@@ -146,7 +161,13 @@ fn process_local_acounts() {
                 }
 
                 // Will return empty string on fail
-                // todo get the sid and convert to string
+                let mut lp_user_info_4: LPUSER_INFO_4 = unsafe { ptr::read(user_lvl_4buff.as_mut_ptr() as _) };
+                let mut sid: *mut c_void = unsafe {(*lp_user_info_4).usri4_user_sid};
+
+                let sid_string = sid_to_string(sid);
+                println!("sid_string {:?}", sid_string);
+
+                // todo fill user row
             }
         } else {
             println!("NetUserEnum failed with {:?}", ret);
