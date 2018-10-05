@@ -12,6 +12,7 @@ use winapi::shared::lmcons::MAX_PREFERRED_LENGTH;
 use winapi::shared::minwindef::LPBYTE;
 use winapi::shared::minwindef::LPDWORD;
 use winapi::shared::ntdef::LPCWSTR;
+use winapi::shared::ntdef::LPWSTR;
 use winapi::shared::winerror::*;
 use std::mem;
 use winapi::um::lmaccess::NetUserEnum;
@@ -26,8 +27,9 @@ use winapi::um::lmapibuf::NetApiBufferFree;
 use winapi::shared::winerror::*;
 use winapi::ctypes::wchar_t;
 use winapi::shared::minwindef::BOOL;
-use utils::sid_to_string;
-
+use utils::*;
+use widestring::WideString;
+use libc;
 
 const NERR_Success: u32 = 0;
 
@@ -49,37 +51,6 @@ const COLUMN_NAMES: [&'static str; 17 ] = [
     "S-1-5-20",
     "S-1-5-21",
     "S-1-5-32",];
-
-/*pub fn get_uid_from_sid(sid: PSID) -> u64 {
-
-    const UID_DEFAULT : u64 = 1;
-    let sid_string : *mut c_void = ptr::null_mut();
-
-    if unsafe {ConvertSidToStringSidA(sid, sid_string)} == false {
-        println!("get_uid_from_sid failed ConvertSidToStringSidA");
-        return UID_DEFAULT;
-    }
-
-    let toks = unsafe {CStr::from_ptr(sid_string as *const _)}.to_string_lossy();
-        //let toks = sid_string.to_string().split("-");
-
-        if toks.len() < 1 {
-            unsafe {LocalFree(sid_string)};
-            return UID_DEFAULT;
-        }
-
-    let uid_exp = toks.to_string().parse::<u64>().unwrap_or(0);
-
-    // todo handle errors
-    /*if uid_exp.isError() {
-        LocalFree(sid_string);
-        println!( "failed to parse PSID ");
-        return UID_DEFAULT;
-    }*/
-
-    unsafe {LocalFree(sid_string)};
-    return uid_exp;
-}*/
 
 impl Users {
     pub(crate) fn new() -> Users {
@@ -136,11 +107,11 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 
         if (ret == NERR_Success || ret == ERROR_MORE_DATA) &&
             user_buffer.as_mut_ptr() != ptr::null_mut() {
-
             let mut iter_buff: LPUSER_INFO_3 = unsafe { ptr::read(user_buffer.as_mut_ptr() as *mut _) };
 
-            let mut user = Users::new();
+
             for i in 0..unsafe { *dw_num_users_read } {
+                let mut user = Users::new();
                 let mut dw_detailed_user_info_level: c_ulong = 4;
                 let mut user_lvl_4buff: Vec<*mut u8> = Vec::with_capacity((mem::size_of::<USER_INFO_4>()) as usize);
 
@@ -153,48 +124,54 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 
                 if ret != NERR_Success || user_lvl_4buff.as_mut_ptr() == ptr::null_mut() {
                     if user_lvl_4buff.as_mut_ptr() != ptr::null_mut() {
-                        unsafe{NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void )};
+                        unsafe { NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void) };
                     }
                     println!("with error code {:?}", ret);
 
                     //todo incr iter_buff
-                    //iter_buff +=1;
+                    unsafe { iter_buff.add(mem::size_of::<USER_INFO_3>()) };
                     continue;
                 }
 
                 // Will return empty string on fail
                 let mut lp_user_info_4: LPUSER_INFO_4 = unsafe { ptr::read(user_lvl_4buff.as_mut_ptr() as _) };
-                let mut sid: *mut c_void = unsafe {(*lp_user_info_4).usri4_user_sid};
+                let mut sid: *mut c_void = unsafe { (*lp_user_info_4).usri4_user_sid };
 
-                // todo prossecedSids
-                let sid_string = sid_to_string(sid);
-
-                // todo fill user row
-                /*
-                username: String::new(),
-                description: String::new(),
-                directory: String::new(),*/
+                unsafe {
+                    if let Ok(username) = lpwstr_to_string((*iter_buff).usri3_name) {
+                        user.username = username;
+                    }
+                    if let Ok(description) = get_user_description((*lp_user_info_4).usri4_comment) {
+                        user.description = description;
+                    }
+                }
 
                 user.shell = "C:\\Windows\\System32\\cmd.exe".to_string();
                 user.type_ = "local".to_string();
                 if let Ok(sid_string) = sid_to_string(sid) {
-                    user.uuid = sid_string;
+                    user.uuid = sid_string.clone();
+                    user.directory = get_user_home_dir(sid_string);
                 }
-
                 unsafe {
                     user.uid = (*iter_buff).usri3_user_id as i64;
                     user.gid = (*iter_buff).usri3_primary_group_id as i64;
                     user.uid_signed = user.uid;
                     user.gid_signed = user.gid;
                 }
+
+                users.push(user);
+                unsafe {
+                    println!("ptr iter_buff {:?}", iter_buff);
+                    iter_buff.add((mem::size_of::<USER_INFO_3>()) * i as usize)
+                };
             }
-            users.push(user);
+            // if there are no local users
         } else {
             println!("NetUserEnum failed with {:?}", ret);
         }
 
         if user_buffer.as_mut_ptr() != ptr::null_mut() {
-            unsafe{NetApiBufferFree(*user_buffer.as_mut_ptr() as *mut c_void )};
+            unsafe { NetApiBufferFree(*user_buffer.as_mut_ptr() as *mut c_void) };
         }
 
         if ret != ERROR_MORE_DATA {
@@ -206,8 +183,17 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 fn process_roaming_profiles(){
 
 }
+
 // todo get home dir using RegKey
-fn get_user_home_dir()->String {
+fn get_user_home_dir(sid_string: String)->String {
+    let key = format!(r#"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList{}"#, sid_string);
+    let hklm = &RegKey::predef(HKEY_LOCAL_MACHINE);
+
+    if let Ok(subkey) = hklm.open_subkey_with_flags(key, KEY_READ) {
+        for _x in 0..subkey.enum_keys().count() {
+            println!("got in ?");
+        }
+    }
     "".to_string()
 }
 
@@ -216,4 +202,12 @@ fn from_wide_string(s: &[u16]) -> String {
     use std::os::windows::ffi::OsStringExt;
     let slice = s.split(|&v| v == 0).next().unwrap();
     OsString::from_wide(slice).to_string_lossy().into()
+}
+
+fn get_user_description (lpwstr: LPWSTR) -> Result<String, DWORD> {
+    unsafe {
+        let buf_size = libc::wcslen(lpwstr);
+        let string = WideString::from_ptr(lpwstr, buf_size);
+        Ok(string.to_string_lossy())
+    }
 }

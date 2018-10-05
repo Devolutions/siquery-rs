@@ -33,10 +33,14 @@ pub fn sid_to_string(sid: PSID) -> Result<String, DWORD> {
         buf == (NULL as LPWSTR) {
         return Err(unsafe { GetLastError() });
     }
-    let buf_size = unsafe { libc::wcslen(buf) };
-    let sid_string = unsafe { WideString::from_ptr(buf, buf_size) };
-    unsafe { LocalFree(buf as HLOCAL) };
-    Ok(sid_string.to_string_lossy())
+    lpwstr_to_string(buf)
+}
+
+pub fn lpwstr_to_string(lpwstr: LPWSTR) -> Result<String, DWORD> {
+    let buf_size = unsafe { libc::wcslen(lpwstr) };
+    let string = unsafe { WideString::from_ptr(lpwstr, buf_size) };
+    unsafe { LocalFree(lpwstr as HLOCAL) };
+    Ok(string.to_string_lossy())
 }
 
 
