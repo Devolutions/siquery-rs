@@ -67,7 +67,6 @@ use winapi::{
             HANDLE,
             LPCSTR,
             LPWSTR,
-            NULL
         },
         winerror::{
             ERROR_ACCESS_DENIED,

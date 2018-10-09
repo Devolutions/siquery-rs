@@ -219,6 +219,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
             let table = MountsRow::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "groups")]
+        "groups" => {
+            let table = GroupsRow::get_specific();
+            select(&table, columns)
+        },
         _ => { // for tests only
             let table: Vec<Dummy> = vec![
                 Dummy{a:25, b:25},
