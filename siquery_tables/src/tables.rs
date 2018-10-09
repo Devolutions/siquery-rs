@@ -3162,13 +3162,13 @@ impl Table for GroupsRow {
         "gid_signed",
         "groupname",
         "group_sid",
-        "comment",
+        "comment"
     ];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "gid" => Value::from(self.gid.to_owned()),
-            "gid_signed" => Value::from(self.gid_signed.to_owned()),
+            "gid" => Value::from(self.gid),
+            "gid_signed" => Value::from(self.gid_signed),
             "groupname" => Value::from(self.groupname.to_owned()),
             "group_sid" => Value::from(self.group_sid.to_owned()),
             "comment" => Value::from(self.comment.to_owned()),
@@ -3178,8 +3178,8 @@ impl Table for GroupsRow {
 
     fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::GID_ID => Value::from(self.gid.to_owned()),
-            Self::GID_SIGNED_ID => Value::from(self.gid_signed.to_owned()),
+            Self::GID_ID => Value::from(self.gid),
+            Self::GID_SIGNED_ID => Value::from(self.gid_signed),
             Self::GROUPNAME_ID => Value::from(self.groupname.to_owned()),
             Self::GROUP_SID_ID => Value::from(self.group_sid.to_owned()),
             Self::COMMENT_ID => Value::from(self.comment.to_owned()),

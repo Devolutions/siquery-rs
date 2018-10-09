@@ -471,6 +471,12 @@ pub fn get_schema(table_name: &str) -> Option<String> {
             let column_types = MountsRow::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "groups")]
+        "groups" => {
+            let column_names = GroupsRow::get_columns_name();
+            let column_types = GroupsRow::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
         _ => {
             let column_names = Dummy::get_columns_name();
             let column_types = Dummy::get_columns_type();

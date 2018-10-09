@@ -94,7 +94,9 @@ extern "C" {
     ) -> BOOL;
 }
 
+#[allow(non_upper_case_globals)]
 static NERR_UserNotFound: DWORD = 2221;
+#[allow(non_upper_case_globals)]
 static NERR_Success: DWORD = 0;
 
 pub fn lookup_account_sid_internal (

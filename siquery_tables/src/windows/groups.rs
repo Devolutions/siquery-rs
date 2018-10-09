@@ -1,13 +1,14 @@
 use std::{
-    ptr,
-    mem
+    ptr
 };
 use winapi::{
     shared::{
         minwindef::{
             DWORD,
+            PDWORD,
             LPBYTE,
             LPDWORD,
+            PUCHAR,
             FALSE,
             BOOL
         },
@@ -25,7 +26,6 @@ use winapi::{
         lmaccess::{
             NetLocalGroupEnum,
             LPLOCALGROUP_INFO_1,
-            LOCALGROUP_INFO_1
         },
         winnt::{
             PSID,
@@ -36,7 +36,11 @@ use winapi::{
         winbase::{
             LookupAccountNameW
         },
-        securitybaseapi::IsValidSid,
+        securitybaseapi::{
+            IsValidSid,
+            GetSidSubAuthority,
+            GetSidSubAuthorityCount
+        },
         errhandlingapi::GetLastError
     }
 };
@@ -45,10 +49,10 @@ use libc;
 
 use tables::{
     GroupsRow,
-    ProcessesRow
 };
 use utils;
 
+#[allow(non_upper_case_globals)]
 static NERR_Success: DWORD = 0;
 
 pub fn get_sid_from_username(account_name: LPCWSTR) -> PSID {
@@ -109,19 +113,35 @@ pub fn get_sid_from_username(account_name: LPCWSTR) -> PSID {
     sid_buf_p
 }
 
+pub fn get_rid_from_sid(sid_p: PSID) -> i64 {
+    let count_p: PUCHAR = unsafe {GetSidSubAuthorityCount(sid_p)};
+    let count = unsafe{*count_p};
+    if count > 0 {
+        let rid_p: PDWORD = unsafe {
+            GetSidSubAuthority(
+                sid_p,
+                count as u32 - 1
+            )
+        };
+        return unsafe{*rid_p} as i64;
+    } else {
+        println!("failed to find rid, acces denied");
+        return 0i64;
+    }
+}
+
 impl GroupsRow {
     pub fn get_specific () -> Vec<GroupsRow> {
         let mut out = Vec::<GroupsRow>::new();
 
         // Parameters.
-        let mut group_info_level = 1u32;
+        let group_info_level = 1u32;
         let mut entries_read = 0u32;
         let entries_read_p: LPDWORD = &mut entries_read as LPDWORD;
         let mut total_entries = 0u32;
         let total_entries_p: LPDWORD = &mut total_entries as LPDWORD;
-        //let mut buf_ptr : LOCALGROUP_INFO_1 = unsafe {mem::zeroed()};
         let mut buf = Vec::<u8>::with_capacity(MAX_PREFERRED_LENGTH as usize);
-        let mut buf_ptr = buf.as_mut_ptr();
+        let buf_ptr = buf.as_mut_ptr();
 
         let ret = unsafe {
             NetLocalGroupEnum (
@@ -129,45 +149,65 @@ impl GroupsRow {
                 group_info_level,
                 buf_ptr as *mut LPBYTE,
                 MAX_PREFERRED_LENGTH,
-                entries_read_p,  //*mut DWORD
-                total_entries_p, //*mut DWORD
+                entries_read_p,
+                total_entries_p,
                 ptr::null_mut()
             )
         };
-        println!("{}", unsafe {GetLastError()});
 
         if buf_ptr == ptr::null_mut() || (ret != NERR_Success && ret != ERROR_MORE_DATA) {
             println!("NetLocalGroupEnum() failed, the return value is : {}", ret);
             return Vec::new()
         }
 
-        // entry here is LOCALGROUP_INFO_1
-
         for entry in 0..entries_read {
-            //let local_group_info: LPLOCALGROUP_INFO_1 = unsafe { ptr::read(buf_ptr as *mut _) }; // might be unnecessary becausse of line 10
-            // TODO offset to the next struct and read it.
-            let local_group_info_1_p: LPLOCALGROUP_INFO_1 = unsafe { ptr::read(buf_ptr as *mut _) };
-            let sid_p: PSID = get_sid_from_username(unsafe{*local_group_info_1_p}.lgrpi1_name);  // /!\ TODO ->  sid_p as *mut _ as PSID; .... the fn returns a LOCALGROUP_INFO_1 struct where lgrpi1_name: ::LPWSTR but want PSID
+            // This loop iterates over all LOCALGROUP_INFO_1 structures in buf_ptr.
 
-            if sid_p != ptr::null_mut(){ // null_ptr or null_ptr_mut?
+            // Read buf_ptr.
+            let local_group_info_buf_p: LPLOCALGROUP_INFO_1 = unsafe {
+                ptr::read(buf_ptr as *mut _)
+            };
+            // Offset the pointer.
+            let local_group_info_1 = unsafe {
+                (*local_group_info_buf_p.add(entry as usize))
+            };
+            let lgrpi1_name = local_group_info_1.lgrpi1_name;
+            let lgrpi1_comment = local_group_info_1.lgrpi1_comment;
+
+            let sid_p: PSID = get_sid_from_username(lgrpi1_name);
+
+            if sid_p != ptr::null_mut(){
                 // Read from buffers.
-                let groupname_size = unsafe { libc::wcslen(unsafe{*local_group_info_1_p}.lgrpi1_name) };
-                let groupname_string = unsafe { WideString::from_ptr(unsafe{*local_group_info_1_p}.lgrpi1_name, groupname_size) };
-                let comment_size = unsafe { libc::wcslen(unsafe{*local_group_info_1_p}.lgrpi1_comment) };
-                let comment_string = unsafe { WideString::from_ptr(unsafe{*local_group_info_1_p}.lgrpi1_comment, comment_size) };
+                let groupname = unsafe {
+                    WideString::from_ptr(
+                        lgrpi1_name,
+                        libc::wcslen(lgrpi1_name)
+                    )
+                };
+                let comment = unsafe {
+                    WideString::from_ptr(
+                        lgrpi1_comment,
+                        libc::wcslen(lgrpi1_comment)
+                    )
+                };
+
                 out.push(
                     GroupsRow{
-                        gid: -22,// TODO get_rid_from_sid(sid_p),
-                        gid_signed: -22, // TODO get_rid_from_sid(sid_p),
-                        groupname: groupname_string.to_string().unwrap_or("".to_string()),
+                        gid: get_rid_from_sid(sid_p),
+                        gid_signed: get_rid_from_sid(sid_p),
+                        groupname: groupname.to_string().unwrap_or("".to_string()),
                         group_sid: utils::sid_to_string(sid_p).unwrap_or("".to_string()),
-                        comment: comment_string.to_string().unwrap_or("".to_string())
+                        comment: comment.to_string().unwrap_or("".to_string())
                     }
                 );
             } else {
-                let groupname_size = unsafe { libc::wcslen(unsafe{*local_group_info_1_p}.lgrpi1_name) };
-                let groupname_string = unsafe { WideString::from_ptr(unsafe{*local_group_info_1_p}.lgrpi1_name, groupname_size) };
-                print!("Failed to find sid from LookupAccountNameW for group: {:?}", groupname_string);
+                let groupname = unsafe {
+                    WideString::from_ptr(
+                        lgrpi1_name,
+                        libc::wcslen(lgrpi1_name)
+                    )
+                };
+                print!("Failed to find sid from LookupAccountNameW for group: {:?}", groupname);
             }
         }
         out
