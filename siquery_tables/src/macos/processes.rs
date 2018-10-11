@@ -5,7 +5,6 @@
 use libc::*;
 use libc::timeval;
 use byteorder::{LittleEndian, ReadBytesExt};
-use widestring::WideString;
 use std::{
     mem,
     ptr,
@@ -16,24 +15,6 @@ use std::{
     },
     str,
     collections::HashMap
-};
-use winapi::{
-    um::{
-        winnt::PSID,
-        errhandlingapi::GetLastError,
-        winbase::LocalFree
-    },
-    shared::{
-        minwindef::{
-            DWORD,
-            HLOCAL
-        },
-        ntdef::{
-            LPWSTR,
-            NULL
-        },
-        sddl::ConvertSidToStringSidW
-    }
 };
 
 use tables::ProcessesRow;
@@ -218,22 +199,6 @@ struct rusage_info_v2 {
 }
 
 type mach_timebase_info_data_t = mach_timebase_info;
-
-/// Converts a raw SID into a SID string representation.
-pub fn sid_to_string(sid: PSID) -> Result<String, DWORD> {
-    let mut buf: LPWSTR = NULL as LPWSTR;
-    if unsafe { ConvertSidToStringSidW(sid, &mut buf) } == 0 ||
-        buf == (NULL as LPWSTR) {
-        return Err(unsafe { GetLastError() });
-    }
-
-    let buf_size = unsafe { libc::wcslen(buf) };
-    let sid_string = unsafe { WideString::from_ptr(buf, buf_size) };
-
-    unsafe { LocalFree(buf as HLOCAL) };
-
-    Ok(sid_string.to_string_lossy())
-}
 
 impl ProcessesRow {
     fn new() -> ProcessesRow {

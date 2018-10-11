@@ -13,6 +13,7 @@ use std::{
 };
 use winapi::{
     um::{
+        winbase::LocalFree,
         tlhelp32::{
             CreateToolhelp32Snapshot,
             TH32CS_SNAPPROCESS,
@@ -60,22 +61,26 @@ use winapi::{
             DWORD,
             FALSE,
             LPDWORD,
-            BOOL
+            BOOL,
+            HLOCAL
         },
         ntdef::{
             ULARGE_INTEGER_s,
             HANDLE,
             LPCSTR,
             LPWSTR,
+            NULL
         },
         winerror::{
             ERROR_ACCESS_DENIED,
             ERROR_INSUFFICIENT_BUFFER
-        }
+        },
+        sddl::ConvertSidToStringSidW
     },
     ctypes::c_char
-
 };
+use libc;
+use widestring::WideString;
 
 use tables::{
     ProcessesRow,
@@ -119,6 +124,22 @@ pub fn lookup_account_sid_internal (
             pe_use
         )
     }
+}
+
+/// Converts a raw SID into a SID string representation.
+pub fn sid_to_string(sid: PSID) -> Result<String, DWORD> {
+    let mut buf: LPWSTR = NULL as LPWSTR;
+    if unsafe { ConvertSidToStringSidW(sid, &mut buf) } == 0 ||
+        buf == (NULL as LPWSTR) {
+        return Err(unsafe { GetLastError() });
+    }
+
+    let buf_size = unsafe { libc::wcslen(buf) };
+    let sid_string = unsafe { WideString::from_ptr(buf, buf_size) };
+
+    unsafe { LocalFree(buf as HLOCAL) };
+
+    Ok(sid_string.to_string().unwrap_or("".to_owned()))
 }
 
 pub struct Reader {}
@@ -199,7 +220,7 @@ impl ProcessesRow {
     }
 
     pub fn get_uid_from_sid (sid: PSID) -> i64 {
-        if let Ok(sid_string) = utils::sid_to_string(sid) {
+        if let Ok(sid_string) = sid_to_string(sid) {
             let components : Vec<_> = sid_string.as_str().split('-').collect();
             if components.len() < 1 {
                 return MAX
@@ -256,7 +277,7 @@ impl ProcessesRow {
         let ret = unsafe {NetUserGetInfo(ptr::null(), uname_p, 3, user_buf_p)};
 
         if ret == NERR_UserNotFound {
-            if let Ok(sid_string) = utils::sid_to_string(sid) {
+            if let Ok(sid_string) = sid_to_string(sid) {
                 let components : Vec<_> = sid_string.as_str().split('-').collect();
                 gid = components[components.len()-1].parse::<i64>().unwrap_or(MAX);
             }

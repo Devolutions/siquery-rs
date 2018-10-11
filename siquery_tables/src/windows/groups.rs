@@ -19,8 +19,8 @@ use winapi::{
         lmcons::MAX_PREFERRED_LENGTH,
         ntdef::{
             LPCWSTR,
-            LPWSTR
-        }
+            LPWSTR,
+        },
     },
     um::{
         lmaccess::{
@@ -42,7 +42,7 @@ use winapi::{
             GetSidSubAuthorityCount
         },
         errhandlingapi::GetLastError
-    }
+    },
 };
 use widestring::WideString;
 use libc;
@@ -50,7 +50,7 @@ use libc;
 use tables::{
     GroupsRow,
 };
-use utils;
+use windows::processes;
 
 #[allow(non_upper_case_globals)]
 static NERR_Success: DWORD = 0;
@@ -196,7 +196,7 @@ impl GroupsRow {
                         gid: get_rid_from_sid(sid_p),
                         gid_signed: get_rid_from_sid(sid_p),
                         groupname: groupname.to_string().unwrap_or("".to_string()),
-                        group_sid: utils::sid_to_string(sid_p).unwrap_or("".to_string()),
+                        group_sid: processes::sid_to_string(sid_p).unwrap_or("".to_string()),
                         comment: comment.to_string().unwrap_or("".to_string())
                     }
                 );

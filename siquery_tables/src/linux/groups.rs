@@ -1,5 +1,4 @@
 use libc::{
-    int32_t,
     getgrent,
     setgrent,
     endgrent,
