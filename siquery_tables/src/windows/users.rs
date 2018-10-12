@@ -1,18 +1,14 @@
 use tables::Users;
 use winreg::RegKey;
 use winreg::enums::*;
-use winapi::um::winnt::PSID;
 use winapi::um::winnt::LPSTR;
-use winapi::um::winbase::LocalFree;
 use winapi::ctypes::*;
 use std::ffi::CStr;
 use std::ptr;
-use winapi::shared::minwindef::DWORD;
 use winapi::shared::lmcons::MAX_PREFERRED_LENGTH;
 use winapi::shared::minwindef::LPBYTE;
 use winapi::shared::minwindef::LPDWORD;
 use winapi::shared::ntdef::LPCWSTR;
-use winapi::shared::ntdef::LPWSTR;
 use winapi::shared::winerror::*;
 use std::mem;
 use winapi::um::lmaccess::NetUserEnum;
@@ -27,13 +23,31 @@ use winapi::um::lmapibuf::NetApiBufferFree;
 use winapi::shared::winerror::*;
 use winapi::ctypes::wchar_t;
 use winapi::shared::minwindef::BOOL;
-use utils::*;
+
+use winapi::{
+    um::{
+        winnt::PSID,
+        errhandlingapi::GetLastError,
+        winbase::LocalFree,
+        winbase::LocalReAlloc
+    },
+    shared::{
+        minwindef::{
+            DWORD,
+            HLOCAL
+        },
+        ntdef::{
+            LPWSTR,
+            NULL
+        },
+        sddl::ConvertSidToStringSidW
+    }
+};
 use widestring::WideString;
 use libc;
 
 const NERR_Success: u32 = 0;
-
-const COLUMN_NAMES: [&'static str; 17 ] = [
+const kWellKnownSids: [&'static str; 17 ] = [
     "S-1-5-1",
     "S-1-5-2",
     "S-1-5-3",
@@ -107,10 +121,10 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 
         if (ret == NERR_Success || ret == ERROR_MORE_DATA) &&
             user_buffer.as_mut_ptr() != ptr::null_mut() {
+
             let mut iter_buff: LPUSER_INFO_3 = unsafe { ptr::read(user_buffer.as_mut_ptr() as *mut _) };
 
-
-            for i in 0..unsafe { *dw_num_users_read } {
+            for i in 0..unsafe { *dw_num_users_read }  {
                 let mut user = Users::new();
                 let mut dw_detailed_user_info_level: c_ulong = 4;
                 let mut user_lvl_4buff: Vec<*mut u8> = Vec::with_capacity((mem::size_of::<USER_INFO_4>()) as usize);
@@ -128,8 +142,13 @@ fn process_local_acounts(users: &mut Vec<Users>) {
                     }
                     println!("with error code {:?}", ret);
 
-                    //todo incr iter_buff
-                    unsafe { iter_buff.add(mem::size_of::<USER_INFO_3>()) };
+                   unsafe {
+                       if i == 0 {
+                           iter_buff = iter_buff.add(1) as *mut _;
+                       } else {
+                           iter_buff = iter_buff.add(1) as *mut _;
+                       }
+                   }
                     continue;
                 }
 
@@ -139,6 +158,7 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 
                 unsafe {
                     if let Ok(username) = lpwstr_to_string((*iter_buff).usri3_name) {
+
                         user.username = username;
                     }
                     if let Ok(description) = get_user_description((*lp_user_info_4).usri4_comment) {
@@ -148,21 +168,22 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 
                 user.shell = "C:\\Windows\\System32\\cmd.exe".to_string();
                 user.type_ = "local".to_string();
+
                 if let Ok(sid_string) = sid_to_string(sid) {
                     user.uuid = sid_string.clone();
                     user.directory = get_user_home_dir(sid_string);
-                }
-                unsafe {
+                } unsafe {
                     user.uid = (*iter_buff).usri3_user_id as i64;
                     user.gid = (*iter_buff).usri3_primary_group_id as i64;
                     user.uid_signed = user.uid;
                     user.gid_signed = user.gid;
                 }
-
+                if user_lvl_4buff.as_mut_ptr() != ptr::null_mut() {
+                    unsafe { NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void)};
+                }
                 users.push(user);
                 unsafe {
-                    println!("ptr iter_buff {:?}", iter_buff);
-                    iter_buff.add((mem::size_of::<USER_INFO_3>()) * i as usize)
+                        iter_buff = iter_buff.add(1) as LPUSER_INFO_3;
                 };
             }
             // if there are no local users
@@ -180,18 +201,21 @@ fn process_local_acounts(users: &mut Vec<Users>) {
     }
 }
 
-fn process_roaming_profiles(){
+//todo
+fn process_roaming_profiles(users: &mut Vec<Users>){
+
 
 }
 
-// todo get home dir using RegKey
+//todo
 fn get_user_home_dir(sid_string: String)->String {
-    let key = format!(r#"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList{}"#, sid_string);
+    let key = format!(r#"Software\Microsoft\Windows NT\CurrentVersion\ProfileList\{}"#, sid_string);
     let hklm = &RegKey::predef(HKEY_LOCAL_MACHINE);
 
     if let Ok(subkey) = hklm.open_subkey_with_flags(key, KEY_READ) {
+        println!("got in ?");
         for _x in 0..subkey.enum_keys().count() {
-            println!("got in ?");
+
         }
     }
     "".to_string()
@@ -210,4 +234,19 @@ fn get_user_description (lpwstr: LPWSTR) -> Result<String, DWORD> {
         let string = WideString::from_ptr(lpwstr, buf_size);
         Ok(string.to_string_lossy())
     }
+}
+
+pub fn sid_to_string(sid: PSID) -> Result<String, DWORD> {
+    let mut buf: LPWSTR = NULL as LPWSTR;
+    if unsafe { ConvertSidToStringSidW(sid, &mut buf) } == 0 ||
+        buf == (NULL as LPWSTR) {
+        return Err(unsafe { GetLastError() });
+    }
+    lpwstr_to_string(buf)
+}
+
+pub fn lpwstr_to_string(lpwstr: LPWSTR) -> Result<String, DWORD> {
+    let buf_size = unsafe { libc::wcslen(lpwstr) };
+    let string = unsafe { WideString::from_ptr(lpwstr, buf_size) };
+    Ok(string.to_string_lossy())
 }
