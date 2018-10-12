@@ -13,7 +13,10 @@ use std::{
 };
 use winapi::{
     um::{
-        winbase::LocalFree,
+        winbase::{
+            LocalFree,
+            LookupAccountSidW
+        },
         tlhelp32::{
             CreateToolhelp32Snapshot,
             TH32CS_SNAPPROCESS,
@@ -67,7 +70,6 @@ use winapi::{
         ntdef::{
             ULARGE_INTEGER_s,
             HANDLE,
-            LPCSTR,
             LPWSTR,
             NULL
         },
@@ -87,25 +89,13 @@ use tables::{
     ProcessesIface
 };
 
-extern "C" {
-    pub fn LookupAccountSidW (
-        lpSystemName: LPCSTR,
-        Sid: PSID,
-        Name: LPWSTR,
-        cchName: LPDWORD,
-        ReferencedDomainName: LPWSTR,
-        cchReferencedDomainName: LPDWORD,
-        peUse: PSID_NAME_USE
-    ) -> BOOL;
-}
-
 #[allow(non_upper_case_globals)]
 static NERR_UserNotFound: DWORD = 2221;
 #[allow(non_upper_case_globals)]
 static NERR_Success: DWORD = 0;
 
 pub fn lookup_account_sid_internal (
-    lp_system_name: LPCSTR,
+    lp_system_name: LPWSTR,
     sid: PSID,
     name: LPWSTR,
     cch_name: LPDWORD,
@@ -245,7 +235,7 @@ impl ProcessesRow {
 
         // Get the buffers sizes.
         lookup_account_sid_internal(
-            ptr::null(),
+            ptr::null_mut(),
             sid,
             ptr::null_mut(),
             uname_size_p,
@@ -261,7 +251,7 @@ impl ProcessesRow {
         let dom_name_p: LPWSTR = dom_name.as_mut_ptr() as LPWSTR;
 
         if lookup_account_sid_internal(
-            ptr::null(),
+            ptr::null_mut(),
             sid,
             uname_p,
             uname_size_p,
