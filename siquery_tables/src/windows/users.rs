@@ -207,18 +207,16 @@ fn process_roaming_profiles(users: &mut Vec<Users>){
 
 }
 
-//todo
 fn get_user_home_dir(sid_string: String)->String {
     let key = format!(r#"Software\Microsoft\Windows NT\CurrentVersion\ProfileList\{}"#, sid_string);
     let hklm = &RegKey::predef(HKEY_LOCAL_MACHINE);
+    let mut home_dir: String = "".to_string();
 
     if let Ok(subkey) = hklm.open_subkey_with_flags(key, KEY_READ) {
-        println!("got in ?");
-        for _x in 0..subkey.enum_keys().count() {
-
-        }
+        home_dir = subkey.get_value("ProfileImagePath").unwrap_or("".to_string());
     }
-    "".to_string()
+
+    home_dir
 }
 
 fn from_wide_string(s: &[u16]) -> String {
