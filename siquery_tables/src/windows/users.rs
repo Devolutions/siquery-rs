@@ -99,13 +99,13 @@ impl Users {
     pub fn get_specific() -> Vec<Users> {
         let mut users: Vec<Users> = Vec::new();
         let mut processed_sid: Vec<String> = Vec::new();
-        process_local_acounts(&mut users, &mut processed_sid);
+        process_local_accounts(&mut users, &mut processed_sid);
         process_roaming_profiles(&mut users, &mut processed_sid);
         users
     }
 }
 
-fn process_local_acounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String>) {
+fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String>) {
     let mut dw_user_info_level: c_ulong = 3;
 
     let mut dw_num_users_read_int = 0u32;
@@ -150,12 +150,14 @@ fn process_local_acounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String>
                 };
 
                 if ret != NERR_Success || user_lvl_4buff.as_mut_ptr() == ptr::null_mut() {
-                    if user_lvl_4buff.as_mut_ptr() != ptr::null_mut() {
-                        unsafe { NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void) };
-                    }
-                    println!("with error code {:?}", ret);
+                    unsafe {
+                        if user_lvl_4buff.as_mut_ptr() != ptr::null_mut() {
+                            NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void);
+                        }
+                        println!("with error code {:?}", ret);
 
-                    unsafe { iter_buff = iter_buff.add(1) as *mut _; }
+                        iter_buff = iter_buff.add(1) as *mut _;
+                    }
                     continue;
                 }
 
@@ -174,22 +176,25 @@ fn process_local_acounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String>
 
                 user.shell = "C:\\Windows\\System32\\cmd.exe".to_string();
                 user.type_ = "local".to_string();
-
                 if let Ok(sid_string) = sid_to_string(sid) {
                     user.uuid = sid_string.clone();
                     processed_sid.push(sid_string.clone());
                     user.directory = get_user_home_dir(sid_string);
-                } unsafe {
+                }
+                unsafe {
                     user.uid = (*iter_buff).usri3_user_id as i64;
                     user.gid = (*iter_buff).usri3_primary_group_id as i64;
                     user.uid_signed = user.uid;
                     user.gid_signed = user.gid;
                 }
-                if user_lvl_4buff.as_mut_ptr() != ptr::null_mut() {
-                    unsafe { NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void)};
-                }
                 users.push(user);
-                unsafe { iter_buff = iter_buff.add(1) as LPUSER_INFO_3; };
+
+                unsafe {
+                    iter_buff = iter_buff.add(1) as LPUSER_INFO_3;
+                    if user_lvl_4buff.as_mut_ptr() != ptr::null_mut() {
+                        NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void);
+                    }
+                }
             }
         // if there are no local users
         } else {
@@ -331,4 +336,4 @@ pub fn lookup_account_sid_internal (
 }
 
 //todo
-pub fn get_roaming_acount_user_name() {}
+pub fn get_roaming_profiles_user_name() {}
