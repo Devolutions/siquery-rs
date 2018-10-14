@@ -51,6 +51,8 @@ cfg_if! {
         extern crate winreg;
         #[macro_use]
         extern crate winapi;
+        extern crate widestring;
+        extern crate libc;
 
         pub mod windows;
         pub use windows as sys;

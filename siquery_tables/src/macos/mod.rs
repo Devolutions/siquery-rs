@@ -13,6 +13,8 @@ use serde_json;
 #[cfg(feature = "etc_services")]    use tables::EtcServicesIface;
 #[cfg(feature = "etc_protocols")]   use tables::EtcProtocolsIface;
 #[cfg(feature = "mounts")]          mod mounts;
+#[cfg(feature = "groups")]          mod groups;
+
 
 pub struct EtcHostsReader {}
 #[cfg(feature = "etc_hosts")]
