@@ -23,10 +23,11 @@ use winapi::um::lmapibuf::NetApiBufferFree;
 use winapi::shared::winerror::*;
 use winapi::ctypes::wchar_t;
 use winapi::shared::minwindef::BOOL;
+use std::i64::MAX;
 
 use winapi::{
     um::{
-        winnt::PSID,
+        winnt::{PSID,PSID_NAME_USE},
         errhandlingapi::GetLastError,
         winbase::LocalFree,
         winbase::LocalReAlloc
@@ -38,6 +39,7 @@ use winapi::{
         },
         ntdef::{
             LPWSTR,
+            LPCSTR,
             NULL
         },
         sddl::ConvertSidToStringSidW
@@ -45,6 +47,18 @@ use winapi::{
 };
 use widestring::WideString;
 use libc;
+
+extern "C" {
+    pub fn LookupAccountSidW (
+        lpSystemName: LPCSTR,
+        Sid: PSID,
+        Name: LPWSTR,
+        cchName: LPDWORD,
+        ReferencedDomainName: LPWSTR,
+        cchReferencedDomainName: LPDWORD,
+        peUse: PSID_NAME_USE
+    ) -> BOOL;
+}
 
 const NERR_Success: u32 = 0;
 const kWellKnownSids: [&'static str; 17 ] = [
@@ -84,15 +98,14 @@ impl Users {
 
     pub fn get_specific() -> Vec<Users> {
         let mut users: Vec<Users> = Vec::new();
-        process_local_acounts(&mut users);
-
-        let mut user = Users::new();
-
+        let mut processed_sid: Vec<String> = Vec::new();
+        process_local_acounts(&mut users, &mut processed_sid);
+        process_roaming_profiles(&mut users, &mut processed_sid);
         users
     }
 }
 
-fn process_local_acounts(users: &mut Vec<Users>) {
+fn process_local_acounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String>) {
     let mut dw_user_info_level: c_ulong = 3;
 
     let mut dw_num_users_read_int = 0u32;
@@ -142,13 +155,7 @@ fn process_local_acounts(users: &mut Vec<Users>) {
                     }
                     println!("with error code {:?}", ret);
 
-                   unsafe {
-                       if i == 0 {
-                           iter_buff = iter_buff.add(1) as *mut _;
-                       } else {
-                           iter_buff = iter_buff.add(1) as *mut _;
-                       }
-                   }
+                    unsafe { iter_buff = iter_buff.add(1) as *mut _; }
                     continue;
                 }
 
@@ -158,7 +165,6 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 
                 unsafe {
                     if let Ok(username) = lpwstr_to_string((*iter_buff).usri3_name) {
-
                         user.username = username;
                     }
                     if let Ok(description) = get_user_description((*lp_user_info_4).usri4_comment) {
@@ -171,6 +177,7 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 
                 if let Ok(sid_string) = sid_to_string(sid) {
                     user.uuid = sid_string.clone();
+                    processed_sid.push(sid_string.clone());
                     user.directory = get_user_home_dir(sid_string);
                 } unsafe {
                     user.uid = (*iter_buff).usri3_user_id as i64;
@@ -182,11 +189,9 @@ fn process_local_acounts(users: &mut Vec<Users>) {
                     unsafe { NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void)};
                 }
                 users.push(user);
-                unsafe {
-                        iter_buff = iter_buff.add(1) as LPUSER_INFO_3;
-                };
+                unsafe { iter_buff = iter_buff.add(1) as LPUSER_INFO_3; };
             }
-            // if there are no local users
+        // if there are no local users
         } else {
             println!("NetUserEnum failed with {:?}", ret);
         }
@@ -202,9 +207,54 @@ fn process_local_acounts(users: &mut Vec<Users>) {
 }
 
 //todo
-fn process_roaming_profiles(users: &mut Vec<Users>){
+fn process_roaming_profiles(users: &mut Vec<Users>, processed_sid: &mut Vec<String>){
+    let key = r#"Software\Microsoft\Windows NT\CurrentVersion\ProfileList"#;
+    let hklm = &RegKey::predef(HKEY_LOCAL_MACHINE);
+    let processed_sid_iter = processed_sid.iter();
 
+    if let Ok(profile) = hklm.open_subkey_with_flags(key, KEY_READ) {
+        let mut type_ : String = "".to_string();
 
+        for _x in 0..profile.enum_keys().count() {
+            let mut user = Users::new();
+            let type_key = profile.enum_keys().nth(_x).unwrap();
+
+            if type_ == "subkey".to_string() {
+                continue;
+            }
+
+            let mut processed = false;
+            if let Ok(sid_string) = type_key {
+                for sid in processed_sid.iter() {
+                    if *sid == sid_string {
+                        processed = true;
+                        continue;
+                    }
+                }
+                if !processed {
+                    user.uuid = sid_string.clone();
+                    user.directory = get_user_home_dir(sid_string.clone());
+                    user.uid = get_uid_from_sid(sid_string.clone());
+                    user.gid = user.uid;
+                    user.uid_signed = user.uid;
+                    user.gid_signed = user.gid;
+                    let mut known_sid = false;
+                    for sid in kWellKnownSids.iter(){
+                        if *sid == sid_string.as_str() {
+                            user.type_ = "special".to_string();
+                            known_sid = true;
+                        }
+                    }
+                    if !known_sid {
+                        user.type_ = "roaming".to_string();
+                    }
+                    user.shell = "C:\\Windows\\system32\\cmd.exe".to_string();
+                    user.description = "".to_string();
+                    users.push(user);
+                }
+            }
+        }
+    }
 }
 
 fn get_user_home_dir(sid_string: String)->String {
@@ -248,3 +298,37 @@ pub fn lpwstr_to_string(lpwstr: LPWSTR) -> Result<String, DWORD> {
     let string = unsafe { WideString::from_ptr(lpwstr, buf_size) };
     Ok(string.to_string_lossy())
 }
+
+pub fn get_uid_from_sid (sid_string: String) -> i64 {
+    let components: Vec<_> = sid_string.as_str().split('-').collect();
+    if components.len() < 1 {
+        return MAX
+    }
+    let uid = components[components.len() - 1].parse::<i64>().unwrap_or(MAX);
+    return uid
+}
+
+pub fn lookup_account_sid_internal (
+    lp_system_name: LPCSTR,
+    sid: PSID,
+    name: LPWSTR,
+    cch_name: LPDWORD,
+    referenced_domain_name: LPWSTR,
+    cch_referenced_domain_name: LPDWORD,
+    pe_use: PSID_NAME_USE
+) -> BOOL {
+    unsafe {
+        LookupAccountSidW (
+            lp_system_name,
+            sid,
+            name,
+            cch_name,
+            referenced_domain_name,
+            cch_referenced_domain_name,
+            pe_use
+        )
+    }
+}
+
+//todo
+pub fn get_roaming_acount_user_name() {}
