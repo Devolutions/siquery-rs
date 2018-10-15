@@ -27,6 +27,7 @@ use std::env;
 #[cfg(feature = "wmi_monitors")] mod wmi_monitors;
 #[cfg(feature = "wmi_keyboard")] mod wmi_keyboard;
 #[cfg(feature = "wmi_pointing_device")] mod wmi_pointing_device;
+#[cfg(feature = "users")] mod users;
 #[cfg(feature = "groups")] mod groups;
 #[cfg(feature = "process_open_sockets")] #[cfg(not(fuzzing))] mod process_open_sockets;
 #[cfg(feature = "processes")] #[cfg(not(fuzzing))] mod processes;

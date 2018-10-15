@@ -219,6 +219,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
             let table = MountsRow::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "users")]
+        "users" => {
+            let table = Users::get_specific();
+            select(&table, columns)
+        }
         #[cfg(feature = "groups")]
         "groups" => {
             let table = GroupsRow::get_specific();
@@ -469,6 +474,12 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         "mounts" => {
             let column_names = MountsRow::get_columns_name();
             let column_types = MountsRow::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
+        #[cfg(feature = "users")]
+        "users" => {
+            let column_names = Users::get_columns_name();
+            let column_types = Users::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         #[cfg(feature = "groups")]
