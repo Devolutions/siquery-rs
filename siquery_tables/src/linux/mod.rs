@@ -15,7 +15,8 @@ use serde_json;
 #[cfg(feature = "process_open_sockets")] mod process_open_sockets;
 #[cfg(feature = "processes")] mod processes;
 #[cfg(feature = "mounts")] mod mounts;
-#[cfg(feature = "groups")]          mod groups;
+#[cfg(feature = "groups")] mod groups;
+#[cfg(feature = "users")] mod users;
 
 pub struct EtcHostsReader {}
 #[cfg(feature = "etc_hosts")]
