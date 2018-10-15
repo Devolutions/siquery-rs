@@ -122,6 +122,8 @@ processes | ✔ | ✔ | ✔
 process_open_sockets | ✔ | ✔ | 
 process_memory_map | ✔ | ✔ | 
 products | ✔ |  | 
+users | ✔ |  | 
+groups | ✔ | ✔ | ✔
 process_envs |  | ✔ | ✔
 mounts |  | ✔ | ✔
 wmi_computer_info | ✔ |  | 
