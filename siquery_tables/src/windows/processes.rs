@@ -3,26 +3,134 @@
 extern crate winapi;
 
 use utils;
-use std::os::raw::c_void;
-use winapi::um::tlhelp32::*;
-use winapi::shared::minwindef::*;
-use std::mem::size_of;
-use winapi::um::handleapi::*;
-use winapi::um::winnt::*;
-use std::ptr;
-use winapi::shared::ntdef::*;
-use winapi::um::errhandlingapi::*;
-use winapi::um::processthreadsapi::*;
-use winapi::shared::winerror::*;
-use winapi::um::psapi::*;
-use winapi::shared::minwindef::FALSE;
-use winapi::shared::ntdef::HANDLE;
-use winapi::um::libloaderapi::*;
-use winapi::um::securitybaseapi::*;
-use std::process::Command;
-use std::borrow::Borrow;
+use std::{
+    os::raw::c_void,
+    mem::size_of,
+    ptr,
+    process::Command,
+    borrow::Borrow,
+    i64::MAX
+};
+use winapi::{
+    um::{
+        winbase::{
+            LocalFree,
+            LookupAccountSidW
+        },
+        tlhelp32::{
+            CreateToolhelp32Snapshot,
+            TH32CS_SNAPPROCESS,
+            Process32First,
+            Process32Next,
+            PROCESSENTRY32,
+        },
+        winnt::{
+            PROCESS_QUERY_INFORMATION,
+            PROCESS_VM_READ,
+            TOKEN_OWNER,
+            TOKEN_READ,
+            TokenUser,
+            TokenElevation,
+            PSID,
+            TOKEN_USER,
+            TOKEN_ELEVATION,
+            PSID_NAME_USE,
+            SID_NAME_USE,
+            SidTypeUnknown
+        },
+        handleapi::CloseHandle,
+        errhandlingapi::GetLastError,
+        processthreadsapi::{
+            GetCurrentProcessId,
+            GetCurrentProcess,
+            OpenProcess,
+            GetProcessTimes,
+            OpenProcessToken
+        },
+        psapi::GetModuleFileNameExW,
+        libloaderapi::GetModuleFileNameW,
+        securitybaseapi::GetTokenInformation,
+        lmaccess::{
+            NetUserGetInfo,
+            USER_INFO_3,
+            LPUSER_INFO_3
+        }
+    },
+    shared::{
+        minwindef::{
+            MAX_PATH,
+            HINSTANCE__,
+            FILETIME,
+            DWORD,
+            FALSE,
+            LPDWORD,
+            BOOL,
+            HLOCAL
+        },
+        ntdef::{
+            ULARGE_INTEGER_s,
+            HANDLE,
+            LPWSTR,
+            NULL
+        },
+        winerror::{
+            ERROR_ACCESS_DENIED,
+            ERROR_INSUFFICIENT_BUFFER
+        },
+        sddl::ConvertSidToStringSidW
+    },
+    ctypes::c_char
+};
+use libc;
+use widestring::WideString;
 
-use tables::{ProcessesRow,ProcessesIface};
+use tables::{
+    ProcessesRow,
+    ProcessesIface
+};
+
+#[allow(non_upper_case_globals)]
+static NERR_UserNotFound: DWORD = 2221;
+#[allow(non_upper_case_globals)]
+static NERR_Success: DWORD = 0;
+
+pub fn lookup_account_sid_internal (
+    lp_system_name: LPWSTR,
+    sid: PSID,
+    name: LPWSTR,
+    cch_name: LPDWORD,
+    referenced_domain_name: LPWSTR,
+    cch_referenced_domain_name: LPDWORD,
+    pe_use: PSID_NAME_USE
+) -> BOOL {
+    unsafe {
+        LookupAccountSidW (
+            lp_system_name,
+            sid,
+            name,
+            cch_name,
+            referenced_domain_name,
+            cch_referenced_domain_name,
+            pe_use
+        )
+    }
+}
+
+/// Converts a raw SID into a SID string representation.
+pub fn sid_to_string(sid: PSID) -> Result<String, DWORD> {
+    let mut buf: LPWSTR = NULL as LPWSTR;
+    if unsafe { ConvertSidToStringSidW(sid, &mut buf) } == 0 ||
+        buf == (NULL as LPWSTR) {
+        return Err(unsafe { GetLastError() });
+    }
+
+    let buf_size = unsafe { libc::wcslen(buf) };
+    let sid_string = unsafe { WideString::from_ptr(buf, buf_size) };
+
+    unsafe { LocalFree(buf as HLOCAL) };
+
+    Ok(sid_string.to_string().unwrap_or("".to_owned()))
+}
 
 pub struct Reader {}
 impl ProcessesIface for Reader {
@@ -43,8 +151,8 @@ impl ProcessesRow {
             state: "".to_owned(),   // NA for windows
             cwd: "".to_owned(), //TODO
             root: "".to_owned(),    //TODO
-            uid: 0, //TODO
-            gid: 0, //TODO
+            uid: -1,
+            gid: -1,
             euid:  -1,  // NA for windows
             egid: -1,   // NA for windows
             suid: -1,   // NA for windows
@@ -101,8 +209,74 @@ impl ProcessesRow {
         pids
     }
 
-    //TODO getUidFromSid()
-    //TODO getGidFromSid()
+    pub fn get_uid_from_sid (sid: PSID) -> i64 {
+        if let Ok(sid_string) = sid_to_string(sid) {
+            let components : Vec<_> = sid_string.as_str().split('-').collect();
+            if components.len() < 1 {
+                return MAX
+            }
+            let uid = components[components.len()-1].parse::<i64>().unwrap_or(MAX);
+            return uid
+        } else {
+            return MAX
+        }
+    }
+
+    pub fn get_gid_from_sid (sid: PSID) -> i64 {
+        let mut gid = -1;
+
+        // Parameters.
+        let mut e_use: SID_NAME_USE = SidTypeUnknown as SID_NAME_USE;
+        let e_use_p: PSID_NAME_USE = &mut e_use as PSID_NAME_USE;
+        let mut uname_size: DWORD = 0u32;
+        let uname_size_p: LPDWORD = &mut uname_size as LPDWORD;
+        let mut dom_name_size: DWORD = 0u32;
+        let dom_name_size_p: LPDWORD = &mut dom_name_size as LPDWORD;
+
+        // Get the buffers sizes.
+        lookup_account_sid_internal(
+            ptr::null_mut(),
+            sid,
+            ptr::null_mut(),
+            uname_size_p,
+            ptr::null_mut(),
+            dom_name_size_p,
+            e_use_p
+        );
+
+        // Buffers.
+        let mut uname: Vec<u16> = Vec::with_capacity(uname_size as usize);
+        let uname_p: LPWSTR = uname.as_mut_ptr() as LPWSTR;
+        let mut dom_name: Vec<u16> = Vec::with_capacity(dom_name_size as usize);
+        let dom_name_p: LPWSTR = dom_name.as_mut_ptr() as LPWSTR;
+
+        if lookup_account_sid_internal(
+            ptr::null_mut(),
+            sid,
+            uname_p,
+            uname_size_p,
+            dom_name_p,
+            dom_name_size_p,
+            e_use_p
+        ) == 0 {
+            return -1
+        };
+
+        let mut user_buf: Vec<u8> = Vec::with_capacity(size_of::<USER_INFO_3>());
+        let user_buf_p: *mut *mut u8 = &mut user_buf.as_mut_ptr();
+        let ret = unsafe {NetUserGetInfo(ptr::null(), uname_p, 3, user_buf_p)};
+
+        if ret == NERR_UserNotFound {
+            if let Ok(sid_string) = sid_to_string(sid) {
+                let components : Vec<_> = sid_string.as_str().split('-').collect();
+                gid = components[components.len()-1].parse::<i64>().unwrap_or(MAX);
+            }
+        } else if ret == NERR_Success {
+            let user_info_3_p: LPUSER_INFO_3 = unsafe { ptr::read(user_buf_p as *mut _) };
+            gid = unsafe{*user_info_3_p}.usri3_primary_group_id as i64;
+        }
+        gid
+    }
 
     pub(crate) fn get_specific_ex (reader: &ProcessesIface) -> Vec<ProcessesRow> {
         let mut out: Vec<ProcessesRow> = Vec::new();
@@ -141,11 +315,8 @@ impl ProcessesRow {
                     "ProcessId" => {
 
                         let pid = v.to_owned().parse::<i64>().unwrap_or(-1);
-                        let null_pointer = ptr::null::<c_void>() as *mut c_void;
                         processes_row.pid = pid;
                         let mut h_process: *mut winapi::ctypes::c_void = 0 as *mut c_void;
-                        let gid : i64 = -1;
-                        let uid : i64 = -1;
                         if pid == current_pid {
                             h_process = unsafe {GetCurrentProcess()};
                         } else {
@@ -158,11 +329,11 @@ impl ProcessesRow {
                         let mut file_name: Vec<u16> = Vec::with_capacity(MAX_PATH as usize);
                         if pid == current_pid {
                             unsafe{
-                                GetModuleFileNameW(null_pointer.clone() as *mut HINSTANCE__, file_name.as_mut_ptr(), MAX_PATH as u32);
+                                GetModuleFileNameW(ptr::null_mut() as *mut HINSTANCE__, file_name.as_mut_ptr(), MAX_PATH as u32);
                             };
                         } else {
                             unsafe{
-                                GetModuleFileNameExW(h_process, null_pointer.clone() as *mut HINSTANCE__, file_name.as_mut_ptr(), MAX_PATH as u32);
+                                GetModuleFileNameExW(h_process, ptr::null_mut() as *mut HINSTANCE__, file_name.as_mut_ptr(), MAX_PATH as u32);
                             };
                         }
                         processes_row.cwd = String::from_utf16(&file_name).unwrap_or("could not parse cwd".to_string());
@@ -200,44 +371,41 @@ impl ProcessesRow {
                             processes_row.system_time = 0;//TODO QuadPart of utime / 10000000
                             processes_row.start_time = 0;//TODO filetime to unix time
                         }
-                        let mut tok: *mut HANDLE = &mut null_pointer.clone();
-                        let mut tok_owner: TOKEN_OWNER = TOKEN_OWNER {
-                            Owner: 0 as *mut c_void,
-                        };
-                        let mut buffer: Vec<u8> = Vec::new();
+
+                        let mut tok: *mut HANDLE = &mut ptr::null_mut();
+                        let mut tok_owner: Vec<c_char> = Vec::with_capacity(size_of::<TOKEN_OWNER>());
                         let mut ret = unsafe {OpenProcessToken(h_process, TOKEN_READ, tok)};
-                        if ret != 0 && tok != &mut null_pointer.clone() {
+                        if ret != 0 && tok != &mut ptr::null_mut() {
                             let mut tok_owner_buff_len : u32 = 0;
-                            ret = unsafe {GetTokenInformation(*tok, TokenUser, null_pointer.clone(), 0, &mut tok_owner_buff_len)};
+                            ret = unsafe {GetTokenInformation(*tok, TokenUser, ptr::null_mut(), 0, &mut tok_owner_buff_len)};
                             if ret == 0 && unsafe{GetLastError()} == ERROR_INSUFFICIENT_BUFFER {
-                                buffer = Vec::with_capacity(tok_owner_buff_len as usize);
-                                ret = unsafe{GetTokenInformation(*tok, TokenUser,buffer.as_mut_ptr() as *mut c_void , tok_owner_buff_len, &mut tok_owner_buff_len)};
+                                tok_owner = Vec::with_capacity(tok_owner_buff_len as usize);
+                                ret = unsafe{GetTokenInformation(*tok, TokenUser,tok_owner.as_mut_ptr() as *mut c_void , tok_owner_buff_len, &mut tok_owner_buff_len)};
+                                unsafe {tok_owner.set_len(tok_owner_buff_len as usize)};
+
                             }
                             // Check if the process is using an elevated token
-                            let elevation = TOKEN_ELEVATION{
+                            let mut elevation = TOKEN_ELEVATION {
                                 TokenIsElevated: 0
                             };
-
                             let mut cb_size: DWORD = size_of::<TOKEN_ELEVATION>() as u32;
-                            if unsafe {GetTokenInformation(*tok, TokenElevation, buffer.as_mut_ptr() as *mut c_void, size_of::<TOKEN_ELEVATION>() as u32, &mut cb_size)} != 0 {
+                            if unsafe {GetTokenInformation(*tok, TokenElevation, &mut elevation as *mut _ as *mut c_void, size_of::<TOKEN_ELEVATION>() as u32, &mut cb_size)} != 0 {
                                 processes_row.is_elevated_token = elevation.TokenIsElevated as i32;
                             }
-                            if processes_row.uid != 0 && ret != 0 && tok_owner.Owner != 0 as *mut c_void {
-                                //TODO let sid = &mut tok_owner;
-                                processes_row.uid = 0;//TODO getUidFromSid(sid);
-                                processes_row.gid = 0;//TODO INTEGER(getGidFromSid(sid));
-                            } else {
-                                processes_row.uid = uid;
-                                processes_row.gid = gid;
+                        }
+                        if processes_row.uid != 0 && ret != 0 && tok_owner.len() != 0 {
+                            let sid_ptr = tok_owner.as_ptr() as *mut TOKEN_USER;
+                            let sid = unsafe{*sid_ptr}.User.Sid;
+                                processes_row.uid = ProcessesRow::get_uid_from_sid(sid);
+                                processes_row.gid = ProcessesRow::get_gid_from_sid(sid);
                             }
-                            if h_process != null_pointer.clone() {
+                        if h_process != ptr::null_mut() {
                                 unsafe {CloseHandle(h_process)};
                             }
-                            if tok != &mut null_pointer.clone() {
+                        if tok != &mut ptr::null_mut() {
                                 unsafe {CloseHandle(*tok)};
-                                tok = &mut null_pointer.clone();
+                                tok = &mut ptr::null_mut();
                             }
-                        };
                     },
                     "ExecutionState" => {
                         processes_row.state = v;

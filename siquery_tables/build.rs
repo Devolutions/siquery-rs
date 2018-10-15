@@ -14,6 +14,8 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "process_open_sockets",
     "process_memory_map",
     "products",
+    "users",
+    "groups",
     "wmi_computer_info",
     "wmi_os_version",
     "wmi_printers",
@@ -31,7 +33,6 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "wmi_monitors",
     "wmi_keyboard",
     "wmi_pointing_device",
-    "users"
 ];
 
 const LINUX_TABLES: &'static [(&'static str)] = &[
@@ -48,6 +49,7 @@ const LINUX_TABLES: &'static [(&'static str)] = &[
     "process_memory_map",
     "process_envs",
     "mounts",
+    "groups"
 ];
 
 const MACOS_TABLES: &'static [(&'static str)] = &[
@@ -60,6 +62,7 @@ const MACOS_TABLES: &'static [(&'static str)] = &[
     "system_info",
     "uptime",
     "mounts",
+    "groups"
 ];
 
 fn emit_features(features: &'static [(&'static str)]) {

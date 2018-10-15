@@ -3228,6 +3228,70 @@ impl Table for Users {
     }
 }
 
+#[cfg(feature = "groups")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct GroupsRow {
+    pub gid: i64,
+    pub gid_signed: i64,
+    pub groupname: String,
+    pub group_sid: String,
+    pub comment: String,
+}}
+
+#[cfg(feature = "groups")]
+impl GroupsRow {
+    const GID_ID: u64 = 0x00000001;
+    const GID_SIGNED_ID: u64 = 0x00000002;
+    const GROUPNAME_ID: u64 = 0x00000004;
+    const GROUP_SID_ID: u64 = 0x00000008;
+    const COMMENT_ID: u64 = 0x00000010;
+}
+
+#[cfg(feature = "groups")]
+impl Table for GroupsRow {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "gid",
+        "gid_signed",
+        "groupname",
+        "group_sid",
+        "comment"
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "gid" => Value::from(self.gid),
+            "gid_signed" => Value::from(self.gid_signed),
+            "groupname" => Value::from(self.groupname.to_owned()),
+            "group_sid" => Value::from(self.group_sid.to_owned()),
+            "comment" => Value::from(self.comment.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::GID_ID => Value::from(self.gid),
+            Self::GID_SIGNED_ID => Value::from(self.gid_signed),
+            Self::GROUPNAME_ID => Value::from(self.groupname.to_owned()),
+            Self::GROUP_SID_ID => Value::from(self.group_sid.to_owned()),
+            Self::COMMENT_ID => Value::from(self.comment.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "gid" => Self::GID_ID,
+            "gid_signed" => Self::GID_SIGNED_ID,
+            "groupname" => Self::GROUPNAME_ID,
+            "group_sid" => Self::GROUP_SID_ID,
+            "comment" => Self::COMMENT_ID,
+            _ => 0
+        }
+    }
+}
+
 pub fn get_table_list() -> Vec<String> {
     vec![
         #[cfg(feature = "etc_hosts")]
@@ -3256,6 +3320,10 @@ pub fn get_table_list() -> Vec<String> {
             "process_memory_map".to_string(),
         #[cfg(feature = "products")]
             "products".to_string(),
+        #[cfg(feature = "users")]
+            "users".to_string(),
+        #[cfg(feature = "groups")]
+            "groups".to_string(),
         #[cfg(feature = "wmi_computer_info")]
             "wmi_computer_info".to_string(),
         #[cfg(feature = "wmi_os_version")]
@@ -3294,8 +3362,6 @@ pub fn get_table_list() -> Vec<String> {
             "process_envs".to_string(),
         #[cfg(feature = "mounts")]
             "mounts".to_string(),
-        #[cfg(feature = "users")]
-            "users".to_string(),
         #[cfg(test)]
             "Dummy".to_string(),
     ]

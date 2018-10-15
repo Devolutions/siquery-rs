@@ -4,15 +4,20 @@
 
 use libc::*;
 use libc::timeval;
-use std::collections::HashMap;
-use std::mem;
-use std::ptr;
-use tables::ProcessesRow;
 use byteorder::{LittleEndian, ReadBytesExt};
-use std::path::Path;
-use std::ffi::CStr;
-use std::str;
-use std::ffi::OsStr;
+use std::{
+    mem,
+    ptr,
+    path::Path,
+    ffi::{
+        CStr,
+        OsStr
+    },
+    str,
+    collections::HashMap
+};
+
+use tables::ProcessesRow;
 
 pub struct ProcCred {
     parent: uint32_t,
