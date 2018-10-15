@@ -90,13 +90,13 @@ fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String
     let mut resume_handle_int = 0u32;
     let resume_handle: *mut c_ulong = &mut resume_handle_int as *mut c_ulong;
 
-    let mut user_buffer: Vec<*mut u8> = Vec::with_capacity((MAX_PREFERRED_LENGTH) as usize);
+    let mut user_buffer: Vec<u8> = Vec::with_capacity((MAX_PREFERRED_LENGTH) as usize);
     loop {
         let mut ret = unsafe {
             NetUserEnum(ptr::null(),
                         dw_user_info_level,
                         0 as DWORD,
-                        user_buffer.as_mut_ptr(),
+                        user_buffer.as_mut_ptr() as *mut _ as *mut _,
                         MAX_PREFERRED_LENGTH,
                         dw_num_users_read,
                         dw_total_users,
