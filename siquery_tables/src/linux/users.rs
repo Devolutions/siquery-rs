@@ -50,18 +50,14 @@ pub fn gen_users(users: &mut Vec<Users>, pwd: *mut passwd) {
         if (*pwd).pw_name != ptr::null_mut() {
             user.username = c_string_to_string((*pwd).pw_name);
         }
-
         if (*pwd).pw_gecos != ptr::null_mut() {
             user.description = c_string_to_string((*pwd).pw_gecos);
-
         }
         if (*pwd).pw_dir != ptr::null_mut() {
             user.directory = c_string_to_string((*pwd).pw_dir);
-
         }
         if (*pwd).pw_shell != ptr::null_mut() {
             user.shell = c_string_to_string((*pwd).pw_shell);
-
         }
         user.uuid = "".to_string();
         user.type_ = "".to_string();
