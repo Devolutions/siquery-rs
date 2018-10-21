@@ -15,6 +15,7 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "process_memory_map",
     "products",
     "users",
+    "logged_in_users",
     "groups",
     "wmi_computer_info",
     "wmi_os_version",

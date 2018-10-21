@@ -3228,6 +3228,77 @@ impl Table for Users {
     }
 }
 
+#[cfg(feature = "logged_in_users")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct LoggedInUsers {
+    pub type_: String,
+    pub user: String,
+    pub tty: String,
+    pub host: String,
+    pub time: i64,
+    pub pid: i64,
+}}
+
+#[cfg(feature = "logged_in_users")]
+impl LoggedInUsers {
+    const TYPE_ID: u64 = 0x00000001;
+    const USER_ID: u64 = 0x00000002;
+    const TTY_ID:  u64 = 0x00000004;
+    const HOST_ID: u64 = 0x00000008;
+    const TIME_ID: u64 = 0x00000010;
+    const PID_ID: u64 = 0x00000020;
+}
+
+#[cfg(feature = "logged_in_users")]
+impl Table for LoggedInUsers {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "type_",
+        "user",
+        "tty",
+        "host",
+        "time",
+        "pid",
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "type_" => Value::from(self.type_.to_owned()),
+            "user" => Value::from(self.user.to_owned()),
+            "tty" => Value::from(self.tty.to_owned()),
+            "host" => Value::from(self.host.to_owned()),
+            "time" => Value::from(self.time),
+            "pid" => Value::from(self.pid),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::TYPE_ID => Value::from(self.type_.to_owned()),
+            Self::USER_ID => Value::from(self.user.to_owned()),
+            Self::TTY_ID => Value::from(self.tty.to_owned()),
+            Self::HOST_ID => Value::from(self.host.to_owned()),
+            Self::TIME_ID => Value::from(self.time),
+            Self::PID_ID => Value::from(self.pid),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "type_" => Self::TYPE_ID,
+            "user" => Self::USER_ID,
+            "tty" => Self::TTY_ID,
+            "host" => Self::HOST_ID,
+            "time" => Self::TIME_ID,
+            "pid" => Self::PID_ID,
+            _ => 0
+        }
+    }
+}
+
+
 #[cfg(feature = "groups")]
 table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -3322,6 +3393,8 @@ pub fn get_table_list() -> Vec<String> {
             "products".to_string(),
         #[cfg(feature = "users")]
             "users".to_string(),
+        #[cfg(feature = "logged_in_users")]
+            "logged_in_users".to_string(),
         #[cfg(feature = "groups")]
             "groups".to_string(),
         #[cfg(feature = "wmi_computer_info")]
