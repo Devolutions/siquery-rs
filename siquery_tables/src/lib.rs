@@ -43,6 +43,9 @@ cfg_if! {
         extern crate uname;
         extern crate libc;
         extern crate byteorder;
+        #[macro_use]
+extern crate objc;
+extern crate objc_foundation;
 
         pub mod macos;
         pub use macos as sys;
