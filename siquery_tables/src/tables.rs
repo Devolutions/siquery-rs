@@ -3136,6 +3136,99 @@ impl Table for MountsRow {
     }
 }
 
+#[cfg(feature = "users")]
+table_properties!{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Users {
+    pub uid : i64,
+    pub gid: i64,
+    pub uid_signed: i64,
+    pub gid_signed: i64,
+    pub username: String,
+    pub description: String,
+    pub directory: String,
+    pub shell: String,
+    pub uuid: String,
+    pub type_: String,
+}}
+
+#[cfg(feature = "users")]
+impl Users {
+    const UID_ID: u64 = 0x00000001;
+    const GID_ID: u64 = 0x00000002;
+    const UID_SIGNED_ID: u64 = 0x00000004;
+    const GID_SIGNED_ID: u64 = 0x00000008;
+    const USERNAME_ID: u64 = 0x00000010;
+    const DESCRIPTION_SIGNED_ID: u64 = 0x00000020;
+    const DIRECTORY_ID: u64 = 0x00000040;
+    const SHELL_ID: u64 = 0x00000080;
+    const UUID_SIGNED_ID: u64 = 0x00000100;
+    const TYPE_ID: u64 = 0x00000200;
+}
+
+#[cfg(feature = "users")]
+impl Table for Users {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "uid",
+        "gid",
+        "uid_signed",
+        "gid_signed",
+        "username",
+        "description",
+        "directory",
+        "shell",
+        "uuid",
+        "type_", ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "uid" => Value::from(self.uid),
+            "gid" => Value::from(self.gid),
+            "uid_signed" => Value::from(self.uid_signed),
+            "gid_signed" => Value::from(self.gid_signed),
+            "username" => Value::from(self.username.to_owned()),
+            "description" => Value::from(self.description.to_owned()),
+            "directory" => Value::from(self.directory.to_owned()),
+            "shell" => Value::from(self.shell.to_owned()),
+            "uuid" => Value::from(self.uuid.to_owned()),
+            "type_" => Value::from(self.type_.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::UID_ID => Value::from(self.uid),
+            Self::GID_ID => Value::from(self.gid),
+            Self::UID_SIGNED_ID => Value::from(self.uid_signed),
+            Self::GID_SIGNED_ID => Value::from(self.gid_signed),
+            Self::USERNAME_ID => Value::from(self.username.to_owned()),
+            Self::DESCRIPTION_SIGNED_ID => Value::from(self.description.to_owned()),
+            Self::DIRECTORY_ID => Value::from(self.directory.to_owned()),
+            Self::SHELL_ID => Value::from(self.shell.to_owned()),
+            Self::UUID_SIGNED_ID => Value::from(self.uuid.to_owned()),
+            Self::TYPE_ID => Value::from(self.type_.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "uid" => Self::UID_ID,
+            "gid" => Self::GID_ID,
+            "uid_signed" => Self::UID_SIGNED_ID,
+            "gid_signed" => Self::GID_SIGNED_ID,
+            "username" => Self::USERNAME_ID,
+            "description" => Self::DESCRIPTION_SIGNED_ID,
+            "directory" => Self::DIRECTORY_ID,
+            "shell" => Self::SHELL_ID,
+            "uuid" => Self::UUID_SIGNED_ID,
+            "type_" => Self::TYPE_ID,
+            _ => 0
+        }
+    }
+}
+
 #[cfg(feature = "groups")]
 table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -3203,73 +3296,75 @@ impl Table for GroupsRow {
 pub fn get_table_list() -> Vec<String> {
     vec![
         #[cfg(feature = "etc_hosts")]
-        "etc_hosts".to_string(),
+            "etc_hosts".to_string(),
         #[cfg(feature = "etc_protocols")]
-        "etc_protocols".to_string(),
+            "etc_protocols".to_string(),
         #[cfg(feature = "etc_services")]
-        "etc_services".to_string(),
+            "etc_services".to_string(),
         #[cfg(feature = "system_info")]
-        "system_info".to_string(),
+            "system_info".to_string(),
         #[cfg(feature = "os_version")]
-        "os_version".to_string(),
+            "os_version".to_string(),
         #[cfg(feature = "logical_drives")]
-        "logical_drives".to_string(),
+            "logical_drives".to_string(),
         #[cfg(feature = "uptime")]
-        "uptime".to_string(),
+            "uptime".to_string(),
         #[cfg(feature = "processes")]
-        "processes".to_string(),
+            "processes".to_string(),
         #[cfg(feature = "interface_address")]
-        "interface_address".to_string(),
+            "interface_address".to_string(),
         #[cfg(feature = "interface_details")]
-        "interface_details".to_string(),
+            "interface_details".to_string(),
         #[cfg(feature = "process_open_sockets")]
-        "process_open_sockets".to_string(),
+            "process_open_sockets".to_string(),
         #[cfg(feature = "process_memory_map")]
-        "process_memory_map".to_string(),
+            "process_memory_map".to_string(),
         #[cfg(feature = "products")]
-        "products".to_string(),
+            "products".to_string(),
+        #[cfg(feature = "users")]
+            "users".to_string(),
         #[cfg(feature = "groups")]
-        "groups".to_string(),
+            "groups".to_string(),
         #[cfg(feature = "wmi_computer_info")]
-        "wmi_computer_info".to_string(),
+            "wmi_computer_info".to_string(),
         #[cfg(feature = "wmi_os_version")]
-        "wmi_os_version".to_string(),
+            "wmi_os_version".to_string(),
         #[cfg(feature = "wmi_printers")]
-        "wmi_printers".to_string(),
+            "wmi_printers".to_string(),
         #[cfg(feature = "wmi_services")]
-        "wmi_services".to_string(),
+            "wmi_services".to_string(),
         #[cfg(feature = "wmi_hotfixes")]
-        "wmi_hotfixes".to_string(),
+            "wmi_hotfixes".to_string(),
         #[cfg(feature = "wmi_shares")]
-        "wmi_shares".to_string(),
+            "wmi_shares".to_string(),
         #[cfg(feature = "wmi_network_adapters")]
-        "wmi_network_adapters".to_string(),
+            "wmi_network_adapters".to_string(),
         #[cfg(feature = "wmi_local_accounts")]
-        "wmi_local_accounts".to_string(),
+            "wmi_local_accounts".to_string(),
         #[cfg(feature = "wmi_bios")]
-        "wmi_bios".to_string(),
+            "wmi_bios".to_string(),
         #[cfg(feature = "wmi_motherboard")]
-        "wmi_motherboard".to_string(),
+            "wmi_motherboard".to_string(),
         #[cfg(feature = "wmi_processor")]
-        "wmi_processor".to_string(),
+            "wmi_processor".to_string(),
         #[cfg(feature = "wmi_physical_memory")]
-        "wmi_physical_memory".to_string(),
+            "wmi_physical_memory".to_string(),
         #[cfg(feature = "wmi_sound")]
-        "wmi_sound".to_string(),
+            "wmi_sound".to_string(),
         #[cfg(feature = "wmi_video")]
-        "wmi_video".to_string(),
+            "wmi_video".to_string(),
         #[cfg(feature = "wmi_monitors")]
-        "wmi_monitors".to_string(),
+            "wmi_monitors".to_string(),
         #[cfg(feature = "wmi_keyboard")]
-        "wmi_keyboard".to_string(),
+            "wmi_keyboard".to_string(),
         #[cfg(feature = "wmi_pointing_device")]
-        "wmi_pointing_device".to_string(),
+            "wmi_pointing_device".to_string(),
         #[cfg(feature = "process_envs")]
-        "process_envs".to_string(),
+            "process_envs".to_string(),
         #[cfg(feature = "mounts")]
-        "mounts".to_string(),
+            "mounts".to_string(),
         #[cfg(test)]
-        "Dummy".to_string(),
+            "Dummy".to_string(),
     ]
 }
 

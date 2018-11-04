@@ -5,6 +5,7 @@ rust:
 os:
   - linux
   - osx
+  - windows
 # Cache settings based on https://levans.fr/rust_travis_cache.html
 cache:
   directories:
