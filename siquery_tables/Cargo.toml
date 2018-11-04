@@ -25,8 +25,9 @@ version = "0.3.2"
 plist-rs = "0.1.0"
 uname = "0.1.1"
 byteorder = "1.2.3"
-objc = {version = "0.2.5", features = ["exception"]}
+objc = {version = "~0.2.5", features = ["exception"]}
 objc-foundation = "0.1.1"
+objc_id = "0.1.1"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 kernel32-sys = "0.2"
