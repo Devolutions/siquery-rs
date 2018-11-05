@@ -122,7 +122,7 @@ processes | ✔ | ✔ | ✔
 process_open_sockets | ✔ | ✔ | 
 process_memory_map | ✔ | ✔ | 
 products | ✔ |  | 
-users | ✔ | ✔ |
+users | ✔ | ✔ | ✔
 groups | ✔ | ✔ | ✔
 process_envs |  | ✔ | ✔
 mounts |  | ✔ | ✔
