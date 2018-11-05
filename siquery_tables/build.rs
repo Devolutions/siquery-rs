@@ -64,6 +64,7 @@ const MACOS_TABLES: &'static [(&'static str)] = &[
     "uptime",
     "mounts",
     "groups",
+    "users"
 ];
 
 fn emit_features(features: &'static [(&'static str)]) {
