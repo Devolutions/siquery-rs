@@ -1,10 +1,10 @@
 use libc::{
-    getgrent,
-    setgrent,
-    endgrent,
-    getgrnam,
-    group,
-    c_void
+    getpwnam,
+    c_void,
+    c_int,
+    uid_t,
+    c_char,
+    c_uchar
 };
 use std::{
     ptr,
@@ -23,13 +23,16 @@ use objc_foundation::{
 };
 use objc_id::Id;
 
-use tables::GroupsRow;
+use tables::Users;
 
-impl GroupsRow {
-    pub fn get_specific() -> Vec<GroupsRow> {
+extern "C" {
+    fn uuid_unparse(uu: *mut c_uchar, out: *mut c_char) -> c_int;
+    fn mbr_uid_to_uuid(id: uid_t, uu: *mut u8) -> c_int;
+}
+
+impl Users {
+    pub fn get_specific() -> Vec<Users> {
         if let Some(vec) = gen_od_entreies() {
-            return vec
-        } else if let Some(vec) = gen_grgent_entries() {
             return vec
         } else {
             return Vec::new()
@@ -37,44 +40,10 @@ impl GroupsRow {
     }
 }
 
-// If Objective-C interface fails.
-pub fn gen_grgent_entries () -> Option<Vec<GroupsRow>> {
-    println!("Objective-C interface failes, querying with getgrent().");
-    let mut out = Vec::new();
-    let mut groupnames = HashSet::new();
-    unsafe {setgrent()};
-    let mut group_p: *mut group = unsafe {getgrent()};
-    /*The getgrent() function searches all available directory services on it's
-    first invocation.  It caches the returned entries in a list and returns
-    group entries one at a time.
-    NOTE that getgrent() may cause a very lengthy search for group records by
-    opendirectoryd and may result in a large number of group records being
-    cached by the calling process.  Use of this function is not advised.*/
-
-    //https://stackoverflow.com/questions/49833059/list-all-the-users-logged-in-a-specific-group
-    while group_p != ptr::null_mut() {
-        let groupname = unsafe{CStr::from_ptr((*group_p).gr_name).to_str().unwrap_or("")};
-        if groupnames.insert(groupname){   // true when the value was added
-            out.push(
-                GroupsRow {
-                    gid: unsafe {*group_p}.gr_gid as i64,
-                    gid_signed: unsafe {*group_p}.gr_gid as i32 as i64,
-                    groupname: groupname.to_string(),
-                    group_sid: "".to_string(),
-                    comment: "".to_string()
-                }
-            );
-        }
-        group_p = unsafe {getgrent()};
-    }
-    unsafe {endgrent()};
-    Some(out)
-}
-
 // Objective-C interface to query Open Directory entries.
-pub fn gen_od_entreies () -> Option<Vec<GroupsRow>> {
+pub fn gen_od_entreies () -> Option<Vec<Users>> {
     let mut out = Vec::new();
-    let mut groupnames = HashSet::new();  // TODO: Is a set really necessary here? Does ODQuery return double entries?
+    let mut usernames = HashSet::new();  // TODO: Is a set really necessary here? Does ODQuery return double entries?
 
     let s = ODSession::new().default_session();
     let root = ODNode::new().get_root(s).unwrap_or(ODNode::new());
@@ -95,21 +64,37 @@ pub fn gen_od_entreies () -> Option<Vec<GroupsRow>> {
         let name_c : *const i8 = unsafe {
             msg_send![name_obj_c.ptr, UTF8String]
         };
-        let groupname = unsafe {
+        let username = unsafe {
             CStr::from_ptr(name_c).to_string_lossy().into_owned()
         };
 
-        if groupnames.insert(groupname.clone()){   // True when the value was added.
-            let gr = unsafe {
-                getgrnam(name_c)
+        if usernames.insert(username.clone()){   // True when the value was added.
+            let pwd_p = unsafe {
+                getpwnam(name_c)
             };
+            if pwd_p == ptr::null_mut() {
+                return None
+            }
+            let pwd = unsafe {*pwd_p};
+
+            // Get uuid string.
+            let mut uuid= [0u8;16];
+            unsafe{mbr_uid_to_uuid(pwd.pw_uid.clone(),&mut uuid as *mut _ as *mut _)};
+            let mut uuid_string = [0i8;37];
+            unsafe{uuid_unparse(&mut uuid as *mut _ as *mut _, &mut uuid_string as *mut _ as *mut _)};
+
             out.push(
-                GroupsRow {
-                    gid: unsafe {*gr}.gr_gid as i64,
-                    gid_signed: unsafe {*gr}.gr_gid as i32 as i64,
-                    groupname,
-                    group_sid: "".to_string(),
-                    comment: "".to_string()
+                Users {
+                    uid : pwd.pw_uid as i64,
+                    gid: pwd.pw_gid as i64,
+                    uid_signed: pwd.pw_uid as i32 as i64,
+                    gid_signed: pwd.pw_gid as i32 as i64,
+                    username,
+                    description: unsafe{CStr::from_ptr(pwd.pw_gecos).to_string_lossy().into_owned()},
+                    directory: unsafe{CStr::from_ptr(pwd.pw_dir).to_string_lossy().into_owned()},
+                    shell: unsafe{CStr::from_ptr(pwd.pw_shell).to_string_lossy().into_owned()},
+                    uuid: unsafe{CStr::from_ptr(uuid_string.as_ptr()).to_string_lossy().into_owned()},
+                    type_: "0".to_string(),
                 }
             );
         }
@@ -171,7 +156,7 @@ impl ODQuery {
     }
     pub fn query(&self, root: ODNode) -> Result<Self, String> {
         #[allow(non_snake_case)] {
-            let od_record_type = NSString::from("dsRecTypeStandard:Groups");
+            let od_record_type = NSString::from("dsRecTypeStandard:Users");
             let kODAttributeTypeUniqueID = NSString::from("dsAttrTypeStandard:UniqueID");
             let kODMatchEqualTo : i64 = 0x2001;
             let nil : &Class = class!(NSNull);
@@ -192,7 +177,7 @@ impl ODQuery {
             } else {
                 Ok(
                     ODQuery {
-                    ptr: query
+                        ptr: query
                     }
                 )
             }

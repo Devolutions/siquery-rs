@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use rusqlite::types::*;
 
