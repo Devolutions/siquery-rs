@@ -3293,6 +3293,69 @@ impl Table for GroupsRow {
     }
 }
 
+#[cfg(feature = "proxies")]
+pub trait ProxiesIface {
+    fn get_proxies_file(&self) -> Option<String>;
+}
+
+#[cfg(feature = "proxies")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ProxiesRow {
+    pub address: String,
+    pub port: i64,
+    pub protocol: String,
+    pub interface: String,
+}}
+
+#[cfg(feature = "proxies")]
+impl ProxiesRow {
+    const ADDRESS_ID: u64 = 0x00000001;
+    const PORT_ID: u64 = 0x00000002;
+    const PROTOCOL_ID: u64 = 0x00000004;
+    const INTERFACE_ID: u64 = 0x00000008;
+}
+
+#[cfg(feature = "proxies")]
+impl Table for ProxiesRow {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "address",
+        "port",
+        "protocol",
+        "interface",
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "address" => Value::from(self.address.to_owned()),
+            "port" => Value::from(self.port),
+            "protocol" => Value::from(self.protocol.to_owned()),
+            "interface" => Value::from(self.interface.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::ADDRESS_ID => Value::from(self.address.to_owned()),
+            Self::PORT_ID => Value::from(self.port),
+            Self::PROTOCOL_ID => Value::from(self.protocol.to_owned()),
+            Self::INTERFACE_ID => Value::from(self.interface.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "address" => Self::ADDRESS_ID,
+            "port" => Self::PORT_ID,
+            "protocol" => Self::PROTOCOL_ID,
+            "interface" => Self::INTERFACE_ID,
+            _ => 0
+        }
+    }
+}
+
 pub fn get_table_list() -> Vec<String> {
     vec![
         #[cfg(feature = "etc_hosts")]
@@ -3363,6 +3426,8 @@ pub fn get_table_list() -> Vec<String> {
             "process_envs".to_string(),
         #[cfg(feature = "mounts")]
             "mounts".to_string(),
+        #[cfg(feature = "proxies")]
+            "proxies".to_string(),
         #[cfg(test)]
             "Dummy".to_string(),
     ]
