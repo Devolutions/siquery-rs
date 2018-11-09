@@ -15,7 +15,6 @@ impl ProxiesIface for Reader {
     fn get_proxies_file(&self) -> Option<String> {
         let mut s = String::new();
         File::open("/Library/Preferences/SystemConfiguration/preferences.plist").ok()?.read_to_string(&mut s).ok()?;
-        println!("{:?}",s);
         Some(s)
     }
 }
