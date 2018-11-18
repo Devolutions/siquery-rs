@@ -1,85 +1,120 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
+#![warn(improper_ctypes)]
 use tables::LoggedInUsers;
-use winapi::shared::minwindef::DWORD;
-use winapi::um::winnt::LPSTR;
-use winapi::um::winnt::HANDLE;
-use winapi::um::winnt::LARGE_INTEGER;
-use winapi::um::winnt::CHAR;
-use winapi::shared::minwindef::UCHAR;
-use winapi::ctypes::*;
-use std::{ptr, mem};
-use libc;
-use winapi::um::errhandlingapi::GetLastError;
-use winapi::shared::ntdef::LPWSTR;
-use std::collections::HashMap;
+use winapi::{
+    shared::
+    {
+        minwindef::DWORD,
+        ws2def::{AF_INET, AF_INET6},
+        minwindef::FILETIME,
+        ntdef::{LPWSTR, ULONG},
+    },
+    um::{
+        winnt::{HANDLE, LARGE_INTEGER, CHAR, PVOID },
+        errhandlingapi::GetLastError,
+    },
+    ctypes::*,
+};
+use std::{ptr, mem, str};
+use widestring::WideString;
 
 const WINSTATIONNAME_LENGTH: usize = 32;
 const DOMAIN_LENGTH: usize = 17;
-const NASIUSERNAME_LENGTH: usize = 47;
 const USERNAME_LENGTH: usize = 21;
+const CLIENTNAME_LENGTH: usize = 20;
+const CLIENTADDRESS_LENGTH: usize = 30;
+const MAX_PATH : usize = 260;
 
-#[repr(C)]
 #[allow(dead_code)]
-pub enum _WTS_CONNECTSTATE_CLASS {
-    WTSActive = 0,
-    WTSConnected = 1,
-    WTSConnectQuery = 2,
-    WTSShadow = 3,
-    WTSDisconnected = 4,
-    WTSIdle = 5,
-    WTSListen = 6,
-    WTSReset = 7,
-    WTSDown = 8,
-    WTSInit = 9
-} pub type WTS_CONNECTSTATE_CLASS = _WTS_CONNECTSTATE_CLASS;
+#[repr(C)]
+macro_rules! enum_str {
+    (pub enum $name:ident {
+        $($variant:ident),*,
+    }) => {
+        pub enum $name {
+            $($variant),*
+        }
 
+        impl $name {
+            fn name(&self) -> &'static str {
+                match self {
+                    $($name::$variant => stringify!($variant)),*
+                }
+            }
+        }
+    };
+}
 
+#[allow(dead_code)]
+#[repr(C)]
+enum_str! {
+pub enum WTS_CONNECTSTATE_CLASS {
+    Active,
+    Connected,
+    ConnectQuery,
+    Shadow,
+    Disconnected,
+    Idle,
+    Listen,
+    Reset,
+    Down,
+    Init,
+}
+}
+
+#[allow(dead_code)]
 #[link(name = "Wtsapi32")]
-pub enum _WTS_INFO_CLASS {
-    WTSInitialProgram = 0,
-    WTSApplicationName = 1,
-    WTSWorkingDirectory = 2,
-    WTSOEMId = 3,
-    WTSSessionId = 4,
-    WTSUserName = 5,
-    WTSWinStationName = 6,
-    WTSDomainName = 7,
-    WTSConnectState = 8,
-    WTSClientBuildNumber = 9,
-    WTSClientName = 10,
-    WTSClientDirectory = 11,
-    WTSClientProductId = 12,
-    WTSClientHardwareId = 13,
-    WTSClientAddress = 14,
-    WTSClientDisplay = 15,
-    WTSClientProtocolType = 16,
-    WTSIdleTime = 17,
-    WTSLogonTime = 18,
-    WTSIncomingBytes = 19,
-    WTSOutgoingBytes = 20,
-    WTSIncomingFrames = 21,
-    WTSOutgoingFrames = 22,
-    WTSClientInfo = 23,
-    WTSSessionInfo = 24,
-    WTSSessionInfoEx = 25,
-    WTSConfigInfo = 26,
-    WTSValidationInfo = 27,
-    WTSSessionAddressV4 = 28,
-    WTSIsRemoteSession = 29
-} pub type WTS_INFO_CLASS = _WTS_INFO_CLASS;
+#[repr(C)]
+pub enum WTS_INFO_CLASS {
+    WTSInitialProgram,
+    WTSApplicationName,
+    WTSWorkingDirectory,
+    WTSOEMId,
+    WTSSessionId,
+    WTSUserName,
+    WTSWinStationName,
+    WTSDomainName,
+    WTSConnectState,
+    WTSClientBuildNumber,
+    WTSClientName,
+    WTSClientDirectory,
+    WTSClientProductId,
+    WTSClientHardwareId,
+    WTSClientAddress,
+    WTSClientDisplay,
+    WTSClientProtocolType,
+    WTSIdleTime,
+    WTSLogonTime,
+    WTSIncomingBytes,
+    WTSOutgoingBytes,
+    WTSIncomingFrames,
+    WTSOutgoingFrames,
+    WTSClientInfo,
+    WTSSessionInfo,
+    WTSSessionInfoEx,
+    WTSConfigInfo,
+    WTSValidationInfo, // Info Class value used to fetch Validation Information through the WTSQuerySessionInformation
+    WTSSessionAddressV4,
+    WTSIsRemoteSession,
+}
 
 #[repr(C)]
-    pub struct _WTS_SESSION_INFOW  {
-        SessionId: DWORD,
-        pWinStationName: DWORD,
-        State: WTS_CONNECTSTATE_CLASS,
+pub struct WTS_SESSION_INFO_1W {
+    ExecEnvId: DWORD,
+    State: WTS_CONNECTSTATE_CLASS,
+    SessionId: DWORD,
+    pSessionName: LPWSTR,
+    pHostName: LPWSTR,
+    pUserName: LPWSTR,
+    pDomainName: LPWSTR,
+    pFarmName: LPWSTR,
 }
-pub type PWTS_SESSION_INFOW  = *mut _WTS_SESSION_INFOW ;
+pub type PWTS_SESSION_INFOW  = *mut WTS_SESSION_INFO_1W ;
 
 #[repr(C)]  
-pub struct _WTSINFOA {
-    State: WTS_CONNECTSTATE_CLASS,
+pub struct WTSINFOA {
+    State: isize,
     SessionId: DWORD,
     IncomingBytes: DWORD,
     OutgoingBytes: DWORD,
@@ -96,26 +131,50 @@ pub struct _WTSINFOA {
     LogonTime: LARGE_INTEGER,
     CurrentTime: LARGE_INTEGER,
 }
-pub type PWTSINFOA  = *mut _WTSINFOA ;
+pub type PWTSINFOA  = *mut WTSINFOA ;
+
+#[repr(C)]
+pub struct WTSCLIENTA {
+    ClientName: [CHAR; CLIENTNAME_LENGTH + 1],
+    Domain: [CHAR; DOMAIN_LENGTH + 1],
+    UserName: [CHAR; USERNAME_LENGTH + 1],
+    WorkDirectory: [CHAR; MAX_PATH + 1],
+    InitialProgram: [CHAR; MAX_PATH + 1],
+    EncryptionLevel: u8,
+    ClientAddressFamily: u64,
+    ClientAddress: [u16; CLIENTADDRESS_LENGTH + 1],
+    HRes: u16,
+    VRes: u16,
+    ColorDepth: u16,
+    ClientDirectory: [CHAR; MAX_PATH + 1],
+    ClientBuildNumber: u64,
+    ClientHardwareId: u64,
+    ClientProductId: u16,
+    OutBufCountHost: u16,
+    OutBufCountClient: u16,
+    OutBufLength: u16,
+    DeviceId: [CHAR; MAX_PATH + 1],
+} pub type PWTSCLIENTA = *mut WTSCLIENTA;
 
 #[link(name = "Wtsapi32")]
 extern "system" {
-    fn WTSEnumerateSessionsW(
+    pub fn WTSEnumerateSessionsExW(
         hServer: HANDLE,
-        Reserved: DWORD,
-        Version: DWORD,
+        pLevel: *mut DWORD,
+        Filter: DWORD,
         ppSessionInfo: *mut PWTS_SESSION_INFOW,
-        pCount: *mut DWORD) -> bool;
+        pCount: *mut DWORD
+    ) -> bool;
 
-    fn WTSQuerySessionInformationW(
+    pub fn WTSQuerySessionInformationW(
         hServer: HANDLE,
         SessionId: DWORD,
-        WTSInfoClass: WTS_INFO_CLASS,
-        ppBuffer: *mut *mut _WTSINFOA,
+        WTSInfoClass: usize,
+        ppBuffer: *mut LPWSTR,
         pBytesReturned: *mut DWORD,
     ) -> bool;
 
-    fn WTSFreeMemory(pMemory: *mut c_void);
+    pub fn WTSFreeMemoryExW(WTSTypeClass: usize, pMemory: PVOID, NumberOfEntries: ULONG);
 }
 
 impl LoggedInUsers {
@@ -140,68 +199,70 @@ impl LoggedInUsers {
 fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
     unsafe {
         let mut logged_in_user = LoggedInUsers::new();
-        let mut WTS_CURRENT_SERVER_HANDLE: *mut c_void = ptr::null_mut();
-
-        //let mut pSessionInfo: *mut PWTS_SESSION_INFOW;
-        //pSessionInfo = Vec::with_capacity((mem::size_of::<_WTS_SESSION_INFOW>()) as usize).as_mut_ptr() as *mut PWTS_SESSION_INFOW;
+        let WTS_CURRENT_SERVER_HANDLE: *mut c_void = ptr::null_mut();
 
         let mut count_int = 0u32;
         let count: *mut c_ulong = &mut count_int as *mut c_ulong;
+        let mut level_int = 1u32;
+        let level: *mut c_ulong = &mut level_int as *mut c_ulong;
 
-        let mut reserved = 0u32;
-        let mut version = 1u32;
-        let mut pSessionInfo: *mut PWTS_SESSION_INFOW;
-        pSessionInfo = Vec::with_capacity((mem::size_of::<WTS_INFO_CLASS>()) as usize).as_mut_ptr() as *mut PWTS_SESSION_INFOW;
+        let mut pSessionInfo: *mut PWTS_SESSION_INFOW = ptr::null_mut();
+        let mut sessionInfo_array: Vec<u16> = Vec::with_capacity((mem::size_of::<WTS_SESSION_INFO_1W>()) as usize);
+        let pSessionInfo_array = sessionInfo_array.as_mut_ptr();
+        pSessionInfo = pSessionInfo_array as *mut _;
 
-        let mut res =
-        WTSEnumerateSessionsW(WTS_CURRENT_SERVER_HANDLE,
-                              reserved,
-                              version,
-                              pSessionInfo,
-                              count);
-        //println! ("step 1");
+        let mut res = WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE,
+                                              level,
+                                              0,
+                                              pSessionInfo,
+                                              count
+        );
+
         if GetLastError() != 0 {
+            println!("error");
             return
         }
 
-        // get pSessionInfo size
-        /*let mut pSessionInfo_sized: *mut PWTS_SESSION_INFOW;
-        pSessionInfo_sized = Vec::with_capacity(((mem::size_of::<WTS_INFO_CLASS>()) * count_int as usize) as usize).as_mut_ptr() as *mut PWTS_SESSION_INFOW;
+        WTSFreeMemoryExW(2,
+                         *pSessionInfo as *mut c_void,
+                         count_int);
 
-        let mut WTS_CURRENT_SERVER_HANDLE_sized: *mut c_void = ptr::null_mut();
+        let mut pSessionInfo_sized_: *mut PWTS_SESSION_INFOW = ptr::null_mut();
+        let sessionInfo_array_sized: Vec<WTS_SESSION_INFO_1W> = Vec::with_capacity(count_int as usize);
+        let pSessionInfo_array_sized = sessionInfo_array.as_mut_ptr();
+        pSessionInfo_sized_ = pSessionInfo_array_sized as *mut _;
+
+
+        let WTS_CURRENT_SERVER_HANDLE_sized: *mut c_void = ptr::null_mut();
         let mut count_int_sized = 0u32;
         let count_sized: *mut c_ulong = &mut count_int_sized as *mut c_ulong;
+        let level_int_sized = 1u32;
+        let level_sized: *mut c_ulong = &mut level_int as *mut c_ulong;
 
-        WTSEnumerateSessionsW(WTS_CURRENT_SERVER_HANDLE_sized,
-                              reserved,
-                              version,
-                              pSessionInfo_sized,
-                              count_sized);
-        println! ("step 2");
+        res = WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE_sized,
+                                              level_sized,
+                                              0,
+                                              pSessionInfo_sized_,
+                                              count_sized
+        );
+
         if GetLastError() != 0 {
+            println!("error");
             return
-        }*/
+        }
 
-        println! ("number of users {:?}", count_int_sized);
-
-        /*if sessionInfo != ptr::null_mut() {
-            WTSFreeMemory(pSessionInfo);
-            pSessionInfo = ptr::null_mut();
-            WTSFreeMemory(pSessionInfo_sized);
-            pSessionInfo_sized = ptr::null_mut();
-        }*/
-        /*for i in 0..count_int {
+        for i in 0..count_int_sized {
             let mut sessionInfo: *mut PWTSINFOA = ptr::null_mut();
-            sessionInfo = Vec::with_capacity((mem::size_of::<_WTSINFOA>()) as usize).as_mut_ptr() as *mut PWTSINFOA;
+            let mut sessionInfo_data: Vec<u16> = Vec::with_capacity((mem::size_of::<WTSINFOA>()) as usize);
+            sessionInfo = sessionInfo_data.as_mut_ptr() as *mut PWTSINFOA;
 
-            let mut bytesRet_int = 0u32;
-            let bytesRet: *mut c_ulong = &mut bytesRet_int as *mut c_ulong;
+            let mut bytesRet_int_ = 0u32;
+            let mut bytesRet: *mut c_ulong = &mut bytesRet_int_ as *mut c_ulong;
 
-            println!("pSessionInfo {:?} ", (**pSessionInfo_sized).SessionId);
-            let res = WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE,
-                                                  (**pSessionInfo_sized).SessionId,
-                                                  _WTS_INFO_CLASS::WTSSessionInfo,
-                                                  sessionInfo,
+            res = WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE_sized,
+                                                  (**pSessionInfo_sized_).SessionId,
+                                                  25,
+                                                  sessionInfo as *mut *mut u16,
                                                   bytesRet);
 
             if !res || sessionInfo == ptr::null_mut() {
@@ -209,15 +270,86 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
                 continue;
             }
 
-            println!("user {:?}", (**sessionInfo).UserName);
-            //println!("State {:?}", (**sessionInfo).State);
+            let username_vec = ((**sessionInfo).UserName).to_vec();
+            logged_in_user.user = i8_to_string(username_vec);
+            logged_in_user.type_ = (**pSessionInfo_sized_).State.name().to_string();
+            logged_in_user.pid = -1;
+            let mut v: [u16; 25] = mem::uninitialized();
+            let mut buf = (**pSessionInfo_sized_).pSessionName;
 
-            if sessionInfo != ptr::null_mut() {
-                WTSFreeMemory(sessionInfo);
-                sessionInfo = ptr::null_mut();
+            let buf_size = 25;
+            let session_name = WideString::from_ptr(buf, buf_size);
+            let mut st = session_name.to_string().unwrap_or("".to_owned());
+            let v: Vec<_> = st.split("\u{0}").collect();
+
+            logged_in_user.tty = v[0].to_string();
+            let mut utcTime: FILETIME  = mem::uninitialized();
+
+            utcTime.dwLowDateTime = (**sessionInfo).ConnectTime.u().LowPart as u32;
+            utcTime.dwHighDateTime = (**sessionInfo).ConnectTime.u().HighPart as u32;
+            let mut unixTime: i64 = 0;
+
+            if utcTime.dwLowDateTime != 0 || utcTime.dwHighDateTime != 0 {
+                unixTime = filetimeToUnixtime(&mut utcTime);
             }
 
-            pSessionInfo_sized =  (pSessionInfo_sized).add(1);
-        }*/
+            logged_in_user.time = unixTime;
+
+            let mut clientInfo: *mut PWTSCLIENTA = ptr::null_mut();
+            let mut clientInfo_data: Vec<u16> = Vec::with_capacity((mem::size_of::<WTSCLIENTA>()) as usize);
+            clientInfo = clientInfo_data.as_mut_ptr() as *mut PWTSCLIENTA;
+            bytesRet_int_ = 0;
+
+            res = WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE_sized,
+                                              (**pSessionInfo_sized_).SessionId,
+                                              25,
+                                              clientInfo as *mut *mut u16,
+                                              bytesRet);
+
+            if !res || clientInfo == ptr::null_mut() {
+                println!("Error querying WTS session information  : {:?}", GetLastError());
+                logged_in_users.push(logged_in_user);
+                logged_in_user = LoggedInUsers::new();
+                *pSessionInfo_sized_ = (*pSessionInfo_sized_).add(1);
+                continue;
+            }
+
+            // to test
+            if (**clientInfo).ClientAddressFamily == AF_INET as u64 {
+                let mut host_u16 = String::from_utf16(&(**clientInfo).ClientAddress).unwrap();
+                logged_in_user.host = host_u16;
+
+            } else if (**clientInfo).ClientAddressFamily == AF_INET6 as u64 {
+                let mut host = String::from_utf16(&(**clientInfo).ClientAddress).unwrap();
+                logged_in_user.host = host;
+            }
+
+            *pSessionInfo_sized_ = (*pSessionInfo_sized_).add(1);
+            logged_in_users.push(logged_in_user);
+            logged_in_user = LoggedInUsers::new();
+        }
+    }
+}
+
+pub fn i8_to_string(vec: Vec<i8>) -> String {
+    let mut vec_c: Vec<_> = Vec::new();
+    for i in vec.iter() {
+        if *i != 0 {
+            vec_c.push(*i);
+        }
+    }
+    let s: String = String::from_utf8(vec_c.iter().map(|&c| c as u8).collect()).unwrap();
+    s
+}
+
+pub fn filetimeToUnixtime(ft : &mut FILETIME) -> i64 {
+    unsafe {
+        let mut date: LARGE_INTEGER = mem::uninitialized();
+        let mut adjust: LARGE_INTEGER = mem::uninitialized();
+        date.u_mut().HighPart = ft.dwHighDateTime as i32;
+        date.u_mut().LowPart = ft.dwLowDateTime;
+        *adjust.QuadPart_mut() = 11644473600000 * 10000;
+        *date.QuadPart_mut() -= *adjust.QuadPart_mut();
+        return *date.QuadPart_mut() / 10000000;
     }
 }
