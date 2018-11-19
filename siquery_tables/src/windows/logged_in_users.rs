@@ -1,7 +1,4 @@
 #![allow(warnings)]
-#![allow(non_snake_case)]
-#![allow(non_camel_case_types)]
-#![warn(improper_ctypes)]
 use tables::LoggedInUsers;
 use winapi::{
     shared::
@@ -27,7 +24,6 @@ const CLIENTNAME_LENGTH: usize = 20;
 const CLIENTADDRESS_LENGTH: usize = 30;
 const MAX_PATH : usize = 260;
 
-#[allow(dead_code)]
 #[repr(C)]
 macro_rules! enum_str {
     (pub enum $name:ident {
@@ -47,7 +43,6 @@ macro_rules! enum_str {
     };
 }
 
-#[allow(dead_code)]
 #[repr(C)]
 enum_str! {
 pub enum WTS_CONNECTSTATE_CLASS {
@@ -64,7 +59,6 @@ pub enum WTS_CONNECTSTATE_CLASS {
 }
 }
 
-#[allow(dead_code)]
 #[link(name = "Wtsapi32")]
 #[repr(C)]
 pub enum WTS_INFO_CLASS {
@@ -212,6 +206,7 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
 
         let mut count_int = 0u32;
         let count: *mut c_ulong = &mut count_int as *mut c_ulong;
+
         let mut level_int = 1u32;
         let level: *mut c_ulong = &mut level_int as *mut c_ulong;
 
@@ -227,7 +222,7 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
                                               count
         );
 
-        if GetLastError() != 0 {
+        if !res {
             println!("error");
             return
         }
@@ -236,30 +231,24 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
                          *pSessionInfo as *mut c_void,
                          count_int);
 
-        let mut pSessionInfo_sized_: *mut PWTS_SESSION_INFOW = ptr::null_mut();
+        pSessionInfo = ptr::null_mut();
         let sessionInfo_array_sized: Vec<WTS_SESSION_INFO_1W> = Vec::with_capacity(count_int as usize);
         let pSessionInfo_array_sized = sessionInfo_array.as_mut_ptr();
-        pSessionInfo_sized_ = pSessionInfo_array_sized as *mut _;
+        pSessionInfo = pSessionInfo_array_sized as *mut _;
 
-        let WTS_CURRENT_SERVER_HANDLE_sized: *mut c_void = ptr::null_mut();
-        let mut count_int_sized = 0u32;
-        let count_sized: *mut c_ulong = &mut count_int_sized as *mut c_ulong;
-        let level_int_sized = 1u32;
-        let level_sized: *mut c_ulong = &mut level_int as *mut c_ulong;
-
-        res = WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE_sized,
-                                      level_sized,
+        res = WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE,
+                                      level,
                                       0,
-                                      pSessionInfo_sized_,
-                                      count_sized
+                                      pSessionInfo,
+                                      count
         );
 
-        if GetLastError() != 0 {
+        if !res {
             println!("error");
             return
         }
 
-        for i in 0..count_int_sized {
+        for i in 0..count_int {
             let mut sessionInfo: *mut PWTSINFOA = ptr::null_mut();
             let mut sessionInfo_data: Vec<u16> = Vec::with_capacity((mem::size_of::<WTSINFOA>()) as usize);
             sessionInfo = sessionInfo_data.as_mut_ptr() as *mut PWTSINFOA;
@@ -267,9 +256,9 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
             let mut bytesRet_int_ = 0u32;
             let mut bytesRet: *mut c_ulong = &mut bytesRet_int_ as *mut c_ulong;
 
-            // get the username
-            res = WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE_sized,
-                                              (**pSessionInfo_sized_).SessionId,
+            // get username
+            res = WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE,
+                                              (**pSessionInfo).SessionId,
                                               25,
                                               sessionInfo as *mut *mut u16,
                                               bytesRet);
@@ -277,8 +266,8 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
             let username_vec = ((**sessionInfo).UserName).to_vec();
             logged_in_user.user =  i8_to_string(username_vec);
 
-            res = WTSQuerySessionInformationA(WTS_CURRENT_SERVER_HANDLE_sized,
-                                              (**pSessionInfo_sized_).SessionId,
+            res = WTSQuerySessionInformationA(WTS_CURRENT_SERVER_HANDLE,
+                                              (**pSessionInfo).SessionId,
                                               25,
                                               sessionInfo as *mut *mut i8,
                                               bytesRet);
@@ -288,41 +277,18 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
                 continue;
             }
 
-            logged_in_user.type_ = (**pSessionInfo_sized_).State.name().to_string();
+            logged_in_user.type_ = (**pSessionInfo).State.name().to_string();
             logged_in_user.pid = -1;
-
-            let mut buf_session_name = (**pSessionInfo_sized_).pSessionName;
-            if buf_session_name != ptr::null_mut() {
-                let mut v: [u16; 25] = mem::uninitialized();
-                let buf_size = 25;
-                let session_name = WideString::from_ptr(buf_session_name, buf_size);
-                let mut st = session_name.to_string().unwrap_or("".to_owned());
-                let v: Vec<_> = st.split("\u{0}").collect();
-                logged_in_user.tty = v[0].to_string();
-            }
-                else {
-                    logged_in_user.tty = "".to_string();
-                }
-
-            let mut utcTime: FILETIME  = mem::uninitialized();
-
-            utcTime.dwLowDateTime = (**sessionInfo).ConnectTime.u().LowPart as u32;
-            utcTime.dwHighDateTime = (**sessionInfo).ConnectTime.u().HighPart as u32;
-            let mut unixTime: i64 = 0;
-
-            if utcTime.dwLowDateTime != 0 || utcTime.dwHighDateTime != 0 {
-                unixTime = filetimeToUnixtime(&mut utcTime);
-            }
-
-            logged_in_user.time = unixTime;
+            logged_in_user.tty = get_user_tty((**pSessionInfo).pSessionName);
+            logged_in_user.time = get_unixtime((**sessionInfo).ConnectTime);
 
             let mut clientInfo: *mut PWTSCLIENTA = ptr::null_mut();
             let mut clientInfo_data: Vec<u16> = Vec::with_capacity((mem::size_of::<WTSCLIENTA>()) as usize);
             clientInfo = clientInfo_data.as_mut_ptr() as *mut PWTSCLIENTA;
             bytesRet_int_ = 0;
 
-            res = WTSQuerySessionInformationA(WTS_CURRENT_SERVER_HANDLE_sized,
-                                              (**pSessionInfo_sized_).SessionId,
+            res = WTSQuerySessionInformationA(WTS_CURRENT_SERVER_HANDLE,
+                                              (**pSessionInfo).SessionId,
                                               24, // clientInfo
                                               clientInfo as *mut *mut i8,
                                               bytesRet);
@@ -331,7 +297,7 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
                 println!("Error querying WTS session information  : {:?}", GetLastError());
                 logged_in_users.push(logged_in_user);
                 logged_in_user = LoggedInUsers::new();
-                *pSessionInfo_sized_ = (*pSessionInfo_sized_).add(1);
+                *pSessionInfo = (*pSessionInfo).add(1);
                 continue;
             }
 
@@ -345,7 +311,7 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
                 logged_in_user.host = host;
             }
 
-            *pSessionInfo_sized_ = (*pSessionInfo_sized_).add(1);
+            *pSessionInfo = (*pSessionInfo).add(1);
             logged_in_users.push(logged_in_user);
             logged_in_user = LoggedInUsers::new();
         }
@@ -363,7 +329,7 @@ pub fn i8_to_string(vec: Vec<i8>) -> String {
     s
 }
 
-pub fn filetimeToUnixtime(ft : &mut FILETIME) -> i64 {
+pub fn filetime_to_unixtime(ft : &mut FILETIME) -> i64 {
     unsafe {
         let mut date: LARGE_INTEGER = mem::uninitialized();
         let mut adjust: LARGE_INTEGER = mem::uninitialized();
@@ -372,5 +338,32 @@ pub fn filetimeToUnixtime(ft : &mut FILETIME) -> i64 {
         *adjust.QuadPart_mut() = 11644473600000 * 10000;
         *date.QuadPart_mut() -= *adjust.QuadPart_mut();
         return *date.QuadPart_mut() / 10000000;
+    }
+}
+
+pub fn get_user_tty(session_name: LPWSTR) -> String {
+    let mut buf_session_name = session_name;
+    if buf_session_name != ptr::null_mut() {
+        let mut v: [u16; 25] = unsafe { mem::uninitialized() };
+        let buf_size = 25;
+        let session_name = unsafe { WideString::from_ptr(buf_session_name, buf_size) };
+        let mut st = session_name.to_string().unwrap_or("".to_owned());
+        let v: Vec<_> = st.split("\u{0}").collect();
+        v[0].to_string()
+    } else {
+        "".to_string()
+    }
+}
+
+pub fn get_unixtime(connectTime: LARGE_INTEGER) -> i64 {
+    unsafe {
+        let mut utcTime: FILETIME = mem::uninitialized();
+        utcTime.dwLowDateTime = connectTime.u().LowPart as u32;
+        utcTime.dwHighDateTime = connectTime.u().HighPart as u32;
+        let mut unixTime: i64 = 0;
+        if utcTime.dwLowDateTime != 0 || utcTime.dwHighDateTime != 0 {
+            unixTime = filetime_to_unixtime(&mut utcTime);
+        }
+        unixTime
     }
 }
