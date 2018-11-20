@@ -50,7 +50,8 @@ const LINUX_TABLES: &'static [(&'static str)] = &[
     "process_envs",
     "mounts",
     "groups",
-    "users"
+    "users",
+    "logged_in_users"
 ];
 
 const MACOS_TABLES: &'static [(&'static str)] = &[
