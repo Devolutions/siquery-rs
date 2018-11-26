@@ -16,6 +16,7 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "products",
     "users",
     "logged_in_users",
+    "logon_sessions",
     "groups",
     "wmi_computer_info",
     "wmi_os_version",

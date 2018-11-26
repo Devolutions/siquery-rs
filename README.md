@@ -123,6 +123,8 @@ process_open_sockets | ✔ | ✔ |
 process_memory_map | ✔ | ✔ | 
 products | ✔ |  | 
 users | ✔ | ✔ | ✔
+logged_in_users | ✔ | ✔ | 
+logon_sessions | ✔ |  | 
 groups | ✔ | ✔ | ✔
 process_envs |  | ✔ | ✔
 mounts |  | ✔ | ✔

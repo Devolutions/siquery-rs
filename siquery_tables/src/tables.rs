@@ -3298,7 +3298,6 @@ impl Table for LoggedInUsers {
     }
 }
 
-
 #[cfg(feature = "groups")]
 table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -3363,6 +3362,130 @@ impl Table for GroupsRow {
     }
 }
 
+#[cfg(feature = "logon_sessions")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct LogonSessions {
+    pub logon_id: i32,
+    pub user: String,
+    pub logon_domain: String,
+    pub authentication_package: String,
+    pub logon_type: String,
+    pub session_id: i32,
+    pub logon_sid: String,
+    pub logon_time: i64,
+    pub logon_server: String,
+    pub dns_domain_name: String,
+    pub upn: String,
+    pub logon_script: String,
+    pub profile_path: String,
+    pub home_directory: String,
+    pub home_directory_drive: String,
+}}
+
+#[cfg(feature = "logon_sessions")]
+impl LogonSessions {
+    const LOGON_ID_ID: u64 = 0x00000001;
+    const USER_ID: u64 = 0x00000002;
+    const LOGON_DOMAIN_ID: u64 = 0x00000004;
+    const AUTHENTICATION_PACKAGE_ID: u64 = 0x00000008;
+    const LOGON_TYPE_ID: u64 = 0x00000010;
+    const SESSION_ID_ID: u64 = 0x00000020;
+    const LOGON_SID_ID: u64 = 0x00000040;
+    const LOGON_TIME_ID: u64 = 0x00000080;
+    const LOGON_SERVER_ID: u64 = 0x00000100;
+    const DNS_DOMAIN_NAME_ID: u64 = 0x00000200;
+    const UPN_ID: u64 = 0x00000400;
+    const LOGON_SCRIPT_ID: u64 = 0x00000800;
+    const PROFILE_PATH_ID: u64 = 0x00001000;
+    const HOME_DIRECTORY_ID: u64 = 0x00002000;
+    const HOME_DIRECTORY_DRIVE_ID: u64 = 0x00004000;
+}
+
+#[cfg(feature = "logon_sessions")]
+impl Table for LogonSessions {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "logon_id",
+        "user",
+        "logon_domain",
+        "authentication_package",
+        "logon_type",
+        "session_id",
+        "logon_sid",
+        "logon_time",
+        "logon_server",
+        "dns_domain_name",
+        "upn",
+        "logon_script",
+        "profile_path",
+        "home_directory",
+        "home_directory_drive",
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "logon_id" => Value::from(self.logon_id),
+            "user" => Value::from(self.user.to_owned()),
+            "logon_domain" => Value::from(self.logon_domain.to_owned()),
+            "authentication_package" => Value::from(self.authentication_package.to_owned()),
+            "logon_type" => Value::from(self.logon_type.to_owned()),
+            "session_id" => Value::from(self.session_id),
+            "logon_sid" => Value::from(self.logon_sid.to_owned()),
+            "logon_time" => Value::from(self.logon_time),
+            "logon_server" => Value::from(self.logon_server.to_owned()),
+            "dns_domain_name" => Value::from(self.dns_domain_name.to_owned()),
+            "upn" => Value::from(self.upn.to_owned()),
+            "logon_script" => Value::from(self.logon_script.to_owned()),
+            "profile_path" => Value::from(self.profile_path.to_owned()),
+            "home_directory" => Value::from(self.home_directory.to_owned()),
+            "home_directory_drive" => Value::from(self.home_directory_drive.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::LOGON_ID_ID => Value::from(self.logon_id),
+            Self::USER_ID => Value::from(self.user.to_owned()),
+            Self::LOGON_DOMAIN_ID => Value::from(self.logon_domain.to_owned()),
+            Self::AUTHENTICATION_PACKAGE_ID => Value::from(self.authentication_package.to_owned()),
+            Self::LOGON_TYPE_ID => Value::from(self.logon_type.to_owned()),
+            Self::SESSION_ID_ID => Value::from(self.session_id),
+            Self::LOGON_SID_ID => Value::from(self.logon_sid.to_owned()),
+            Self::LOGON_TIME_ID => Value::from(self.logon_time),
+            Self::LOGON_SERVER_ID => Value::from(self.logon_server.to_owned()),
+            Self::DNS_DOMAIN_NAME_ID => Value::from(self.dns_domain_name.to_owned()),
+            Self::UPN_ID => Value::from(self.upn.to_owned()),
+            Self::LOGON_SCRIPT_ID => Value::from(self.logon_script.to_owned()),
+            Self::PROFILE_PATH_ID => Value::from(self.profile_path.to_owned()),
+            Self::HOME_DIRECTORY_ID => Value::from(self.home_directory.to_owned()),
+            Self::HOME_DIRECTORY_DRIVE_ID => Value::from(self.home_directory_drive.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "logon_id" => Self::LOGON_ID_ID,
+            "user" => Self::USER_ID,
+            "logon_domain" => Self::LOGON_DOMAIN_ID,
+            "authentication_package" => Self::AUTHENTICATION_PACKAGE_ID,
+            "logon_type" => Self::LOGON_TYPE_ID,
+            "session_id" => Self::SESSION_ID_ID,
+            "logon_sid" => Self::LOGON_SID_ID,
+            "logon_time" => Self::LOGON_TIME_ID,
+            "logon_server" => Self::LOGON_SERVER_ID,
+            "dns_domain_name" => Self::DNS_DOMAIN_NAME_ID,
+            "upn" => Self::UPN_ID,
+            "logon_script" => Self::LOGON_SCRIPT_ID,
+            "profile_path" => Self::PROFILE_PATH_ID,
+            "home_directory" => Self::HOME_DIRECTORY_ID,
+            "home_directory_drive" => Self::HOME_DIRECTORY_DRIVE_ID,
+            _ => 0
+        }
+    }
+}
+
 pub fn get_table_list() -> Vec<String> {
     vec![
         #[cfg(feature = "etc_hosts")]
@@ -3395,6 +3518,8 @@ pub fn get_table_list() -> Vec<String> {
             "users".to_string(),
         #[cfg(feature = "logged_in_users")]
             "logged_in_users".to_string(),
+        #[cfg(feature = "logon_sessions")]
+            "logon_sessions".to_string(),
         #[cfg(feature = "groups")]
             "groups".to_string(),
         #[cfg(feature = "wmi_computer_info")]

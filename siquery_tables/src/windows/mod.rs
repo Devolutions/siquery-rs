@@ -29,6 +29,7 @@ use std::env;
 #[cfg(feature = "wmi_pointing_device")] mod wmi_pointing_device;
 #[cfg(feature = "users")] mod users;
 #[cfg(feature = "logged_in_users")] mod logged_in_users;
+#[cfg(feature = "logon_sessions")] mod logon_sessions;
 #[cfg(feature = "groups")] mod groups;
 #[cfg(feature = "process_open_sockets")] #[cfg(not(fuzzing))] mod process_open_sockets;
 #[cfg(feature = "processes")] #[cfg(not(fuzzing))] mod processes;

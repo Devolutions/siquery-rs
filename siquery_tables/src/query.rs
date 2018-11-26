@@ -229,6 +229,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
             let table = LoggedInUsers::get_specific();
             select(&table, columns)
         }
+        #[cfg(feature = "logon_sessions")]
+        "logon_sessions" => {
+            let table = LogonSessions::get_specific();
+            select(&table, columns)
+        }
         #[cfg(feature = "groups")]
         "groups" => {
             let table = GroupsRow::get_specific();
@@ -493,6 +498,12 @@ pub fn get_schema(table_name: &str) -> Option<String> {
             let column_types = LoggedInUsers::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "logon_sessions")]
+        "logon_sessions" => {
+            let column_names = LogonSessions::get_columns_name();
+            let column_types = LogonSessions::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        }
         #[cfg(feature = "groups")]
         "groups" => {
             let column_names = GroupsRow::get_columns_name();
