@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NetworkServices</key>
+	<dict>
+		<key>1EC5D93E-602F-44F3-B30F-F1BC6427FBAE</key>
+		<dict>
+			<key>DNS</key>
+			<dict/>
+			<key>IPv4</key>
+			<dict>
+				<key>ConfigMethod</key>
+				<string>DHCP</string>
+			</dict>
+			<key>IPv6</key>
+			<dict>
+				<key>ConfigMethod</key>
+				<string>Automatic</string>
+			</dict>
+			<key>Interface</key>
+			<dict>
+				<key>DeviceName</key>
+				<string>en4</string>
+				<key>Hardware</key>
+				<string>Ethernet</string>
+				<key>Type</key>
+				<string>Ethernet</string>
+				<key>UserDefinedName</key>
+				<string>Thunderbolt Bridge</string>
+			</dict>
+			<key>Proxies</key>
+			<dict>
+				<key>ExceptionsList</key>
+				<array>
+					<string>*.local</string>
+					<string>169.254/16</string>
+					<string>123.0.0.1/15</string>
+				</array>
+				<key>HTTPSEnable</key>
+				<integer>1</integer>
+				<key>HTTPSPort</key>
+				<integer>50001</integer>
+				<key>HTTPSProxy</key>
+				<string>127.0.0.1</string>
+			</dict>
+			<key>SMB</key>
+			<dict/>
+			<key>UserDefinedName</key>
+			<string>Thunderbolt Bridge</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

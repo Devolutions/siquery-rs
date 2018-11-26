@@ -48,9 +48,14 @@ cfg_if! {
         extern crate objc_foundation;
         extern crate objc_id;
         extern crate fnv;
+        extern crate url;
 
         pub mod macos;
         pub use macos as sys;
+        pub mod errors;
+        pub use errors::ProxyError;
+        pub use errors::*;
+        pub use errors::ProxyError::*;
     } else if #[cfg(target_os = "windows")] {
         extern crate kernel32;
         extern crate winreg;

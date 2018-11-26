@@ -1,85 +1,118 @@
 use plist::Plist;
 use std::{
     fs::File,
-    io::Read,
-    borrow::Borrow,
-    collections::HashMap,
-    hash::BuildHasherDefault
 };
-use fnv::FnvHasher;
+use serde_json;
+use url::Url;
+use std::borrow::Borrow;
 
-use tables::{ProxiesRow,ProxiesIface};
+use tables::ProxiesRow;
+use errors::ProxyError;
+use errors::ProxyError::*;
 
-pub struct Reader {}
-impl ProxiesIface for Reader {
-    fn get_proxies_file(&self) -> Option<String> {
-        let mut s = String::new();
-        File::open("/Library/Preferences/SystemConfiguration/preferences.plist").ok()?.read_to_string(&mut s).ok()?;
-        Some(s)
+trait ProxyReaderIface {
+    fn read_plist(&self) -> Result<Plist, ProxyError>;
+}
+
+struct Reader {}
+
+impl ProxyReaderIface for Reader {
+    fn read_plist(&self) -> Result<Plist, ProxyError> {
+        File::open("/Library/Preferences/SystemConfiguration/preferences.plist").ok()
+            .and_then(|file| Plist::read(file).ok()).ok_or(OsError)
     }
 }
 
 impl ProxiesRow {
-    pub(crate) fn get_specific_ex(reader: &ProxiesIface) -> Vec<ProxiesRow> {
-        let mut out : Vec<ProxiesRow> = Vec::new();
+    pub fn get_specific() -> Vec<ProxiesRow> {
+        let reader: Box<ProxyReaderIface> = Box::new(Reader{});
+        get_specific_ex(reader.borrow()).unwrap_or(Vec::new())
+        // TODO: store log here using wrapped result
+    }
+}
 
-        if let Some(Plist::Dict(dict)) = reader.get_proxies_file()
-            .and_then(|s| Plist::from_xml_reader(&mut s.as_bytes()).ok()){
-            if let Some(Plist::Dict(network_services)) = dict.get("NetworkServices") {
-                for (interface_key,_v) in network_services.iter() {
-                    if let Some(Plist::Dict(interface)) = network_services.get(interface_key) {
-                        if let Some(Plist::Dict(proxy)) = interface.get("Proxies") {
-                            if proxy.get("HTTPEnable") == Some(&Plist::Integer(1)) {
-                                out.push(
-                                    get_proxy_info("HTTP".to_string(),proxy,interface)
-                                )
-                            } else if proxy.get("HTTPSEnable") == Some(&Plist::Integer(1)) {
-                                out.push(
-                                    get_proxy_info("HTTPS".to_string(),proxy,interface)
-                                )
-                            } else if proxy.get("SOCKSEnable") == Some(&Plist::Integer(1)) {
-                                out.push(
-                                    get_proxy_info("SOCKS".to_string(),proxy,interface)
-                                )
+fn get_specific_ex(reader: &ProxyReaderIface) -> Result<Vec<ProxiesRow>, ProxyError> {
+
+    let plist = reader.read_plist()?;
+
+    if let Some(Plist::Dictionary(network_services)) = plist.as_dictionary()
+        .and_then(|decoded_data| decoded_data.get("NetworkServices")) {
+
+        let mut proxies = Vec::new();
+
+        // Extract proxy settings for all network interfaces.
+        for (_k,v) in network_services.iter() {
+
+            let proxy = v.as_dictionary().ok_or(InvalidConfigError)?
+                .get("Proxies").ok_or(InvalidConfigError)?
+                .as_dictionary().ok_or(InvalidConfigError)?;
+
+            for entry in proxy.keys() {
+                if entry.contains("Proxy") {
+                    // Ex: entry = "HTTPSProxy".
+                    let protocol = entry.replace("Proxy","");
+                    let scheme;
+                    match protocol.as_ref() {
+                        "HTTPS" => {
+                            scheme = "https"
+                        },
+                        _ => {
+                            scheme = "http"
+                        }
+                    };
+                    if proxy.get(&format!("{}{}",protocol,"Enable"))
+                        == Some(&Plist::Integer(1)) {
+                        let mut interface = String::new();
+                        let mut whitelist = Vec::new();
+                        if let Some(Plist::Array(exceptions)) = proxy.get("ExceptionsList") {
+                            // Proxy exceptions can be different for different network interfaces on MacOs.
+                            if let Some(Plist::String(user_defined_name)) = v
+                                .as_dictionary().ok_or(InvalidConfigError)?
+                                .get("UserDefinedName"){
+                                interface = user_defined_name.to_string();
+                                for exception in exceptions {
+                                    whitelist.push(exception.as_string().ok_or(InvalidConfigError)?)
+                                }
                             }
                         }
+
+                        proxies.push(
+                            ProxiesRow {
+                                proxy: parse_addr_default_scheme(
+                                    scheme,
+                                    &format!(
+                                        "{}:{}",
+                                        proxy.get(entry).ok_or(InvalidConfigError)?.as_string().ok_or(InvalidConfigError)?,
+                                        proxy.get(&format!("{}{}", protocol, "Port")).ok_or(InvalidConfigError)?.as_integer().ok_or(InvalidConfigError)?
+                                    )
+                                )?,
+                                port: proxy.get(&format!("{}{}", protocol, "Port")).ok_or(InvalidConfigError)?.as_integer().ok_or(InvalidConfigError)?,
+                                protocol: protocol.to_lowercase(),
+                                interface,
+                                whitelist:serde_json::to_string(&whitelist).ok().unwrap_or(String::new()),
+                            }
+                        );
+
+                    } else {
+                        // Proxy for protocol is not enabled.
+                        continue
                     }
                 }
             }
         }
-        out
+        return Ok(proxies);
     }
-    pub(crate) fn get_specific() -> Vec<ProxiesRow> {
-        let reader: Box<ProxiesIface> = Box::new(Reader{});
-        let out = ProxiesRow::get_specific_ex(reader.borrow());
-        out
-    }
+    Err(NoProxyConfiguredError)
 }
 
-pub fn get_string(s:Option<&Plist>) -> Option<String> {
-    match s {
-        Some(Plist::String(v)) => Some(v.to_owned()),
-        _ => None,
-    }
-}
-
-pub fn get_int(i:Option<&Plist>) -> Option<i64> {
-    match i {
-        Some(Plist::Integer(v)) => Some(*v),
-        _ => None,
-    }
-}
-
-pub fn get_proxy_info(
-    protocol:String,
-    proxy:&HashMap<String,Plist,BuildHasherDefault<FnvHasher>>,
-    interface:&HashMap<String,Plist,BuildHasherDefault<FnvHasher>>
-) -> ProxiesRow{
-    ProxiesRow {
-        address: get_string(proxy.get(&(protocol.clone()+"Proxy"))).unwrap_or("".to_string()),
-        port: get_int(proxy.get(&(protocol.clone()+"Port"))).unwrap_or(-1),
-        protocol,
-        interface: get_string(interface.get("UserDefinedName")).unwrap_or("".to_string()),
+fn parse_addr_default_scheme(scheme: &str, addr: &str) -> Result<String, ProxyError> {
+    let split: Vec<&str> = addr.split("://").collect();
+    if split.len() == 2 {
+        Ok(Url::parse(addr)?.to_string())
+    } else if split.len() == 1 {
+        Ok(Url::parse(&format!("{}://{}", scheme, addr))?.to_string())
+    } else {
+        Err(InvalidConfigError)
     }
 }
 
@@ -87,31 +120,21 @@ pub fn get_proxy_info(
 mod tests {
     use super::*;
     pub struct Test {}
-    impl ProxiesIface for Test {
-        fn get_proxies_file(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/preferences.plist")))
+    impl ProxyReaderIface for Test {
+        fn read_plist(&self) -> Result<Plist, ProxyError> {
+            File::open("../siquery_tables/test_data/preferences.plist").ok()
+                .and_then(|file| Plist::read(file).ok()).ok_or(OsError)
         }
     }
     #[test]
-    fn get_proxies_file () {
-        let reader: Box<ProxiesIface> = Box::new(Test{});
-        // TODO
-        let http_proxy = &ProxiesRow::get_specific_ex(reader.borrow())[0];
-        assert_eq!(http_proxy.address, "111.111.111");
-        assert_eq!(http_proxy.port, 1111);
-        assert_eq!(http_proxy.protocol, "HTTP");
-        assert_eq!(http_proxy.interface, "USB 10/100/1000 LAN");
-        let https_proxy = &ProxiesRow::get_specific_ex(reader.borrow())[1];
-        assert_eq!(https_proxy.address, "222.222.222");
-        assert_eq!(https_proxy.port, 2222);
-        assert_eq!(https_proxy.protocol, "HTTPS");
-        assert_eq!(https_proxy.interface, "Wi-Fi");
-        let socks_proxy = &ProxiesRow::get_specific_ex(reader.borrow())[2];
-        assert_eq!(socks_proxy.address, "333.333.333");
-        assert_eq!(socks_proxy.port, 3333);
-        assert_eq!(socks_proxy.protocol, "SOCKS");
-        assert_eq!(socks_proxy.interface, "Thunderbolt Bridge");
+    fn proxy_configs () {
+        let reader: Box<ProxyReaderIface> = Box::new(Test{});
+        let proxy_settings = &get_specific_ex(reader.borrow()).unwrap()[0];
+        assert_eq!(proxy_settings.proxy, "https://127.0.0.1:50001/");
+        assert_eq!(proxy_settings.port, 50001);
+        assert_eq!(proxy_settings.protocol, "https");
+        assert_eq!(proxy_settings.interface, "Thunderbolt Bridge");
+        assert_eq!(proxy_settings.whitelist, r#"["*.local","169.254/16","123.0.0.1/15"]"#);
 
-        assert_eq!(ProxiesRow::get_specific_ex(reader.borrow()).len(), 3);
     }
 }

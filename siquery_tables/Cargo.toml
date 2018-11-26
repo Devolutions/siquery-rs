@@ -22,13 +22,14 @@ uname = "0.1.1"
 version = "0.3.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-plist-rs = "0.1.0"
 uname = "0.1.1"
 byteorder = "1.2.3"
 objc = {version = "~0.2.5", features = ["exception"]}
 objc-foundation = "0.1.1"
 objc_id = "0.1.1"
 fnv = "1.0.6"
+url = "1.5"
+plist = "0.3.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 kernel32-sys = "0.2"
