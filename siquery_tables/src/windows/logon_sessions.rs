@@ -4,7 +4,7 @@ use tables::LogonSessions;
 use winapi::{
     um::{
         ntlsa::*,
-        winnt::{PLUID, LUID, PWSTR, LPWSTR, PSID, LARGE_INTEGER        }
+        winnt::{PLUID, LUID, PWSTR, LPWSTR, PSID, LARGE_INTEGER}
     },
     shared::{minwindef::DWORD,
              sddl::ConvertSidToStringSidW}
@@ -36,13 +36,12 @@ impl LogonSessions {
     }
 
     pub fn get_specific() -> Vec<LogonSessions> {
-        let mut logon_sessions: Vec<LogonSessions> = Vec::new();
-        get_logon_sessions(&mut logon_sessions);
-        logon_sessions
+        get_logon_sessions()
     }
 }
 
-fn get_logon_sessions(logon_sessions: &mut Vec<LogonSessions>) {
+fn get_logon_sessions() ->  Vec<LogonSessions> {
+    let mut logon_sessions: Vec<LogonSessions> = Vec::new();
     unsafe {
         let kLsaStatusSuccess: i32 = 0;
 
@@ -126,6 +125,7 @@ fn get_logon_sessions(logon_sessions: &mut Vec<LogonSessions>) {
             }
         }
     }
+    logon_sessions
 }
 
 pub fn logon_type_to_string(logon_type : u32) -> String {
