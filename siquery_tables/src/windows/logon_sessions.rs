@@ -1,14 +1,16 @@
+#![allow(non_upper_case_globals)]
+#![allow(non_snake_case)]
 use tables::LogonSessions;
-use winapi::um::ntlsa::*;
-use winapi::um::winnt::PLUID;
-use winapi::um::winnt::LUID;
+use winapi::{
+    um::{
+        ntlsa::*,
+        winnt::{PLUID, LUID, PWSTR, LPWSTR, PSID, LARGE_INTEGER        }
+    },
+    shared::{minwindef::DWORD,
+             sddl::ConvertSidToStringSidW}
+};
 use winapi::um::errhandlingapi::GetLastError;
-use winapi::um::winnt::PWSTR;
-use winapi::um::winnt::LPWSTR;
-use winapi::um::winnt::PSID;
 use widestring::WideString;
-use winapi::shared::minwindef::DWORD;
-use winapi::shared::sddl::ConvertSidToStringSidW;
 use std::{ptr, mem};
 use libc;
 
@@ -48,75 +50,77 @@ fn get_logon_sessions(logon_sessions: &mut Vec<LogonSessions>) {
         let session_count: *mut u32 = &mut session_count_int as *mut u32;
 
         // get sessions array size
-        let mut sessions: *mut PLUID = ptr::null_mut();
+        let mut _sessions: *mut PLUID = ptr::null_mut();
         let mut session_array: Vec<LUID> = Vec::with_capacity((mem::size_of::<LUID>()) as usize);
         let psession_array = session_array.as_mut_ptr();
-        sessions = psession_array as *mut _;
+        _sessions = psession_array as *mut _;
 
-        let mut status: i32 = 0;
-        status = LsaEnumerateLogonSessions(session_count, sessions);
+        let mut _status: i32 = 0;
+        _status = LsaEnumerateLogonSessions(session_count, _sessions);
 
-        if status == kLsaStatusSuccess {
-            sessions = ptr::null_mut();
+        if _status == kLsaStatusSuccess {
+            _sessions = ptr::null_mut();
             let mut session_array_sized: Vec<LUID> = Vec::with_capacity(session_count_int as usize);
             let psession_array_sized = session_array_sized.as_mut_ptr();
-            sessions = psession_array_sized as *mut _;
+            _sessions = psession_array_sized as *mut _;
 
-            status = LsaEnumerateLogonSessions(session_count, sessions);
+            _status = LsaEnumerateLogonSessions(session_count, _sessions);
 
-            if status == kLsaStatusSuccess {
-                for i in 0..session_count_int {
+            if _status == kLsaStatusSuccess {
+                for _i in 0..session_count_int {
 
-                    let mut session_data: *mut PSECURITY_LOGON_SESSION_DATA = ptr::null_mut();
-                    let mut session_data_array: Vec<SECURITY_LOGON_SESSION_DATA> = Vec::with_capacity(10);
-                    let psession_data_array = session_data_array.as_mut_ptr();
-                    session_data = psession_data_array as *mut _;
+                    let mut _session_data: *mut PSECURITY_LOGON_SESSION_DATA = ptr::null_mut();
+                    let mut session_data_struct: *mut SECURITY_LOGON_SESSION_DATA = mem::uninitialized();
+                    _session_data = session_data_struct as *mut _;
 
-                    status = LsaGetLogonSessionData(*sessions, session_data);
-
-                    if status != kLsaStatusSuccess {
-                        *sessions = (*sessions).add(1);
+                    _status = LsaGetLogonSessionData(*_sessions, _session_data);
+                    if _status != kLsaStatusSuccess {
+                        *_sessions = (*_sessions).add(1);
                         continue;
                     }
 
                     let mut logon_session = LogonSessions::new();
 
-                    logon_session.logon_id = (**session_data).LogonId.LowPart as i32;
-                    logon_session.user =  pwstr_to_string((**session_data).UserName.Buffer,
-                                                          (**session_data).UserName.Length).unwrap_or("".to_string());
-                    logon_session.logon_domain = pwstr_to_string((**session_data).LogonDomain.Buffer,
-                                                                 (**session_data).LogonDomain.Length).unwrap_or("".to_string());
-                    logon_session.authentication_package = pwstr_to_string((**session_data).AuthenticationPackage.Buffer,
-                                                                           (**session_data).AuthenticationPackage.Length).unwrap_or("".to_string());
-                    logon_session.logon_type = logon_type_to_string((**session_data).LogonType);
-                    logon_session.session_id = (**session_data).Session as i32;
-                    logon_session.logon_sid = sid_to_string((**session_data).Sid).unwrap_or("".to_string());
+                    logon_session.logon_id = (**_session_data).LogonId.LowPart as i32;
 
-                    // todo implement longIntToUnixtime
-                    //logon_session.logon_time =
+                    logon_session.user =  pwstr_to_string((**_session_data).UserName.Buffer,
+                                                          (**_session_data).UserName.Length).unwrap_or("".to_string());
 
-                    logon_session.logon_server = pwstr_to_string((**session_data).LogonServer.Buffer,
-                                                                 (**session_data).LogonServer.Length).unwrap_or("".to_string());
+                    logon_session.logon_domain = pwstr_to_string((**_session_data).LogonDomain.Buffer,
+                                                                 (**_session_data).LogonDomain.Length).unwrap_or("".to_string());
 
-                    logon_session.dns_domain_name = pwstr_to_string((**session_data).DnsDomainName.Buffer,
-                                                                    (**session_data).DnsDomainName.Length).unwrap_or("".to_string());
+                    logon_session.authentication_package = pwstr_to_string((**_session_data).AuthenticationPackage.Buffer,
+                                                                           (**_session_data).AuthenticationPackage.Length).unwrap_or("".to_string());
+                    logon_session.logon_type = logon_type_to_string((**_session_data).LogonType);
 
-                    logon_session.upn = pwstr_to_string((**session_data).Upn.Buffer,
-                                                        (**session_data).Upn.Length).unwrap_or("".to_string());
+                    logon_session.session_id = (**_session_data).Session as i32;
 
-                    logon_session.logon_script = pwstr_to_string((**session_data).LogonScript.Buffer,
-                                                                 (**session_data).LogonScript.Length).unwrap_or("".to_string());
+                    logon_session.logon_sid = sid_to_string((**_session_data).Sid).unwrap_or("".to_string());
 
-                    logon_session.profile_path = pwstr_to_string((**session_data).ProfilePath.Buffer,
-                                                                 (**session_data).ProfilePath.Length).unwrap_or("".to_string());
+                    logon_session.logon_time = long_int_to_unixtime(&mut (**_session_data).LogonTime);
 
-                    logon_session.home_directory = pwstr_to_string((**session_data).HomeDirectory.Buffer,
-                                                                   (**session_data).HomeDirectory.Length).unwrap_or("".to_string());
+                    logon_session.logon_server = pwstr_to_string((**_session_data).LogonServer.Buffer,
+                                                                 (**_session_data).LogonServer.Length).unwrap_or("".to_string());
 
-                    logon_session.home_directory_drive = pwstr_to_string((**session_data).HomeDirectoryDrive.Buffer,
-                                                                         (**session_data).HomeDirectoryDrive.Length).unwrap_or("".to_string());
+                    logon_session.dns_domain_name = pwstr_to_string((**_session_data).DnsDomainName.Buffer,
+                                                                    (**_session_data).DnsDomainName.Length).unwrap_or("".to_string());
 
-                    *sessions = (*sessions).add(1);
+                    logon_session.upn = pwstr_to_string((**_session_data).Upn.Buffer,
+                                                        (**_session_data).Upn.Length).unwrap_or("".to_string());
+
+                    logon_session.logon_script = pwstr_to_string((**_session_data).LogonScript.Buffer,
+                                                                 (**_session_data).LogonScript.Length).unwrap_or("".to_string());
+
+                    logon_session.profile_path = pwstr_to_string((**_session_data).ProfilePath.Buffer,
+                                                                 (**_session_data).ProfilePath.Length).unwrap_or("".to_string());
+
+                    logon_session.home_directory = pwstr_to_string((**_session_data).HomeDirectory.Buffer,
+                                                                   (**_session_data).HomeDirectory.Length).unwrap_or("".to_string());
+
+                    logon_session.home_directory_drive = pwstr_to_string((**_session_data).HomeDirectoryDrive.Buffer,
+                                                                         (**_session_data).HomeDirectoryDrive.Length).unwrap_or("".to_string());
+
+                    *_sessions = (*_sessions).add(1);
                     logon_sessions.push(logon_session);
                 }
             }
@@ -184,4 +188,19 @@ pub fn lpwstr_to_string(lpwstr: LPWSTR) -> Result<String, DWORD> {
 pub fn pwstr_to_string(pwstr: PWSTR, buf_size: u16) -> Result<String, DWORD> {
     let string = unsafe { WideString::from_ptr(pwstr, buf_size as usize / 2) };
     Ok(string.to_string_lossy())
+}
+
+pub fn long_int_to_unixtime(ft: &mut LARGE_INTEGER ) -> i64  {
+    unsafe {
+        let mut ull: LARGE_INTEGER = mem::uninitialized();
+        let mut adjust: LARGE_INTEGER = mem::uninitialized();
+
+        ull.u_mut().LowPart = ft.u_mut().LowPart;
+        ull.u_mut().HighPart = ft.u_mut().HighPart;
+
+        *adjust.QuadPart_mut() = 11644473600000 * 10000;
+        *ull.QuadPart_mut() -= *adjust.QuadPart_mut();
+
+        return *ull.QuadPart_mut() / 10000000;
+    }
 }
