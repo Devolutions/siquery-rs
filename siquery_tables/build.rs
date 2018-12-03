@@ -15,6 +15,8 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "process_memory_map",
     "products",
     "users",
+    "logged_in_users",
+    "logon_sessions",
     "groups",
     "wmi_computer_info",
     "wmi_os_version",
@@ -50,7 +52,8 @@ const LINUX_TABLES: &'static [(&'static str)] = &[
     "process_envs",
     "mounts",
     "groups",
-    "users"
+    "users",
+    "logged_in_users"
 ];
 
 const MACOS_TABLES: &'static [(&'static str)] = &[
