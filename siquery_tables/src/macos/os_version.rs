@@ -64,8 +64,9 @@ mod tests {
     use super::*;
     pub struct Test {}
     impl OsVersionReaderIface for Test {
-        fn get_os_info(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/SystemVersion.plist")))
+        fn get_os_info(&self) -> Option<Plist> {
+            File::open("../siquery_tables/test_data/SystemVersion.plist").ok()
+                .and_then(|file| Plist::read(file).ok())
         }
     }
     #[test]
