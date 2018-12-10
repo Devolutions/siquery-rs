@@ -3372,61 +3372,67 @@ pub trait ProxiesIface {
 table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProxiesRow {
-    pub proxy: String,
-    pub port: u16,
+    pub url: String,
     pub protocol: String,
+    pub host: String,
+    pub port: u16,
     pub interface: String,
-    pub whitelist: String,
+    pub exceptions: String,
 }}
 
 #[cfg(feature = "proxies")]
 impl ProxiesRow {
-    const PROXY_ID: u64 = 0x00000001;
-    const PORT_ID: u64 = 0x00000002;
-    const PROTOCOL_ID: u64 = 0x00000004;
-    const INTERFACE_ID: u64 = 0x00000008;
-    const WHITELIST_ID: u64 = 0x00000010;
+    const URL_ID: u64 = 0x00000001;
+    const PROTOCOL_ID: u64 = 0x00000002;
+    const HOST_ID: u64 = 0x00000004;
+    const PORT_ID: u64 = 0x00000008;
+    const INTERFACE_ID: u64 = 0x00000010;
+    const EXCEPTIONS_ID: u64 = 0x00000020;
 }
 
 #[cfg(feature = "proxies")]
 impl Table for ProxiesRow {
     const COLUMN_NAMES: &'static [&'static str] = &[
-        "proxy",
-        "port",
+        "url",
         "protocol",
+        "host",
+        "port",
         "interface",
-        "whitelist",
+        "exceptions",
     ];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "proxy" => Value::from(self.proxy.to_owned()),
-            "port" => Value::from(self.port),
+            "url" => Value::from(self.url.to_owned()),
             "protocol" => Value::from(self.protocol.to_owned()),
+            "host" => Value::from(self.host.to_owned()),
+            "port" => Value::from(self.port),
             "interface" => Value::from(self.interface.to_owned()),
-            "whitelist" => Value::from(self.whitelist.to_owned()),
+            "exceptions" => Value::from(self.exceptions.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
 
     fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::PROXY_ID => Value::from(self.proxy.to_owned()),
-            Self::PORT_ID => Value::from(self.port),
+            Self::URL_ID => Value::from(self.url.to_owned()),
             Self::PROTOCOL_ID => Value::from(self.protocol.to_owned()),
+            Self::HOST_ID => Value::from(self.host.to_owned()),
+            Self::PORT_ID => Value::from(self.port),
             Self::INTERFACE_ID => Value::from(self.interface.to_owned()),
-            Self::WHITELIST_ID => Value::from(self.whitelist.to_owned()),
+            Self::EXCEPTIONS_ID => Value::from(self.exceptions.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
 
     fn get_id(&self, _name: &str) -> u64 {
         match _name {
-            "proxy" => Self::PROXY_ID,
-            "port" => Self::PORT_ID,
+            "url" => Self::URL_ID,
             "protocol" => Self::PROTOCOL_ID,
+            "host" => Self::HOST_ID,
+            "port" => Self::PORT_ID,
             "interface" => Self::INTERFACE_ID,
-            "whitelist" => Self::WHITELIST_ID,
+            "exceptions" => Self::EXCEPTIONS_ID,
             _ => 0
         }
     }

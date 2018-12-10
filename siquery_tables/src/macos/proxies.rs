@@ -12,11 +12,12 @@ impl ProxiesRow {
         for entry in proxies {
             out.push(
                 ProxiesRow{
-                    proxy : entry.proxy.to_string(),
-                    port : entry.port,
-                    protocol : entry.protocol,
+                    url : entry.url.to_string().trim_right_matches('/').to_string(),
+                    protocol : entry.url.scheme().to_string(),
+                    host : entry.url.host_str().unwrap_or("").to_string(),
+                    port : entry.url.port().unwrap_or(0),
                     interface : entry.interface,
-                    whitelist : entry.whitelist,
+                    exceptions : entry.whitelist,
                 }
             )
         }
