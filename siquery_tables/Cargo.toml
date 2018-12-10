@@ -49,4 +49,4 @@ features = ["vtab", "bundled"]
 [dependencies.proxy_config]
 version = "0.0.2"
 git = "https://github.com/Devolutions/proxy-config.git"
-rev = "223ba13"
+rev = "1c216a5"
