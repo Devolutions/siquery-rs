@@ -110,7 +110,6 @@ fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> Map<Str
     }
     for i in 1..row_value.column_count() {
         let v: Value = row_value.get(i);
-        // todo add condition for flag
         match Value::data_type(&v) {
             Type::Real | Type::Integer => {
                 value_json.insert(col_names[i].clone(),json!(row_value.get::<usize,i64>(i)));
