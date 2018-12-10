@@ -10,12 +10,12 @@ impl ProxiesRow {
             for (protocol,url) in proxies {
                 out.push(
                     ProxiesRow{
-                        proxy:url.to_string(),
-                        port:url.port().unwrap_or(0),
+                        url:url.to_string().trim_right_matches('/').to_string(),
                         protocol,
-                        interface:"".to_string(),
-                        whitelist:serde_json::to_string(&whitelist).ok()
-                            .unwrap_or(String::new()),
+                        host:url.host_str().unwrap_or("").to_string(),
+                        port:url.port().unwrap_or(0),
+                        interface: "".to_string(),
+                        exceptions: whitelist.join(","),
                     }
                 );
             }
