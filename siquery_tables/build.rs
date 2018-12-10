@@ -70,7 +70,8 @@ const MACOS_TABLES: &'static [(&'static str)] = &[
     "mounts",
     "groups",
     "users",
-    "proxies"
+    "proxies",
+    "logged_in_users"
 ];
 
 fn emit_features(features: &'static [(&'static str)]) {
