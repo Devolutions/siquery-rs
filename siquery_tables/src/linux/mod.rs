@@ -18,6 +18,7 @@ use serde_json;
 #[cfg(feature = "groups")] mod groups;
 #[cfg(feature = "users")] mod users;
 #[cfg(feature = "logged_in_users")] mod logged_in_users;
+#[cfg(feature = "proxies")] mod proxies;
 
 pub struct EtcHostsReader {}
 #[cfg(feature = "etc_hosts")]

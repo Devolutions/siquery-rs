@@ -3373,7 +3373,7 @@ table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProxiesRow {
     pub proxy: String,
-    pub port: i64,
+    pub port: u16,
     pub protocol: String,
     pub interface: String,
     pub whitelist: String,

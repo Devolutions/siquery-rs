@@ -53,10 +53,6 @@ cfg_if! {
 
         pub mod macos;
         pub use macos as sys;
-        pub mod errors;
-        pub use errors::ProxyError;
-        pub use errors::*;
-        pub use errors::ProxyError::*;
     } else if #[cfg(target_os = "windows")] {
         extern crate kernel32;
         extern crate winreg;
