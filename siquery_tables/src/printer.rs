@@ -1,12 +1,11 @@
+extern crate serde;
+extern crate serde_json;
 use csv::{WriterBuilder, Terminator};
-use rusqlite::{Rows, Row as RusqliteRow};
-use rusqlite::types::{Value, Type};
-use prettytable::Table;
-use prettytable::row::Row;
-use prettytable::cell::Cell;
-use utils;
+use rusqlite::{Rows, Row as RusqliteRow, types::{Value, Type}};
+use prettytable::{Table, row::Row, cell::Cell};
 use tables::get_table_list;
 use query::get_schema;
+use serde_json::{Value as serdValue, Map};
 
 pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
     let mut row: Vec<String> = Vec::new();
@@ -80,41 +79,30 @@ pub fn print_pretty(columns: Vec<String>, values: &mut Rows) {
 }
 
 pub fn print_json (col_names: &Vec<String>, values: &mut Rows) {
-    let mut out = "[\n".to_owned();
+    let mut writer = Vec::new();
+    let mut _value:  Map<String, serdValue> = Map::new();
     loop {
-        if let Some(v) = values.next(){
-            if let Some (res) = v.ok() {
-                out.push_str(&format_to_json(&col_names, &res));
+        if let Some(v) = values.next() {
+            if let Some(res) = v.ok() {
+                _value = format_to_json(&col_names, &res);
+                writer.push(_value);
             }
         } else {
             break
         }
     }
-    utils::trim_string(&mut out);
-    out.push_str("\n]");
-    println!("{}",out);
+    let json = serde_json::to_string_pretty(&writer).unwrap();
+    println!("{}", json);
 }
 
-fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> String {
-    let mut value_to_json = String::new();
+fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> Map<String, serdValue> {
+    let mut value_json: Map<String, serdValue> = Map::new();
     match Value::data_type(&row_value.get(0)) {
         Type::Real | Type::Integer => {
-            value_to_json.push_str(
-                &format!(
-                    "{:?}:{:?}",
-                    col_names[0],
-                    row_value.get::<usize,i64>(0).to_string()
-                )
-            );
+            value_json.insert(col_names[0].clone(),json!(row_value.get::<usize,i64>(0)));
         },
         Type::Text => {
-            value_to_json.push_str(
-                &format!(
-                    "{:?}:{:?}",
-                    col_names[0],
-                    row_value.get::<usize,String>(0)
-                )
-            );
+            value_json.insert(col_names[0].clone(),json!(row_value.get::<usize,String>(0)));
         },
         _ => {
             // Do nothing.
@@ -122,37 +110,24 @@ fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> String 
     }
     for i in 1..row_value.column_count() {
         let v: Value = row_value.get(i);
-        // todo add condition for flag
         match Value::data_type(&v) {
             Type::Real | Type::Integer => {
-                value_to_json.push_str(
-                    &format!(
-                        ",{:?}:{:?}",
-                        col_names[i],
-                        row_value.get::<usize,i64>(i).to_string()
-                    )
-                );
+                value_json.insert(col_names[i].clone(),json!(row_value.get::<usize,i64>(i)));
             },
             Type::Text => {
-                value_to_json.push_str(
-                    &format!(
-                        ",{:?}:{:?}",
-                        col_names[i],
-                        row_value.get::<usize,String>(i)
-                    )
-                );
+                value_json.insert(col_names[i].clone(),json!(row_value.get::<usize,String>(i)));
             },
             _ => {
                 // Do nothing.
             }
         }
     }
-    format!("  {{{}}},\n", value_to_json)
+    value_json
 }
 
 pub fn print_schema(table: String) {
     if table.len() > 0 {
-        if let Some(value) = get_table_list().iter().find(| x| *x.as_str() == *table) {
+        if let Some(value) = get_table_list().iter().find(|x| *x.as_str() == *table) {
             let mut schema = get_schema(value.as_str()).unwrap();
             schema = schema.replace("x(", &format!("{}{}", value.as_str(), "("));
             println!("{}", schema);
@@ -162,7 +137,7 @@ pub fn print_schema(table: String) {
     } else {
         for table in get_table_list().iter() {
             let mut schema = get_schema(table.as_str()).unwrap();
-            schema = schema.replace("x(", &format!("{}{}", table.as_str(),"("));
+            schema = schema.replace("x(", &format!("{}{}", table.as_str(), "("));
             println!("{}", schema);
         }
     }
