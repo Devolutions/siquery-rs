@@ -4,7 +4,6 @@ use rusqlite::{version_number, Connection, Error};
 use rusqlite::types::Value;
 use printer::*;
 
-
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();
 
