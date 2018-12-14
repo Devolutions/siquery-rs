@@ -1,28 +1,24 @@
 use plist::Plist;
 use std::fs::File;
-use std::io::Read;
 use std::borrow::Borrow;
 
-use tables::{OsVersion,OsVersionIface};
+use tables::OsVersion;
 
-pub struct Reader {}
-impl OsVersionIface for Reader {
-    fn get_os_info(&self) -> Option<String> {
-        let mut s = String::new();
-        File::open("/System/Library/CoreServices/SystemVersion.plist").ok()?.read_to_string(&mut s).ok()?;
-        Some(s)
-    }
-    // NA for mac
-    fn os_release(&self) -> Option<String> {
-        Some(String::from("For linux only"))
-    }
-    fn os_platform(&self) -> Option<String> {
-        Some(String::from("For linux only"))
+pub trait OsVersionReaderIface {
+    fn get_os_info(&self) -> Option<Plist>;
+}
+
+struct Reader {}
+
+impl OsVersionReaderIface for Reader {
+    fn get_os_info(&self) -> Option<Plist> {
+        File::open("/System/Library/CoreServices/SystemVersion.plist").ok()
+            .and_then(|file| Plist::read(file).ok())
     }
 }
 
 impl OsVersion {
-    pub(crate) fn get_specific_ex(reader: &OsVersionIface) -> Vec<OsVersion> {
+    pub(crate) fn get_specific_ex(reader: &OsVersionReaderIface) -> Vec<OsVersion> {
         let mut output : Vec<OsVersion> = Vec::new();
         let system_version = reader.get_os_info();
 
@@ -30,8 +26,7 @@ impl OsVersion {
         let mut version = String::new();
         let mut major = 0;
         let mut minor = 0;
-        if let Some(s) = system_version {
-            if let Ok(Plist::Dict(dict)) = Plist::from_xml_reader(&mut s.as_bytes()) {
+        if let Some(Plist::Dictionary(dict)) = system_version {
                     if let Some(&Plist::String(ref n)) = dict.get("ProductName") {
                         name = n.clone();
                     }
@@ -45,7 +40,6 @@ impl OsVersion {
                         }
                     }
                 }
-        }
 
         output.push(
             OsVersion {
@@ -59,7 +53,7 @@ impl OsVersion {
         output
     }
     pub(crate) fn get_specific() -> Vec<OsVersion> {
-        let reader: Box<OsVersionIface> = Box::new(Reader{});
+        let reader: Box<OsVersionReaderIface> = Box::new(Reader{});
         let out = OsVersion::get_specific_ex(reader.borrow());
         out
     }
@@ -69,21 +63,15 @@ impl OsVersion {
 mod tests {
     use super::*;
     pub struct Test {}
-    impl OsVersionIface for Test {
-        fn get_os_info(&self) -> Option<String> {
-            Some(String::from(include_str!("../../test_data/SystemVersion.plist")))
-        }
-        // NA for mac
-        fn os_release(&self) -> Option<String> {
-            Some(String::new())
-        }
-        fn os_platform(&self) -> Option<String> {
-            Some(String::new())
+    impl OsVersionReaderIface for Test {
+        fn get_os_info(&self) -> Option<Plist> {
+            File::open("../siquery_tables/test_data/SystemVersion.plist").ok()
+                .and_then(|file| Plist::read(file).ok())
         }
     }
     #[test]
     fn test_os_version () {
-        let reader: Box<OsVersionIface> = Box::new(Test{});
+        let reader: Box<OsVersionReaderIface> = Box::new(Test{});
         let os_version = &OsVersion::get_specific_ex(reader.borrow())[0];
         assert_eq!(os_version.platform, "MacOS");
         assert_eq!(os_version.name, "Mac OS X");

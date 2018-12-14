@@ -35,6 +35,7 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "wmi_monitors",
     "wmi_keyboard",
     "wmi_pointing_device",
+    "proxies"
 ];
 
 const LINUX_TABLES: &'static [(&'static str)] = &[
@@ -53,7 +54,8 @@ const LINUX_TABLES: &'static [(&'static str)] = &[
     "mounts",
     "groups",
     "users",
-    "logged_in_users"
+    "logged_in_users",
+    "proxies"
 ];
 
 const MACOS_TABLES: &'static [(&'static str)] = &[
@@ -67,7 +69,9 @@ const MACOS_TABLES: &'static [(&'static str)] = &[
     "uptime",
     "mounts",
     "groups",
-    "users"
+    "users",
+    "proxies",
+    "logged_in_users"
 ];
 
 fn emit_features(features: &'static [(&'static str)]) {

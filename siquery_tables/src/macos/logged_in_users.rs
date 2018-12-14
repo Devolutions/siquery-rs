@@ -77,10 +77,10 @@ pub fn gen_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>, entry: *mut
         if *K_LOGIN_TYPES.get(&(*entry).ut_type).unwrap() == ""{
             logged_in_user.type_ = "unknown".to_string();
         }
-        else
-        {
-            logged_in_user.type_ = (*K_LOGIN_TYPES.get(&(*entry).ut_type).unwrap()).to_string();
-        }
+            else
+            {
+                logged_in_user.type_ = (*K_LOGIN_TYPES.get(&(*entry).ut_type).unwrap()).to_string();
+            }
         logged_in_user.user = c_char_arr_to_string(((*entry).ut_user).as_ptr()) ;
         logged_in_user.tty = c_char_arr_to_string( ((*entry).ut_line).as_ptr());
         logged_in_user.host = c_char_arr_to_string( ((*entry).ut_host).as_ptr());
