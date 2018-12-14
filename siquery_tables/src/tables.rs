@@ -3364,11 +3364,6 @@ impl Table for GroupsRow {
 }
 
 #[cfg(feature = "proxies")]
-pub trait ProxiesIface {
-    fn get_proxies_file(&self) -> Option<String>;
-}
-
-#[cfg(feature = "proxies")]
 table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProxiesRow {
