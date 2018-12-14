@@ -122,8 +122,9 @@ processes | ✔ | ✔ | ✔
 process_open_sockets | ✔ | ✔ | 
 process_memory_map | ✔ | ✔ | 
 products | ✔ |  | 
+proxies | ✔ | ✔ | ✔
 users | ✔ | ✔ | ✔
-logged_in_users | ✔ | ✔ | 
+logged_in_users | ✔ | ✔ | ✔
 logon_sessions | ✔ |  | 
 groups | ✔ | ✔ | ✔
 process_envs |  | ✔ | ✔
