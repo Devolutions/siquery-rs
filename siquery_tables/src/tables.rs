@@ -3557,6 +3557,167 @@ impl Table for LogonSessions {
     }
 }
 
+#[cfg(feature = "launchd")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct LaunchdRow {
+    pub path: String,
+    pub name: String,
+    pub label: String,
+    pub program: String,
+    pub run_at_load: String,
+    pub keep_alive: String,
+    pub on_demand: String,
+    pub disabled: String,
+    pub username: String,
+    pub groupname: String,
+    pub stdout_path: String,
+    pub stderr_path: String,
+    pub start_interval: String,
+    pub program_arguments: String,
+    pub watch_paths: String,
+    pub queue_directories: String,
+    pub inetd_compatibility: String,
+    pub start_on_mount: String,
+    pub root_directory: String,
+    pub working_directory: String,
+    pub process_type: String,
+
+}}
+
+#[cfg(feature = "launchd")]
+impl LaunchdRow {
+    const PATH_ID: u64 = 0x00000001;
+    const NAME_ID: u64 = 0x00000002;
+    const LABEL_ID: u64 = 0x00000004;
+    const PROGRAM_ID: u64 = 0x00000008;
+    const RUN_AT_LOAD_ID: u64 = 0x00000010;
+    const KEEP_ALIVE_ID: u64 = 0x00000020;
+    const ON_DEMAND_ID: u64 = 0x00000040;
+    const DISABLED_ID: u64 = 0x00000080;
+    const USERNAME_ID: u64 = 0x00000100;
+    const GROUPNAME_ID: u64 = 0x00000200;
+    const STDOUT_PATH_ID: u64 = 0x00000400;
+    const STDERR_PATH_ID: u64 = 0x00000800;
+    const START_INTERVAL_ID: u64 = 0x00001000;
+    const PROGRAM_ARGUMENTS_ID: u64 = 0x00002000;
+    const WATCH_PATHS_ID: u64 = 0x00004000;
+    const QUEUE_DIRECTORIES_ID: u64 = 0x00008000;
+    const INETD_COMPATIBILITY_ID: u64 = 0x00010000;
+    const START_ON_MOUNT_ID: u64 = 0x00020000;
+    const ROOT_DIRECTORY_ID: u64 = 0x00040000;
+    const WORK_DIRECTORY_ID: u64 = 0x00080000;
+    const PROCESS_TYPE_ID: u64 = 0x00100000;
+}
+
+#[cfg(feature = "launchd")]
+impl Table for LaunchdRow {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "path",
+        "name",
+        "label",
+        "program",
+        "run_at_load",
+        "keep_alive",
+        "on_demand",
+        "disabled",
+        "username",
+        "groupname",
+        "stdout_path",
+        "stderr_path",
+        "start_interval",
+        "program_arguments",
+        "watch_paths",
+        "queue_directories",
+        "inetd_compatibility",
+        "start_on_mount",
+        "root_directory",
+        "working_directory",
+        "process_type",
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "path"=> Value::from(self.path.to_owned()),
+            "name"=> Value::from(self.name.to_owned()),
+            "label"=> Value::from(self.label.to_owned()),
+            "program"=> Value::from(self.program.to_owned()),
+            "run_at_load"=> Value::from(self.run_at_load.to_owned()),
+            "keep_alive"=> Value::from(self.keep_alive.to_owned()),
+            "on_demand"=> Value::from(self.on_demand.to_owned()),
+            "disabled"=> Value::from(self.disabled.to_owned()),
+            "username"=> Value::from(self.username.to_owned()),
+            "groupname"=> Value::from(self.groupname.to_owned()),
+            "stdout_path"=> Value::from(self.stdout_path.to_owned()),
+            "stderr_path"=> Value::from(self.stderr_path.to_owned()),
+            "start_interval" => Value::from(self.start_interval.to_owned()),
+            "program_arguments"=> Value::from(self.program_arguments.to_owned()),
+            "watch_paths"=> Value::from(self.watch_paths.to_owned()),
+            "queue_directories"=> Value::from(self.queue_directories.to_owned()),
+            "inetd_compatibility"=> Value::from(self.inetd_compatibility.to_owned()),
+            "start_on_mount"=> Value::from(self.start_on_mount.to_owned()),
+            "root_directory"=> Value::from(self.root_directory.to_owned()),
+            "working_directory"=> Value::from(self.working_directory.to_owned()),
+            "process_type"=> Value::from(self.process_type.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::PATH_ID=> Value::from(self.path.to_owned()),
+            Self::NAME_ID=> Value::from(self.name.to_owned()),
+            Self::LABEL_ID=> Value::from(self.label.to_owned()),
+            Self::PROGRAM_ID=> Value::from(self.program.to_owned()),
+            Self::RUN_AT_LOAD_ID=> Value::from(self.run_at_load.to_owned()),
+            Self::KEEP_ALIVE_ID=> Value::from(self.keep_alive.to_owned()),
+            Self::ON_DEMAND_ID=> Value::from(self.on_demand.to_owned()),
+            Self::DISABLED_ID=> Value::from(self.disabled.to_owned()),
+            Self::USERNAME_ID=> Value::from(self.username.to_owned()),
+            Self::GROUPNAME_ID=> Value::from(self.groupname.to_owned()),
+            Self::STDOUT_PATH_ID=> Value::from(self.stdout_path.to_owned()),
+            Self::STDERR_PATH_ID=> Value::from(self.stderr_path.to_owned()),
+            Self::START_INTERVAL_ID=> Value::from(self.start_interval.to_owned()),
+            Self::PROGRAM_ARGUMENTS_ID=> Value::from(self.program_arguments.to_owned()),
+            Self::WATCH_PATHS_ID=> Value::from(self.watch_paths.to_owned()),
+            Self::QUEUE_DIRECTORIES_ID=> Value::from(self.queue_directories.to_owned()),
+            Self::INETD_COMPATIBILITY_ID=> Value::from(self.inetd_compatibility.to_owned()),
+            Self::START_ON_MOUNT_ID=> Value::from(self.start_on_mount.to_owned()),
+            Self::ROOT_DIRECTORY_ID=> Value::from(self.root_directory.to_owned()),
+            Self::WORK_DIRECTORY_ID=> Value::from(self.working_directory.to_owned()),
+            Self::PROCESS_TYPE_ID=> Value::from(self.process_type.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "path" => Self::PATH_ID,
+            "name" => Self::NAME_ID,
+            "label"=> Self::LABEL_ID,
+            "program"=> Self::PROGRAM_ID,
+            "run_at_load"=> Self::RUN_AT_LOAD_ID,
+            "keep_alive"=> Self::KEEP_ALIVE_ID,
+            "on_demand"=> Self::ON_DEMAND_ID,
+            "disabled"=> Self::DISABLED_ID,
+            "username"=> Self::USERNAME_ID,
+            "groupname"=> Self::GROUPNAME_ID,
+            "stdout_path"=> Self::STDOUT_PATH_ID,
+            "stderr_path"=> Self::STDERR_PATH_ID,
+            "start_interval"=> Self::START_INTERVAL_ID,
+            "program_arguments"=> Self::PROGRAM_ARGUMENTS_ID,
+            "watch_paths"=> Self::WATCH_PATHS_ID,
+            "queue_directories"=> Self::QUEUE_DIRECTORIES_ID,
+            "inetd_compatibility"=> Self::INETD_COMPATIBILITY_ID,
+            "start_on_mount"=> Self::START_ON_MOUNT_ID,
+            "root_directory"=> Self::ROOT_DIRECTORY_ID,
+            "working_directory"=> Self::WORK_DIRECTORY_ID,
+            "process_type"=> Self::PROCESS_TYPE_ID,
+            _ => 0
+        }
+    }
+}
+
 pub fn get_table_list() -> Vec<String> {
     vec![
         #[cfg(feature = "etc_hosts")]
@@ -3633,6 +3794,8 @@ pub fn get_table_list() -> Vec<String> {
             "mounts".to_string(),
         #[cfg(feature = "proxies")]
             "proxies".to_string(),
+        #[cfg(feature = "launchd")]
+            "launchd".to_string(),
         #[cfg(test)]
             "Dummy".to_string(),
     ]
