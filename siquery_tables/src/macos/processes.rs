@@ -253,7 +253,7 @@ impl ProcessesRow {
             )
         };
         if bufsize <= 0 {
-            println!("An error occurred while retrieving the process list");;
+            Error!("An error occurred while retrieving the process list");;
             return out;
         }
         // Use twice the number of PIDs returned to handle races.
@@ -267,7 +267,7 @@ impl ProcessesRow {
             )
         };
         if bufsize <= 0 {
-            println!("An error occurred while retrieving the process list");
+            error!("An error occurred while retrieving the process list");
             return pid_list;
         }
         let items_count = bufsize as usize / mem::size_of::<i32>();

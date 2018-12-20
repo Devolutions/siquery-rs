@@ -2,12 +2,24 @@
 extern crate clap;
 extern crate siquery;
 
+#[macro_use]
+extern crate log;
+extern crate env_logger;
+
+use log::Level;
+use log::LevelFilter;
+use log::set_max_level;
+
 use siquery::query::{init_db, execute_query};
 use siquery::tables::get_table_list;
 use siquery::printer::print_schema;
 use clap::App;
 
 fn main() {
+
+    env_logger::init();
+    info!("starting up");
+
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
     let matches = app.version(crate_version!()).get_matches();

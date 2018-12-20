@@ -223,7 +223,7 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
         );
 
         if !res {
-            println!("error");
+            error!("WTSEnumerateSessionsExW failed with {} return value", res);
             return
         }
 
@@ -244,7 +244,7 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
         );
 
         if !res {
-            println!("error");
+            error!("WTSEnumerateSessionsExW failed with {} return value", res);
             return
         }
 
@@ -273,7 +273,7 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
                                               bytesRet);
 
             if !res || sessionInfo == ptr::null_mut() {
-                println!("Error querying WTS session information  : {:?}", GetLastError());
+                error!("WTSQuerySessionInformationA failed with {} ", GetLastError());
                 continue;
             }
 
@@ -294,7 +294,7 @@ fn get_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>) {
                                               bytesRet);
 
             if !res || clientInfo == ptr::null_mut() {
-                println!("Error querying WTS session information  : {:?}", GetLastError());
+                error!("WTSQuerySessionInformationA failed with {} ", GetLastError());
                 logged_in_users.push(logged_in_user);
                 logged_in_user = LoggedInUsers::new();
                 *pSessionInfo = (*pSessionInfo).add(1);

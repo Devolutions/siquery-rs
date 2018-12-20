@@ -15,12 +15,18 @@ extern crate rusqlite;
 extern crate csv;
 extern crate prettytable;
 
+#[macro_use]
+extern crate log;
+extern crate env_logger;
+
 pub mod vtab;
 mod common;
 mod utils;
 pub mod printer;
 pub mod query;
 pub mod tables;
+
+use log::Level;
 
 cfg_if! {
     if #[cfg(all(target_os = "linux",fuzzing))] {

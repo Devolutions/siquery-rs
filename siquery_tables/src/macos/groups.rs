@@ -39,7 +39,7 @@ impl GroupsRow {
 
 // If Objective-C interface fails.
 pub fn gen_grgent_entries () -> Option<Vec<GroupsRow>> {
-    println!("Objective-C interface failes, querying with getgrent().");
+    warn!("Objective-C interface failes, querying with getgrent().");
     let mut out = Vec::new();
     let mut groupnames = HashSet::new();
     unsafe {setgrent()};

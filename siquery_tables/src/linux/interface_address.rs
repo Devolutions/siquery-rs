@@ -47,7 +47,7 @@ impl InterfaceAddress {
                     }
                 },
                 None => {
-                    println!("interface {} with unsupported address family",
+                    warn!("interface {} with unsupported address family",
                              ifaddr.interface_name);
                 }
             }

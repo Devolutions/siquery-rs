@@ -32,7 +32,6 @@ impl Uptime {
             )
         };
 
-
         if ret == 0 {
             let mut remaining_time = 0;
             let sec_to_days_converter = 60 * 60 * 24;

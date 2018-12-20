@@ -125,7 +125,7 @@ fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String
                         if user_lvl_4buff.as_mut_ptr() != ptr::null_mut() {
                             NetApiBufferFree(*user_lvl_4buff.as_mut_ptr() as *mut c_void);
                         }
-                        println!("with error code {:?}", ret);
+                        error!("NetUserGetInfo failed with value {}", ret);
 
                         iter_buff = iter_buff.add(1) as *mut _;
                     }
@@ -166,7 +166,7 @@ fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String
             }
         // if there are no local users
         } else {
-            println!("NetUserEnum failed with {:?}", ret);
+            error!("NetUserEnum failed with value {}", ret);
         }
 
         if user_buffer.as_mut_ptr() != ptr::null_mut() {
@@ -285,7 +285,7 @@ pub fn convert_string_sid_to_sid(sid_string: String) -> *mut PSID {
     unsafe {
         let ret = ConvertStringSidToSidW(sid_c_str.as_ptr(), sid);
         if ret == 0 && GetLastError() != ERROR_INSUFFICIENT_BUFFER {
-            println!("failed with error {:?}", ret);
+            error!("ConvertStringSidToSidW failed with value {}", GetLastError());
         };
     }
     sid
@@ -316,7 +316,7 @@ pub fn get_roaming_profiles_username(sid: *mut PSID) -> String {
     };
 
     if ret == 0 && unsafe {GetLastError()} != ERROR_INSUFFICIENT_BUFFER {
-        println!("failed to lookup account name");
+        error!("LookupAccountSidW failed with value {}", unsafe{GetLastError()});
         return "".to_string()
     };
 

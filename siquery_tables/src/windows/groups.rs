@@ -81,8 +81,11 @@ pub fn get_sid_from_username(account_name: LPCWSTR) -> Result<SID, DWORD> {
         )
     };
 
+
+
+
     if ret == 0 && unsafe {GetLastError()} != ERROR_INSUFFICIENT_BUFFER {
-        println!("failed to lookup account name",/*account_name.to_string(),*/);
+        error!("LookupAccountNameW failed with value {}", unsafe{GetLastError()});
         return Err(unsafe{GetLastError()});
     };
 
@@ -105,10 +108,10 @@ pub fn get_sid_from_username(account_name: LPCWSTR) -> Result<SID, DWORD> {
     };
 
     if ret == 0 {
-        println!("failed to lookup account name with error {}", /*account_name.to_string(),*/ unsafe { GetLastError() });
+        error!("LookupAccountNameW failed with value {}", unsafe{GetLastError()});
         return Err(unsafe{GetLastError()});
     } else if unsafe { IsValidSid(sid_buf_p)} == FALSE {
-        println!("The sid for is invalid"/*, account_name.to_string()*/);
+        error!("LookupAccountNameW failed sid is invalid value {}", unsafe{GetLastError()});
         return Err(unsafe{GetLastError()});
     }
     let sid_p = sid_buf_p as *mut _ as *mut SID;
@@ -127,7 +130,7 @@ pub fn get_rid_from_sid(sid_p: PSID) -> i64 {
         };
         return unsafe{*rid_p} as i64;
     } else {
-        println!("failed to find rid, acces denied");
+        warn!("failed to find rid, acces denied");
         return 0i64;
     }
 }
@@ -158,7 +161,7 @@ impl GroupsRow {
         };
 
         if buf_ptr == ptr::null_mut() || (ret != NERR_Success && ret != ERROR_MORE_DATA) {
-            println!("NetLocalGroupEnum() failed, the return value is : {}", ret);
+            error!("NetLocalGroupEnum failed with value {}", ret);
             return Vec::new()
         }
 
@@ -209,7 +212,7 @@ impl GroupsRow {
                             libc::wcslen(lgrpi1_name)
                         )
                     };
-                    print!("Failed to find sid from LookupAccountNameW for group: {:?}", groupname);
+                    warn!("Failed to find sid from LookupAccountNameW for group: {:?}", groupname);
                 }
             };
         }

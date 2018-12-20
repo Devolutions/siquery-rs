@@ -77,6 +77,8 @@ fn emit_features(features: &'static [(&'static str)]) {
 }
 
 fn main() {
+    // test env variable
+
     let target = env::var("TARGET").unwrap();
     let target: Vec<_> = target.split('-').collect();
 
@@ -94,5 +96,9 @@ fn main() {
             _ => {}
         }
     }
+
+    let root = std::env::current_exe();
+    env::set_current_dir(&root.unwrap()).is_ok();
+
     println!("cargo:rerun-if-changed=build.rs");
 }
