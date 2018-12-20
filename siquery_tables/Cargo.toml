@@ -27,12 +27,12 @@ uname = "0.1.1"
 version = "0.3.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-plist-rs = "0.1.0"
 uname = "0.1.1"
 byteorder = "1.2.3"
 objc = {version = "~0.2.5", features = ["exception"]}
 objc-foundation = "0.1.1"
 objc_id = "0.1.1"
+plist = "0.3.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 kernel32-sys = "0.2"
@@ -48,3 +48,8 @@ nix = "0.11.0"
 [dependencies.rusqlite]
 version = "^0.14"
 features = ["vtab", "bundled"]
+
+[dependencies.proxy_config]
+version = "0.0.2"
+git = "https://github.com/Devolutions/proxy-config.git"
+rev = "20831ce"

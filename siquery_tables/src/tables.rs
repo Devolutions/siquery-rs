@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use rusqlite::types::*;
 
@@ -3362,6 +3363,76 @@ impl Table for GroupsRow {
     }
 }
 
+#[cfg(feature = "proxies")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ProxiesRow {
+    pub url: String,
+    pub protocol: String,
+    pub host: String,
+    pub port: u16,
+    pub interface: String,
+    pub exceptions: String,
+}}
+
+#[cfg(feature = "proxies")]
+impl ProxiesRow {
+    const URL_ID: u64 = 0x00000001;
+    const PROTOCOL_ID: u64 = 0x00000002;
+    const HOST_ID: u64 = 0x00000004;
+    const PORT_ID: u64 = 0x00000008;
+    const INTERFACE_ID: u64 = 0x00000010;
+    const EXCEPTIONS_ID: u64 = 0x00000020;
+}
+
+#[cfg(feature = "proxies")]
+impl Table for ProxiesRow {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "url",
+        "protocol",
+        "host",
+        "port",
+        "interface",
+        "exceptions",
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "url" => Value::from(self.url.to_owned()),
+            "protocol" => Value::from(self.protocol.to_owned()),
+            "host" => Value::from(self.host.to_owned()),
+            "port" => Value::from(self.port),
+            "interface" => Value::from(self.interface.to_owned()),
+            "exceptions" => Value::from(self.exceptions.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::URL_ID => Value::from(self.url.to_owned()),
+            Self::PROTOCOL_ID => Value::from(self.protocol.to_owned()),
+            Self::HOST_ID => Value::from(self.host.to_owned()),
+            Self::PORT_ID => Value::from(self.port),
+            Self::INTERFACE_ID => Value::from(self.interface.to_owned()),
+            Self::EXCEPTIONS_ID => Value::from(self.exceptions.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "url" => Self::URL_ID,
+            "protocol" => Self::PROTOCOL_ID,
+            "host" => Self::HOST_ID,
+            "port" => Self::PORT_ID,
+            "interface" => Self::INTERFACE_ID,
+            "exceptions" => Self::EXCEPTIONS_ID,
+            _ => 0
+        }
+    }
+}
+
 #[cfg(feature = "logon_sessions")]
 table_properties!{
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -3560,6 +3631,8 @@ pub fn get_table_list() -> Vec<String> {
             "process_envs".to_string(),
         #[cfg(feature = "mounts")]
             "mounts".to_string(),
+        #[cfg(feature = "proxies")]
+            "proxies".to_string(),
         #[cfg(test)]
             "Dummy".to_string(),
     ]

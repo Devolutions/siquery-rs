@@ -14,6 +14,7 @@ extern crate time;
 extern crate rusqlite;
 extern crate csv;
 extern crate prettytable;
+extern crate proxy_config;
 
 #[macro_use]
 extern crate log;

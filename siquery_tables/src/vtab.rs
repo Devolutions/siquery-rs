@@ -128,10 +128,10 @@ impl VTabCursor for SiqueryTabCursor {
         {
             if self.row_id == self.rows.len() as i64 {
                 self.eot = true;
-                return Ok(());
             } else {
                 self.cols = self.rows[self.row_id as usize].clone();
                 self.row_id += 1;
+                self.eot = false;
             }
         }
         Ok(())

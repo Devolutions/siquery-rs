@@ -31,6 +31,7 @@ use std::env;
 #[cfg(feature = "logged_in_users")] mod logged_in_users;
 #[cfg(feature = "logon_sessions")] mod logon_sessions;
 #[cfg(feature = "groups")] mod groups;
+#[cfg(feature = "proxies")] mod proxies;
 #[cfg(feature = "process_open_sockets")] #[cfg(not(fuzzing))] mod process_open_sockets;
 #[cfg(feature = "processes")] #[cfg(not(fuzzing))] mod processes;
 #[cfg(feature = "process_memory_map")] #[cfg(not(fuzzing))] mod process_memory_map;
