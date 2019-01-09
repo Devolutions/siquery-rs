@@ -55,7 +55,6 @@ impl LaunchdRow {
         if let Some(Plist::Dictionary(dictionary)) = File::open(&row.path).ok()
             .and_then(|file| Plist::read(file).ok()){
             for (k,v) in dictionary.iter() {
-
                 if let Some(value) = v.as_string(){
                     let string_value = value.to_string();
                     match k.as_str() {
@@ -83,7 +82,11 @@ impl LaunchdRow {
                         &_ => { continue }
                     }
                 } else if let Some(bool_value) = v.as_boolean() {
-                    let string = bool_value.to_string();
+                    let string = match bool_value.to_string().as_str() {
+                        "true" => { "1".to_string() }
+                        "false" => { "0".to_string() }
+                        &_ => { "".to_string() }
+                    };
                     match k.as_str() {
                         "RunAtLoad" => { row.run_at_load = string }
                         "KeepAlive" => { row.keep_alive = string }
@@ -99,8 +102,9 @@ impl LaunchdRow {
                     }
                 }
             }
+            return Ok(row)
         }
-        Ok(row)
+        Err("Not a plist.".to_string())
     }
 
     pub fn get_specific() -> Vec<LaunchdRow>{
