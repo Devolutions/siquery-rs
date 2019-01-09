@@ -242,7 +242,12 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
         "proxies" => {
             let table = ProxiesRow::get_specific();
             select(&table, columns)
-        }
+        },
+        #[cfg(feature = "launchd")]
+        "launchd" => {
+            let table = LaunchdRow::get_specific();
+            select(&table, columns)
+        },
         _ => { // for tests only
             let table: Vec<Dummy> = vec![
                 Dummy{a:25, b:25},
@@ -518,6 +523,12 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         "proxies" => {
             let column_names = ProxiesRow::get_columns_name();
             let column_types = ProxiesRow::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
+        #[cfg(feature = "launchd")]
+        "launchd" => {
+            let column_names = LaunchdRow::get_columns_name();
+            let column_types = LaunchdRow::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         _ => {
