@@ -49,6 +49,7 @@ cfg_if! {
         extern crate objc_foundation;
         extern crate objc_id;
         extern crate walkdir;
+        extern crate glob;
 
         pub mod macos;
         pub use macos as sys;

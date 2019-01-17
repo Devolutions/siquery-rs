@@ -3718,6 +3718,70 @@ impl Table for LaunchdRow {
     }
 }
 
+#[cfg(feature = "launchd_overrides")]
+table_properties!{
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct LaunchdOverridesRow {
+    pub label   : String,
+    pub key     : String,
+    pub value   : String,
+    pub uid     : i64,
+    pub path    : String,
+}}
+
+#[cfg(feature = "launchd_overrides")]
+impl LaunchdOverridesRow {
+    const LABEL_ID  : u64 = 0x00000001;
+    const KEY_ID    : u64 = 0x00000002;
+    const VALUE_ID  : u64 = 0x00000004;
+    const UID_ID    : u64 = 0x00000008;
+    const PATH_ID   : u64 = 0x00000010;
+}
+
+#[cfg(feature = "launchd_overrides")]
+impl Table for LaunchdOverridesRow {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "label" ,
+        "key"   ,
+        "value" ,
+        "uid"   ,
+        "path"  ,
+    ];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "label" => Value::from(self.label.to_owned()),
+            "key"   => Value::from(self.key.to_owned()),
+            "value" => Value::from(self.value.to_owned()),
+            "uid"   => Value::from(self.uid.to_owned()),
+            "path"  => Value::from(self.path.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::LABEL_ID => Value::from(self.label.to_owned()),
+            Self::KEY_ID   => Value::from(self.key.to_owned()),
+            Self::VALUE_ID => Value::from(self.value.to_owned()),
+            Self::UID_ID   => Value::from(self.uid.to_owned()),
+            Self::PATH_ID  => Value::from(self.path.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "label" =>  Self::LABEL_ID ,
+            "key"   =>  Self::KEY_ID   ,
+            "value" =>  Self::VALUE_ID ,
+            "uid"   =>  Self::UID_ID   ,
+            "path"  =>  Self::PATH_ID  ,
+            _ => 0
+        }
+    }
+}
+
 pub fn get_table_list() -> Vec<String> {
     vec![
         #[cfg(feature = "etc_hosts")]
@@ -3796,6 +3860,8 @@ pub fn get_table_list() -> Vec<String> {
             "proxies".to_string(),
         #[cfg(feature = "launchd")]
             "launchd".to_string(),
+        #[cfg(feature = "launchd_overrides")]
+            "launchd_overrides".to_string(),
         #[cfg(test)]
             "Dummy".to_string(),
     ]
