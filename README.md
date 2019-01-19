@@ -124,6 +124,8 @@ process_memory_map | ✔ | ✔ |
 products | ✔ |  | 
 proxies | ✔ | ✔ | ✔
 users | ✔ | ✔ | ✔
+launchd |  |  | ✔
+launchd_overrides |  |  | ✔
 logged_in_users | ✔ | ✔ | ✔
 logon_sessions | ✔ |  | 
 groups | ✔ | ✔ | ✔
