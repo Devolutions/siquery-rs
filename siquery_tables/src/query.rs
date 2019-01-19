@@ -248,6 +248,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
             let table = LaunchdRow::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "launchd_overrides")]
+        "launchd_overrides" => {
+            let table = LaunchdOverridesRow::get_specific();
+            select(&table, columns)
+        },
         _ => { // for tests only
             let table: Vec<Dummy> = vec![
                 Dummy{a:25, b:25},
@@ -529,6 +534,12 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         "launchd" => {
             let column_names = LaunchdRow::get_columns_name();
             let column_types = LaunchdRow::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
+        #[cfg(feature = "launchd_overrides")]
+        "launchd_overrides" => {
+            let column_names = LaunchdOverridesRow::get_columns_name();
+            let column_types = LaunchdOverridesRow::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         _ => {

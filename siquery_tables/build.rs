@@ -72,7 +72,8 @@ const MACOS_TABLES: &'static [(&'static str)] = &[
     "users",
     "proxies",
     "logged_in_users",
-    "launchd"
+    "launchd",
+    "launchd_overrides",
 ];
 
 fn emit_features(features: &'static [(&'static str)]) {

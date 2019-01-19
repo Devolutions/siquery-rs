@@ -29,6 +29,7 @@ objc-foundation = "0.1.1"
 objc_id = "0.1.1"
 plist = "0.3.0"
 walkdir = "2.2.7"
+glob = "0.2"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 kernel32-sys = "0.2"

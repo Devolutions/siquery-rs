@@ -3,21 +3,23 @@ use std::io::Read;
 #[allow(unused_imports)]
 // TODO implement to_json
 use serde_json;
-#[cfg(feature = "logical_drive")]   mod logical_drive;
-#[cfg(feature = "os_version")]      mod os_version;
-#[cfg(feature = "system_info")]     mod system_info;
-#[cfg(feature = "uptime")]          mod uptime;
-#[cfg(feature = "processes")]       mod processes;
-#[cfg(feature = "process_envs")]    mod process_envs;
-#[cfg(feature = "etc_hosts")]       use tables::EtcHostsIface;
-#[cfg(feature = "etc_services")]    use tables::EtcServicesIface;
-#[cfg(feature = "etc_protocols")]   use tables::EtcProtocolsIface;
-#[cfg(feature = "mounts")]          mod mounts;
-#[cfg(feature = "users")]           mod users;
-#[cfg(feature = "groups")]          mod groups;
-#[cfg(feature = "proxies")]         mod proxies;
-#[cfg(feature = "logged_in_users")] mod logged_in_users;
-#[cfg(feature = "launchd")]         mod launchd;
+#[cfg(feature = "logical_drive")]       mod logical_drive;
+#[cfg(feature = "os_version")]          mod os_version;
+#[cfg(feature = "system_info")]         mod system_info;
+#[cfg(feature = "uptime")]              mod uptime;
+#[cfg(feature = "processes")]           mod processes;
+#[cfg(feature = "process_envs")]        mod process_envs;
+#[cfg(feature = "etc_hosts")]           use tables::EtcHostsIface;
+#[cfg(feature = "etc_services")]        use tables::EtcServicesIface;
+#[cfg(feature = "etc_protocols")]       use tables::EtcProtocolsIface;
+#[cfg(feature = "mounts")]              mod mounts;
+#[cfg(feature = "users")]               mod users;
+#[cfg(feature = "groups")]              mod groups;
+#[cfg(feature = "proxies")]             mod proxies;
+#[cfg(feature = "logged_in_users")]     mod logged_in_users;
+#[cfg(feature = "launchd")]             mod launchd;
+#[cfg(feature = "launchd_overrides")]   mod launchd_overrides;
+
 
 pub struct EtcHostsReader {}
 #[cfg(feature = "etc_hosts")]
