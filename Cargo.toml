@@ -4,3 +4,5 @@ members = [
     "siquery_tables"
 ]
 
+[profile.release]
+lto = true
