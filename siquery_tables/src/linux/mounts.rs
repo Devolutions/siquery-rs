@@ -83,7 +83,7 @@ impl MountsRow {
 
                 let mut st: statfs = unsafe {mem::zeroed()};
                 if unsafe{ statfs(ent.mnt_dir, &mut st as *mut _) == 0 } {
-                    row.blocks_size = st.f_bsize;
+                    row.blocks_size = st.f_bsize as i64;
                     row.blocks = st.f_blocks as i64;
                     row.blocks_free = st.f_bfree as i64;
                     row.blocks_available = st.f_bavail as i64;
