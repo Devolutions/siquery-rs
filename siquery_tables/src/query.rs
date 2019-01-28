@@ -572,6 +572,8 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
                 print_csv(col_name_internal, &mut response);
             } else if flag == 1 {
                 print_json(&col_name_internal, &mut response);
+            } else if flag == 3 {
+                print_xml(&col_name_internal, &mut response);
             } else {
                 print_pretty(col_name_internal, &mut response);
             }

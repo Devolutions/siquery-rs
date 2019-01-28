@@ -37,6 +37,8 @@ winreg = "0.5.1"
 winapi =  { version = "~0.3.6", features = ["sddl","handleapi","winnt", "minwindef", "ws2def", "errhandlingapi", "winbase","objidlbase", "tlhelp32", "shlobj", "memoryapi", "psapi", "winerror","lmaccess", "ntddscsi","securitybaseapi","lmapibuf", "ntlsa"] }
 libc = "0.2"
 widestring = "0.4"
+treexml = "0.7.0"
+heck = "0.3.1"
 
 [target.'cfg(not(windows))'.dependencies]
 libc = "0.2"

@@ -36,6 +36,13 @@ fn main() {
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 2);
         }
+    } else if matches.is_present("xml_mode") {
+        if table.len() > 0 {
+            let query = format!("select * from {}", table);
+            execute_query(&db, &query, 3);
+        } else if siquery.len() > 0 {
+            execute_query(&db, &siquery, 3);
+        }
     } else {
         if table.len() > 0 {
             let query = format!("select * from {}", table);

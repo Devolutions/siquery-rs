@@ -30,6 +30,9 @@ args:
     - pretty_mode:
         long: pretty
         help: Sets 'print_pretty' output mode
+    - xml_mode:
+        long: xml
+        help: Sets 'print_xml' output mode
     - schema:
         long : schema
         help : Prints schema of the given table name

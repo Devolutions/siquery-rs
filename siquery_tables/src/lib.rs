@@ -60,6 +60,8 @@ cfg_if! {
         extern crate winapi;
         extern crate widestring;
         extern crate libc;
+        extern crate treexml;
+        extern crate heck;
 
         pub mod windows;
         pub use windows as sys;

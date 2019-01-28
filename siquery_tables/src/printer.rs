@@ -6,6 +6,8 @@ use prettytable::{Table, row::Row, cell::Cell};
 use tables::get_table_list;
 use query::get_schema;
 use serde_json::{Value as serdValue, Map};
+use treexml::{Element,Document};
+use heck::CamelCase;
 
 pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
     let mut row: Vec<String> = Vec::new();
@@ -94,6 +96,51 @@ pub fn print_json (col_names: &Vec<String>, values: &mut Rows) {
     let json = serde_json::to_string_pretty(&writer).unwrap();
     println!("{}", json);
 }
+
+pub fn print_xml (col_names: &Vec<String>, rows: &mut Rows) {
+    let mut root = Element::new("InventorySystemInformation");
+
+    //for _column in col_names.iter() {
+        let mut local_account = Element::new("LocalAccounts");
+        loop {
+            if let Some(row) = rows.next() {
+                if let Some(row_data) = row.ok() {
+                    let mut remote_account = Element::new("RemoteAccount");
+                    for i in 0..(row_data.column_count()-1) {
+                        let mut col = Element::new(col_names.get(i).unwrap().to_camel_case());
+                        match Value::data_type(&row_data.get_checked(i).unwrap()) {
+                            Type::Text => {
+                                col.text = Some(row_data.get_checked::<usize, String>(i).unwrap());
+                                remote_account.children.push(col);
+                            },
+                            Type::Real | Type::Integer => {
+                                col.text = Some(row_data.get_checked::<usize, i64>(i).unwrap().to_string());
+                                remote_account.children.push(col);
+                            },
+                            _ => {
+                                // Do nothing.
+                            }
+                        }
+                    }
+                    local_account.children.push(remote_account);
+                }
+            } else {
+                break
+            }
+        }
+        root.children.push(local_account);
+    //}
+
+    let doc = Document {
+        root: Some(root),
+        encoding: "utf-8".to_string(),
+        ..Document::default()
+    };
+
+    println!("{}",doc.to_string());
+}
+
+//fn format_to_xml(col_names: &Vec<String>, row_value : &RusqliteRow) -> Map<String, serdValue> {}
 
 fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> Map<String, serdValue> {
     let mut value_json: Map<String, serdValue> = Map::new();
