@@ -22,6 +22,7 @@ mod utils;
 pub mod printer;
 pub mod query;
 pub mod tables;
+mod inventory;
 
 cfg_if! {
     if #[cfg(all(target_os = "linux",fuzzing))] {
