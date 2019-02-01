@@ -38,3 +38,7 @@ args:
         short: v
         multiple: true
         help: Sets the level of verbosity
+    - rdmInventory:
+        value_name: rdmInventory
+        long: inv
+        help: Prints rdm inventory tables
