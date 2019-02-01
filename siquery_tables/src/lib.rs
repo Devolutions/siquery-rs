@@ -15,6 +15,9 @@ extern crate rusqlite;
 extern crate csv;
 extern crate prettytable;
 extern crate proxy_config;
+extern crate treexml;
+extern crate heck;
+
 
 pub mod vtab;
 mod common;

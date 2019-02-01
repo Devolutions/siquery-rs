@@ -291,7 +291,7 @@ impl Table for EtcServices {
 
 #[cfg(any(feature = "wmi_computer_info" , fuzzing))]
 table_properties!{
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct WmiComputerInfo {
     pub computer_name: String,
     pub domain: String,
