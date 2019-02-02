@@ -2,17 +2,254 @@ use treexml::{Element,Document,XmlVersion::Version10};
 use heck::CamelCase;
 use tables::*;
 
+fn bios() -> Element {
+    let bios = WmiBios::get_specific();
+
+    let mut parent = Element::new("Bios");
+
+    for entry in bios {
+        let mut child_1 = Element::new("Caption");
+        let mut child_2 = Element::new("Manufacturer");
+        let mut child_3 = Element::new("ReleaseDate");
+        let mut child_4 = Element::new("SerialNumber");
+        let mut child_5 = Element::new("SMBIOSBIOSVersion");
+
+        child_1.text = Some(entry.caption);
+        child_2.text = Some(entry.manufacturer);
+        child_3.text = Some(entry.release_date);
+        child_4.text = Some(entry.serial_number);
+        child_5.text = Some(entry.smbios_version);
+
+        parent.children.push(child_1);
+        parent.children.push(child_2);
+        parent.children.push(child_3);
+        parent.children.push(child_4);
+        parent.children.push(child_5);
+    }
+
+    parent
+}
+
+fn cd_roms() -> Element {
+    let mut cd_roms = Element::new("CDRoms");
+
+    cd_roms
+}
+
+fn devices() -> Element {
+    let mut devices = Element::new("Devices");
+
+    let mut keyboards = Element::new("Keyboards");
+    let mut remote_keyboard = Element::new("RemoteKeyboard");
+    let mut remote_keyboard_description = Element::new("Description");
+    let mut remote_keyboard_name = Element::new("Name");
+
+    remote_keyboard.children.push(remote_keyboard_description);
+    remote_keyboard.children.push(remote_keyboard_name);
+    keyboards.children.push(remote_keyboard);
+    devices.children.push(keyboards);
+
+    let mut pointing_devices = Element::new("PointingDevices");
+    let mut remote_pointing_device = Element::new("RemotePointingDevice");
+    let mut remote_pointing_device_description = Element::new("Description");
+    let mut remote_pointing_device_manufacturer = Element::new("Manufacturer");
+    let mut remote_pointing_device_name = Element::new("Name");
+
+    remote_pointing_device.children.push(remote_pointing_device_description);
+    remote_pointing_device.children.push(remote_pointing_device_manufacturer);
+    remote_pointing_device.children.push(remote_pointing_device_name);
+    pointing_devices.children.push(remote_pointing_device);
+    devices.children.push(pointing_devices);
+
+    devices
+}
+
+fn ip_address() -> Element {
+    let mut ip_address = Element::new("IPAddress");
+
+    ip_address
+}
+
+fn local_accounts() -> Element {
+    let wmi_local_accounts = WmiLocalAccounts::get_specific();
+
+    let mut local_accounts = Element::new("LocalAccounts");
+
+    let mut remote_account = Element::new("RemoteAccount");
+    let mut child_1 = Element::new("Caption");
+    let mut child_2 = Element::new("Domain");
+    let mut child_3 = Element::new("LocalAccount");
+    let mut child_4 = Element::new("Name");
+    let mut child_6 = Element::new("Status");
+
+    for local_account in wmi_local_accounts {
+        let mut child_5 = Element::new("SID");
+        child_5.text = Some(local_account.sid);
+        remote_account.children.push(child_5);
+    }
+    remote_account.children.push(child_1);
+    remote_account.children.push(child_2);
+    remote_account.children.push(child_3);
+    remote_account.children.push(child_4);
+    remote_account.children.push(child_6);
+    local_accounts.children.push(remote_account);
+
+    local_accounts
+}
+
+fn memory() -> Element {
+    let mut memory = Element::new("Memory");
+
+    let mut remote_memory = Element::new("RemoteMemory");
+    let mut child_1 = Element::new("Capacity");
+    let mut child_2 = Element::new("Description");
+    let mut child_3 = Element::new("DeviceLocator");
+    let mut child_4 = Element::new("FormFactor");
+    let mut child_5 = Element::new("Manufacturer");
+    let mut child_6 = Element::new("MemoryType");
+    let mut child_7 = Element::new("Name");
+    let mut child_8 = Element::new("SerialNumber");
+    let mut child_9 = Element::new("VolumeSerialNumber");
+
+    remote_memory.children.push(child_1);
+    remote_memory.children.push(child_2);
+    remote_memory.children.push(child_3);
+    remote_memory.children.push(child_4);
+    remote_memory.children.push(child_5);
+    remote_memory.children.push(child_6);
+    remote_memory.children.push(child_7);
+    remote_memory.children.push(child_8);
+    remote_memory.children.push(child_9);
+
+    memory.children.push(remote_memory);
+
+    memory
+}
+
+fn monitors() -> Element {
+    let mut monitors = Element::new("Monitors");
+
+    let mut remote_monitor = Element::new("RemoteMonitor");
+    let mut child_1 = Element::new("Availability");
+    let mut child_2 = Element::new("Manufacturer");
+    let mut child_3 = Element::new("Name");
+    let mut child_4 = Element::new("ScreenHeight");
+    let mut child_5 = Element::new("ScreenWidth");
+
+    remote_monitor.children.push(child_1);
+    remote_monitor.children.push(child_2);
+    remote_monitor.children.push(child_3);
+    remote_monitor.children.push(child_4);
+    remote_monitor.children.push(child_5);
+
+    monitors.children.push(remote_monitor);
+
+    monitors
+}
+
+fn motherboards() -> Element {
+    let mut motherboards = Element::new("Motherboards");
+
+    let mut remote_motherboards = Element::new("RemoteMotherboard");
+    let mut child_1 = Element::new("Manufacturer");
+    let mut child_2 = Element::new("Name");
+    let mut child_3 = Element::new("Product");
+    let mut child_4 = Element::new("SerialNumber");
+    let mut child_5 = Element::new("Version");
+
+    remote_motherboards.children.push(child_1);
+    remote_motherboards.children.push(child_2);
+    remote_motherboards.children.push(child_3);
+    remote_motherboards.children.push(child_4);
+    remote_motherboards.children.push(child_5);
+
+    motherboards.children.push(remote_motherboards);
+
+    motherboards
+}
+
+fn network_adapters() -> Element {
+    let mut network_adapters = Element::new("NetworkAdapters");
+
+    let mut remote_network_adapters = Element::new("RemoteNetworkAdapter");
+    let mut child_1 = Element::new("Ports");
+    let mut child_2 = Element::new("DatabasePath");
+    let mut child_3 = Element::new("Description");
+    let mut child_4 = Element::new("DHCPEnabled");
+    let mut child_5 = Element::new("IPAddress");
+    let mut child_6 = Element::new("IPAddressMac");
+    let mut child_7 = Element::new("IPEnabled");
+    let mut child_8 = Element::new("IPSubnet");
+    let mut child_9 = Element::new("MACAddress");
+
+    remote_network_adapters.children.push(child_1);
+    remote_network_adapters.children.push(child_2);
+    remote_network_adapters.children.push(child_3);
+    remote_network_adapters.children.push(child_4);
+    remote_network_adapters.children.push(child_5);
+    remote_network_adapters.children.push(child_6);
+    remote_network_adapters.children.push(child_7);
+    remote_network_adapters.children.push(child_8);
+    remote_network_adapters.children.push(child_9);
+
+    network_adapters.children.push(remote_network_adapters);
+
+    network_adapters
+}
+
 pub fn get_local_accounts_inv() /*-> String*/ {
     #[cfg(feature = "wmi_local_accounts")]
     let table = WmiLocalAccounts::get_specific();
     //return serialized table to xml here
 }
 
-pub fn get_local_drives_inv() /*-> String*/ {
-    #[cfg(feature = "logical_drives")]
-    let table = LogicalDrive::get_specific();
-    //return serialized table to xml here
+pub fn get_logical_drives_inv(ref mut root: &mut Element) /*-> String*/ {
+
+    let wmi_logical_drives = LogicalDrive::get_specific();
+
+    let mut logical_drives = Element::new("LogicalDrives");
+
+    for logical_drive in wmi_logical_drives {
+        let mut remote_logical_disk = Element::new("RemoteLogicalDisk");
+
+        let mut child_1 = Element::new("Description");
+        let mut child_2 = Element::new("DriveType");
+        let mut child_3 = Element::new("FileSystem");
+        let mut child_4 = Element::new("FreeSpace");
+        let mut child_5 = Element::new("MaximumComponentLength");
+        let mut child_6 = Element::new("Name");
+        let mut child_7 = Element::new("Size");
+        let mut child_8 = Element::new("SupportsFileBasedCompression");
+        let mut child_9 = Element::new("VolumeSerialNumber");
+
+        child_1.text = Some(logical_drive.description);
+        child_2.text = Some(logical_drive.drive_type);
+        child_3.text = Some(logical_drive.file_system);
+        child_4.text = Some(logical_drive.free_space.to_string());
+        child_5.text = Some(logical_drive.maximum_component_length.to_string());
+        child_6.text = Some(logical_drive.name);
+        child_7.text = Some(logical_drive.size.to_string());
+        child_8.text = Some(logical_drive.supports_file_based_compression.to_string());
+        child_9.text = Some(logical_drive.volume_serial_number);
+
+        remote_logical_disk.children.push(child_1);
+        remote_logical_disk.children.push(child_2);
+        remote_logical_disk.children.push(child_3);
+        remote_logical_disk.children.push(child_4);
+        remote_logical_disk.children.push(child_5);
+        remote_logical_disk.children.push(child_6);
+        remote_logical_disk.children.push(child_7);
+        remote_logical_disk.children.push(child_8);
+        remote_logical_disk.children.push(child_9);
+
+        logical_drives.children.push(remote_logical_disk);
+    }
+
+    root.children.push(logical_drives);
 }
+
+
+
 
 pub fn get_network_adapters_inv() /*-> String*/ {
     #[cfg(feature = "wmi_network_adapters")]
@@ -51,7 +288,6 @@ pub fn get_startup_inv() /*-> String*/ {
 pub fn get_sysem_info_inv() /*-> String*/ {
     #[cfg(feature = "wmi_computer_info")]
     let table = WmiComputerInfo::get_specific();
-    println!("{:?}", table[0]);
     // serialize table to xml
 
     #[cfg(feature = "wmi_bios")]
@@ -98,6 +334,8 @@ pub fn get_hotfixes_inv() /*-> String*/ {
 }
 
 pub fn execute_inventory_query(query: &str) {
+    let mut root = Element::new("InventorySystemInformation");
+
     let mut rdm_inv_queries: Vec<String> = Vec::new();
     let query_string = query.to_string();
 
@@ -110,7 +348,7 @@ pub fn execute_inventory_query(query: &str) {
     let logical_drives = "Logical Drives";
     let logical_drives_idx = query_string.find("Logical Drives");
     if let Some(_i) = logical_drives_idx {
-        get_local_drives_inv();
+        get_logical_drives_inv(&mut root);
     }
 
     let logical_drives = "Network Adapters";
@@ -161,4 +399,12 @@ pub fn execute_inventory_query(query: &str) {
     if let Some(_i) = logical_drives_idx {
         get_hotfixes_inv();
     }
+
+    let doc = Document {
+        root: Some(root),
+        version: Version10,
+        .. Document::default()
+    };
+
+    println!("{}",doc.to_string());
 }

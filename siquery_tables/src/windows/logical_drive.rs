@@ -8,7 +8,9 @@ pub struct Reader {}
 impl LogicalDriveIface for Reader {
     fn get_wmi_drives_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["logicaldisk", "get", "DeviceID,FileSystem,Size,FreeSpace,DriveType",
+            .args(&["logicaldisk", "get",
+                "Description,DriveType,FileSystem,FreeSpace,MaximumComponentLength,Name\
+                ,Size,DriveType,SupportsFileBasedCompression,VolumeSerialNumber",
                 "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
@@ -17,11 +19,15 @@ impl LogicalDriveIface for Reader {
 impl LogicalDrive {
     pub(crate) fn new_logical_drive() -> LogicalDrive {
         LogicalDrive {
-            device_id: String::new(),
+            description: String::new(),
             drive_type: String::new(),
-            free_space: 0,
-            size: 0,
             file_system: String::new(),
+            free_space: 0,
+            maximum_component_length: 0,
+            name : String::new(),
+            size: 0,
+            supports_file_based_compression: String::new(),
+            volume_serial_number: String::new(),
         }
     }
 
@@ -34,7 +40,7 @@ impl LogicalDrive {
 
             for line in lines {
                 if line.len() <= 2 {
-                    if drive.device_id != "" && drive.drive_type == "Disk drive" {
+                    if drive.description != "" && drive.volume_serial_number != "" {
                         drives.push(drive);
                     }
                     drive = LogicalDrive::new_logical_drive();
@@ -50,22 +56,32 @@ impl LogicalDrive {
                 utils::trim_string(&mut v);
 
                 match k.as_str() {
-                    "DeviceID" => {
-                        drive.device_id = v;
+                    "Description" => {
+                        drive.description = v;
+                    },
+                    "DriveType" => {
+                        drive.drive_type = v;
                     },
                     "FileSystem" => {
                         drive.file_system = v;
                     },
-                    "Size" => {
-                        drive.size = v.parse::<i64>().unwrap_or(0);
-                    },
                     "FreeSpace" => {                        
                         drive.free_space = v.parse::<i64>().unwrap_or(0);
                     },
-                    "DriveType" => {
-                        if v == "3" {
-                            drive.drive_type = String::from("Disk drive");
-                        }
+                    "MaximumComponentLength" => {
+                        drive.maximum_component_length = v.parse::<i64>().unwrap_or(0);
+                    },
+                    "Name" => {
+                        drive.name = v;
+                    },
+                    "Size" => {
+                        drive.size = v.parse::<i64>().unwrap_or(0);
+                    },
+                    "SupportsFileBasedCompression" => {
+                        drive.supports_file_based_compression = v.to_lowercase();
+                    },
+                    "VolumeSerialNumber" => {
+                        drive.volume_serial_number = v;
                     },
                     _ => ()
                 }

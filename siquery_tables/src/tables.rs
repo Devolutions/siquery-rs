@@ -646,11 +646,15 @@ impl Table for OsVersion {
 table_properties!{
 #[derive(Debug)]
 pub struct LogicalDrive {
-    pub device_id: String,
+    pub description: String,
     pub drive_type: String,
-    pub free_space: i64,
-    pub size: i64,
     pub file_system: String,
+    pub free_space: i64,
+    pub maximum_component_length: i64,
+    pub name : String,
+    pub size: i64,
+    pub supports_file_based_compression: String,
+    pub volume_serial_number: String,
 }}
 
 #[cfg(feature = "logical_drives")]
@@ -661,70 +665,74 @@ pub trait LogicalDriveIface {
 #[cfg(feature = "logical_drives")]
 #[allow(non_upper_case_globals)]
 impl LogicalDrive {
-    const DEVICE_ID: u64 = 0x00000001;
+    const DESCRIPTION_ID: u64 = 0x00000001;
     const DRIVE_TYPE_ID: u64 = 0x00000002;
-    const FREE_SPACE_ID: u64 = 0x00000004;
-    const SIZE_ID: u64 = 0x00000008;
-    const FILE_SYSTEM_ID: u64 = 0x00000010;
+    const FILE_SYSTEM_ID: u64 = 0x00000004;
+    const FREE_SPACE_ID: u64 = 0x00000008;
+    const MAXIMUM_COMPONENT_LENGTH_ID: u64 = 0x00000010;
+    const NAME_ID: u64 = 0x00000020;
+    const SIZE_ID: u64 = 0x00000040;
+    const SUPPORTS_FILE_BASED_COMPRESSION_ID: u64 = 0x00000080;
+    const VOLUME_SERIAL_NUMBER_ID: u64 = 0x00000100;
 }
 
 #[cfg(feature = "logical_drives")]
 impl Table for LogicalDrive {
     const COLUMN_NAMES: &'static [&'static str] = &[
-        "device_id",
+        "description",
         "drive_type",
+        "file_system",
         "free_space",
+        "maximum_component_length",
+        "name",
         "size",
-        "file_system"];
+        "supports_file_based_compression",
+        "volume_serial_number",
+    ];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "device_id" => Value::from(self.device_id.to_owned()),
-            "drive_type" => Value::from(self.drive_type.to_owned()),
-            "free_space" => Value::from(self.free_space),
-            "size" => Value::from(self.size),
+            "description" => Value::from(self.description.to_owned()),
+            "drive_type" =>  Value::from(self.drive_type.to_owned()),
             "file_system" => Value::from(self.file_system.to_owned()),
+            "free_space" =>  Value::from(self.free_space),
+            "maximum_component_length" => Value::from(self.maximum_component_length),
+            "name" => Value::from(self.name.to_owned()),
+            "size" => Value::from(self.size),
+            "supports_file_based_compression" => Value::from(self.supports_file_based_compression.to_owned()),
+            "volume_serial_number" => Value::from(self.volume_serial_number.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
 
     fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::DEVICE_ID => Value::from(self.device_id.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
             Self::DRIVE_TYPE_ID => Value::from(self.drive_type.to_owned()),
-            Self::FREE_SPACE_ID => Value::from(self.free_space),
-            Self::SIZE_ID => Value::from(self.size),
             Self::FILE_SYSTEM_ID => Value::from(self.file_system.to_owned()),
-
+            Self::FREE_SPACE_ID => Value::from(self.free_space),
+            Self::MAXIMUM_COMPONENT_LENGTH_ID => Value::from(self.maximum_component_length),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::SIZE_ID => Value::from(self.size),
+            Self::SUPPORTS_FILE_BASED_COMPRESSION_ID => Value::from(self.supports_file_based_compression.to_owned()),
+            Self::VOLUME_SERIAL_NUMBER_ID => Value::from(self.volume_serial_number.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
 
     fn get_id(&self, name: &str) -> u64 {
         match name {
-            "device_id" => Self::DEVICE_ID,
+            "description" => Self::DESCRIPTION_ID,
             "drive_type" => Self::DRIVE_TYPE_ID,
-            "free_space" => Self::FREE_SPACE_ID,
-            "size" => Self::SIZE_ID,
             "file_system" => Self::FILE_SYSTEM_ID,
+            "free_space" => Self::FREE_SPACE_ID,
+            "maximum_component_length" => Self::MAXIMUM_COMPONENT_LENGTH_ID,
+            "name" => Self::NAME_ID,
+            "size" => Self::SIZE_ID,
+            "supports_file_based_compression" => Self::SUPPORTS_FILE_BASED_COMPRESSION_ID,
+            "volume_serial_number" => Self::VOLUME_SERIAL_NUMBER_ID,
             _ => 0
         }
-    }
-}
-
-#[cfg(feature = "logical_drives")]
-impl Serialize for LogicalDrive {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("LogicalDrive", 5)?;
-        state.serialize_field("device_id", &self.device_id)?;
-        state.serialize_field("type", &self.drive_type)?;
-        state.serialize_field("free_space", &self.free_space)?;
-        state.serialize_field("size", &self.size)?;
-        state.serialize_field("file_system", &self.file_system)?;
-        state.end()
     }
 }
 
