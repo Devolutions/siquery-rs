@@ -5,136 +5,10 @@ use tables::*;
 use std::fs::File;
 use std::io::prelude::*;
 
-fn devices() -> Element {
-    let mut devices = Element::new("Devices");
-
-    let mut keyboards = Element::new("Keyboards");
-    let mut remote_keyboard = Element::new("RemoteKeyboard");
-    let mut remote_keyboard_description = Element::new("Description");
-    let mut remote_keyboard_name = Element::new("Name");
-
-    remote_keyboard.children.push(remote_keyboard_description);
-    remote_keyboard.children.push(remote_keyboard_name);
-    keyboards.children.push(remote_keyboard);
-    devices.children.push(keyboards);
-
-    let mut pointing_devices = Element::new("PointingDevices");
-    let mut remote_pointing_device = Element::new("RemotePointingDevice");
-    let mut remote_pointing_device_description = Element::new("Description");
-    let mut remote_pointing_device_manufacturer = Element::new("Manufacturer");
-    let mut remote_pointing_device_name = Element::new("Name");
-
-    remote_pointing_device.children.push(remote_pointing_device_description);
-    remote_pointing_device.children.push(remote_pointing_device_manufacturer);
-    remote_pointing_device.children.push(remote_pointing_device_name);
-    pointing_devices.children.push(remote_pointing_device);
-    devices.children.push(pointing_devices);
-
-    devices
-}
-
 fn ip_address() -> Element {
     let mut ip_address = Element::new("IPAddress");
 
     ip_address
-}
-
-fn local_accounts() -> Element {
-    let wmi_local_accounts = WmiLocalAccounts::get_specific();
-
-    let mut local_accounts = Element::new("LocalAccounts");
-
-    let mut remote_account = Element::new("RemoteAccount");
-    let mut child_1 = Element::new("Caption");
-    let mut child_2 = Element::new("Domain");
-    let mut child_3 = Element::new("LocalAccount");
-    let mut child_4 = Element::new("Name");
-    let mut child_6 = Element::new("Status");
-
-    for local_account in wmi_local_accounts {
-        let mut child_5 = Element::new("SID");
-        child_5.text = Some(local_account.sid);
-        remote_account.children.push(child_5);
-    }
-    remote_account.children.push(child_1);
-    remote_account.children.push(child_2);
-    remote_account.children.push(child_3);
-    remote_account.children.push(child_4);
-    remote_account.children.push(child_6);
-    local_accounts.children.push(remote_account);
-
-    local_accounts
-}
-
-fn memory() -> Element {
-    let mut memory = Element::new("Memory");
-
-    let mut remote_memory = Element::new("RemoteMemory");
-    let mut child_1 = Element::new("Capacity");
-    let mut child_2 = Element::new("Description");
-    let mut child_3 = Element::new("DeviceLocator");
-    let mut child_4 = Element::new("FormFactor");
-    let mut child_5 = Element::new("Manufacturer");
-    let mut child_6 = Element::new("MemoryType");
-    let mut child_7 = Element::new("Name");
-    let mut child_8 = Element::new("SerialNumber");
-    let mut child_9 = Element::new("VolumeSerialNumber");
-
-    remote_memory.children.push(child_1);
-    remote_memory.children.push(child_2);
-    remote_memory.children.push(child_3);
-    remote_memory.children.push(child_4);
-    remote_memory.children.push(child_5);
-    remote_memory.children.push(child_6);
-    remote_memory.children.push(child_7);
-    remote_memory.children.push(child_8);
-    remote_memory.children.push(child_9);
-
-    memory.children.push(remote_memory);
-
-    memory
-}
-
-fn monitors() -> Element {
-    let mut monitors = Element::new("Monitors");
-
-    let mut remote_monitor = Element::new("RemoteMonitor");
-    let mut child_1 = Element::new("Availability");
-    let mut child_2 = Element::new("Manufacturer");
-    let mut child_3 = Element::new("Name");
-    let mut child_4 = Element::new("ScreenHeight");
-    let mut child_5 = Element::new("ScreenWidth");
-
-    remote_monitor.children.push(child_1);
-    remote_monitor.children.push(child_2);
-    remote_monitor.children.push(child_3);
-    remote_monitor.children.push(child_4);
-    remote_monitor.children.push(child_5);
-
-    monitors.children.push(remote_monitor);
-
-    monitors
-}
-
-fn motherboards() -> Element {
-    let mut motherboards = Element::new("Motherboards");
-
-    let mut remote_motherboards = Element::new("RemoteMotherboard");
-    let mut child_1 = Element::new("Manufacturer");
-    let mut child_2 = Element::new("Name");
-    let mut child_3 = Element::new("Product");
-    let mut child_4 = Element::new("SerialNumber");
-    let mut child_5 = Element::new("Version");
-
-    remote_motherboards.children.push(child_1);
-    remote_motherboards.children.push(child_2);
-    remote_motherboards.children.push(child_3);
-    remote_motherboards.children.push(child_4);
-    remote_motherboards.children.push(child_5);
-
-    motherboards.children.push(remote_motherboards);
-
-    motherboards
 }
 
 pub fn get_local_accounts_inv() {
@@ -425,7 +299,7 @@ pub fn get_startup_inv() /*-> String*/ {
     /*No info*/
 }
 
-pub fn get_sysem_info_inv() /*-> String*/ {
+pub fn get_system_info_inv() /*-> String*/ {
     #[cfg(feature = "wmi_computer_info")]
     let table = WmiComputerInfo::get_specific();
     // serialize table to xml
@@ -468,9 +342,36 @@ pub fn get_sysem_info_inv() /*-> String*/ {
     // append serialize table to xml string
 }
 
-pub fn get_hotfixes_inv() /*-> String*/ {
-    #[cfg(feature = "wmi_hotfixes")]
-    let table = WmiHotfixes::get_specific();
+pub fn get_hotfixes_inv(ref mut root: &mut Element) {
+    let wmi_hotfixes = WmiHotfixes::get_specific();
+    let mut hotfixes = Element::new("QuickFixEngineerings");
+    for hotfix in wmi_hotfixes {
+        let mut remote_hotfix = Element::new("RemoteQuickFixEngineering");
+
+        let mut child_1 = Element::new("Caption");
+        let mut child_2 = Element::new("CSName");
+        let mut child_3 = Element::new("Description");
+        let mut child_4 = Element::new("HotFixID");
+        let mut child_5 = Element::new("InstalledBy");
+        let mut child_6 = Element::new("InstalledOn");
+
+        child_1.text = Some(hotfix.caption);
+        child_2.text = Some(hotfix.csname);
+        child_3.text = Some(hotfix.description);
+        child_4.text = Some(hotfix.hotfix_id);
+        child_5.text = Some(hotfix.installed_by);
+        child_6.text = Some(hotfix.installed_on);
+
+        remote_hotfix.children.push(child_1);
+        remote_hotfix.children.push(child_2);
+        remote_hotfix.children.push(child_3);
+        remote_hotfix.children.push(child_4);
+        remote_hotfix.children.push(child_5);
+        remote_hotfix.children.push(child_6);
+
+        hotfixes.children.push(remote_hotfix);
+    }
+    root.children.push(hotfixes);
 }
 
 pub fn execute_inventory_query(query: &str) {
@@ -530,14 +431,13 @@ pub fn execute_inventory_query(query: &str) {
     let logical_drives = "System Information";
     let logical_drives_idx = query_string.find("System Information");
     if let Some(_i) = logical_drives_idx {
-        rdm_inv_queries.push(logical_drives.to_string());
-        get_sysem_info_inv();
+        get_system_info_inv();
     }
 
     let logical_drives = "Windows HotFixes";
     let logical_drives_idx = query_string.find("Windows HotFixes");
     if let Some(_i) = logical_drives_idx {
-        get_hotfixes_inv();
+        get_hotfixes_inv(&mut root);
     }
 
     let doc = Document {
@@ -545,7 +445,6 @@ pub fn execute_inventory_query(query: &str) {
         version: Version10,
         .. Document::default()
     };
-
 
     let mut file = File::create("inventory.inv").ok();
     file.unwrap().write_all(doc.to_string().as_str().as_bytes()).ok();

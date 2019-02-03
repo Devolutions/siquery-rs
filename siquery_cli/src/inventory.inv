@@ -1,36 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <InventorySystemInformation>
-  <Shares>
-    <RemoteShare>
-      <Caption>Remote tox Admin</Caption>
-      <Description>Remote Admin</Description>
-      <Name>ADMIN$</Name>
-      <Path>C:\WINDOWS</Path>
-      <Status>OK</Status>
-      <Type>Disk Drive Admin</Type>
-    </RemoteShare>
-    <RemoteShare>
-      <Caption>Default share</Caption>
-      <Description>Default share</Description>
-      <Name>C$</Name>
-      <Path>C:\</Path>
-      <Status>OK</Status>
-      <Type>Disk Drive Admin</Type>
-    </RemoteShare>
-    <RemoteShare>
-      <Caption>Remote IPC</Caption>
-      <Description>Remote IPC</Description>
-      <Name>IPC$</Name>
-      <Status>OK</Status>
-      <Type>IPC Admin</Type>
-    </RemoteShare>
-    <RemoteShare>
-      <Caption>Printer Drivers</Caption>
-      <Description>Printer Drivers</Description>
-      <Name>print$</Name>
-      <Path>C:\WINDOWS\system32\spool\drivers</Path>
-      <Status>OK</Status>
-      <Type>Disk Drive</Type>
-    </RemoteShare>
-  </Shares>
+  <QuickFixEngineerings>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4100347</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Update</Description>
+      <HotFixID>KB4100347</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>10/8/2018</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4343669</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Update</Description>
+      <HotFixID>KB4343669</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>7/10/2018</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4456655</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Update</Description>
+      <HotFixID>KB4456655</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>9/12/2018</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4465663</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Security Update</Description>
+      <HotFixID>KB4465663</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>11/18/2018</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4467694</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Security Update</Description>
+      <HotFixID>KB4467694</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>11/16/2018</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4471331</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Security Update</Description>
+      <HotFixID>KB4471331</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>1/1/2019</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4477029</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Security Update</Description>
+      <HotFixID>KB4477029</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>1/1/2019</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4477137</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Security Update</Description>
+      <HotFixID>KB4477137</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>1/1/2019</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4480979</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Security Update</Description>
+      <HotFixID>KB4480979</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>1/11/2019</InstalledOn>
+    </RemoteQuickFixEngineering>
+    <RemoteQuickFixEngineering>
+      <Caption>http://support.microsoft.com/?kbid=4480966</Caption>
+      <CSName>DEVOLUTIONS124</CSName>
+      <Description>Security Update</Description>
+      <HotFixID>KB4480966</HotFixID>
+      <InstalledBy>NT AUTHORITY\SYSTEM</InstalledBy>
+      <InstalledOn>1/20/2019</InstalledOn>
+    </RemoteQuickFixEngineering>
+  </QuickFixEngineerings>
 </InventorySystemInformation>
