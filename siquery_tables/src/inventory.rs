@@ -387,10 +387,38 @@ pub fn get_services_inv(ref mut root: &mut Element) {
     root.children.push(services);
 }
 
-pub fn get_shares_inv() /*-> String*/ {
-    #[cfg(feature = "wmi_shares")]
-    let table = WmiShares::get_specific();
-    //return serialized table to xml here
+pub fn get_shares_inv(ref mut root: &mut Element) {
+    let wmi_shares = WmiShares::get_specific();
+    let mut shares = Element::new("Shares");
+    for share in wmi_shares {
+        let mut remote_share = Element::new("RemoteShare");
+
+        let mut child_1 = Element::new("Caption");
+        let mut child_2 = Element::new("Description");
+        let mut child_3 = Element::new("Name");
+        let mut child_4 = Element::new("Path");
+        let mut child_5 = Element::new("Status");
+        let mut child_6 = Element::new("Type");
+
+        child_1.text = Some(share.caption);
+        child_2.text = Some(share.description);
+        child_3.text = Some(share.name);
+        child_5.text = Some(share.status);
+        child_6.text = Some(share._type);
+
+        remote_share.children.push(child_1);
+        remote_share.children.push(child_2);
+        remote_share.children.push(child_3);
+        if share.path != "" {
+            child_4.text = Some(share.path);
+            remote_share.children.push(child_4);  
+        }
+        remote_share.children.push(child_5);
+        remote_share.children.push(child_6);
+
+        shares.children.push(remote_share);
+    }
+    root.children.push(shares);
 }
 
 pub fn get_startup_inv() /*-> String*/ {
@@ -490,7 +518,7 @@ pub fn execute_inventory_query(query: &str) {
     let logical_drives = "Shares";
     let logical_drives_idx = query_string.find("Shares");
     if let Some(_i) = logical_drives_idx {
-        get_shares_inv();
+        get_shares_inv(&mut root);
     }
 
     let logical_drives = "Start Up";
