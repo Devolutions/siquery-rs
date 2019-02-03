@@ -70,10 +70,10 @@ impl WmiServices {
 
                 match k.as_str() {
                     "AcceptPause" => {
-                        service.accept_pause = v;
+                        service.accept_pause = v.to_lowercase();
                     },
                     "AcceptStop" => {
-                        service.accept_stop = v;
+                        service.accept_stop = v.to_lowercase();
                     },
                     "Caption" => {
                         service.caption = v;
@@ -85,7 +85,7 @@ impl WmiServices {
                         service.description = v;
                     },
                     "DesktopInteract" => {
-                        service.desktop_interact = v;
+                        service.desktop_interact = v.to_lowercase();
                     },
                     "DisplayName" => {
                         service.display_name = v;
@@ -106,7 +106,7 @@ impl WmiServices {
                         service.service_type = v;
                     },
                     "Started" => {
-                        service.started = v;
+                        service.started = v.to_lowercase();
                     },
                     "StartMode" => {
                         service.start_mode = v;

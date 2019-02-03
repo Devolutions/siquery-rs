@@ -2,6 +2,9 @@ use treexml::{Element,Document,XmlVersion::Version10};
 use heck::CamelCase;
 use tables::*;
 
+use std::fs::File;
+use std::io::prelude::*;
+
 fn devices() -> Element {
     let mut devices = Element::new("Devices");
 
@@ -235,7 +238,6 @@ pub fn get_network_adapters_inv(ref mut root: &mut Element) {
 }
 
 pub fn get_printers_inv(ref mut root: &mut Element) {
-
     let wmi_printers = WmiPrinters::get_specific();
     let mut printers = Element::new("Printers");
     for printer in wmi_printers {
@@ -306,16 +308,83 @@ pub fn get_printers_inv(ref mut root: &mut Element) {
     root.children.push(printers);
 }
 
-pub fn get_products_inv() /*-> String*/ {
+pub fn get_products_inv(ref mut root: &mut Element) {
     #[cfg(feature = "products")]
     let table = Products::get_specific();
     //return serialized table to xml here
 }
 
-pub fn get_services_inv() /*-> String*/ {
-    #[cfg(feature = "wmi_services")]
-    let table = WmiServices::get_specific();
-    //return serialized table to xml here
+pub fn get_services_inv(ref mut root: &mut Element) {
+    let wmi_services = WmiServices::get_specific();
+    let mut services = Element::new("Services");
+    for service in wmi_services {
+        let mut remote_service = Element::new("RemoteService");
+
+        let mut child_1 = Element::new("AcceptPause");
+        let mut child_2 = Element::new("AcceptStop");
+        let mut child_3 = Element::new("Caption");
+        let mut child_4 = Element::new("CreationClassName");
+        let mut child_5 = Element::new("Description");
+        let mut child_6 = Element::new("DesktopInteract");
+        let mut child_7 = Element::new("DisplayName");
+        let mut child_8 = Element::new("ErrorControl");
+        let mut child_9 = Element::new("ExitCode");
+        let mut child_10 = Element::new("Name");
+        let mut child_11 = Element::new("PathName");
+        let mut child_12 = Element::new("ServiceType");
+        let mut child_13 = Element::new("Started");
+        let mut child_14 = Element::new("StartMode");
+        let mut child_15 = Element::new("StartName");
+        let mut child_16 = Element::new("State");
+        let mut child_17 = Element::new("Status");
+        let mut child_18 = Element::new("SystemCreationClassName");
+        let mut child_19 = Element::new("SystemName");
+
+        child_1.text = Some(service.accept_pause);
+        child_2.text = Some(service.accept_stop);
+        child_3.text = Some(service.caption);
+        child_4.text = Some(service.creation_class_name);
+        child_5.text = Some(service.description);
+        child_6.text = Some(service.desktop_interact);
+        child_7.text = Some(service.display_name);
+        child_8.text = Some(service.error_control);
+        child_9.text = Some(service.exit_code.to_string());
+        child_10.text = Some(service.name);
+        child_11.text = Some(service.path_name);
+        child_12.text = Some(service.service_type);
+        child_13.text = Some(service.started);
+        child_14.text = Some(service.start_mode);
+        child_15.text = Some(service.start_name);
+        child_16.text = Some(service.state);
+        child_17.text = Some(service.status);
+        child_18.text = Some(service.system_creation_class_name);
+        child_19.text = Some(service.system_name);
+
+        remote_service.children.push(child_1);
+        remote_service.children.push(child_2);
+        remote_service.children.push(child_3);
+        remote_service.children.push(child_4);
+        remote_service.children.push(child_5);
+        remote_service.children.push(child_6);
+        remote_service.children.push(child_7);
+        remote_service.children.push(child_8);
+        if service.exit_code != 0 {
+            remote_service.children.push(child_9);
+        }
+        remote_service.children.push(child_10);
+        remote_service.children.push(child_11);
+        remote_service.children.push(child_12);
+        remote_service.children.push(child_13);
+        remote_service.children.push(child_14);
+        remote_service.children.push(child_15);
+        remote_service.children.push(child_16);
+        remote_service.children.push(child_17);
+        remote_service.children.push(child_18);
+        remote_service.children.push(child_19);
+
+        services.children.push(remote_service);
+    }
+    root.children.push(services);
 }
 
 pub fn get_shares_inv() /*-> String*/ {
@@ -409,13 +478,13 @@ pub fn execute_inventory_query(query: &str) {
     let logical_drives = "Products";
     let logical_drives_idx = query_string.find("Products");
     if let Some(_i) = logical_drives_idx {
-        get_services_inv();
+        get_products_inv(&mut root);
     }
 
     let logical_drives = "Services";
     let logical_drives_idx = query_string.find("Services");
     if let Some(_i) = logical_drives_idx {
-        get_products_inv();
+        get_services_inv(&mut root);
     }
 
     let logical_drives = "Shares";
@@ -448,6 +517,10 @@ pub fn execute_inventory_query(query: &str) {
         version: Version10,
         .. Document::default()
     };
+
+
+    let mut file = File::create("inventory.inv").ok();
+    file.unwrap().write_all(doc.to_string().as_str().as_bytes()).ok();
 
     println!("{}",doc.to_string());
 }

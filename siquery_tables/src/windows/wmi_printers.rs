@@ -83,7 +83,7 @@ impl WmiPrinters {
                         printer.device_id = v;
                     },
                     "DoCompleteFirst" => {
-                        printer.do_complete_first = v.to_lowercase();;
+                        printer.do_complete_first = v.to_lowercase();
                     },
                     "DriverName" => {
                         printer.driver_name = v;
