@@ -83,7 +83,7 @@ impl WmiPrinters {
                         printer.device_id = v;
                     },
                     "DoCompleteFirst" => {
-                        printer.do_complete_first = v;
+                        printer.do_complete_first = v.to_lowercase();;
                     },
                     "DriverName" => {
                         printer.driver_name = v;
@@ -95,7 +95,7 @@ impl WmiPrinters {
                         printer.horizontal_resolution = v.parse::<u32>().unwrap_or(0);
                     },
                     "Local" => {
-                        printer.local = v;
+                        printer.local = v.to_lowercase();
                     },
                     "Name" => {
                         printer.name = v;

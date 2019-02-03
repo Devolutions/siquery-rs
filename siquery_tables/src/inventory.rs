@@ -2,40 +2,6 @@ use treexml::{Element,Document,XmlVersion::Version10};
 use heck::CamelCase;
 use tables::*;
 
-fn bios() -> Element {
-    let bios = WmiBios::get_specific();
-
-    let mut parent = Element::new("Bios");
-
-    for entry in bios {
-        let mut child_1 = Element::new("Caption");
-        let mut child_2 = Element::new("Manufacturer");
-        let mut child_3 = Element::new("ReleaseDate");
-        let mut child_4 = Element::new("SerialNumber");
-        let mut child_5 = Element::new("SMBIOSBIOSVersion");
-
-        child_1.text = Some(entry.caption);
-        child_2.text = Some(entry.manufacturer);
-        child_3.text = Some(entry.release_date);
-        child_4.text = Some(entry.serial_number);
-        child_5.text = Some(entry.smbios_version);
-
-        parent.children.push(child_1);
-        parent.children.push(child_2);
-        parent.children.push(child_3);
-        parent.children.push(child_4);
-        parent.children.push(child_5);
-    }
-
-    parent
-}
-
-fn cd_roms() -> Element {
-    let mut cd_roms = Element::new("CDRoms");
-
-    cd_roms
-}
-
 fn devices() -> Element {
     let mut devices = Element::new("Devices");
 
@@ -168,39 +134,8 @@ fn motherboards() -> Element {
     motherboards
 }
 
-fn network_adapters() -> Element {
-    let mut network_adapters = Element::new("NetworkAdapters");
-
-    let mut remote_network_adapters = Element::new("RemoteNetworkAdapter");
-    let mut child_1 = Element::new("Ports");
-    let mut child_2 = Element::new("DatabasePath");
-    let mut child_3 = Element::new("Description");
-    let mut child_4 = Element::new("DHCPEnabled");
-    let mut child_5 = Element::new("IPAddress");
-    let mut child_6 = Element::new("IPAddressMac");
-    let mut child_7 = Element::new("IPEnabled");
-    let mut child_8 = Element::new("IPSubnet");
-    let mut child_9 = Element::new("MACAddress");
-
-    remote_network_adapters.children.push(child_1);
-    remote_network_adapters.children.push(child_2);
-    remote_network_adapters.children.push(child_3);
-    remote_network_adapters.children.push(child_4);
-    remote_network_adapters.children.push(child_5);
-    remote_network_adapters.children.push(child_6);
-    remote_network_adapters.children.push(child_7);
-    remote_network_adapters.children.push(child_8);
-    remote_network_adapters.children.push(child_9);
-
-    network_adapters.children.push(remote_network_adapters);
-
-    network_adapters
-}
-
-pub fn get_local_accounts_inv() /*-> String*/ {
-    #[cfg(feature = "wmi_local_accounts")]
+pub fn get_local_accounts_inv() {
     let table = WmiLocalAccounts::get_specific();
-    //return serialized table to xml here
 }
 
 pub fn get_logical_drives_inv(ref mut root: &mut Element) {
@@ -299,10 +234,76 @@ pub fn get_network_adapters_inv(ref mut root: &mut Element) {
     root.children.push(network_adapters);
 }
 
-pub fn get_printers_inv() /*-> String*/ {
-    #[cfg(feature = "wmi_printers")]
-    let table = WmiPrinters::get_specific();
-    //return serialized table to xml here
+pub fn get_printers_inv(ref mut root: &mut Element) {
+
+    let wmi_printers = WmiPrinters::get_specific();
+    let mut printers = Element::new("Printers");
+    for printer in wmi_printers {
+        let mut remote_printer = Element::new("RemotePrinter");
+
+        let mut child_1 = Element::new("Attributes");
+        let mut child_2 = Element::new("Caption");
+        let mut child_3 = Element::new("CreationClassName");
+        let mut child_4 = Element::new("DeviceID");
+        let mut child_5 = Element::new("DoCompleteFirst");
+        let mut child_6 = Element::new("DriverName");
+        let mut child_7 = Element::new("ExtendedPrinterStatus");
+        let mut child_8 = Element::new("HorizontalResolution");
+        let mut child_9 = Element::new("Local");
+        let mut child_10 = Element::new("Name");
+        let mut child_11 = Element::new("PortName");
+        let mut child_12 = Element::new("PrinterStatus");
+        let mut child_13 = Element::new("PrintJobDataType");
+        let mut child_14 = Element::new("PrintProcessor");
+        let mut child_15 = Element::new("Priority");
+        let mut child_16 = Element::new("Status");
+        let mut child_17 = Element::new("SystemCreationClassName");
+        let mut child_18 = Element::new("SystemName");
+        let mut child_19 = Element::new("VerticalResolution");
+
+        child_1.text = Some(printer.attributes.to_string());
+        child_2.text = Some(printer.caption);
+        child_3.text = Some(printer.creation_class_name);
+        child_4.text = Some(printer.device_id);
+        child_5.text = Some(printer.do_complete_first);
+        child_6.text = Some(printer.driver_name);
+        child_7.text = Some(printer.extended_printer_status.to_string());
+        child_8.text = Some(printer.horizontal_resolution.to_string());
+        child_9.text = Some(printer.local);
+        child_10.text = Some(printer.name);
+        child_11.text = Some(printer.port_name);
+        child_12.text = Some(printer.printer_status.to_string());
+        child_13.text = Some(printer.print_job_data_type);
+        child_14.text = Some(printer.print_processor);
+        child_15.text = Some(printer.priority.to_string());
+        child_16.text = Some(printer.status);
+        child_17.text = Some(printer.system_creation_class_name);
+        child_18.text = Some(printer.system_name);
+        child_19.text = Some(printer.vertical_resolution.to_string());
+
+        remote_printer.children.push(child_1);
+        remote_printer.children.push(child_2);
+        remote_printer.children.push(child_3);
+        remote_printer.children.push(child_4);
+        remote_printer.children.push(child_5);
+        remote_printer.children.push(child_6);
+        remote_printer.children.push(child_7);
+        remote_printer.children.push(child_8);
+        remote_printer.children.push(child_9);
+        remote_printer.children.push(child_10);
+        remote_printer.children.push(child_11);
+        remote_printer.children.push(child_12);
+        remote_printer.children.push(child_13);
+        remote_printer.children.push(child_14);
+        remote_printer.children.push(child_15);
+        remote_printer.children.push(child_16);
+        remote_printer.children.push(child_17);
+        remote_printer.children.push(child_18);
+        remote_printer.children.push(child_19);
+
+        printers.children.push(remote_printer);
+    }
+    root.children.push(printers);
 }
 
 pub fn get_products_inv() /*-> String*/ {
@@ -402,7 +403,7 @@ pub fn execute_inventory_query(query: &str) {
     let logical_drives = "Printers";
     let logical_drives_idx = query_string.find("Printers");
     if let Some(_i) = logical_drives_idx {
-        get_printers_inv();
+        get_printers_inv(&mut root);
     }
 
     let logical_drives = "Products";
