@@ -29,7 +29,6 @@ impl WmiNetworkAdapters {
     pub fn get_specific_ex(reader: &WmiNetworkAdaptersIface) -> Vec<WmiNetworkAdapters> {
 
         let mut network_adapters: Vec<WmiNetworkAdapters> = Vec::new();
-
         if let Some(network_adapter_info) = reader.get_wmi_network_adapters_info() {
             let mut network_adapter = WmiNetworkAdapters::new();
             let lines = network_adapter_info.split('\n');
@@ -59,13 +58,13 @@ impl WmiNetworkAdapters {
                         network_adapter.database_path = v;
                     },
                     "DHCPEnabled" => {
-                        network_adapter.dhcp_enabled = v;
+                        network_adapter.dhcp_enabled = v.to_lowercase();
                     },
                     "IPAddress" => {
                         add_formatted_entry(&mut v,  &mut network_adapter.ip_address);
                     },
                     "IPEnabled" => {
-                        network_adapter.ip_enabled = v;
+                        network_adapter.ip_enabled = v.to_lowercase();
                     },
                     "IPSubnet" => {
                         add_formatted_entry(&mut v,  &mut network_adapter.ip_subnet);

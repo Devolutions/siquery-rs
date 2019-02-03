@@ -203,12 +203,10 @@ pub fn get_local_accounts_inv() /*-> String*/ {
     //return serialized table to xml here
 }
 
-pub fn get_logical_drives_inv(ref mut root: &mut Element) /*-> String*/ {
+pub fn get_logical_drives_inv(ref mut root: &mut Element) {
 
     let wmi_logical_drives = LogicalDrive::get_specific();
-
     let mut logical_drives = Element::new("LogicalDrives");
-
     for logical_drive in wmi_logical_drives {
         let mut remote_logical_disk = Element::new("RemoteLogicalDisk");
 
@@ -244,17 +242,61 @@ pub fn get_logical_drives_inv(ref mut root: &mut Element) /*-> String*/ {
 
         logical_drives.children.push(remote_logical_disk);
     }
-
     root.children.push(logical_drives);
 }
 
+pub fn get_network_adapters_inv(ref mut root: &mut Element) {
+    let wmi_network_adapters = WmiNetworkAdapters::get_specific();
+    let mut network_adapters = Element::new("NetworkAdapters");
+    for network_adapter in wmi_network_adapters {
+        if (network_adapter.ip_enabled == "true") {
+            let mut remote_network_adapters = Element::new("RemoteNetworkAdapter");
+            let mut child_1 = Element::new("Ports");
+            let mut child_2 = Element::new("DatabasePath");
+            let mut child_3 = Element::new("Description");
+            let mut child_4 = Element::new("DHCPEnabled");
+            let mut child_5 = Element::new("IPAddress");
+            let mut child_6 = Element::new("IPAddressMac");
+            let mut child_7 = Element::new("IPEnabled");
+            let mut child_8 = Element::new("IPSubnet");
+            let mut child_9 = Element::new("MACAddress");
 
+            child_1.text = Some("".to_string()); // no ports in wmi call this field is always empty
+            child_2.text = Some(network_adapter.database_path);
+            child_3.text = Some(network_adapter.description);
+            child_4.text = Some(network_adapter.dhcp_enabled);
 
+            for ip_addr in network_adapter.ip_address.iter() {
+                let mut sub_child = Element::new("string");
+                sub_child.text = Some((*ip_addr).to_owned());
+                child_5.children.push(sub_child);
+            }
 
-pub fn get_network_adapters_inv() /*-> String*/ {
-    #[cfg(feature = "wmi_network_adapters")]
-    let table = WmiNetworkAdapters::get_specific();
-    //return serialized table to xml here
+            child_6.text = Some("".to_string()); // no ports in wmi call this field is always empty
+            child_7.text = Some(network_adapter.ip_enabled);
+
+            for ip_subnet in network_adapter.ip_subnet.iter() {
+                let mut sub_child = Element::new("string");
+                sub_child.text = Some((*ip_subnet).to_owned());
+                child_8.children.push(sub_child);
+            }
+
+            child_9.text = Some(network_adapter.mac_address);
+
+            remote_network_adapters.children.push(child_1);
+            remote_network_adapters.children.push(child_2);
+            remote_network_adapters.children.push(child_3);
+            remote_network_adapters.children.push(child_4);
+            remote_network_adapters.children.push(child_5);
+            remote_network_adapters.children.push(child_6);
+            remote_network_adapters.children.push(child_7);
+            remote_network_adapters.children.push(child_8);
+            remote_network_adapters.children.push(child_9);
+
+            network_adapters.children.push(remote_network_adapters);
+        }
+    }
+    root.children.push(network_adapters);
 }
 
 pub fn get_printers_inv() /*-> String*/ {
@@ -354,7 +396,7 @@ pub fn execute_inventory_query(query: &str) {
     let logical_drives = "Network Adapters";
     let logical_drives_idx = query_string.find("Network Adapters");
     if let Some(_i) = logical_drives_idx {
-        get_network_adapters_inv();
+        get_network_adapters_inv(&mut root);
     }
 
     let logical_drives = "Printers";
