@@ -1914,23 +1914,23 @@ impl Table for WmiMotherboard {
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiProcessor {
-    pub address_width: u16,
-    pub cpu_satus: String,
-    pub current_clock_speed: u32,
-    pub current_voltage: u16,
-    pub description: String,
-    pub external_clock: u32,
-    pub hyper_threading_enabled: String,
-    pub l2_cache_size: u32,
-    pub l2_cache_speed: u32,
-    pub l3_cache_size: u32,
-    pub l3_cache_speed: u32,
-    pub manufacturer: String,
-    pub max_clock_speed: u32,
-    pub name: String,
-    pub number_of_cores: u32,
+    pub address_width               : u16,
+    pub cpu_satus                   : String,
+    pub current_clock_speed         : u32,
+    pub current_voltage             : u16,
+    pub description                 : String,
+    pub external_clock              : u32,
+    pub hyper_threading_enabled     : String,
+    pub l2_cache_size               : u32,
+    pub l2_cache_speed              : u32,
+    pub l3_cache_size               : u32,
+    pub l3_cache_speed              : u32,
+    pub manufacturer                : String,
+    pub max_clock_speed             : u32,
+    pub name                        : String,
+    pub number_of_cores             : u32,
     pub number_of_logical_processors: u32,
-    pub socket_designation: String,
+    pub socket_designation          : String,
 }}
 
 #[cfg(feature = "wmi_processor")]
@@ -2054,18 +2054,18 @@ impl Table for WmiProcessor {
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WmiMemory {
-    pub name: String,
-    pub bank_label: String,
-    pub capacity: String,
-    pub description: String,
-    pub device_locator: String,
-    pub form_factor: u16,
-    pub interleave_data_depth: u16,
-    pub interleave_position: u32,
-    pub manufacturer: String,
-    pub memory_type: u16,
-    pub serial_number: String,
-    pub speed: u32,
+    pub name                    : String,
+    pub bank_label              : String,
+    pub capacity                : String,
+    pub description             : String,
+    pub device_locator          : String,
+    pub form_factor             : u16,
+    pub interleave_data_depth   : u16,
+    pub interleave_position     : u32,
+    pub manufacturer            : String,
+    pub memory_type             : u16,
+    pub serial_number           : String,
+    pub speed                   : u32,
 }}
 
 #[cfg(feature = "wmi_physical_memory")]
