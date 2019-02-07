@@ -364,8 +364,30 @@ pub fn get_shares_inv(ref mut root: &mut Element) {
     root.children.push(shares);
 }
 
-pub fn get_startup_inv() /*-> String*/ {
-    /*No info*/
+pub fn get_start_up_inv(ref mut root: &mut Element) {
+    let wmi_start_ups = WmiStartUp::get_specific();
+    let mut start_ups = Element::new("StartUps");
+    for start_up in wmi_start_ups {
+        let mut remote_start_up = Element::new("RemoteStartUp");
+
+        let mut child_1 = Element::new("Command");
+        let mut child_2 = Element::new("Location");
+        let mut child_3 = Element::new("Name");
+        let mut child_4 = Element::new("User");
+
+        child_1.text = Some(start_up.command);
+        child_2.text = Some(start_up.location);
+        child_3.text = Some(start_up.name);
+        child_4.text = Some(start_up.user);
+
+        remote_start_up.children.push(child_1);
+        remote_start_up.children.push(child_2);
+        remote_start_up.children.push(child_3);
+        remote_start_up.children.push(child_4);
+
+        start_ups.children.push(remote_start_up);
+    }
+    root.children.push(start_ups);
 }
 
 pub fn get_hotfixes_inv(ref mut root: &mut Element) {
@@ -788,7 +810,7 @@ pub fn execute_inventory_query(query: &str) {
     let logical_drives = "Start Up";
     let logical_drives_idx = query_string.find("Start Up");
     if let Some(_i) = logical_drives_idx {
-        get_startup_inv();
+        get_start_up_inv(&mut root);
     }
 
     let logical_drives = "System Information";

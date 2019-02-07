@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<InventorySystemInformation>
+  <StartUps>
+    <RemoteStartUp>
+      <Command>"C:\Users\skamate\AppData\Local\Microsoft\OneDrive\OneDrive.exe" /background</Command>
+      <Location>HKU\S-1-5-21-1417238777-1582384553-2904431062-3302\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>OneDrive</Name>
+      <User>DEVOLUTIONS\skamate</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>"C:\Users\skamate\AppData\Local\slack\Update.exe" --processStart "slack.exe" --process-start-args "--startup"</Command>
+      <Location>HKU\S-1-5-21-1417238777-1582384553-2904431062-3302\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>com.squirrel.slack.slack</Name>
+      <User>DEVOLUTIONS\skamate</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>C:\Program Files (x86)\McAfee Safe Connect\McAfee Safe Connect.exe</Command>
+      <Location>HKU\S-1-5-21-1417238777-1582384553-2904431062-3302\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>McAfeeSafeConnect</Name>
+      <User>DEVOLUTIONS\skamate</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>C:\Program Files (x86)\Lavasoft\Web Companion\Application\WebCompanion.exe --minimize</Command>
+      <Location>HKU\S-1-5-21-1417238777-1582384553-2904431062-3302\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>Web Companion</Name>
+      <User>DEVOLUTIONS\skamate</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>%ProgramFiles%\Windows Defender\MSASCuiL.exe</Command>
+      <Location>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>SecurityHealth</Name>
+      <User>Public</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>"C:\Program Files\Realtek\Audio\HDA\RtkNGUI64.exe" -s</Command>
+      <Location>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>RTHDVCPL</Name>
+      <User>Public</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>"C:\Program Files\Realtek\Audio\HDA\RAVBg64.exe" /IM</Command>
+      <Location>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>RtHDVBg_PushButton</Name>
+      <User>Public</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>"C:\Program Files\Waves\MaxxAudio\WavesSvc64.exe" -Jack</Command>
+      <Location>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>WavesSvc</Name>
+      <User>Public</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>"C:\Program Files\TechSmith\Snagit 2018\Snagit32.exe" /i</Command>
+      <Location>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>TechSmithSnagit</Name>
+      <User>Public</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>"C:\Program Files\Intel\Intel(R) Rapid Storage Technology\IAStorIconLaunch.exe" "C:\Program Files\Intel\Intel(R) Rapid Storage Technology\IAStorIcon.exe" 60</Command>
+      <Location>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>IAStorIcon</Name>
+      <User>Public</User>
+    </RemoteStartUp>
+    <RemoteStartUp>
+      <Command>C:\Windows\system32\rundll32.exe C:\Windows\System32\LogiLDA.dll,LogiFetch</Command>
+      <Location>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Location>
+      <Name>Logitech Download Assistant</Name>
+      <User>Public</User>
+    </RemoteStartUp>
+  </StartUps>
+</InventorySystemInformation>

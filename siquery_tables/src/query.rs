@@ -488,7 +488,6 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         },
         #[cfg(feature = "wmi_start_up")]
         "wmi_start_up" => {
-            println!("got here");
             let column_names = WmiStartUp::get_columns_name();
             let column_types = WmiStartUp::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
