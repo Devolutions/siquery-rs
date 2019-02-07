@@ -1358,6 +1358,81 @@ impl Table for WmiServices {
     }
 }
 
+#[cfg(feature = "wmi_products")]
+table_properties!{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiProducts {
+    pub help_link: String,
+    pub install_date: String,
+    pub install_location: String,
+    pub name: String,
+    pub vendor: String,
+    pub version: String,
+}}
+
+#[cfg(feature = "wmi_products")]
+pub trait WmiProductsIface {
+    fn get_wmi_products_info(&self)-> Option<String>;
+}
+
+#[cfg(feature = "wmi_products")]
+#[allow(non_upper_case_globals)]
+impl WmiProducts {
+    const HELP_LINK_ID: u64 = 0x00000001;
+    const INSTALL_DATE_ID: u64 = 0x00000002;
+    const INSTALL_LOCATION_ID: u64 = 0x00000004;
+    const NAME_ID: u64 = 0x00000008;
+    const VENDOR_ID: u64 = 0x00000010;
+    const VERSION_ID: u64 = 0x00000020;
+}
+
+#[cfg(feature = "wmi_products")]
+impl Table for WmiProducts {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "help_link",
+        "install_date",
+        "install_location",
+        "name",
+        "vendor",
+        "version"];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "help_link" => Value::from(self.help_link.to_owned()),
+            "install_date" => Value::from(self.install_date.to_owned()),
+            "install_location" => Value::from(self.install_location.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "vendor" => Value::from(self.vendor.to_owned()),
+            "version" => Value::from(self.version.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::HELP_LINK_ID => Value::from(self.help_link.to_owned()),
+            Self::INSTALL_DATE_ID => Value::from(self.install_date.to_owned()),
+            Self::INSTALL_LOCATION_ID => Value::from(self.install_location.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::VENDOR_ID => Value::from(self.vendor.to_owned()),
+            Self::VERSION_ID => Value::from(self.version.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "help_link" => Self::HELP_LINK_ID,
+            "install_date" => Self::INSTALL_DATE_ID,
+            "install_location" => Self::INSTALL_LOCATION_ID,
+            "name" => Self::NAME_ID,
+            "vendor" => Self::VENDOR_ID,
+            "version" => Self::VERSION_ID,
+            _ => 0
+        }
+    }
+}
+
 #[cfg(any(feature = "wmi_hotfixes", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
@@ -3834,6 +3909,8 @@ pub fn get_table_list() -> Vec<String> {
             "wmi_printers".to_string(),
         #[cfg(feature = "wmi_services")]
             "wmi_services".to_string(),
+        #[cfg(feature = "wmi_products")]
+            "wmi_products".to_string(),
         #[cfg(feature = "wmi_hotfixes")]
             "wmi_hotfixes".to_string(),
         #[cfg(feature = "wmi_shares")]

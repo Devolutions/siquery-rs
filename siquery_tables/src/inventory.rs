@@ -183,9 +183,47 @@ pub fn get_printers_inv(ref mut root: &mut Element) {
 }
 
 pub fn get_products_inv(ref mut root: &mut Element) {
-    #[cfg(feature = "products")]
-    let table = Products::get_specific();
-    //return serialized table to xml here
+
+    let wmi_products = WmiProducts::get_specific();
+    let mut products = Element::new("Products");
+    for product in wmi_products {
+        let mut remote_product = Element::new("RemoteProgram");
+
+        let mut child_1 = Element::new("HelpLink");
+        let mut child_2 = Element::new("InstallDate");
+        let mut child_3 = Element::new("InstallLocation");
+        let mut child_4 = Element::new("Name");
+        let mut child_5 = Element::new("Vendor");
+        let mut child_6 = Element::new("Version");
+
+        if product.help_link != "" {
+            child_1.text = Some(product.help_link);
+            remote_product.children.push(child_1);
+        }
+        if product.install_date != "" {
+            child_2.text = Some(product.install_date);
+            remote_product.children.push(child_2);
+        }
+        if product.install_location != "" {
+            child_3.text = Some(product.install_location);
+            remote_product.children.push(child_3);
+        }
+        if product.name != "" {
+            child_4.text = Some(product.name);
+            remote_product.children.push(child_4);
+        }
+        if product.vendor != "" {
+            child_5.text = Some(product.vendor);
+            remote_product.children.push(child_5);
+        }
+        if product.version != "" {
+            child_6.text = Some(product.version);
+            remote_product.children.push(child_6);
+        }
+
+        products.children.push(remote_product);
+    }
+    root.children.push(products);
 }
 
 pub fn get_services_inv(ref mut root: &mut Element) {
@@ -449,5 +487,5 @@ pub fn execute_inventory_query(query: &str) {
     let mut file = File::create("inventory.inv").ok();
     file.unwrap().write_all(doc.to_string().as_str().as_bytes()).ok();
 
-    println!("{}",doc.to_string());
+    //println!("{}",doc.to_string());
 }

@@ -14,6 +14,7 @@ use std::env;
 #[cfg(feature = "wmi_computer_info")] mod wmi_computer_info;
 #[cfg(feature = "wmi_printers")] mod wmi_printers;
 #[cfg(feature = "wmi_services")] mod wmi_services;
+#[cfg(feature = "wmi_products")] mod wmi_products;
 #[cfg(feature = "wmi_hotfixes")] mod wmi_hotfixes;
 #[cfg(feature = "wmi_shares")] mod wmi_shares;
 #[cfg(feature = "wmi_network_adapters")] mod wmi_network_adapters;

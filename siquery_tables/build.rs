@@ -22,6 +22,7 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "wmi_os_version",
     "wmi_printers",
     "wmi_services",
+    "wmi_products",
     "wmi_hotfixes",
     "wmi_shares",
     "wmi_network_adapters",

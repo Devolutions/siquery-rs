@@ -128,6 +128,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
             let table = WmiServices::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "wmi_products")]
+        "wmi_products" => {
+            let table = WmiProducts::get_specific();
+            select(&table, columns)
+        },
         #[cfg(feature = "wmi_hotfixes")]
         "wmi_hotfixes" => {
             let table = WmiHotfixes::get_specific();
@@ -390,6 +395,12 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         "wmi_services" => {
             let column_names = WmiServices::get_columns_name();
             let column_types = WmiServices::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
+        #[cfg(feature = "wmi_products")]
+        "wmi_products" => {
+            let column_names = WmiProducts::get_columns_name();
+            let column_types = WmiProducts::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         #[cfg(feature = "wmi_hotfixes")]
