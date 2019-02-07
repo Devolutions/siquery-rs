@@ -28,6 +28,7 @@ use std::env;
 #[cfg(feature = "wmi_monitors")] mod wmi_monitors;
 #[cfg(feature = "wmi_keyboard")] mod wmi_keyboard;
 #[cfg(feature = "wmi_pointing_device")] mod wmi_pointing_device;
+#[cfg(feature = "wmi_start_up")] mod wmi_start_up;
 #[cfg(feature = "users")] mod users;
 #[cfg(feature = "logged_in_users")] mod logged_in_users;
 #[cfg(feature = "logon_sessions")] mod logon_sessions;

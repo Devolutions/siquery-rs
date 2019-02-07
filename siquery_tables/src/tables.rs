@@ -2634,6 +2634,69 @@ impl Table for WmiPointingDevice {
     }
 }
 
+#[cfg(feature = "wmi_start_up")]
+table_properties!{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiStartUp {
+    pub command: String,
+    pub location: String,
+    pub name: String,
+    pub user: String,
+}}
+
+#[cfg(feature = "wmi_start_up")]
+pub trait WmiStartUpIface {
+    fn get_wmi_start_up_info(&self)-> Option<String>;
+}
+
+#[cfg(feature = "wmi_start_up")]
+#[allow(non_upper_case_globals)]
+impl WmiStartUp {
+    const COMMAND_ID: u64 = 0x00000001;
+    const LOCATION_ID: u64 = 0x00000002;
+    const NAME_ID: u64 = 0x00000004;
+    const USER_ID: u64 = 0x00000008;
+}
+
+#[cfg(feature = "wmi_start_up")]
+impl Table for WmiStartUp {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "command",
+        "location",
+        "name",
+        "user"];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "command" => Value::from(self.command.to_owned()),
+            "location" => Value::from(self.location.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "user" => Value::from(self.user.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::COMMAND_ID => Value::from(self.command.to_owned()),
+            Self::LOCATION_ID => Value::from(self.location.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::USER_ID => Value::from(self.user.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "command" => Self::COMMAND_ID,
+            "location" => Self::LOCATION_ID,
+            "name" => Self::NAME_ID,
+            "user" => Self::USER_ID,
+            _ => 0
+        }
+    }
+}
+
 #[cfg(feature = "process_open_sockets")]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
@@ -3937,6 +4000,8 @@ pub fn get_table_list() -> Vec<String> {
             "wmi_keyboard".to_string(),
         #[cfg(feature = "wmi_pointing_device")]
             "wmi_pointing_device".to_string(),
+        #[cfg(feature = "wmi_start_up")]
+            "wmi_start_up".to_string(),
         #[cfg(feature = "process_envs")]
             "process_envs".to_string(),
         #[cfg(feature = "mounts")]

@@ -198,6 +198,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
             let table = WmiPointingDevice::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "wmi_start_up")]
+        "wmi_start_up" => {
+            let table = WmiStartUp::get_specific();
+            select(&table, columns)
+        },
         #[cfg(feature = "process_open_sockets")]
         "process_open_sockets" => {
             let table = ProcessOpenSocketsRow::get_specific();
@@ -479,6 +484,13 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         "wmi_pointing_device" => {
             let column_names = WmiPointingDevice::get_columns_name();
             let column_types = WmiPointingDevice::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
+        #[cfg(feature = "wmi_start_up")]
+        "wmi_start_up" => {
+            println!("got here");
+            let column_names = WmiStartUp::get_columns_name();
+            let column_types = WmiStartUp::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         #[cfg(feature = "process_open_sockets")]

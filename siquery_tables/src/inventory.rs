@@ -368,49 +368,6 @@ pub fn get_startup_inv() /*-> String*/ {
     /*No info*/
 }
 
-pub fn get_system_info_inv() /*-> String*/ {
-    #[cfg(feature = "wmi_computer_info")]
-    let table = WmiComputerInfo::get_specific();
-    // serialize table to xml
-
-    #[cfg(feature = "wmi_bios")]
-    let table = WmiBios::get_specific();
-    // append serialize table to xml string
-
-    #[cfg(feature = "wmi_os_version")]
-    let table = WmiOsVersion::get_specific();
-    // append serialize table to xml string
-
-    // rdm creates a subdivision of motherboards
-    #[cfg(feature = "wmi_motherboard")]
-    let table = WmiMotherboard::get_specific(); // change table name to baseboard
-    // append serialize table to xml string
-
-    #[cfg(feature = "wmi_processor")]
-    let table = WmiProcessor::get_specific(); // to check
-    // append serialize table to xml string
-
-    #[cfg(feature = "wmi_physical_memory")]
-    let table = WmiMemory::get_specific(); // to check
-    // append serialize table to xml string
-
-    #[cfg(feature = "wmi_sound")]
-    let table = WmiSound::get_specific(); // to check
-    // append serialize table to xml string
-
-    #[cfg(feature = "wmi_video")]
-    let table = WmiVideo::get_specific(); // to check
-    // append serialize table to xml string
-
-    #[cfg(feature = "wmi_keyboard")] // devices tree
-    let table = WmiKeyboard::get_specific();
-    // append serialize table to xml string
-
-    #[cfg(feature = "wmi_pointing_device")] // devices tree
-    let table = WmiPointingDevice::get_specific();
-    // append serialize table to xml string
-}
-
 pub fn get_hotfixes_inv(ref mut root: &mut Element) {
     let wmi_hotfixes = WmiHotfixes::get_specific();
     let mut hotfixes = Element::new("QuickFixEngineerings");
@@ -443,7 +400,7 @@ pub fn get_hotfixes_inv(ref mut root: &mut Element) {
     root.children.push(hotfixes);
 }
 
-pub fn get_sysem_info_inv(ref mut root: &mut Element) {
+pub fn get_system_info_inv(ref mut root: &mut Element) {
     for entry in WmiComputerInfo::get_specific(){
         let mut parent = Element::new("System");
 
@@ -837,7 +794,7 @@ pub fn execute_inventory_query(query: &str) {
     let logical_drives = "System Information";
     let logical_drives_idx = query_string.find("System Information");
     if let Some(_i) = logical_drives_idx {
-        get_system_info_inv();
+        get_system_info_inv(&mut root);
     }
 
     let logical_drives = "Windows HotFixes";
@@ -849,7 +806,7 @@ pub fn execute_inventory_query(query: &str) {
     let local_accounts = "Local Accounts";
     let local_accounts_idx = query_string.find("Local Accounts");
     if let Some(_i) = local_accounts_idx {
-        get_sysem_info_inv(&mut root);
+        get_local_accounts_inv(&mut root);
     }
 
     let doc = Document {
