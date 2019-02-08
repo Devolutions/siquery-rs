@@ -2697,6 +2697,50 @@ impl Table for WmiStartUp {
     }
 }
 
+#[cfg(feature = "wmi_time_zone")]
+table_properties!{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiTimeZone {
+    pub description: String,
+}}
+
+#[cfg(feature = "wmi_time_zone")]
+pub trait WmiTimeZoneIface {
+    fn get_wmi_time_zone_info(&self)-> Option<String>;
+}
+
+#[cfg(feature = "wmi_time_zone")]
+#[allow(non_upper_case_globals)]
+impl WmiTimeZone {
+    const DESCRIPTION_ID: u64 = 0x00000001;
+}
+
+#[cfg(feature = "wmi_time_zone")]
+impl Table for WmiTimeZone {
+    const COLUMN_NAMES: &'static [&'static str] = &["description"];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "description" => Value::from(self.description.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "description" => Self::DESCRIPTION_ID,
+            _ => 0
+        }
+    }
+}
+
 #[cfg(feature = "process_open_sockets")]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
@@ -4002,6 +4046,8 @@ pub fn get_table_list() -> Vec<String> {
             "wmi_pointing_device".to_string(),
         #[cfg(feature = "wmi_start_up")]
             "wmi_start_up".to_string(),
+        #[cfg(feature = "wmi_time_zone")]
+            "wmi_time_zone".to_string(),
         #[cfg(feature = "process_envs")]
             "process_envs".to_string(),
         #[cfg(feature = "mounts")]

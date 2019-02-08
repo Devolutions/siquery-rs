@@ -203,6 +203,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
             let table = WmiStartUp::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "wmi_time_zone")]
+        "wmi_time_zone" => {
+            let table = WmiTimeZone::get_specific();
+            select(&table, columns)
+        },
         #[cfg(feature = "process_open_sockets")]
         "process_open_sockets" => {
             let table = ProcessOpenSocketsRow::get_specific();
@@ -490,6 +495,12 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         "wmi_start_up" => {
             let column_names = WmiStartUp::get_columns_name();
             let column_types = WmiStartUp::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
+        #[cfg(feature = "wmi_time_zone")]
+        "wmi_time_zone" => {
+            let column_names = WmiTimeZone::get_columns_name();
+            let column_types = WmiTimeZone::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         #[cfg(feature = "process_open_sockets")]
