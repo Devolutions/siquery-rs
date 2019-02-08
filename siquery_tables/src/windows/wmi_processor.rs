@@ -34,6 +34,7 @@ impl WmiProcessor {
             number_of_cores: 0,
             number_of_logical_processors: 0,
             socket_designation: String::new(),
+            architecture: String::new(),
         };
 
         let mut nbr_cores = 0;
@@ -130,6 +131,9 @@ impl WmiProcessor {
                     },
                     "SocketDesignation" => {
                         processor.socket_designation = v;
+                    },
+                    "Architecture" => {
+                        processor.architecture = v;
                     },
                     _ => ()
                 }

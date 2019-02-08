@@ -233,7 +233,7 @@ pub fn get_products_inv(ref mut root: &mut Element) {
         }
         if product.install_date != "" {
             child_2.text = Some(product.install_date);
-            remote_product.children.push(child_2);
+            remote_product.children.push(child_2); // fixme : parse date format
         }
         if product.install_location != "" {
             child_3.text = Some(product.install_location);
@@ -458,13 +458,13 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
 
         child_1.text = Some(entry.caption);
         child_2.text = Some(entry.manufacturer);
-        //fixme child_3.text = Some(entry.release_date);
+        child_3.text = Some(entry.release_date);
         child_4.text = Some(entry.serial_number);
         child_5.text = Some(entry.smbios_version);
 
         parent.children.push(child_1);
         parent.children.push(child_2);
-        //parent.children.push(child_3);
+        parent.children.push(child_3);
         parent.children.push(child_4);
         parent.children.push(child_5);
 
@@ -494,12 +494,12 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
         child_2.text  = Some(entry.csname);
         child_3.text  = Some(entry.free_physical_mem);
         child_4.text  = Some(entry.free_virtual_mem);
-        //fixme child_5.text  = Some(entry.install_date);
-        //fixme child_6.text  = Some(entry.last_boot_up_time);
-        //fixme child_7.text  = Some(entry.locale);
+        child_5.text  = Some(entry.install_date); // fixme : parse date format
+        child_6.text  = Some(entry.last_boot_up_time); // fixme : parse date format
+        child_7.text  = Some(entry.locale);
         child_8.text  = Some(entry.manufacturer);
         child_9.text  = Some(entry.name);
-        //fixme child_10.text = Some(entry.os_type);
+        child_10.text = Some(entry.os_type);
         child_11.text = Some(entry.size_stored_in_paging_file);
         child_12.text = Some(entry.total_virtual_mem_size);
         child_13.text = Some(entry.total_visible_mem_size);
@@ -510,9 +510,9 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
         parent.children.push(child_2);
         parent.children.push(child_3);
         parent.children.push(child_4);
-        //parent.children.push(child_5);
-        //parent.children.push(child_6);
-        //parent.children.push(child_7);
+        parent.children.push(child_5);
+        parent.children.push(child_6);
+        parent.children.push(child_7);
         parent.children.push(child_8);
         parent.children.push(child_9);
         parent.children.push(child_10);
@@ -572,8 +572,8 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
         let mut child_15 = Element::new("SocketDesignation");
 
         child_1.text  = Some(entry.address_width.to_string());
-        //fixme child_2.text  = Some(entry.architecture);
-        //fixme child_3.text  = Some(entry.cpu_satus);
+        child_2.text  = Some(entry.architecture);
+        child_3.text  = Some(entry.cpu_satus);
         child_4.text  = Some(entry.current_clock_speed.to_string());
         child_5.text  = Some(entry.current_voltage.to_string());
         child_6.text  = Some(entry.description);
@@ -611,29 +611,29 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
     for entry in WmiMemory::get_specific() {
         let mut parent = Element::new("RemoteMemory");
 
-        let mut child_1  = Element::new("Capacity");
-        let mut child_2  = Element::new("Description");
-        let mut child_3  = Element::new("DeviceLocator");
-        let mut child_4  = Element::new("FormFactor");
-        let mut child_5  = Element::new("InterleaveDataDepth");
-        let mut child_6  = Element::new("InterleavePosition");
-        let mut child_7  = Element::new("Manufacturer");
-        let mut child_8  = Element::new("MemoryType");
-        let mut child_9  = Element::new("Name");
+        let mut child_1 = Element::new("Capacity");
+        let mut child_2 = Element::new("Description");
+        let mut child_3 = Element::new("DeviceLocator");
+        let mut child_4 = Element::new("FormFactor");
+        let mut child_5 = Element::new("InterleaveDataDepth");
+        let mut child_6 = Element::new("InterleavePosition");
+        let mut child_7 = Element::new("Manufacturer");
+        let mut child_8 = Element::new("MemoryType");
+        let mut child_9 = Element::new("Name");
         let mut child_10 = Element::new("SerialNumber");
         let mut child_11 = Element::new("Speed");
 
-        child_1.text  = Some(entry.capacity                             );
-        child_2.text  = Some(entry.description                          );
-        child_3.text  = Some(entry.device_locator                       );
-        child_4.text  = Some(entry.form_factor.to_string()              );
-        child_5.text  = Some(entry.interleave_data_depth.to_string()    );
-        child_6.text  = Some(entry.interleave_position.to_string()      );
-        child_7.text  = Some(entry.manufacturer                         );
-        child_8.text  = Some(entry.memory_type.to_string()              );
-        child_9.text  = Some(entry.name                                 );
-        child_10.text = Some(entry.serial_number                        );
-        child_11.text = Some(entry.speed.to_string()                    );
+        child_1.text = Some(entry.capacity);
+        child_2.text = Some(entry.description);
+        child_3.text = Some(entry.device_locator);
+        child_4.text = Some(entry.form_factor.to_string());
+        child_5.text = Some(entry.interleave_data_depth.to_string());
+        child_6.text = Some(entry.interleave_position.to_string());
+        child_7.text = Some(entry.manufacturer);
+        child_8.text = Some(entry.memory_type.to_string());
+        child_9.text = Some(entry.name);
+        child_10.text = Some(entry.serial_number);
+        child_11.text = Some(entry.speed.to_string());
 
         parent.children.push(child_1);
         parent.children.push(child_2);
@@ -688,7 +688,7 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
         child_1.text = Some(entry.adapter_compatibility);
         child_2.text = Some(entry.adapter_dac_type);
         child_3.text = Some(entry.adapter_ram.to_string());
-        //fixme child_4.text = Some(entry.availability);
+        child_4.text = Some(entry.availability);
         child_5.text = Some(entry.driver_version);
         for driver in entry.installed_display_driver {
             let mut string = Element::new("string");
@@ -699,8 +699,8 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
         child_8.text = Some(entry.refresh_rate);
         child_9.text = Some(entry.screen_info);
         child_10.text = Some(entry.status);
-        //fixme child_11.text = Some(entry.video_architecture);
-        //fixme child_12.text = Some(entry.video_memory_type);
+        child_11.text = Some(entry.video_architecture);
+        child_12.text = Some(entry.video_memory_type);
 
         parent.children.push(child_1);
         parent.children.push(child_2);
@@ -770,6 +770,7 @@ pub fn get_time_zone(ref mut root: &mut Element) {
     }
     root.children.push(time_zone_tree);
 }
+
 pub fn execute_inventory_query(query: &str) {
     let mut root = Element::new("InventorySystemInformation");
 

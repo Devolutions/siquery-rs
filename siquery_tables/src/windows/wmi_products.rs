@@ -8,9 +8,9 @@ pub struct Reader {}
 impl WmiProductsIface for Reader {
     fn get_wmi_products_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["Product",
+            .args(&["SOFTWAREFEATURE",
                 "get",
-                "InstallDate,Name,Vendor,Version",
+                /*"InstallDate,Name,Vendor,Version",*/
                 "/format:list"]).output().ok()?;
         String::from_utf8(output.stdout).ok()
     }
@@ -38,8 +38,8 @@ impl WmiProducts {
             for line in lines {
                 let mut element_counter = 0;
                 if line.len() <= 2 {
-                    if element_counter == 6 {
-                        //products.push(product);
+                    if product.name != "" {
+                        products.push(product);
                     }
                     product = WmiProducts::new();
                 }
@@ -55,27 +55,21 @@ impl WmiProducts {
 
                 match k.as_str() {
                     "HelpLink" => {
-                        element_counter = element_counter + 1;
                         product.help_link = v;
                     },
                     "InstallDate" => {
-                        element_counter = element_counter + 1;
                         product.install_date = v;
                     },
                     "InstallLocation" => {
-                        element_counter = element_counter + 1;
                         product.install_location = v;
                     },
                     "Name" => {
-                        element_counter = element_counter + 1;
                         product.name = v;
                     },
                     "Vendor" => {
-                        element_counter = element_counter + 1;
                         product.vendor = v;
                     },
                     "Version" => {
-                        element_counter = element_counter + 1;
                         product.version = v;
                     },
                     _ => ()

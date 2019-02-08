@@ -451,6 +451,10 @@ pub struct WmiOsVersion {
     pub total_virtual_mem_size: String,
     pub total_visible_mem_size: String,
     pub win_directory: String,
+    pub install_date: String,
+    pub last_boot_up_time: String,
+    pub locale: String,
+    pub os_type: String,
 }}
 
 #[cfg(feature = "wmi_os_version")]
@@ -478,6 +482,10 @@ impl WmiOsVersion {
     const TOTAL_VIRTUAL_MEM_SIZE_ID: u64 = 0x00004000;
     const TOTAL_VISIBLE_MEM_SIZE_ID: u64 = 0x00008000;
     const WIN_DIRECTORY_ID: u64 = 0x00010000;
+    const INSTALL_DATE_ID: u64 = 0x00020000;
+    const LAST_BOOT_UP_TIME_ID: u64 = 0x00040000;
+    const LOCAL_ID: u64 = 0x00080000;
+    const OS_TYPE_ID: u64 = 0x00100000;
 }
 
 #[cfg(feature = "wmi_os_version")]
@@ -499,7 +507,11 @@ impl Table for WmiOsVersion {
         "size_stored_in_paging_file",
         "total_virtual_mem_size",
         "total_visible_mem_size",
-        "win_directory"];
+        "win_directory",
+        "install_date",
+        "last_boot_up_time",
+        "locale",
+        "os_type"];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
@@ -520,6 +532,10 @@ impl Table for WmiOsVersion {
             "total_virtual_mem_size" => Value::from(self.total_virtual_mem_size.to_owned()),
             "total_visible_mem_size" => Value::from(self.total_visible_mem_size.to_owned()),
             "win_directory" => Value::from(self.win_directory.to_owned()),
+            "install_date" => Value::from(self.install_date.to_owned()),
+            "last_boot_up_time" => Value::from(self.last_boot_up_time.to_owned()),
+            "locale" => Value::from(self.locale.to_owned()),
+            "os_type" => Value::from(self.os_type.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
@@ -543,10 +559,13 @@ impl Table for WmiOsVersion {
             Self::TOTAL_VIRTUAL_MEM_SIZE_ID => Value::from(self.total_virtual_mem_size.to_owned()),
             Self::TOTAL_VISIBLE_MEM_SIZE_ID => Value::from(self.total_visible_mem_size.to_owned()),
             Self::WIN_DIRECTORY_ID => Value::from(self.win_directory.to_owned()),
+            Self::INSTALL_DATE_ID => Value::from(self.install_date.to_owned()),
+            Self::LAST_BOOT_UP_TIME_ID => Value::from(self.last_boot_up_time.to_owned()),
+            Self::LOCAL_ID => Value::from(self.locale.to_owned()),
+            Self::OS_TYPE_ID => Value::from(self.os_type.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
-
     fn get_id(&self, _name: &str) -> u64 {
         match _name {
             "build_number" => Self::BUILDER_NUMBER_ID,
@@ -566,6 +585,10 @@ impl Table for WmiOsVersion {
             "total_virtual_mem_size" => Self::TOTAL_VIRTUAL_MEM_SIZE_ID,
             "total_visible_mem_size" => Self::TOTAL_VISIBLE_MEM_SIZE_ID,
             "win_directory" => Self::WIN_DIRECTORY_ID,
+            "install_date" => Self::INSTALL_DATE_ID,
+            "last_boot_up_time" => Self::LAST_BOOT_UP_TIME_ID,
+            "locale" => Self::LOCAL_ID,
+            "os_type" => Self::OS_TYPE_ID,
             _ => 0
         }
     }
@@ -2014,6 +2037,7 @@ pub struct WmiProcessor {
     pub number_of_cores: u32,
     pub number_of_logical_processors: u32,
     pub socket_designation: String,
+    pub architecture: String,
 }}
 
 #[cfg(feature = "wmi_processor")]
@@ -2040,6 +2064,7 @@ impl WmiProcessor {
     const NUMBER_OF_CORES_ID: u64 = 0x00004000;
     const NUMBER_OF_LOGICAL_PROCESSORS_ID: u64 = 0x00008000;
     const SOCKET_DESIGNATION_ID: u64 = 0x00010000;
+    const ARCHITECHTURE_ID : u64 = 0x00020000;
 }
 
 #[cfg(feature = "wmi_processor")]
@@ -2061,7 +2086,8 @@ impl Table for WmiProcessor {
         "name",
         "number_of_cores",
         "number_of_logical_processors",
-        "socket_designation", ];
+        "socket_designation",
+        "architecture"];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
@@ -2082,6 +2108,7 @@ impl Table for WmiProcessor {
             "number_of_cores" => Value::from(self.number_of_cores),
             "number_of_logical_processors" => Value::from(self.number_of_logical_processors),
             "socket_designation" => Value::from(self.socket_designation.to_owned()),
+            "architecture" => Value::from(self.architecture.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
@@ -2105,6 +2132,7 @@ impl Table for WmiProcessor {
             Self::NUMBER_OF_CORES_ID => Value::from(self.number_of_cores),
             Self::NUMBER_OF_LOGICAL_PROCESSORS_ID => Value::from(self.number_of_logical_processors),
             Self::SOCKET_DESIGNATION_ID => Value::from(self.socket_designation.to_owned()),
+            Self::ARCHITECHTURE_ID => Value::from(self.architecture.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
@@ -2128,6 +2156,7 @@ impl Table for WmiProcessor {
             "number_of_cores" => Self::NUMBER_OF_CORES_ID,
             "number_of_logical_processors" => Self::NUMBER_OF_LOGICAL_PROCESSORS_ID,
             "socket_designation" => Self::SOCKET_DESIGNATION_ID,
+            "architecture" => Self::ARCHITECHTURE_ID,
             _ => 0
         }
     }

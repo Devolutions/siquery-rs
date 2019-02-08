@@ -34,6 +34,10 @@ impl WmiOsVersion {
             total_virtual_mem_size: String::new(),
             total_visible_mem_size: String::new(),
             win_directory: String::new(),
+            install_date: String::new(),
+            last_boot_up_time: String::new(),
+            locale: String::new(),
+            os_type: String::new(),
         };
 
         if let Some(os_info) = reader.get_wmi_os_info() {
@@ -100,6 +104,21 @@ impl WmiOsVersion {
                     },
                     "WindowsDirectory" => {
                         os_version.win_directory = v;
+                    },
+                    "InstallDate" => {
+                        os_version.install_date = v;
+                    },
+
+                    "LastBootUpTime" => {
+                        os_version.last_boot_up_time = v;
+                    },
+
+                    "Locale" => {
+                        os_version.locale = v;
+                    },
+
+                    "OSType" => {
+                        os_version.os_type = v;
                     },
                     _ => ()
                 }
