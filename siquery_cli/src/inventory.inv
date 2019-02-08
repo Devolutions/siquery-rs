@@ -68,4 +68,7 @@
       <User>Public</User>
     </RemoteStartUp>
   </StartUps>
+  <TimeZone>
+    <Description>(UTC-05:00) Eastern Time (US &amp;amp; Canada)</Description>
+  </TimeZone>
 </InventorySystemInformation>

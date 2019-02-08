@@ -759,6 +759,17 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
     root.children.push(parent_devices);
 }
 
+pub fn get_time_zone(ref mut root: &mut Element) {
+    let wmi_time_zone = WmiTimeZone::get_specific();
+    let mut time_zone_tree = Element::new("TimeZone");
+
+    for time_zone in wmi_time_zone {
+        let mut child_1 = Element::new("Description");
+        child_1.text = Some(time_zone.description);
+        time_zone_tree.children.push(child_1);
+    }
+    root.children.push(time_zone_tree);
+}
 pub fn execute_inventory_query(query: &str) {
     let mut root = Element::new("InventorySystemInformation");
 
@@ -830,6 +841,8 @@ pub fn execute_inventory_query(query: &str) {
     if let Some(_i) = local_accounts_idx {
         get_local_accounts_inv(&mut root);
     }
+
+    get_time_zone(&mut root);
 
     let doc = Document {
         root: Some(root),
