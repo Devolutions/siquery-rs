@@ -60,33 +60,7 @@ impl WmiProcessor {
                     },
                     "CpuStatus" => {
                         //https://msdn.microsoft.com/en-us/library/aa394373(v=vs.85).aspx
-                        match v.as_str(){
-                            "0"=> {
-                                processor.cpu_satus = "Unknown".to_string();
-                            },
-                            "1"=> {
-                                processor.cpu_satus = "CPU Enabled".to_string();
-                            },
-                            "2"=> {
-                                processor.cpu_satus = "CPU Disabled by User via BIOS Setup".to_string();
-                            },
-                            "3"=> {
-                                processor.cpu_satus = "CPU Disabled By BIOS (POST Error)".to_string();
-                            },
-                            "4"=> {
-                                processor.cpu_satus = "CPU is Idle".to_string();
-                            },
-                            "5"=> {
-                                processor.cpu_satus = "Reserved".to_string();
-                            },
-                            "6"=> {
-                                processor.cpu_satus = "Reserved".to_string();
-                            },
-                            "7"=> {
-                                processor.cpu_satus = "Other".to_string();
-                            },
-                            _=>()
-                        }
+                        processor.cpu_satus = v;
                     },
                     "CurrentClockSpeed" => {
                         processor.current_clock_speed = v.parse::<u32>().unwrap_or(0);

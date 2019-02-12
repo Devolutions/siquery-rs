@@ -8,7 +8,7 @@ pub struct Reader {}
 impl WmiProductsIface for Reader {
     fn get_wmi_products_info(&self) -> Option<String> {
         let output = Command::new("wmic")
-            .args(&["SOFTWAREFEATURE",
+            .args(&["Product",
                 "get",
                 /*"InstallDate,Name,Vendor,Version",*/
                 "/format:list"]).output().ok()?;
@@ -36,7 +36,6 @@ impl WmiProducts {
             let lines = product_info.split('\n');
 
             for line in lines {
-                let mut element_counter = 0;
                 if line.len() <= 2 {
                     if product.name != "" {
                         products.push(product);
