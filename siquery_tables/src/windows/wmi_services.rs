@@ -154,19 +154,19 @@ mod tests {
     fn test_wmi_services () {
         let reader: Box<WmiServicesIface> = Box::new(Test{});
         let test_services = &WmiServices::get_specific_ex(reader.borrow())[0];
-        assert_eq!(test_services.accept_pause, "FALSE");
-        assert_eq!(test_services.accept_stop, "TRUE");
+        assert_eq!(test_services.accept_pause, "false");
+        assert_eq!(test_services.accept_stop, "true");
         assert_eq!(test_services.caption, "Windows Push Notifications User Service_10b2b340");
         assert_eq!(test_services.creation_class_name, "Win32_Service");
         assert_eq!(test_services.description, "do something");
-        assert_eq!(test_services.desktop_interact, "FALSE");
+        assert_eq!(test_services.desktop_interact, "false");
         assert_eq!(test_services.display_name, "Windows Push Notifications User Service_10b2b340");
         assert_eq!(test_services.error_control, "Ignore");
         assert_eq!(test_services.exit_code, 0);
         assert_eq!(test_services.name, "WpnUserService_10b2b340");
         assert_eq!(test_services.path_name, "C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup");
         assert_eq!(test_services.service_type, "Unknown");
-        assert_eq!(test_services.started, "TRUE");
+        assert_eq!(test_services.started, "true");
         assert_eq!(test_services.start_mode, "Auto");
         assert_eq!(test_services.start_name, "");
         assert_eq!(test_services.state, "Running");

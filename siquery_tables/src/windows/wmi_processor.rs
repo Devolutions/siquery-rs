@@ -144,7 +144,7 @@ mod tests {
         let processor_info = &WmiProcessor::get_specific_ex(reader.borrow())[0];
         assert_eq!(processor_info.name, "Fabrikam Core(TM) i7-7500U CPU @ 2.70GHz");
         assert_eq!(processor_info.address_width, 64);
-        assert_eq!(processor_info.cpu_satus, "CPU Enabled");
+        assert_eq!(processor_info.cpu_satus, "1");
         assert_eq!(processor_info.current_clock_speed, 1600);
         assert_eq!(processor_info.current_voltage, 11);
         assert_eq!(processor_info.description, "Fabrikam Family 6 Model 142 Stepping 9");

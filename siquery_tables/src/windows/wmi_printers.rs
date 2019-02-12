@@ -158,11 +158,11 @@ mod tests {
         assert_eq!(test_printers.caption, "Snagit 2018");
         assert_eq!(test_printers.creation_class_name, "Win32_Printer");
         assert_eq!(test_printers.device_id, "Snagit 2018");
-        assert_eq!(test_printers.do_complete_first, "FALSE");
+        assert_eq!(test_printers.do_complete_first, "false");
         assert_eq!(test_printers.driver_name, "Snagit 18 Printer");
         assert_eq!(test_printers.extended_printer_status, 2);
         assert_eq!(test_printers.horizontal_resolution, 200);
-        assert_eq!(test_printers.local, "TRUE");
+        assert_eq!(test_printers.local, "true");
         assert_eq!(test_printers.name, "Snagit 2018");
         assert_eq!(test_printers.port_name, "C:\\ProgramData\\TechSmith\\Snagit18\\PrinterPortFile");
         assert_eq!(test_printers.printer_status, 3);

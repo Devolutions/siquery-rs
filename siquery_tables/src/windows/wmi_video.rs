@@ -134,13 +134,13 @@ mod tests {
         assert_eq!(video_info.adapter_compatibility, "Graphic Design Institute");
         assert_eq!(video_info.adapter_dac_type, "Integrated RAMDAC");
         assert_eq!(video_info.adapter_ram, 2);
-        assert_eq!(video_info.availability, "Power Cycle");
+        assert_eq!(video_info.availability, "16");
         assert_eq!(video_info.driver_version, "23.21.13.9065");
         assert_eq!(video_info.installed_display_driver.len(), 2);
         assert_eq!(video_info.refresh_rate, "60");
         assert_eq!(video_info.screen_info, "1920 x 1080 x 4294967296 colors");
         assert_eq!(video_info.status, "OK");
-        assert_eq!(video_info.video_architecture, "MDA");
-        assert_eq!(video_info.video_memory_type, "WRAM");
+        assert_eq!(video_info.video_architecture, "7");
+        assert_eq!(video_info.video_memory_type, "6");
     }
 }
