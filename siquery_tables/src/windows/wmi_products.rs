@@ -36,7 +36,6 @@ impl WmiProducts {
             let lines = product_info.split('\n');
 
             for line in lines {
-                let mut element_counter = 0;
                 if line.len() <= 2 {
                     if product.name != "" {
                         products.push(product);

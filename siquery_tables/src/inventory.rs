@@ -1,9 +1,16 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_parens)]
+#![allow(unused_imports)]
+#![allow(unused_mut)]
+
 use treexml::{Element,Document,XmlVersion::Version10};
 use heck::CamelCase;
-use tables::*;
-
 use std::fs::File;
 use std::io::prelude::*;
+use chrono::{NaiveDate,NaiveDateTime};
+
+use tables::*;
 
 fn ip_address() -> Element {
     let mut ip_address = Element::new("IPAddress");
@@ -232,8 +239,15 @@ pub fn get_products_inv(ref mut root: &mut Element) {
             remote_product.children.push(child_1);
         }
         if product.install_date != "" {
-            child_2.text = Some(product.install_date);
-            remote_product.children.push(child_2); // fixme : parse date format
+            let mut install_date = product.install_date.clone();
+            if install_date.len() >= 14 {
+                install_date.truncate(14);
+                if let Ok(date) = NaiveDateTime::parse_from_str(
+                    &install_date, "%Y%m%d%H%M%S") {
+                    child_2.text  = Some(date.format("%Y-%m-%dT%H:%M:%S").to_string());
+                }
+            }
+            remote_product.children.push(child_2);
         }
         if product.install_location != "" {
             child_3.text = Some(product.install_location);
@@ -354,7 +368,7 @@ pub fn get_shares_inv(ref mut root: &mut Element) {
         remote_share.children.push(child_3);
         if share.path != "" {
             child_4.text = Some(share.path);
-            remote_share.children.push(child_4);  
+            remote_share.children.push(child_4);
         }
         remote_share.children.push(child_5);
         remote_share.children.push(child_6);
@@ -458,7 +472,10 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
 
         child_1.text = Some(entry.caption);
         child_2.text = Some(entry.manufacturer);
-        child_3.text = Some(entry.release_date);
+        if let Ok(date) = NaiveDate::parse_from_str(
+            &entry.release_date, "%Y%m%d") {
+            child_3.text = Some(date.to_string());
+        }
         child_4.text = Some(entry.serial_number);
         child_5.text = Some(entry.smbios_version);
 
@@ -494,8 +511,24 @@ pub fn get_system_info_inv(ref mut root: &mut Element) {
         child_2.text  = Some(entry.csname);
         child_3.text  = Some(entry.free_physical_mem);
         child_4.text  = Some(entry.free_virtual_mem);
-        child_5.text  = Some(entry.install_date); // fixme : parse date format
-        child_6.text  = Some(entry.last_boot_up_time); // fixme : parse date format
+
+        let mut install_date = entry.install_date.clone();
+        if install_date.len() >= 14 {
+            install_date.truncate(14);
+            if let Ok(date) = NaiveDateTime::parse_from_str(
+                &install_date, "%Y%m%d%H%M%S") {
+                child_5.text = Some(date.format("%Y-%m-%dT%H:%M:%S").to_string());
+            }
+        }
+        let mut last_boot_up_time = entry.last_boot_up_time.clone();
+        if last_boot_up_time.len() >= 14 {
+            last_boot_up_time.truncate(14);
+            if let Ok(date) = NaiveDateTime::parse_from_str(
+                &last_boot_up_time, "%Y%m%d%H%M%S") {
+                child_6.text = Some(date.format("%Y-%m-%dT%H:%M:%S").to_string());
+            }
+        }
+
         child_7.text  = Some(entry.locale);
         child_8.text  = Some(entry.manufacturer);
         child_9.text  = Some(entry.name);
@@ -837,14 +870,6 @@ pub fn execute_inventory_query(query: &str) {
         get_hotfixes_inv(&mut root);
     }
 
-    let local_accounts = "Local Accounts";
-    let local_accounts_idx = query_string.find("Local Accounts");
-    if let Some(_i) = local_accounts_idx {
-        get_local_accounts_inv(&mut root);
-    }
-
-    get_time_zone(&mut root);
-
     let doc = Document {
         root: Some(root),
         version: Version10,
@@ -854,5 +879,5 @@ pub fn execute_inventory_query(query: &str) {
     let mut file = File::create("inventory.inv").ok();
     file.unwrap().write_all(doc.to_string().as_str().as_bytes()).ok();
 
-    //println!("{}",doc.to_string());
+    println!("{}",doc.to_string());
 }

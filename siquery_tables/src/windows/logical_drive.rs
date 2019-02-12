@@ -112,11 +112,11 @@ mod tests {
         let reader: Box<LogicalDriveIface> = Box::new(Test {});
         let drive = LogicalDrive::get_specific_ex(reader.borrow());
         assert_eq!(drive.len(), 2);
-        assert_eq!(drive[0].device_id, "C:");
+        assert_eq!(drive[0].name, "C:");
         assert_eq!(drive[0].file_system, "NTFS");
         assert_eq!(drive[0].size, 496869830656);
         assert_eq!(drive[0].free_space, 55674548224);
-        assert_eq!(drive[1].device_id, "E:");
+        assert_eq!(drive[1].name, "E:");
         assert_eq!(drive[1].file_system, "NTFS");
         assert_eq!(drive[1].size, 501215232);
         assert_eq!(drive[1].free_space, 469622784);

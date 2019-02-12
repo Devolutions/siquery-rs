@@ -114,7 +114,7 @@ pub fn get_products_info(ref mut root: &mut Vec<Products>, hkey: RegKey){
             });*/
 
         if product.name != "" {
-            products.push(product);
+            //products.push(product);
         }
         product = Products::new();
     }

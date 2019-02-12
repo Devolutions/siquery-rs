@@ -17,7 +17,7 @@ extern crate prettytable;
 extern crate proxy_config;
 extern crate treexml;
 extern crate heck;
-
+extern crate chrono;
 
 pub mod vtab;
 mod common;
