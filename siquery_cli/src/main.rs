@@ -5,8 +5,11 @@ extern crate siquery;
 use siquery::query::{init_db, execute_query};
 use siquery::tables::get_table_list;
 use siquery::printer::print_schema;
-use siquery::inventory::execute_inventory_query;
 use clap::App;
+
+#[cfg(target_os = "windows")]
+use siquery::inventory::execute_inventory_query;
+
 
 fn main() {
     let yaml = load_yaml!("cli.yml");
