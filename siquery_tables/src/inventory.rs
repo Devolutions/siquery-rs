@@ -6,8 +6,6 @@
 
 use treexml::{Element,Document,XmlVersion::Version10};
 use heck::CamelCase;
-use std::fs::File;
-use std::io::prelude::*;
 use chrono::{NaiveDate,NaiveDateTime};
 
 use tables::*;
@@ -826,6 +824,5 @@ pub fn execute_inventory_query() {
         ..Document::default()
     };
 
-    let mut file = File::create("inventory.inv").ok();
-    file.unwrap().write_all(doc.to_string().as_str().as_bytes()).ok();
+    println!("{}", doc.to_string().as_str());
 }
