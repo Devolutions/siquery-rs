@@ -23,7 +23,6 @@ impl WmiBios {
             serial_number: String::new(),
             smbios_version: String::new(),
         };
-
         if let Some(bios_info) = reader.get_wmi_bios_info() {
             let lines = bios_info.split('\n');
 

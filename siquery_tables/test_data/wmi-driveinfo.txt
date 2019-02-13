@@ -1,24 +1,26 @@
 
-
-DeviceID=C:
+Description=Cdrive
+Name=C:
 DriveType=3
 FileSystem=NTFS
 FreeSpace=55674548224
 Size=496869830656
+VolumeSerialNumber=12345
 
-
-DeviceID=D:
+Description=Ddrive
+Name=D:
 DriveType=5
 FileSystem=
 FreeSpace=
 Size=
+VolumeSerialNumber=12345
 
-
-DeviceID=E:
+Description=Edrive
+Name=E:
 DriveType=3
 FileSystem=NTFS
 FreeSpace=469622784
 Size=501215232
-
+VolumeSerialNumber=12345
 
 

@@ -15,6 +15,9 @@ extern crate rusqlite;
 extern crate csv;
 extern crate prettytable;
 extern crate proxy_config;
+extern crate treexml;
+extern crate heck;
+extern crate chrono;
 
 pub mod vtab;
 mod common;
@@ -22,6 +25,7 @@ mod utils;
 pub mod printer;
 pub mod query;
 pub mod tables;
+
 
 cfg_if! {
     if #[cfg(all(target_os = "linux",fuzzing))] {
@@ -63,5 +67,6 @@ cfg_if! {
 
         pub mod windows;
         pub use windows as sys;
+        pub mod inventory;
     }
 }

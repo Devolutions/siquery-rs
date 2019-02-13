@@ -34,6 +34,7 @@ impl WmiProcessor {
             number_of_cores: 0,
             number_of_logical_processors: 0,
             socket_designation: String::new(),
+            architecture: String::new(),
         };
 
         let mut nbr_cores = 0;
@@ -59,33 +60,7 @@ impl WmiProcessor {
                     },
                     "CpuStatus" => {
                         //https://msdn.microsoft.com/en-us/library/aa394373(v=vs.85).aspx
-                        match v.as_str(){
-                            "0"=> {
-                                processor.cpu_satus = "Unknown".to_string();
-                            },
-                            "1"=> {
-                                processor.cpu_satus = "CPU Enabled".to_string();
-                            },
-                            "2"=> {
-                                processor.cpu_satus = "CPU Disabled by User via BIOS Setup".to_string();
-                            },
-                            "3"=> {
-                                processor.cpu_satus = "CPU Disabled By BIOS (POST Error)".to_string();
-                            },
-                            "4"=> {
-                                processor.cpu_satus = "CPU is Idle".to_string();
-                            },
-                            "5"=> {
-                                processor.cpu_satus = "Reserved".to_string();
-                            },
-                            "6"=> {
-                                processor.cpu_satus = "Reserved".to_string();
-                            },
-                            "7"=> {
-                                processor.cpu_satus = "Other".to_string();
-                            },
-                            _=>()
-                        }
+                        processor.cpu_satus = v;
                     },
                     "CurrentClockSpeed" => {
                         processor.current_clock_speed = v.parse::<u32>().unwrap_or(0);
@@ -131,6 +106,9 @@ impl WmiProcessor {
                     "SocketDesignation" => {
                         processor.socket_designation = v;
                     },
+                    "Architecture" => {
+                        processor.architecture = v;
+                    },
                     _ => ()
                 }
             }
@@ -166,7 +144,7 @@ mod tests {
         let processor_info = &WmiProcessor::get_specific_ex(reader.borrow())[0];
         assert_eq!(processor_info.name, "Fabrikam Core(TM) i7-7500U CPU @ 2.70GHz");
         assert_eq!(processor_info.address_width, 64);
-        assert_eq!(processor_info.cpu_satus, "CPU Enabled");
+        assert_eq!(processor_info.cpu_satus, "1");
         assert_eq!(processor_info.current_clock_speed, 1600);
         assert_eq!(processor_info.current_voltage, 11);
         assert_eq!(processor_info.description, "Fabrikam Family 6 Model 142 Stepping 9");

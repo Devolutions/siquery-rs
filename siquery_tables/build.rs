@@ -22,6 +22,7 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "wmi_os_version",
     "wmi_printers",
     "wmi_services",
+    "wmi_products",
     "wmi_hotfixes",
     "wmi_shares",
     "wmi_network_adapters",
@@ -35,6 +36,8 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "wmi_monitors",
     "wmi_keyboard",
     "wmi_pointing_device",
+    "wmi_start_up",
+    "wmi_time_zone",
     "proxies"
 ];
 

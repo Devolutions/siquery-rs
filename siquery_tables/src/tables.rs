@@ -291,7 +291,7 @@ impl Table for EtcServices {
 
 #[cfg(any(feature = "wmi_computer_info" , fuzzing))]
 table_properties!{
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct WmiComputerInfo {
     pub computer_name: String,
     pub domain: String,
@@ -451,6 +451,10 @@ pub struct WmiOsVersion {
     pub total_virtual_mem_size: String,
     pub total_visible_mem_size: String,
     pub win_directory: String,
+    pub install_date: String,
+    pub last_boot_up_time: String,
+    pub locale: String,
+    pub os_type: String,
 }}
 
 #[cfg(feature = "wmi_os_version")]
@@ -478,6 +482,10 @@ impl WmiOsVersion {
     const TOTAL_VIRTUAL_MEM_SIZE_ID: u64 = 0x00004000;
     const TOTAL_VISIBLE_MEM_SIZE_ID: u64 = 0x00008000;
     const WIN_DIRECTORY_ID: u64 = 0x00010000;
+    const INSTALL_DATE_ID: u64 = 0x00020000;
+    const LAST_BOOT_UP_TIME_ID: u64 = 0x00040000;
+    const LOCAL_ID: u64 = 0x00080000;
+    const OS_TYPE_ID: u64 = 0x00100000;
 }
 
 #[cfg(feature = "wmi_os_version")]
@@ -499,7 +507,11 @@ impl Table for WmiOsVersion {
         "size_stored_in_paging_file",
         "total_virtual_mem_size",
         "total_visible_mem_size",
-        "win_directory"];
+        "win_directory",
+        "install_date",
+        "last_boot_up_time",
+        "locale",
+        "os_type"];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
@@ -520,6 +532,10 @@ impl Table for WmiOsVersion {
             "total_virtual_mem_size" => Value::from(self.total_virtual_mem_size.to_owned()),
             "total_visible_mem_size" => Value::from(self.total_visible_mem_size.to_owned()),
             "win_directory" => Value::from(self.win_directory.to_owned()),
+            "install_date" => Value::from(self.install_date.to_owned()),
+            "last_boot_up_time" => Value::from(self.last_boot_up_time.to_owned()),
+            "locale" => Value::from(self.locale.to_owned()),
+            "os_type" => Value::from(self.os_type.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
@@ -543,10 +559,13 @@ impl Table for WmiOsVersion {
             Self::TOTAL_VIRTUAL_MEM_SIZE_ID => Value::from(self.total_virtual_mem_size.to_owned()),
             Self::TOTAL_VISIBLE_MEM_SIZE_ID => Value::from(self.total_visible_mem_size.to_owned()),
             Self::WIN_DIRECTORY_ID => Value::from(self.win_directory.to_owned()),
+            Self::INSTALL_DATE_ID => Value::from(self.install_date.to_owned()),
+            Self::LAST_BOOT_UP_TIME_ID => Value::from(self.last_boot_up_time.to_owned()),
+            Self::LOCAL_ID => Value::from(self.locale.to_owned()),
+            Self::OS_TYPE_ID => Value::from(self.os_type.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
-
     fn get_id(&self, _name: &str) -> u64 {
         match _name {
             "build_number" => Self::BUILDER_NUMBER_ID,
@@ -566,6 +585,10 @@ impl Table for WmiOsVersion {
             "total_virtual_mem_size" => Self::TOTAL_VIRTUAL_MEM_SIZE_ID,
             "total_visible_mem_size" => Self::TOTAL_VISIBLE_MEM_SIZE_ID,
             "win_directory" => Self::WIN_DIRECTORY_ID,
+            "install_date" => Self::INSTALL_DATE_ID,
+            "last_boot_up_time" => Self::LAST_BOOT_UP_TIME_ID,
+            "locale" => Self::LOCAL_ID,
+            "os_type" => Self::OS_TYPE_ID,
             _ => 0
         }
     }
@@ -646,11 +669,15 @@ impl Table for OsVersion {
 table_properties!{
 #[derive(Debug)]
 pub struct LogicalDrive {
-    pub device_id: String,
+    pub description: String,
     pub drive_type: String,
-    pub free_space: i64,
-    pub size: i64,
     pub file_system: String,
+    pub free_space: i64,
+    pub maximum_component_length: i64,
+    pub name : String,
+    pub size: i64,
+    pub supports_file_based_compression: String,
+    pub volume_serial_number: String,
 }}
 
 #[cfg(feature = "logical_drives")]
@@ -661,70 +688,74 @@ pub trait LogicalDriveIface {
 #[cfg(feature = "logical_drives")]
 #[allow(non_upper_case_globals)]
 impl LogicalDrive {
-    const DEVICE_ID: u64 = 0x00000001;
+    const DESCRIPTION_ID: u64 = 0x00000001;
     const DRIVE_TYPE_ID: u64 = 0x00000002;
-    const FREE_SPACE_ID: u64 = 0x00000004;
-    const SIZE_ID: u64 = 0x00000008;
-    const FILE_SYSTEM_ID: u64 = 0x00000010;
+    const FILE_SYSTEM_ID: u64 = 0x00000004;
+    const FREE_SPACE_ID: u64 = 0x00000008;
+    const MAXIMUM_COMPONENT_LENGTH_ID: u64 = 0x00000010;
+    const NAME_ID: u64 = 0x00000020;
+    const SIZE_ID: u64 = 0x00000040;
+    const SUPPORTS_FILE_BASED_COMPRESSION_ID: u64 = 0x00000080;
+    const VOLUME_SERIAL_NUMBER_ID: u64 = 0x00000100;
 }
 
 #[cfg(feature = "logical_drives")]
 impl Table for LogicalDrive {
     const COLUMN_NAMES: &'static [&'static str] = &[
-        "device_id",
+        "description",
         "drive_type",
+        "file_system",
         "free_space",
+        "maximum_component_length",
+        "name",
         "size",
-        "file_system"];
+        "supports_file_based_compression",
+        "volume_serial_number",
+    ];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
-            "device_id" => Value::from(self.device_id.to_owned()),
-            "drive_type" => Value::from(self.drive_type.to_owned()),
-            "free_space" => Value::from(self.free_space),
-            "size" => Value::from(self.size),
+            "description" => Value::from(self.description.to_owned()),
+            "drive_type" =>  Value::from(self.drive_type.to_owned()),
             "file_system" => Value::from(self.file_system.to_owned()),
+            "free_space" =>  Value::from(self.free_space),
+            "maximum_component_length" => Value::from(self.maximum_component_length),
+            "name" => Value::from(self.name.to_owned()),
+            "size" => Value::from(self.size),
+            "supports_file_based_compression" => Value::from(self.supports_file_based_compression.to_owned()),
+            "volume_serial_number" => Value::from(self.volume_serial_number.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
 
     fn get_by_id(&self, _id: u64) -> Value {
         match _id {
-            Self::DEVICE_ID => Value::from(self.device_id.to_owned()),
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
             Self::DRIVE_TYPE_ID => Value::from(self.drive_type.to_owned()),
-            Self::FREE_SPACE_ID => Value::from(self.free_space),
-            Self::SIZE_ID => Value::from(self.size),
             Self::FILE_SYSTEM_ID => Value::from(self.file_system.to_owned()),
-
+            Self::FREE_SPACE_ID => Value::from(self.free_space),
+            Self::MAXIMUM_COMPONENT_LENGTH_ID => Value::from(self.maximum_component_length),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::SIZE_ID => Value::from(self.size),
+            Self::SUPPORTS_FILE_BASED_COMPRESSION_ID => Value::from(self.supports_file_based_compression.to_owned()),
+            Self::VOLUME_SERIAL_NUMBER_ID => Value::from(self.volume_serial_number.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
 
     fn get_id(&self, name: &str) -> u64 {
         match name {
-            "device_id" => Self::DEVICE_ID,
+            "description" => Self::DESCRIPTION_ID,
             "drive_type" => Self::DRIVE_TYPE_ID,
-            "free_space" => Self::FREE_SPACE_ID,
-            "size" => Self::SIZE_ID,
             "file_system" => Self::FILE_SYSTEM_ID,
+            "free_space" => Self::FREE_SPACE_ID,
+            "maximum_component_length" => Self::MAXIMUM_COMPONENT_LENGTH_ID,
+            "name" => Self::NAME_ID,
+            "size" => Self::SIZE_ID,
+            "supports_file_based_compression" => Self::SUPPORTS_FILE_BASED_COMPRESSION_ID,
+            "volume_serial_number" => Self::VOLUME_SERIAL_NUMBER_ID,
             _ => 0
         }
-    }
-}
-
-#[cfg(feature = "logical_drives")]
-impl Serialize for LogicalDrive {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("LogicalDrive", 5)?;
-        state.serialize_field("device_id", &self.device_id)?;
-        state.serialize_field("type", &self.drive_type)?;
-        state.serialize_field("free_space", &self.free_space)?;
-        state.serialize_field("size", &self.size)?;
-        state.serialize_field("file_system", &self.file_system)?;
-        state.end()
     }
 }
 
@@ -1350,6 +1381,81 @@ impl Table for WmiServices {
     }
 }
 
+#[cfg(feature = "wmi_products")]
+table_properties!{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiProducts {
+    pub help_link: String,
+    pub install_date: String,
+    pub install_location: String,
+    pub name: String,
+    pub vendor: String,
+    pub version: String,
+}}
+
+#[cfg(feature = "wmi_products")]
+pub trait WmiProductsIface {
+    fn get_wmi_products_info(&self)-> Option<String>;
+}
+
+#[cfg(feature = "wmi_products")]
+#[allow(non_upper_case_globals)]
+impl WmiProducts {
+    const HELP_LINK_ID: u64 = 0x00000001;
+    const INSTALL_DATE_ID: u64 = 0x00000002;
+    const INSTALL_LOCATION_ID: u64 = 0x00000004;
+    const NAME_ID: u64 = 0x00000008;
+    const VENDOR_ID: u64 = 0x00000010;
+    const VERSION_ID: u64 = 0x00000020;
+}
+
+#[cfg(feature = "wmi_products")]
+impl Table for WmiProducts {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "help_link",
+        "install_date",
+        "install_location",
+        "name",
+        "vendor",
+        "version"];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "help_link" => Value::from(self.help_link.to_owned()),
+            "install_date" => Value::from(self.install_date.to_owned()),
+            "install_location" => Value::from(self.install_location.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "vendor" => Value::from(self.vendor.to_owned()),
+            "version" => Value::from(self.version.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::HELP_LINK_ID => Value::from(self.help_link.to_owned()),
+            Self::INSTALL_DATE_ID => Value::from(self.install_date.to_owned()),
+            Self::INSTALL_LOCATION_ID => Value::from(self.install_location.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::VENDOR_ID => Value::from(self.vendor.to_owned()),
+            Self::VERSION_ID => Value::from(self.version.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "help_link" => Self::HELP_LINK_ID,
+            "install_date" => Self::INSTALL_DATE_ID,
+            "install_location" => Self::INSTALL_LOCATION_ID,
+            "name" => Self::NAME_ID,
+            "vendor" => Self::VENDOR_ID,
+            "version" => Self::VERSION_ID,
+            _ => 0
+        }
+    }
+}
+
 #[cfg(any(feature = "wmi_hotfixes", fuzzing))]
 table_properties!{
 #[derive(Serialize, Deserialize, Debug)]
@@ -1931,6 +2037,7 @@ pub struct WmiProcessor {
     pub number_of_cores: u32,
     pub number_of_logical_processors: u32,
     pub socket_designation: String,
+    pub architecture: String,
 }}
 
 #[cfg(feature = "wmi_processor")]
@@ -1957,6 +2064,7 @@ impl WmiProcessor {
     const NUMBER_OF_CORES_ID: u64 = 0x00004000;
     const NUMBER_OF_LOGICAL_PROCESSORS_ID: u64 = 0x00008000;
     const SOCKET_DESIGNATION_ID: u64 = 0x00010000;
+    const ARCHITECHTURE_ID : u64 = 0x00020000;
 }
 
 #[cfg(feature = "wmi_processor")]
@@ -1978,7 +2086,8 @@ impl Table for WmiProcessor {
         "name",
         "number_of_cores",
         "number_of_logical_processors",
-        "socket_designation", ];
+        "socket_designation",
+        "architecture"];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
@@ -1999,6 +2108,7 @@ impl Table for WmiProcessor {
             "number_of_cores" => Value::from(self.number_of_cores),
             "number_of_logical_processors" => Value::from(self.number_of_logical_processors),
             "socket_designation" => Value::from(self.socket_designation.to_owned()),
+            "architecture" => Value::from(self.architecture.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
@@ -2022,6 +2132,7 @@ impl Table for WmiProcessor {
             Self::NUMBER_OF_CORES_ID => Value::from(self.number_of_cores),
             Self::NUMBER_OF_LOGICAL_PROCESSORS_ID => Value::from(self.number_of_logical_processors),
             Self::SOCKET_DESIGNATION_ID => Value::from(self.socket_designation.to_owned()),
+            Self::ARCHITECHTURE_ID => Value::from(self.architecture.to_owned()),
             _ => Value::from("".to_owned())
         }
     }
@@ -2045,6 +2156,7 @@ impl Table for WmiProcessor {
             "number_of_cores" => Self::NUMBER_OF_CORES_ID,
             "number_of_logical_processors" => Self::NUMBER_OF_LOGICAL_PROCESSORS_ID,
             "socket_designation" => Self::SOCKET_DESIGNATION_ID,
+            "architecture" => Self::ARCHITECHTURE_ID,
             _ => 0
         }
     }
@@ -2546,6 +2658,113 @@ impl Table for WmiPointingDevice {
             "description" => Self::DESCRIPTION_ID,
             "pointing_type" => Self::POINTING_TYPE_ID,
             "status" => Self::STATUS_ID,
+            _ => 0
+        }
+    }
+}
+
+#[cfg(feature = "wmi_start_up")]
+table_properties!{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiStartUp {
+    pub command: String,
+    pub location: String,
+    pub name: String,
+    pub user: String,
+}}
+
+#[cfg(feature = "wmi_start_up")]
+pub trait WmiStartUpIface {
+    fn get_wmi_start_up_info(&self)-> Option<String>;
+}
+
+#[cfg(feature = "wmi_start_up")]
+#[allow(non_upper_case_globals)]
+impl WmiStartUp {
+    const COMMAND_ID: u64 = 0x00000001;
+    const LOCATION_ID: u64 = 0x00000002;
+    const NAME_ID: u64 = 0x00000004;
+    const USER_ID: u64 = 0x00000008;
+}
+
+#[cfg(feature = "wmi_start_up")]
+impl Table for WmiStartUp {
+    const COLUMN_NAMES: &'static [&'static str] = &[
+        "command",
+        "location",
+        "name",
+        "user"];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "command" => Value::from(self.command.to_owned()),
+            "location" => Value::from(self.location.to_owned()),
+            "name" => Value::from(self.name.to_owned()),
+            "user" => Value::from(self.user.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::COMMAND_ID => Value::from(self.command.to_owned()),
+            Self::LOCATION_ID => Value::from(self.location.to_owned()),
+            Self::NAME_ID => Value::from(self.name.to_owned()),
+            Self::USER_ID => Value::from(self.user.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "command" => Self::COMMAND_ID,
+            "location" => Self::LOCATION_ID,
+            "name" => Self::NAME_ID,
+            "user" => Self::USER_ID,
+            _ => 0
+        }
+    }
+}
+
+#[cfg(feature = "wmi_time_zone")]
+table_properties!{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WmiTimeZone {
+    pub description: String,
+}}
+
+#[cfg(feature = "wmi_time_zone")]
+pub trait WmiTimeZoneIface {
+    fn get_wmi_time_zone_info(&self)-> Option<String>;
+}
+
+#[cfg(feature = "wmi_time_zone")]
+#[allow(non_upper_case_globals)]
+impl WmiTimeZone {
+    const DESCRIPTION_ID: u64 = 0x00000001;
+}
+
+#[cfg(feature = "wmi_time_zone")]
+impl Table for WmiTimeZone {
+    const COLUMN_NAMES: &'static [&'static str] = &["description"];
+
+    fn get_by_name(&self, _name: &str) -> Value {
+        match _name {
+            "description" => Value::from(self.description.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_by_id(&self, _id: u64) -> Value {
+        match _id {
+            Self::DESCRIPTION_ID => Value::from(self.description.to_owned()),
+            _ => Value::from("".to_owned())
+        }
+    }
+
+    fn get_id(&self, _name: &str) -> u64 {
+        match _name {
+            "description" => Self::DESCRIPTION_ID,
             _ => 0
         }
     }
@@ -3826,6 +4045,8 @@ pub fn get_table_list() -> Vec<String> {
             "wmi_printers".to_string(),
         #[cfg(feature = "wmi_services")]
             "wmi_services".to_string(),
+        #[cfg(feature = "wmi_products")]
+            "wmi_products".to_string(),
         #[cfg(feature = "wmi_hotfixes")]
             "wmi_hotfixes".to_string(),
         #[cfg(feature = "wmi_shares")]
@@ -3852,6 +4073,10 @@ pub fn get_table_list() -> Vec<String> {
             "wmi_keyboard".to_string(),
         #[cfg(feature = "wmi_pointing_device")]
             "wmi_pointing_device".to_string(),
+        #[cfg(feature = "wmi_start_up")]
+            "wmi_start_up".to_string(),
+        #[cfg(feature = "wmi_time_zone")]
+            "wmi_time_zone".to_string(),
         #[cfg(feature = "process_envs")]
             "process_envs".to_string(),
         #[cfg(feature = "mounts")]

@@ -128,6 +128,11 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
             let table = WmiServices::get_specific();
             select(&table, columns)
         },
+        #[cfg(feature = "wmi_products")]
+        "wmi_products" => {
+            let table = WmiProducts::get_specific();
+            select(&table, columns)
+        },
         #[cfg(feature = "wmi_hotfixes")]
         "wmi_hotfixes" => {
             let table = WmiHotfixes::get_specific();
@@ -191,6 +196,16 @@ pub fn query_table(name: &str, columns: Vec<String>) -> Vec<Vec<Value>> {
         #[cfg(feature = "wmi_pointing_device")]
         "wmi_pointing_device" => {
             let table = WmiPointingDevice::get_specific();
+            select(&table, columns)
+        },
+        #[cfg(feature = "wmi_start_up")]
+        "wmi_start_up" => {
+            let table = WmiStartUp::get_specific();
+            select(&table, columns)
+        },
+        #[cfg(feature = "wmi_time_zone")]
+        "wmi_time_zone" => {
+            let table = WmiTimeZone::get_specific();
             select(&table, columns)
         },
         #[cfg(feature = "process_open_sockets")]
@@ -392,6 +407,12 @@ pub fn get_schema(table_name: &str) -> Option<String> {
             let column_types = WmiServices::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
+        #[cfg(feature = "wmi_products")]
+        "wmi_products" => {
+            let column_names = WmiProducts::get_columns_name();
+            let column_types = WmiProducts::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
         #[cfg(feature = "wmi_hotfixes")]
         "wmi_hotfixes" => {
             let column_names = WmiHotfixes::get_columns_name();
@@ -468,6 +489,18 @@ pub fn get_schema(table_name: &str) -> Option<String> {
         "wmi_pointing_device" => {
             let column_names = WmiPointingDevice::get_columns_name();
             let column_types = WmiPointingDevice::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
+        #[cfg(feature = "wmi_start_up")]
+        "wmi_start_up" => {
+            let column_names = WmiStartUp::get_columns_name();
+            let column_types = WmiStartUp::get_columns_type();
+            _schema = create_schema(&column_names, &column_types)
+        },
+        #[cfg(feature = "wmi_time_zone")]
+        "wmi_time_zone" => {
+            let column_names = WmiTimeZone::get_columns_name();
+            let column_types = WmiTimeZone::get_columns_type();
             _schema = create_schema(&column_names, &column_types)
         },
         #[cfg(feature = "process_open_sockets")]

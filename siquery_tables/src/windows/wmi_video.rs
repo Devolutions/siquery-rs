@@ -70,73 +70,7 @@ impl WmiVideo {
                         video.adapter_ram = ram;
                     },
                     "Availability" => {
-                        match v.as_str() {
-                            "1" => {
-                                video.availability = "Other".to_string();
-                            },
-                            "2" => {
-                                video.availability = "Unknown".to_string();
-                            },
-                            "3" => {
-                                video.availability = "Running or Full Power".to_string();
-                            },
-                            "4" => {
-                                video.availability = "Warning".to_string();
-                            },
-                            "5" => {
-                                video.availability = "In Test".to_string();
-                            },
-                            "6" => {
-                                video.availability = "Not Applicable".to_string();
-                            },
-                            "7" => {
-                                video.availability = "Power Off".to_string();
-                            },
-                            "8" => {
-                                video.availability = "Off Line".to_string();
-                            },
-                            "9" => {
-                                video.availability = "Off Duty".to_string();
-                            },
-                            "10" => {
-                                video.availability = "Degraded".to_string();
-                            },
-                            "11" => {
-                                video.availability = "Not Installed".to_string();
-                            },
-                            "12" => {
-                                video.availability = "Install Error".to_string();
-                            },
-                            "13" => {
-                                video.availability = "Power Save - Unknown".to_string();
-                            },
-                            "14" => {
-                                video.availability = "Power Save - Low Power Mode".to_string();
-                            },
-                            "15" => {
-                                video.availability = "Power Save - Standby".to_string();
-                            },
-                            "16" => {
-                                video.availability = "Power Cycle".to_string();
-                            },
-                            "17" => {
-                                video.availability = "Power Save - Warning".to_string();
-                            },
-                            "18" => {
-                                video.availability = "Paused ".to_string();
-                            },
-                            "19" => {
-                                video.availability = "Not Ready".to_string();
-                            },
-
-                            "20" => {
-                                video.availability = "Not Configured".to_string();
-                            },
-                            "21" => {
-                                video.availability = "Quiesced".to_string();
-                            },
-                            _ => {}
-                        }
+                        video.availability = v;
                     },
                     "DriverVersion" => {
                         video.driver_version = v;
@@ -161,93 +95,11 @@ impl WmiVideo {
                     },
                     "VideoMemoryType" => {
                         //https://msdn.microsoft.com/en-us/library/aa394512(v=vs.85).aspx
-                        match v.as_str() {
-                            "1" => {
-                                video.video_memory_type = "Other".to_string();
-                            },
-                            "2" => {
-                                video.video_memory_type = "Unknown".to_string();
-                            },
-                            "3" => {
-                                video.video_memory_type = "VRAM".to_string();
-                            },
-                            "4" => {
-                                video.video_memory_type = "DRAM".to_string();
-                            },
-                            "5" => {
-                                video.video_memory_type = "SRAM".to_string();
-                            },
-                            "6" => {
-                                video.video_memory_type = "WRAM".to_string();
-                            },
-                            "7" => {
-                                video.video_memory_type = "EDO RAM".to_string();
-                            },
-                            "8" => {
-                                video.video_memory_type = "Burst Synchronous DRAM".to_string();
-                            },
-                            "9" => {
-                                video.video_memory_type = "Pipelined Burst SRAM".to_string();
-                            },
-                            "10" => {
-                                video.video_memory_type = "CDRAM".to_string();
-                            },
-                            "11" => {
-                                video.video_memory_type = "3DRAM".to_string();
-                            },
-                            "12" => {
-                                video.video_memory_type = "SDRAM".to_string();
-                            },
-                            "160" => {
-                                video.video_memory_type = "SGRAM".to_string();
-                            },
-                            _ => ()
-                        }
+                        video.video_memory_type = v;
                     }
                     "VideoArchitecture" => {
                         //https://msdn.microsoft.com/en-us/library/aa394512(v=vs.85).aspx
-                        match v.as_str() {
-                            "1" => {
-                                video.video_architecture = "Other".to_string();
-                            },
-                            "2" => {
-                                video.video_architecture = "Unknown".to_string();
-                            },
-                            "3" => {
-                                video.video_architecture = "CGA".to_string();
-                            },
-                            "4" => {
-                                video.video_architecture = "EGA".to_string();
-                            },
-                            "5" => {
-                                video.video_architecture = "VGA".to_string();
-                            },
-                            "6" => {
-                                video.video_architecture = "SVGA".to_string();
-                            },
-                            "7" => {
-                                video.video_architecture = "MDA".to_string();
-                            },
-                            "8" => {
-                                video.video_architecture = "HGC".to_string();
-                            },
-                            "9" => {
-                                video.video_architecture = "MCGA".to_string();
-                            },
-                            "10" => {
-                                video.video_architecture = "8514A".to_string();
-                            },
-                            "11" => {
-                                video.video_architecture = "XGA".to_string();
-                            },
-                            "12" => {
-                                video.video_architecture = "Linear Frame Buffer".to_string();
-                            },
-                            "13" => {
-                                video.video_architecture = "PC-98".to_string();
-                            },
-                            _ => ()
-                        }
+                        video.video_architecture = v;
                     }
                     _ => ()
                 }
@@ -282,13 +134,13 @@ mod tests {
         assert_eq!(video_info.adapter_compatibility, "Graphic Design Institute");
         assert_eq!(video_info.adapter_dac_type, "Integrated RAMDAC");
         assert_eq!(video_info.adapter_ram, 2);
-        assert_eq!(video_info.availability, "Power Cycle");
+        assert_eq!(video_info.availability, "16");
         assert_eq!(video_info.driver_version, "23.21.13.9065");
         assert_eq!(video_info.installed_display_driver.len(), 2);
         assert_eq!(video_info.refresh_rate, "60");
         assert_eq!(video_info.screen_info, "1920 x 1080 x 4294967296 colors");
         assert_eq!(video_info.status, "OK");
-        assert_eq!(video_info.video_architecture, "MDA");
-        assert_eq!(video_info.video_memory_type, "WRAM");
+        assert_eq!(video_info.video_architecture, "7");
+        assert_eq!(video_info.video_memory_type, "6");
     }
 }

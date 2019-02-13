@@ -1,5 +1,6 @@
 
 /target/
+/siquery_cli/src/*.inv
 **/*.rs.bk
 Cargo.lock
 .idea/

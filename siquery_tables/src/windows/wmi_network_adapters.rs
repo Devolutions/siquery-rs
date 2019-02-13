@@ -29,7 +29,6 @@ impl WmiNetworkAdapters {
     pub fn get_specific_ex(reader: &WmiNetworkAdaptersIface) -> Vec<WmiNetworkAdapters> {
 
         let mut network_adapters: Vec<WmiNetworkAdapters> = Vec::new();
-
         if let Some(network_adapter_info) = reader.get_wmi_network_adapters_info() {
             let mut network_adapter = WmiNetworkAdapters::new();
             let lines = network_adapter_info.split('\n');
@@ -59,13 +58,13 @@ impl WmiNetworkAdapters {
                         network_adapter.database_path = v;
                     },
                     "DHCPEnabled" => {
-                        network_adapter.dhcp_enabled = v;
+                        network_adapter.dhcp_enabled = v.to_lowercase();
                     },
                     "IPAddress" => {
                         add_formatted_entry(&mut v,  &mut network_adapter.ip_address);
                     },
                     "IPEnabled" => {
-                        network_adapter.ip_enabled = v;
+                        network_adapter.ip_enabled = v.to_lowercase();
                     },
                     "IPSubnet" => {
                         add_formatted_entry(&mut v,  &mut network_adapter.ip_subnet);
@@ -118,9 +117,9 @@ mod tests {
         let wmi_network_adapter = &WmiNetworkAdapters::get_specific_ex(reader.borrow())[0];
         assert_eq!(wmi_network_adapter.description, "VMware Virtual Ethernet Adapter for VMnet8");
         assert_eq!(wmi_network_adapter.database_path, "%SystemRoot%\\System32\\drivers\\etc");
-        assert_eq!(wmi_network_adapter.dhcp_enabled, "TRUE");
+        assert_eq!(wmi_network_adapter.dhcp_enabled, "true");
         assert_eq!(wmi_network_adapter.ip_address, vec!["192.168.197.1", "ff80::9999:ffff:9999:f9f9"]);
-        assert_eq!(wmi_network_adapter.ip_enabled, "TRUE");
+        assert_eq!(wmi_network_adapter.ip_enabled, "true");
         assert_eq!(wmi_network_adapter.ip_subnet, vec!["255.255.255.0", "64"]);
         assert_eq!(wmi_network_adapter.mac_address, "FF:FF:FF:FF:FF:FF");
     }
