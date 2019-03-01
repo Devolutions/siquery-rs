@@ -18,6 +18,7 @@ extern crate proxy_config;
 extern crate treexml;
 extern crate heck;
 extern crate chrono;
+extern crate mustache;
 
 pub mod vtab;
 mod common;
@@ -26,6 +27,7 @@ pub mod printer;
 pub mod query;
 pub mod tables;
 pub mod inventory;
+pub mod html;
 
 cfg_if! {
     if #[cfg(all(target_os = "linux",fuzzing))] {

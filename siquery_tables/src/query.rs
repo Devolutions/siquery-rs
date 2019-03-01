@@ -3,6 +3,7 @@ use vtab::*;
 use rusqlite::{version_number, Connection, Error};
 use rusqlite::types::Value;
 use printer::*;
+use html::print_html;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();
@@ -603,6 +604,8 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
             let mut response = statement_res.query(&[]).unwrap();
             if flag == 2 {
                 print_csv(col_name_internal, &mut response);
+            } else if flag == 3 {
+                print_html(col_name_internal, &mut response);
             } else if flag == 1 {
                 print_json(&col_name_internal, &mut response);
             } else {
