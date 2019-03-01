@@ -1,6 +1,7 @@
 use tables::Products;
 use winreg::RegKey;
 use winreg::enums::*;
+use chrono::{NaiveDate};
 
 impl Products {
     pub(crate) fn new() -> Products {
@@ -11,6 +12,7 @@ impl Products {
             name: String::new(),
             vendor: String::new(),
             version: String::new(),
+            size : 0,
         }
     }
 
@@ -53,10 +55,10 @@ impl Products {
 }
 
 
-pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey){
-    let mut product = Products::new();
-    let mut add_program = true;
+pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey) {
     for _x in 0..hkey.enum_keys().count() {
+        let mut add_program = true;
+        let mut product = Products::new();
         let display_name_key = hkey.enum_keys().nth(_x).unwrap();
         let _ = display_name_key.and_then(|display_name_key| hkey.open_subkey_with_flags(display_name_key, KEY_READ))
             .and_then(|program_key| program_key.get_value("DisplayName"))
@@ -82,12 +84,23 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey){
             });
 
         let install_date_key = hkey.enum_keys().nth(_x).unwrap();
+        let mut date = "".to_string();
         let _ = install_date_key.and_then(|install_date_key| hkey.open_subkey_with_flags(install_date_key, KEY_READ))
             .and_then(|program_key| program_key.get_value("InstallDate"))
             .and_then(|install_date: String| {
-                product.install_date = install_date;
+                date = install_date;
                 Ok(())
             });
+        if date != "" {
+            let mut install_date = date.clone();
+            if install_date.len() >= 8 {
+                install_date.truncate(8);
+                if let Ok(formated_date) = NaiveDate::parse_from_str(
+                    &install_date, "%Y%m%d") {
+                    product.install_date = formated_date.format("%Y-%m-%d").to_string();
+                }
+            }
+        }
 
         let install_location_key = hkey.enum_keys().nth(_x).unwrap();
         let _ = install_location_key.and_then(|install_location_key| hkey.open_subkey_with_flags(install_location_key, KEY_READ))
@@ -106,14 +119,13 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey){
             });
 
         let system_component = hkey.enum_keys().nth(_x).unwrap();
-        let mut system_component_value: u64 = 0;
+        let mut system_component_value: u32 = 9999;
         let _ = system_component.and_then(|system_component_key| hkey.open_subkey_with_flags(system_component_key, KEY_READ))
             .and_then(|program_key| program_key.get_value("SystemComponent"))
-            .and_then(|system_component_key: u64| {
+            .and_then(|system_component_key: u32| {
                 system_component_value = system_component_key;
                 Ok(())
             });
-
         if system_component_value == 1 {
             add_program = false;
         }
@@ -127,10 +139,19 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey){
                 Ok(())
             });
 
-        if uninstall_string_value.is_empty() {
-            //add_program = false;
+        let mut size: i64 = 0;
+        let estimated_size_key = hkey.enum_keys().nth(_x).unwrap();
+        let _ = estimated_size_key.and_then(|estimated_s_key| hkey.open_subkey_with_flags(estimated_s_key, KEY_READ))
+            .and_then(|program_key| program_key.get_value("EstimatedSize"))
+            .and_then(|size_value: u32| {
+                size = size_value as i64;
+                Ok(())
+            });
+        if uninstall_string_value == "" && size == 0 {
+            add_program = false;
+        } else {
+            product.size = size * 1024;
         }
-
 
         let parent_key_name = hkey.enum_keys().nth(_x).unwrap();
         let mut parent_key_value = "".to_string();
@@ -148,6 +169,5 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey){
         if product.name != "" && add_program {
             products.push(product);
         }
-        product = Products::new();
     }
 }
