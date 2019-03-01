@@ -6,15 +6,14 @@
 
 use treexml::{Element,Document,XmlVersion::Version10};
 use heck::CamelCase;
+use chrono::{NaiveDate,NaiveDateTime};
 use std::fs::File;
 use std::io::prelude::*;
-use chrono::{NaiveDate,NaiveDateTime};
 
 use tables::*;
 
 fn ip_address() -> Element {
     let mut ip_address = Element::new("IPAddress");
-
     ip_address
 }
 
@@ -222,9 +221,9 @@ pub fn get_printers_inv(ref mut root: &mut Element) {
 
 pub fn get_products_inv(ref mut root: &mut Element) {
 
-    let wmi_products = WmiProducts::get_specific();
-    let mut products = Element::new("Products");
-    for product in wmi_products {
+    let products = Products::get_specific();
+    let mut products_element = Element::new("Products");
+    for product in products {
         let mut remote_product = Element::new("RemoteProgram");
 
         let mut child_1 = Element::new("HelpLink");
@@ -233,21 +232,15 @@ pub fn get_products_inv(ref mut root: &mut Element) {
         let mut child_4 = Element::new("Name");
         let mut child_5 = Element::new("Vendor");
         let mut child_6 = Element::new("Version");
+        let mut child_7 = Element::new("Size");
 
         if product.help_link != "" {
             child_1.text = Some(product.help_link);
             remote_product.children.push(child_1);
         }
         if product.install_date != "" {
-            let mut install_date = product.install_date.clone();
-            if install_date.len() >= 14 {
-                install_date.truncate(14);
-                if let Ok(date) = NaiveDateTime::parse_from_str(
-                    &install_date, "%Y%m%d%H%M%S") {
-                    child_2.text  = Some(date.format("%Y-%m-%dT%H:%M:%S").to_string());
-                }
-                remote_product.children.push(child_2);
-            }
+            child_2.text = Some(product.install_date);
+            remote_product.children.push(child_2);
         }
         if product.install_location != "" {
             child_3.text = Some(product.install_location);
@@ -265,10 +258,14 @@ pub fn get_products_inv(ref mut root: &mut Element) {
             child_6.text = Some(product.version);
             remote_product.children.push(child_6);
         }
+        if product.size.to_string() != "" {
+            child_7.text = Some(product.size.to_string());
+            remote_product.children.push(child_7);
+        }
 
-        products.children.push(remote_product);
+        products_element.children.push(remote_product);
     }
-    root.children.push(products);
+    root.children.push(products_element);
 }
 
 pub fn get_services_inv(ref mut root: &mut Element) {
@@ -807,17 +804,17 @@ pub fn get_time_zone(ref mut root: &mut Element) {
 pub fn execute_inventory_query() {
     let mut root = Element::new("InventorySystemInformation");
 
-    get_local_accounts_inv(&mut root);
-    get_logical_drives_inv(&mut root);
-    get_network_adapters_inv(&mut root);
-    get_printers_inv(&mut root);
+    //get_local_accounts_inv(&mut root);
+    //get_logical_drives_inv(&mut root);
+    //get_network_adapters_inv(&mut root);
+    //get_printers_inv(&mut root);
     get_products_inv(&mut root);
-    get_services_inv(&mut root);
-    get_shares_inv(&mut root);
-    get_start_up_inv(&mut root);
-    get_system_info_inv(&mut root);
-    get_hotfixes_inv(&mut root);
-    get_local_accounts_inv(&mut root);
+    //get_services_inv(&mut root);
+    //get_shares_inv(&mut root);
+    //get_start_up_inv(&mut root);
+    //get_system_info_inv(&mut root);
+    //get_hotfixes_inv(&mut root);
+    //get_local_accounts_inv(&mut root);
     get_time_zone(&mut root);
 
     let doc = Document {
@@ -828,4 +825,5 @@ pub fn execute_inventory_query() {
 
     let mut file = File::create("inventory.inv").ok();
     file.unwrap().write_all(doc.to_string().as_str().as_bytes()).ok();
+    //println!("{}", doc.to_string().as_str());
 }

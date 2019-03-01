@@ -1541,6 +1541,7 @@ pub struct Products {
     pub name: String,
     pub vendor: String,
     pub version: String,
+    pub size: i64,
 }}
 
 #[cfg(feature = "products")]
@@ -1552,6 +1553,7 @@ impl Products {
     const NAME_ID: u64 = 0x00000008;
     const VENDOR_ID: u64 = 0x00000010;
     const VERSION_ID: u64 = 0x00000020;
+    const SIZE_ID: u64 = 0x00000040;
 }
 
 #[cfg(feature = "products")]
@@ -1562,7 +1564,8 @@ impl Table for Products {
         "help_link",
         "name",
         "vendor",
-        "version"];
+        "version",
+        "size"];
 
     fn get_by_name(&self, _name: &str) -> Value {
         match _name {
@@ -1572,6 +1575,7 @@ impl Table for Products {
             "name" => Value::from(self.name.to_owned()),
             "vendor" => Value::from(self.vendor.to_owned()),
             "version" => Value::from(self.version.to_owned()),
+            "size" => Value::from(self.size),
             _ => Value::from("".to_owned())
         }
     }
@@ -1584,6 +1588,7 @@ impl Table for Products {
             Self::NAME_ID => Value::from(self.name.to_owned()),
             Self::VENDOR_ID => Value::from(self.vendor.to_owned()),
             Self::VERSION_ID => Value::from(self.version.to_owned()),
+            Self::SIZE_ID => Value::from(self.size),
             _ => Value::from("".to_owned())
         }
     }
@@ -1596,6 +1601,7 @@ impl Table for Products {
             "name" => Self::NAME_ID,
             "vendor" => Self::VENDOR_ID,
             "version" => Self::VERSION_ID,
+            "size" => Self::SIZE_ID,
             _ => 0
         }
     }
