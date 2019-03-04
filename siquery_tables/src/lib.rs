@@ -18,7 +18,8 @@ extern crate proxy_config;
 extern crate treexml;
 extern crate heck;
 extern crate chrono;
-extern crate mustache;
+#[macro_use]
+extern crate horrorshow;
 
 pub mod vtab;
 mod common;
