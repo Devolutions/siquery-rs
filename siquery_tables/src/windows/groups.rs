@@ -142,14 +142,14 @@ impl GroupsRow {
         let entries_read_p: LPDWORD = &mut entries_read as LPDWORD;
         let mut total_entries = 0u32;
         let total_entries_p: LPDWORD = &mut total_entries as LPDWORD;
-        let mut buf = Vec::<u8>::with_capacity(MAX_PREFERRED_LENGTH as usize);
-        let buf_ptr = buf.as_mut_ptr();
+        let mut buf = ptr::null_mut();
+        let buf_ptr = &mut buf as *mut LPBYTE;
 
         let ret = unsafe {
             NetLocalGroupEnum (
                 ptr::null(),
                 group_info_level,
-                buf_ptr as *mut LPBYTE,
+                buf_ptr,
                 MAX_PREFERRED_LENGTH,
                 entries_read_p,
                 total_entries_p,
