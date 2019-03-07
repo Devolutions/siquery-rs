@@ -2,6 +2,9 @@ use tables::Products;
 use winreg::RegKey;
 use winreg::enums::*;
 use chrono::{NaiveDate};
+use std::fs;
+use filetime::FileTime;
+
 
 impl Products {
     pub(crate) fn new() -> Products {
@@ -110,6 +113,15 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey) {
                 Ok(())
             });
 
+
+        let attr = fs::symlink_metadata(product.install_location.clone()).ok();
+        if let Ok(att) = fs::symlink_metadata(product.install_location.clone()) {
+            let mut time = FileTime::from_last_modification_time(&att);
+            println!("{:?}", FileTime::from_unix_time(time.seconds(), time.nanoseconds()));
+
+            //println!("{:?}", filetime_to_unixtime(&time));
+        }
+
         let help_link_key = hkey.enum_keys().nth(_x).unwrap();
         let _ = help_link_key.and_then(|help_link_key| hkey.open_subkey_with_flags(help_link_key, KEY_READ))
             .and_then(|program_key| program_key.get_value("HelpLink"))
@@ -167,7 +179,20 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey) {
         }
 
         if product.name != "" && add_program {
-            products.push(product);
+            //products.push(product);
         }
     }
 }
+
+
+/*pub fn filetime_to_unixtime(ft : &mut FILETIME) -> i64 {
+    unsafe {
+        let mut date: LARGE_INTEGER = mem::uninitialized();
+        let mut adjust: LARGE_INTEGER = mem::uninitialized();
+        date.u_mut().HighPart = ft.dwHighDateTime as i32;
+        date.u_mut().LowPart = ft.dwLowDateTime;
+        *adjust.QuadPart_mut() = 11644473600000 * 10000;
+        *date.QuadPart_mut() -= *adjust.QuadPart_mut();
+        return *date.QuadPart_mut() / 10000000;
+    }
+}*/

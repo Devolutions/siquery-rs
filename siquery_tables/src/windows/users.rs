@@ -13,7 +13,7 @@ use winapi::{
         errhandlingapi::GetLastError
     },
     shared::{
-        minwindef::{DWORD, LPDWORD, BOOL},
+        minwindef::{DWORD, LPDWORD, BOOL, LPBYTE},
         ntdef::{LPWSTR, LPCWSTR, NULL},
         sddl::{ConvertSidToStringSidW, ConvertStringSidToSidW},
         lmcons::{MAX_PREFERRED_LENGTH, UNLEN, DNLEN},
@@ -90,13 +90,15 @@ fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String
     let mut resume_handle_int = 0u32;
     let resume_handle: *mut c_ulong = &mut resume_handle_int as *mut c_ulong;
 
-    let mut user_buffer: Vec<u8> = Vec::with_capacity((MAX_PREFERRED_LENGTH) as usize);
+    let mut user_buffer = ptr::null_mut();
+    let mut buf_ptr = &mut user_buffer as *mut LPBYTE;
+
     loop {
         let mut ret = unsafe {
             NetUserEnum(ptr::null(),
                         dw_user_info_level,
                         0 as DWORD,
-                        user_buffer.as_mut_ptr() as *mut _ as *mut _,
+                        buf_ptr,
                         MAX_PREFERRED_LENGTH,
                         dw_num_users_read,
                         dw_total_users,
@@ -104,9 +106,9 @@ fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String
         };
 
         if (ret == NERR_SUCCESS || ret == ERROR_MORE_DATA) &&
-            user_buffer.as_mut_ptr() != ptr::null_mut() {
+            buf_ptr != ptr::null_mut() {
 
-            let mut iter_buff: LPUSER_INFO_3 = unsafe { ptr::read(user_buffer.as_mut_ptr() as *mut _) };
+            let mut iter_buff: LPUSER_INFO_3 = unsafe { ptr::read(buf_ptr as *mut _) };
 
             for _i in 0..unsafe { *dw_num_users_read }  {
                 let mut user = Users::new();
@@ -169,8 +171,8 @@ fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String
             println!("NetUserEnum failed with {:?}", ret);
         }
 
-        if user_buffer.as_mut_ptr() != ptr::null_mut() {
-            unsafe { NetApiBufferFree(*user_buffer.as_mut_ptr() as *mut c_void) };
+        if buf_ptr != ptr::null_mut() {
+            unsafe { NetApiBufferFree(*buf_ptr as *mut c_void) };
         }
 
         if ret != ERROR_MORE_DATA {
@@ -268,6 +270,7 @@ pub fn lpwstr_to_string(lpwstr: LPWSTR) -> Result<String, DWORD> {
 }
 
 pub fn get_uid_from_sid (sid_string: String) -> i64 {
+
     let components: Vec<_> = sid_string.as_str().split('-').collect();
     if components.len() < 1 {
         return MAX
@@ -280,21 +283,23 @@ pub fn convert_string_sid_to_sid(sid_string: String) -> *mut PSID {
     let mut sid_c_str: Vec<u16> = sid_string.clone().as_str().encode_utf16().collect();
     sid_c_str.push(0);
 
-    let mut sid_buf: Vec<u16> = Vec::with_capacity(sid_c_str.len() as usize);
-    let sid: *mut PSID = sid_buf.as_mut_ptr() as *mut PSID;
+    let mut sid_buf = ptr::null_mut();
+    let mut sid: *mut PSID  = &mut sid_buf as *mut PSID;
     unsafe {
         let ret = ConvertStringSidToSidW(sid_c_str.as_ptr(), sid);
-        if ret == 0 && GetLastError() != ERROR_INSUFFICIENT_BUFFER {
-            println!("failed with error {:?}", ret);
+        let last_error = GetLastError();
+        if ret == 0 && last_error != ERROR_INSUFFICIENT_BUFFER {
+            println!("failed with error {:?}", last_error);
         };
+        sid
     }
-    sid
 }
 
 pub fn get_roaming_profiles_username(sid: *mut PSID) -> String {
+    unsafe {
     let mut dom_name_len = DNLEN;
     let dom_name_len_p: LPDWORD = &mut dom_name_len as LPDWORD;
-    let mut dom_name: [wchar_t; DNLEN as usize ] = [0; DNLEN as usize];
+    let mut dom_name: [wchar_t; DNLEN as usize] = [0; DNLEN as usize];
 
     let mut account_name_len = UNLEN;
     let account_name_len_p: LPDWORD = &mut account_name_len as LPDWORD;
@@ -302,31 +307,29 @@ pub fn get_roaming_profiles_username(sid: *mut PSID) -> String {
 
     let mut e_sid_type: SID_NAME_USE = SidTypeUnknown as SID_NAME_USE;
     let e_sid_type_p: PSID_NAME_USE = &mut e_sid_type as PSID_NAME_USE;
+        let ret: BOOL =
+            LookupAccountSidW(
+                ptr::null_mut(),
+                *sid,
+                account_name.as_mut_ptr(),
+                account_name_len_p,
+                dom_name.as_mut_ptr(),
+                dom_name_len_p,
+                e_sid_type_p
+            );
+        let last_error =  GetLastError();
+        if ret == 0 && last_error != ERROR_INSUFFICIENT_BUFFER {
+            println!("failed to lookup account name with {:?}", last_error);
+            return "".to_string()
+        };
 
-    let ret: BOOL =  unsafe {
-        LookupAccountSidW(
-            ptr::null_mut(),
-            *sid,
-            account_name.as_mut_ptr(),
-            account_name_len_p,
-            dom_name.as_mut_ptr(),
-            dom_name_len_p,
-            e_sid_type_p
-        )
-    };
+        let mut acc_name = String::from_utf16_lossy(&account_name).to_string();
+        while acc_name.ends_with("\u{0}") {
+            let len = acc_name.len();
+            let new_len = len.saturating_sub("\u{0}".len());
+            acc_name.truncate(new_len);
+        }
 
-    if ret == 0 && unsafe {GetLastError()} != ERROR_INSUFFICIENT_BUFFER {
-        println!("failed to lookup account name");
-        return "".to_string()
-    };
-
-    let mut acc_name = String::from_utf16_lossy(&account_name).to_string();
-
-    while acc_name.ends_with("\u{0}") {
-        let len = acc_name.len();
-        let new_len = len.saturating_sub("\u{0}".len());
-        acc_name.truncate(new_len);
+        acc_name
     }
-
-    acc_name
 }
