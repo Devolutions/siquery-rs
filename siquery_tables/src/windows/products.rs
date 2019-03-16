@@ -1,7 +1,7 @@
 use tables::Products;
 use winreg::RegKey;
 use winreg::enums::*;
-use chrono::{NaiveDate};
+use chrono::{NaiveDateTime, NaiveDate, DateTime, Duration, Utc, TimeZone};
 use std::fs;
 use filetime::FileTime;
 
@@ -98,8 +98,7 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey) {
             let mut install_date = date.clone();
             if install_date.len() >= 8 {
                 install_date.truncate(8);
-                if let Ok(formated_date) = NaiveDate::parse_from_str(
-                    &install_date, "%Y%m%d") {
+                if let Ok(formated_date) = NaiveDate::parse_from_str(&install_date, "%Y%m%d") {
                     product.install_date = formated_date.format("%Y-%m-%d").to_string();
                 }
             }
@@ -113,13 +112,25 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey) {
                 Ok(())
             });
 
+        if date == "" {
+            let attr = fs::symlink_metadata(product.install_location.clone()).ok();
+            if let Ok(att) = fs::symlink_metadata(product.install_location.clone()) {
+                let mut time_ = FileTime::from_creation_time(&att).unwrap();
 
-        let attr = fs::symlink_metadata(product.install_location.clone()).ok();
-        if let Ok(att) = fs::symlink_metadata(product.install_location.clone()) {
-            let mut time = FileTime::from_last_modification_time(&att);
-            println!("{:?}", FileTime::from_unix_time(time.seconds(), time.nanoseconds()));
+                let utc = Utc;
+                let d1 = Utc::now();
+                let d2 = utc.datetime_from_str(&"Jan 1 00:00:00 1601", "%b %d %H:%M:%S %Y").unwrap();
+                let d3 = utc.datetime_from_str(&"Jan 1 00:00:00 1970", "%b %d %H:%M:%S %Y").unwrap();
 
-            //println!("{:?}", filetime_to_unixtime(&time));
+                let duration_1601 = d1.signed_duration_since(d2);
+                let seconds_since_d2 = duration_1601.num_days() * 24 * 60 * 60;
+
+                let duration_1970 = d1.signed_duration_since(d3);
+                let seconds_since_d3 = duration_1970.num_days() * 24 * 60 * 60;
+                let dt = NaiveDateTime::from_timestamp(time_.seconds() - seconds_since_d2 + seconds_since_d3, time_.nanoseconds());
+
+                product.install_date = dt.format("%Y-%m-%d").to_string();
+            }
         }
 
         let help_link_key = hkey.enum_keys().nth(_x).unwrap();
@@ -179,20 +190,7 @@ pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey) {
         }
 
         if product.name != "" && add_program {
-            //products.push(product);
+            products.push(product);
         }
     }
 }
-
-
-/*pub fn filetime_to_unixtime(ft : &mut FILETIME) -> i64 {
-    unsafe {
-        let mut date: LARGE_INTEGER = mem::uninitialized();
-        let mut adjust: LARGE_INTEGER = mem::uninitialized();
-        date.u_mut().HighPart = ft.dwHighDateTime as i32;
-        date.u_mut().LowPart = ft.dwLowDateTime;
-        *adjust.QuadPart_mut() = 11644473600000 * 10000;
-        *date.QuadPart_mut() -= *adjust.QuadPart_mut();
-        return *date.QuadPart_mut() / 10000000;
-    }
-}*/

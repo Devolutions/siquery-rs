@@ -7,8 +7,6 @@
 use treexml::{Element,Document,XmlVersion::Version10};
 use heck::CamelCase;
 use chrono::{NaiveDate,NaiveDateTime};
-use std::fs::File;
-use std::io::prelude::*;
 
 use tables::*;
 
@@ -804,17 +802,17 @@ pub fn get_time_zone(ref mut root: &mut Element) {
 pub fn execute_inventory_query() {
     let mut root = Element::new("InventorySystemInformation");
 
-    //get_local_accounts_inv(&mut root);
-    //get_logical_drives_inv(&mut root);
-    //get_network_adapters_inv(&mut root);
-    //get_printers_inv(&mut root);
+    get_local_accounts_inv(&mut root);
+    get_logical_drives_inv(&mut root);
+    get_network_adapters_inv(&mut root);
+    get_printers_inv(&mut root);
     get_products_inv(&mut root);
-    //get_services_inv(&mut root);
-    //get_shares_inv(&mut root);
-    //get_start_up_inv(&mut root);
-    //get_system_info_inv(&mut root);
-    //get_hotfixes_inv(&mut root);
-    //get_local_accounts_inv(&mut root);
+    get_services_inv(&mut root);
+    get_shares_inv(&mut root);
+    get_start_up_inv(&mut root);
+    get_system_info_inv(&mut root);
+    get_hotfixes_inv(&mut root);
+    get_local_accounts_inv(&mut root);
     get_time_zone(&mut root);
 
     let doc = Document {
@@ -823,7 +821,5 @@ pub fn execute_inventory_query() {
         ..Document::default()
     };
 
-    let mut file = File::create("inventory.inv").ok();
-    file.unwrap().write_all(doc.to_string().as_str().as_bytes()).ok();
-    //println!("{}", doc.to_string().as_str());
+    println!("{}", doc.to_string().as_str());
 }
