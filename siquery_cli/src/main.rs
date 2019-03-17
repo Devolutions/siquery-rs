@@ -4,7 +4,7 @@ extern crate siquery;
 
 use siquery::query::{init_db, execute_query};
 use siquery::tables::get_table_list;
-use siquery::printer::print_schema;
+use siquery::printer::{print_schema, print_table_by_name};
 use clap::App;
 
 #[cfg(target_os = "windows")]
@@ -31,43 +31,22 @@ fn main() {
         print_schema(schema);
     } else if matches.is_present("json_mode") {
         if table.len() > 0 {
-            let v: Vec<_> = table.split(',').collect();
-            for t in get_table_list().iter() {
-                if let Some(table_name) = v.iter().find(|&&x| x == *t) {
-                    let query = format!("select * from {}", table_name);
-                    println!("table : {}", table_name);
-                    execute_query(&db, &query, 1);
-                }
-            }
-
+            print_table_by_name(db, table, 1);
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 1);
         }
     } else if matches.is_present("csv_mode") {
         if table.len() > 0 {
-            let v: Vec<_> = table.split(',').collect();
-            for t in get_table_list().iter() {
-                if let Some(table_name) = v.iter().find(|&&x| x == *t) {
-                    let query = format!("select * from {}", table_name);
-                    println!("table : {}", table_name);
-                    execute_query(&db, &query, 2);
-                }
-            }
+            print_table_by_name(db, table, 2);
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 2);
         }
     } else {
         if table.len() > 0 {
-            let v: Vec<_> = table.split(',').collect();
-            for t in get_table_list().iter() {
-                if let Some(table_name) = v.iter().find(|&&x| x == *t) {
-                    let query = format!("select * from {}", table_name);
-                    println!("table : {}", table_name);
-                    execute_query(&db, &query, 0);
-                }
-            }
+            print_table_by_name(db,table, 0);
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 0);
         }
     }
 }
+
