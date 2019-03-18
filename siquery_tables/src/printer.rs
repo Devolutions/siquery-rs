@@ -1,10 +1,10 @@
 extern crate serde;
 extern crate serde_json;
 use csv::{WriterBuilder, Terminator};
-use rusqlite::{Rows, Row as RusqliteRow, types::{Value, Type}};
+use rusqlite::{Rows, Connection, Row as RusqliteRow, types::{Value, Type}};
 use prettytable::{Table, row::Row, cell::Cell};
 use tables::get_table_list;
-use query::get_schema;
+use query::{get_schema, execute_query};
 use serde_json::{Value as serdValue, Map};
 
 pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
@@ -139,6 +139,17 @@ pub fn print_schema(table: String) {
             let mut schema = get_schema(table.as_str()).unwrap();
             schema = schema.replace("x(", &format!("{}{}", table.as_str(), "("));
             println!("{}", schema);
+        }
+    }
+}
+
+pub fn print_table_by_name(db: Connection, table: String, mode: u8) {
+    let v: Vec<_> = table.split(',').collect();
+    for t in get_table_list().iter() {
+        if let Some(table_name) = v.iter().find(|&&x| x == *t) {
+            let query = format!("select * from {}", table_name);
+            println!("table : {}", table_name);
+            execute_query(&db, &query, mode);
         }
     }
 }
