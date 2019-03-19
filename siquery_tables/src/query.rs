@@ -584,7 +584,7 @@ pub fn get_schema(table_name: &str) -> Option<String> {
     _schema
 }
 
-pub fn execute_query(db: &Connection, query: &str, flag: u8) {
+pub fn execute_query(db: &Connection, query: &str, table_name: String, flag: u8) {
     let mut table_result: Vec<Vec<Value>> = Vec::new();
     let mut row: Vec<Value> = Vec::new();
     let stmt = db.prepare(&query);
@@ -604,7 +604,7 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
             if flag == 2 {
                 print_csv(col_name_internal, &mut response);
             } else if flag == 1 {
-                print_json(&col_name_internal, &mut response);
+                print_json(table_name, &col_name_internal, &mut response);
             } else {
                 print_pretty(col_name_internal, &mut response);
             }

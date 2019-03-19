@@ -78,7 +78,7 @@ pub fn print_pretty(columns: Vec<String>, values: &mut Rows) {
     println!("{}", table);
 }
 
-pub fn print_json (col_names: &Vec<String>, values: &mut Rows) {
+pub fn print_json (table_name: String, col_names: &Vec<String>, values: &mut Rows) {
     let mut writer = Vec::new();
     let mut _value:  Map<String, serdValue> = Map::new();
     loop {
@@ -91,8 +91,17 @@ pub fn print_json (col_names: &Vec<String>, values: &mut Rows) {
             break
         }
     }
-    let json = serde_json::to_string_pretty(&writer).unwrap();
-    println!("{}", json);
+
+    if (!table_name.is_empty()) {
+        let mut table: Map<String, serdValue> = Map::new();
+        table.insert(table_name, json!(writer));
+        let table_stringified = serde_json::to_string_pretty(&table).unwrap();
+        println!("{}", table_stringified);
+    }
+    else {
+        let table_stringified = serde_json::to_string_pretty(&writer).unwrap();
+        println!("{}", table_stringified);
+    }
 }
 
 fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> Map<String, serdValue> {
@@ -148,8 +157,7 @@ pub fn print_table_by_name(db: Connection, table: String, mode: u8) {
     for t in get_table_list().iter() {
         if let Some(table_name) = v.iter().find(|&&x| x == *t) {
             let query = format!("select * from {}", table_name);
-            println!("table : {}", table_name);
-            execute_query(&db, &query, mode);
+            execute_query(&db, &query, table_name.to_string() , mode);
         }
     }
 }
