@@ -261,7 +261,7 @@ pub fn get_products_inv(ref mut root: &mut Element) {
         //if product.size.to_string() != "" {
         //    child_7.text = Some(product.size.to_string());
         //    remote_product.children.push(child_7);
-        //} fixme
+        //}
 
         products_element.children.push(remote_product);
     }
