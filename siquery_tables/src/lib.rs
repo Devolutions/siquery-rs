@@ -18,6 +18,8 @@ extern crate proxy_config;
 extern crate treexml;
 extern crate heck;
 extern crate chrono;
+#[macro_use]
+extern crate horrorshow;
 
 pub mod vtab;
 mod common;
@@ -68,5 +70,6 @@ cfg_if! {
         pub mod windows;
         pub use windows as sys;
         pub mod inventory;
+        pub mod html;
     }
 }

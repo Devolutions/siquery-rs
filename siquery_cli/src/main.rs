@@ -41,6 +41,12 @@ fn main() {
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 2);
         }
+    } else if matches.is_present("html_mode") {
+        if table.len() > 0 {
+            print_table_by_name(db, table, 3);
+        } else if siquery.len() > 0 {
+            execute_query(&db, &siquery, 3);
+        }
     } else {
         if table.len() > 0 {
             print_table_by_name(db,table, 0);
