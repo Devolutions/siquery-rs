@@ -605,7 +605,7 @@ pub fn execute_query(db: &Connection, query: &str, flag: u8) {
             if flag == 2 {
                 print_csv(col_name_internal, &mut response);
             } else if flag == 3 {
-                print_html(col_name_internal, &mut response);
+                print_html(col_name_internal, &mut response, query);
             } else if flag == 1 {
                 print_json(&col_name_internal, &mut response);
             } else {
