@@ -27,8 +27,6 @@ mod utils;
 pub mod printer;
 pub mod query;
 pub mod tables;
-pub mod inventory;
-pub mod html;
 
 cfg_if! {
     if #[cfg(all(target_os = "linux",fuzzing))] {
@@ -70,5 +68,7 @@ cfg_if! {
 
         pub mod windows;
         pub use windows as sys;
+        pub mod inventory;
+        pub mod html;
     }
 }

@@ -6,15 +6,14 @@
 
 use treexml::{Element,Document,XmlVersion::Version10};
 use heck::CamelCase;
+use chrono::{NaiveDate,NaiveDateTime};
 use std::fs::File;
 use std::io::prelude::*;
-use chrono::{NaiveDate,NaiveDateTime};
 
 use tables::*;
 
 fn ip_address() -> Element {
     let mut ip_address = Element::new("IPAddress");
-
     ip_address
 }
 
@@ -222,9 +221,9 @@ pub fn get_printers_inv(ref mut root: &mut Element) {
 
 pub fn get_products_inv(ref mut root: &mut Element) {
 
-    let wmi_products = WmiProducts::get_specific();
-    let mut products = Element::new("Products");
-    for product in wmi_products {
+    let products = Products::get_specific();
+    let mut products_element = Element::new("Products");
+    for product in products {
         let mut remote_product = Element::new("RemoteProgram");
 
         let mut child_1 = Element::new("HelpLink");
@@ -233,20 +232,14 @@ pub fn get_products_inv(ref mut root: &mut Element) {
         let mut child_4 = Element::new("Name");
         let mut child_5 = Element::new("Vendor");
         let mut child_6 = Element::new("Version");
+        let mut child_7 = Element::new("Size");
 
         if product.help_link != "" {
             child_1.text = Some(product.help_link);
             remote_product.children.push(child_1);
         }
         if product.install_date != "" {
-            let mut install_date = product.install_date.clone();
-            if install_date.len() >= 14 {
-                install_date.truncate(14);
-                if let Ok(date) = NaiveDateTime::parse_from_str(
-                    &install_date, "%Y%m%d%H%M%S") {
-                    child_2.text  = Some(date.format("%Y-%m-%dT%H:%M:%S").to_string());
-                }
-            }
+            child_2.text = Some(product.install_date);
             remote_product.children.push(child_2);
         }
         if product.install_location != "" {
@@ -265,10 +258,14 @@ pub fn get_products_inv(ref mut root: &mut Element) {
             child_6.text = Some(product.version);
             remote_product.children.push(child_6);
         }
+        //if product.size.to_string() != "" {
+        //    child_7.text = Some(product.size.to_string());
+        //    remote_product.children.push(child_7);
+        //} fixme
 
-        products.children.push(remote_product);
+        products_element.children.push(remote_product);
     }
-    root.children.push(products);
+    root.children.push(products_element);
 }
 
 pub fn get_services_inv(ref mut root: &mut Element) {
@@ -804,80 +801,29 @@ pub fn get_time_zone(ref mut root: &mut Element) {
     root.children.push(time_zone_tree);
 }
 
-pub fn execute_inventory_query(query: &str) {
+pub fn execute_inventory_query() {
     let mut root = Element::new("InventorySystemInformation");
 
-    let mut rdm_inv_queries: Vec<String> = Vec::new();
-    let query_string = query.to_string();
-
-    let local_accounts = "Local Accounts";
-    let local_accounts_idx = query_string.find("Local Accounts");
-    if let Some(_i) = local_accounts_idx {
-        get_local_accounts_inv(&mut root);
-    }
-
-    let logical_drives = "Logical Drives";
-    let logical_drives_idx = query_string.find("Logical Drives");
-    if let Some(_i) = logical_drives_idx {
-        get_logical_drives_inv(&mut root);
-    }
-
-    let logical_drives = "Network Adapters";
-    let logical_drives_idx = query_string.find("Network Adapters");
-    if let Some(_i) = logical_drives_idx {
-        get_network_adapters_inv(&mut root);
-    }
-
-    let logical_drives = "Printers";
-    let logical_drives_idx = query_string.find("Printers");
-    if let Some(_i) = logical_drives_idx {
-        get_printers_inv(&mut root);
-    }
-
-    let logical_drives = "Products";
-    let logical_drives_idx = query_string.find("Products");
-    if let Some(_i) = logical_drives_idx {
-        get_products_inv(&mut root);
-    }
-
-    let logical_drives = "Services";
-    let logical_drives_idx = query_string.find("Services");
-    if let Some(_i) = logical_drives_idx {
-        get_services_inv(&mut root);
-    }
-
-    let logical_drives = "Shares";
-    let logical_drives_idx = query_string.find("Shares");
-    if let Some(_i) = logical_drives_idx {
-        get_shares_inv(&mut root);
-    }
-
-    let logical_drives = "Start Up";
-    let logical_drives_idx = query_string.find("Start Up");
-    if let Some(_i) = logical_drives_idx {
-        get_start_up_inv(&mut root);
-    }
-
-    let logical_drives = "System Information";
-    let logical_drives_idx = query_string.find("System Information");
-    if let Some(_i) = logical_drives_idx {
-        get_system_info_inv(&mut root);
-    }
-
-    let logical_drives = "Windows HotFixes";
-    let logical_drives_idx = query_string.find("Windows HotFixes");
-    if let Some(_i) = logical_drives_idx {
-        get_hotfixes_inv(&mut root);
-    }
+    //get_local_accounts_inv(&mut root);
+    //get_logical_drives_inv(&mut root);
+    //get_network_adapters_inv(&mut root);
+    //get_printers_inv(&mut root);
+    get_products_inv(&mut root);
+    //get_services_inv(&mut root);
+    //get_shares_inv(&mut root);
+    //get_start_up_inv(&mut root);
+    //get_system_info_inv(&mut root);
+    //get_hotfixes_inv(&mut root);
+    //get_local_accounts_inv(&mut root);
+    get_time_zone(&mut root);
 
     let doc = Document {
         root: Some(root),
         version: Version10,
-        .. Document::default()
+        ..Document::default()
     };
 
     let mut file = File::create("inventory.inv").ok();
     file.unwrap().write_all(doc.to_string().as_str().as_bytes()).ok();
-
-    println!("{}",doc.to_string());
+    //println!("{}", doc.to_string().as_str());
 }
