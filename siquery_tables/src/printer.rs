@@ -78,9 +78,9 @@ pub fn print_pretty(columns: Vec<String>, values: &mut Rows) {
     println!("{}", table);
 }
 
-pub fn print_json (table_name: String, col_names: &Vec<String>, values: &mut Rows) {
-    let mut writer = Vec::new();
-    let mut _value:  Map<String, serdValue> = Map::new();
+pub fn print_json (table_name: String, col_names: &Vec<String>, values: &mut Rows) -> Vec<Map<String,serdValue>> {
+    let mut writer: Vec<Map<String,serdValue>> = Vec::new();
+    let mut _value: Map<String, serdValue> = Map::new();
     loop {
         if let Some(v) = values.next() {
             if let Some(res) = v.ok() {
@@ -91,17 +91,11 @@ pub fn print_json (table_name: String, col_names: &Vec<String>, values: &mut Row
             break
         }
     }
+    if table_name.is_empty() {
+        println!("{}", serde_json::to_string_pretty(&writer).unwrap());
+    }
 
-    if (!table_name.is_empty()) {
-        let mut table: Map<String, serdValue> = Map::new();
-        table.insert(table_name, json!(writer));
-        let table_stringified = serde_json::to_string_pretty(&table).unwrap();
-        println!("{}", table_stringified);
-    }
-    else {
-        let table_stringified = serde_json::to_string_pretty(&writer).unwrap();
-        println!("{}", table_stringified);
-    }
+    writer
 }
 
 fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> Map<String, serdValue> {
@@ -154,10 +148,13 @@ pub fn print_schema(table: String) {
 
 pub fn print_table_by_name(db: Connection, table: String, mode: u8) {
     let v: Vec<_> = table.split(',').collect();
+    let mut json_table: Map<String, serdValue> = Map::new();
     for t in get_table_list().iter() {
         if let Some(table_name) = v.iter().find(|&&x| x == *t) {
             let query = format!("select * from {}", table_name);
-            execute_query(&db, &query, table_name.to_string() , mode);
+            let writer = execute_query(&db, &query, table_name.to_string() , mode);
+            json_table.insert(table_name.to_string(), json!(writer));
         }
     }
+    println!("{}", serde_json::to_string_pretty(&json_table).unwrap());
 }
