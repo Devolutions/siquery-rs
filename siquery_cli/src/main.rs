@@ -10,7 +10,6 @@ use clap::App;
 #[cfg(target_os = "windows")]
 use siquery::inventory::execute_inventory_query;
 
-
 fn main() {
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml);
@@ -33,19 +32,19 @@ fn main() {
         if table.len() > 0 {
             print_table_by_name(db, table, 1);
         } else if siquery.len() > 0 {
-            execute_query(&db, &siquery, 1);
+            execute_query(&db, &siquery, "".to_string(),1);
         }
     } else if matches.is_present("csv_mode") {
         if table.len() > 0 {
             print_table_by_name(db, table, 2);
         } else if siquery.len() > 0 {
-            execute_query(&db, &siquery, 2);
+            execute_query(&db, &siquery, "".to_string(),2);
         }
     } else {
         if table.len() > 0 {
             print_table_by_name(db,table, 0);
         } else if siquery.len() > 0 {
-            execute_query(&db, &siquery, 0);
+            execute_query(&db, &siquery, "".to_string(),0);
         }
     }
 }
