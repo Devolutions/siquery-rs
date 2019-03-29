@@ -3,8 +3,7 @@ use vtab::*;
 use rusqlite::{version_number, Connection, Error};
 use rusqlite::types::Value;
 use printer::*;
-#[cfg(target_os = "windows")]
-use html::print_html;   //todo: add support for the 3 platforms
+use html::print_html;
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
     let mut res: Vec<Vec<Value>> = Vec::new();

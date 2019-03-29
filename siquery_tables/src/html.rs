@@ -1,6 +1,5 @@
 use rusqlite::{
     Rows,
-    Statement,
     types::{
         Value,
         Type
@@ -8,14 +7,12 @@ use rusqlite::{
 };
 use horrorshow::{
     helper::doctype,
-    prelude::*
 };
 use chrono::offset::Local;
-use std::fs::File;
 use std::io::prelude::*;
+use std::fs::OpenOptions;
 
 use tables::{
-    WmiOsVersion,
     SystemInfoData
 };
 
@@ -67,16 +64,23 @@ pub fn print_html(columns: Vec<String>, values: &mut Rows, query: &str) {
                     title : hostname.clone();
                 }
                 body {
-                    TABLE(frame="hsides", rules="groups") {
+                    TABLE(frame="hsides", rules="groups", cellpadding="1") {
                         CAPTION {
                             : format!(
                             "Inventory Report of {} - {}",
                             hostname,
                             Local::now()
-                            );  //fixme
+                            );
                         }
                         COLGROUP(align="center");
                         COLGROUP(align="left");
+                        THEAD(valign="top"){
+                            TR{
+                                TH(colspan="2"){
+                                    : table_name.get(3);
+                                }
+                            }
+                        }
                         THEAD(valign="top"){
                             TR {
                                 TH {
@@ -105,11 +109,11 @@ pub fn print_html(columns: Vec<String>, values: &mut Rows, query: &str) {
                 }
             }
         });
-    write_file(html_data).unwrap_or_else(|e| println!("{}",e));
+    write_file(html_data).unwrap_or_else(|e| println!("html printer failed with: {}",e));
 }
 
 fn write_file (data: String) -> std::io::Result<()> {
-    let mut file = File::create("src\\inventory.html")?;
+    let mut file: std::fs::File = OpenOptions::new().append(true).open("inventory.html")?;
     file.write_all(data.as_bytes())?;
     Ok(())
 }

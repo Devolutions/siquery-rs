@@ -1,7 +1,7 @@
 
 /target/
 /siquery_cli/src/*.inv
-/siquery_cli/src/inventory.html
+/siquery_cli/inventory.html
 **/*.rs.bk
 Cargo.lock
 .idea/

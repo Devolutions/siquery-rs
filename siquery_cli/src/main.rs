@@ -6,6 +6,7 @@ use siquery::query::{init_db, execute_query};
 use siquery::tables::get_table_list;
 use siquery::printer::{print_schema, print_table_by_name};
 use clap::App;
+use std::fs::File;
 
 #[cfg(target_os = "windows")]
 use siquery::inventory::execute_inventory_query;
@@ -43,6 +44,8 @@ fn main() {
         }
     } else if matches.is_present("html_mode") {
         if table.len() > 0 {
+            let _file = File::create("inventory.html")
+                .map_err(|e| println!("html printer failed with: {:?}",e));
             print_table_by_name(db, table, 3);
         } else if siquery.len() > 0 {
             execute_query(&db, &siquery, 3);
