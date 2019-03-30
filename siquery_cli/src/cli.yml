@@ -4,7 +4,7 @@ about: a system info querying tool
 args:
     - table:
         short: a
-        long: A
+        long: all
         value_name: table
         help: Selects all from table
         takes_value: true
@@ -19,7 +19,8 @@ args:
         value_name: input
         help: Sqlite query command
     - list_all:
-        long: L
+        short: l
+        long: list
         help: Lists all table names
     - csv_mode:
         long: csv
