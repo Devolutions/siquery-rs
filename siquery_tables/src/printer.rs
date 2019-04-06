@@ -156,5 +156,7 @@ pub fn print_table_by_name(db: Connection, table: String, mode: u8) {
             json_table.insert(table_name.to_string(), json!(writer));
         }
     }
-    println!("{}", serde_json::to_string_pretty(&json_table).unwrap());
+    if mode != 3 {
+        println!("{}", serde_json::to_string_pretty(&json_table).unwrap());
+    }
 }

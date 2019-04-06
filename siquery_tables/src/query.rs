@@ -3,6 +3,7 @@ use vtab::*;
 use rusqlite::{version_number, Connection, Error};
 use rusqlite::types::Value;
 use printer::*;
+use html::print_html;
 use serde_json::{Value as serdValue, Map};
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {
@@ -605,6 +606,8 @@ pub fn execute_query(db: &Connection, query: &str, table_name: String, flag: u8)
             let mut response = statement_res.query(&[]).unwrap();
             if flag == 2 {
                 print_csv(col_name_internal, &mut response);
+            } else if flag == 3 {
+                print_html(col_name_internal, &mut response, query);
             } else if flag == 1 {
                 writer = print_json(table_name, &col_name_internal, &mut response);
             } else {
