@@ -12,6 +12,7 @@ use winapi::{
 use winapi::um::errhandlingapi::GetLastError;
 use widestring::WideString;
 use std::{ptr, mem};
+use std::ffi::c_void;
 use libc;
 
 impl LogonSessions {
@@ -102,11 +103,11 @@ fn get_logon_sessions() ->  Vec<LogonSessions> {
 
                 logon_sessions.push(logon_session);
 
-                // FIXME: call LsaFreeReturnBuffer on _session_data
+                LsaFreeReturnBuffer(&mut _session_data as *mut _ as *mut c_void);
             }
         }
 
-        // FIXME: call LsaFreeReturnBuffer on _sessions
+        LsaFreeReturnBuffer(&mut _sessions as *mut _ as *mut c_void);
     }
 
     logon_sessions
