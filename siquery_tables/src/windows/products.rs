@@ -20,40 +20,38 @@ impl Products {
         let mut products: Vec<Products> = Vec::new();
 
         let _hklm_local_microsoft = &RegKey::predef(HKEY_LOCAL_MACHINE);
-        let subkey_local_microsoft = _hklm_local_microsoft.open_subkey_with_flags(
-            r#"Software\Microsoft\Windows\CurrentVersion\Uninstall"#, KEY_READ)
-            .expect("Failed to open subkey");
-        get_products_info(&mut products, subkey_local_microsoft);
+        if let Ok(subkey_local_microsoft) = _hklm_local_microsoft.open_subkey_with_flags(
+            r#"Software\Microsoft\Windows\CurrentVersion\Uninstall"#, KEY_READ) {
+            get_products_info(&mut products, subkey_local_microsoft);
+        }
 
         let _hklm_local_wow6432node = &RegKey::predef(HKEY_LOCAL_MACHINE);
-        let subkey_local_wow6432node = _hklm_local_wow6432node.open_subkey_with_flags(
-            r#"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"#, KEY_READ)
-            .expect("Failed to open subkey");
-        get_products_info(&mut products, subkey_local_wow6432node);
+        if let Ok(subkey_local_wow6432node) = _hklm_local_wow6432node.open_subkey_with_flags(
+            r#"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"#, KEY_READ) {
+            get_products_info(&mut products, subkey_local_wow6432node);
+        }
 
         let _hklm_local_classes = &RegKey::predef(HKEY_LOCAL_MACHINE);
-        let subkey_local_classes = _hklm_local_classes.open_subkey_with_flags(
-            r#"Software\Classes\Installer\Products"#, KEY_READ)
-            .expect("Failed to open subkey");
-        get_products_info(&mut products, subkey_local_classes);
-
+        if let Ok(subkey_local_classes) = _hklm_local_classes.open_subkey_with_flags(
+            r#"Software\Classes\Installer\Products"#, KEY_READ) {
+             get_products_info(&mut products, subkey_local_classes);
+        }
 
         let _hklm_current_user_current_version = &RegKey::predef(HKEY_CURRENT_USER);
-        let subkey_current_user_current_version = _hklm_current_user_current_version.open_subkey_with_flags(
-            r#"Software\Microsoft\Windows\CurrentVersion"#, KEY_READ)
-            .expect("Failed to open subkey");
-        get_products_info(&mut products, subkey_current_user_current_version);
+        if let Ok(subkey_current_user_current_version) = _hklm_current_user_current_version.open_subkey_with_flags(
+            r#"Software\Microsoft\Windows\CurrentVersion"#, KEY_READ) {
+            get_products_info(&mut products, subkey_current_user_current_version);
+        }
 
         let _hklm_current_user_products = &RegKey::predef(HKEY_CURRENT_USER);
-        let subkey_current_user_products = _hklm_current_user_products.open_subkey_with_flags(
-            r#"Software\Microsoft\Installer\Products"#, KEY_READ)
-            .expect("Failed to open subkey");
-        get_products_info(&mut products, subkey_current_user_products);
+        if let Ok(subkey_current_user_products) = _hklm_current_user_products.open_subkey_with_flags(
+            r#"Software\Microsoft\Installer\Products"#, KEY_READ) {
+            get_products_info(&mut products, subkey_current_user_products);
+        }
 
         products
     }
 }
-
 
 pub fn get_products_info(ref mut products: &mut Vec<Products>, hkey: RegKey) {
     for _x in 0..hkey.enum_keys().count() {
