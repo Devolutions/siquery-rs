@@ -4,14 +4,15 @@ use tables::LogonSessions;
 use winapi::{
     um::{
         ntlsa::*,
-        winnt::{PLUID, LUID, PWSTR, LPWSTR, PSID, LARGE_INTEGER}
+        winnt::{LUID, PWSTR, LPWSTR, PSID, LARGE_INTEGER}
     },
-    shared::{minwindef::DWORD,
+    shared::{minwindef::DWORD,ntstatus::*,
              sddl::ConvertSidToStringSidW}
 };
 use winapi::um::errhandlingapi::GetLastError;
 use widestring::WideString;
 use std::{ptr, mem};
+use std::ffi::c_void;
 use libc;
 
 impl LogonSessions {
@@ -43,88 +44,72 @@ impl LogonSessions {
 fn get_logon_sessions() ->  Vec<LogonSessions> {
     let mut logon_sessions: Vec<LogonSessions> = Vec::new();
     unsafe {
-        let kLsaStatusSuccess: i32 = 0;
+        let mut session_count = 0u32;
+        let mut _sessions: *mut LUID = ptr::null_mut();
 
-        let mut session_count_int = 0u32;
-        let session_count: *mut u32 = &mut session_count_int as *mut u32;
+        let mut _status = LsaEnumerateLogonSessions(&mut session_count as *mut u32, &mut _sessions);
 
-        // get sessions array size
-        let mut _sessions: *mut PLUID = ptr::null_mut();
-        let mut session_array: Vec<LUID> = Vec::with_capacity((mem::size_of::<LUID>()) as usize);
-        let psession_array = session_array.as_mut_ptr();
-        _sessions = psession_array as *mut _;
+        if _status == STATUS_SUCCESS {
+            for _i in 0..session_count {
 
-        let mut _status: i32 = 0;
-        _status = LsaEnumerateLogonSessions(session_count, _sessions);
+                let mut _session_data: PSECURITY_LOGON_SESSION_DATA = ptr::null_mut();
 
-        if _status == kLsaStatusSuccess {
-            _sessions = ptr::null_mut();
-            let mut session_array_sized: Vec<LUID> = Vec::with_capacity(session_count_int as usize);
-            let psession_array_sized = session_array_sized.as_mut_ptr();
-            _sessions = psession_array_sized as *mut _;
+                _status = LsaGetLogonSessionData(_sessions.offset(_i as isize), &mut _session_data);
 
-            _status = LsaEnumerateLogonSessions(session_count, _sessions);
-
-            if _status == kLsaStatusSuccess {
-                for _i in 0..session_count_int {
-
-                    let mut _session_data: *mut PSECURITY_LOGON_SESSION_DATA = ptr::null_mut();
-                    let mut session_data_struct: *mut SECURITY_LOGON_SESSION_DATA = mem::uninitialized();
-                    _session_data = session_data_struct as *mut _;
-
-                    _status = LsaGetLogonSessionData(*_sessions, _session_data);
-                    if _status != kLsaStatusSuccess {
-                        *_sessions = (*_sessions).add(1);
-                        continue;
-                    }
-
-                    let mut logon_session = LogonSessions::new();
-
-                    logon_session.logon_id = (**_session_data).LogonId.LowPart as i32;
-
-                    logon_session.user =  pwstr_to_string((**_session_data).UserName.Buffer,
-                                                          (**_session_data).UserName.Length).unwrap_or("".to_string());
-
-                    logon_session.logon_domain = pwstr_to_string((**_session_data).LogonDomain.Buffer,
-                                                                 (**_session_data).LogonDomain.Length).unwrap_or("".to_string());
-
-                    logon_session.authentication_package = pwstr_to_string((**_session_data).AuthenticationPackage.Buffer,
-                                                                           (**_session_data).AuthenticationPackage.Length).unwrap_or("".to_string());
-                    logon_session.logon_type = logon_type_to_string((**_session_data).LogonType);
-
-                    logon_session.session_id = (**_session_data).Session as i32;
-
-                    logon_session.logon_sid = sid_to_string((**_session_data).Sid).unwrap_or("".to_string());
-
-                    logon_session.logon_time = long_int_to_unixtime(&mut (**_session_data).LogonTime);
-
-                    logon_session.logon_server = pwstr_to_string((**_session_data).LogonServer.Buffer,
-                                                                 (**_session_data).LogonServer.Length).unwrap_or("".to_string());
-
-                    logon_session.dns_domain_name = pwstr_to_string((**_session_data).DnsDomainName.Buffer,
-                                                                    (**_session_data).DnsDomainName.Length).unwrap_or("".to_string());
-
-                    logon_session.upn = pwstr_to_string((**_session_data).Upn.Buffer,
-                                                        (**_session_data).Upn.Length).unwrap_or("".to_string());
-
-                    logon_session.logon_script = pwstr_to_string((**_session_data).LogonScript.Buffer,
-                                                                 (**_session_data).LogonScript.Length).unwrap_or("".to_string());
-
-                    logon_session.profile_path = pwstr_to_string((**_session_data).ProfilePath.Buffer,
-                                                                 (**_session_data).ProfilePath.Length).unwrap_or("".to_string());
-
-                    logon_session.home_directory = pwstr_to_string((**_session_data).HomeDirectory.Buffer,
-                                                                   (**_session_data).HomeDirectory.Length).unwrap_or("".to_string());
-
-                    logon_session.home_directory_drive = pwstr_to_string((**_session_data).HomeDirectoryDrive.Buffer,
-                                                                         (**_session_data).HomeDirectoryDrive.Length).unwrap_or("".to_string());
-
-                    *_sessions = (*_sessions).add(1);
-                    logon_sessions.push(logon_session);
+                if _status != STATUS_SUCCESS {
+                    continue; /* STATUS_ACCESS_DENIED most of the time */
                 }
+
+                let mut logon_session = LogonSessions::new();
+
+                logon_session.logon_id = (*_session_data).LogonId.LowPart as i32;
+
+                logon_session.user =  pwstr_to_string((*_session_data).UserName.Buffer,
+                                                      (*_session_data).UserName.Length).unwrap_or("".to_string());
+
+                logon_session.logon_domain = pwstr_to_string((*_session_data).LogonDomain.Buffer,
+                                                             (*_session_data).LogonDomain.Length).unwrap_or("".to_string());
+
+                logon_session.authentication_package = pwstr_to_string((*_session_data).AuthenticationPackage.Buffer,
+                                                                       (*_session_data).AuthenticationPackage.Length).unwrap_or("".to_string());
+                logon_session.logon_type = logon_type_to_string((*_session_data).LogonType);
+
+                logon_session.session_id = (*_session_data).Session as i32;
+
+                logon_session.logon_sid = sid_to_string((*_session_data).Sid).unwrap_or("".to_string());
+
+                logon_session.logon_time = long_int_to_unixtime(&mut (*_session_data).LogonTime);
+
+                logon_session.logon_server = pwstr_to_string((*_session_data).LogonServer.Buffer,
+                                                             (*_session_data).LogonServer.Length).unwrap_or("".to_string());
+
+                logon_session.dns_domain_name = pwstr_to_string((*_session_data).DnsDomainName.Buffer,
+                                                                (*_session_data).DnsDomainName.Length).unwrap_or("".to_string());
+
+                logon_session.upn = pwstr_to_string((*_session_data).Upn.Buffer,
+                                                    (*_session_data).Upn.Length).unwrap_or("".to_string());
+
+                logon_session.logon_script = pwstr_to_string((*_session_data).LogonScript.Buffer,
+                                                             (*_session_data).LogonScript.Length).unwrap_or("".to_string());
+
+                logon_session.profile_path = pwstr_to_string((*_session_data).ProfilePath.Buffer,
+                                                             (*_session_data).ProfilePath.Length).unwrap_or("".to_string());
+
+                logon_session.home_directory = pwstr_to_string((*_session_data).HomeDirectory.Buffer,
+                                                               (*_session_data).HomeDirectory.Length).unwrap_or("".to_string());
+
+                logon_session.home_directory_drive = pwstr_to_string((*_session_data).HomeDirectoryDrive.Buffer,
+                                                                     (*_session_data).HomeDirectoryDrive.Length).unwrap_or("".to_string());
+
+                logon_sessions.push(logon_session);
+
+                LsaFreeReturnBuffer(&mut _session_data as *mut _ as *mut c_void);
             }
         }
+
+        LsaFreeReturnBuffer(&mut _sessions as *mut _ as *mut c_void);
     }
+
     logon_sessions
 }
 
