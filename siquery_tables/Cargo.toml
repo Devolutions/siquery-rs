@@ -50,7 +50,5 @@ nix = "0.11.0"
 version = "^0.14"
 features = ["vtab", "bundled"]
 
-[dependencies.proxy_config]
-version = "0.0.2"
-git = "https://github.com/Devolutions/proxy-config.git"
-rev = "20831ce"
+[dependencies.proxy_cfg]
+version = "0.1.0"
