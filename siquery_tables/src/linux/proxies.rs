@@ -1,4 +1,4 @@
-use proxy_config;
+use proxy_cfg;
 use serde_json;
 
 use tables::ProxiesRow;
@@ -6,7 +6,7 @@ use tables::ProxiesRow;
 impl ProxiesRow {
     pub fn get_specific() -> Vec<ProxiesRow> {
         let mut out = Vec::new();
-        if let Ok(proxy_config::ProxyConfig { proxies, whitelist, .. }) = proxy_config::get_proxy_config() {
+        if let Ok(proxy_cfg::ProxyConfig { proxies, whitelist, .. }) = proxy_cfg::get_proxy_config() {
             for (protocol,url) in proxies {
                 out.push(
                     ProxiesRow{

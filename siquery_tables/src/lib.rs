@@ -14,7 +14,7 @@ extern crate time;
 extern crate rusqlite;
 extern crate csv;
 extern crate prettytable;
-extern crate proxy_config;
+extern crate proxy_cfg;
 extern crate treexml;
 extern crate heck;
 extern crate chrono;
