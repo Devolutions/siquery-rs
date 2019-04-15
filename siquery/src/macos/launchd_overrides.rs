@@ -5,10 +5,9 @@ use std::{
     path::{
         Path,
         PathBuf
-    },
-    fs::File
+    }
 };
-use plist::Plist;
+use plist::Value;
 
 use tables::LaunchdOverridesRow;
 
@@ -23,8 +22,7 @@ impl LaunchdOverridesRow {
             .map_err(|e| e.to_string())? {
             match entry {
                 Ok(path) => {
-                    if let Some(Plist::Dictionary(overrides)) = File::open(&path).ok()
-                        .and_then(|file| Plist::read(file).ok()){
+                    if let Some(Value::Dictionary(overrides)) = Value::from_file(&path).ok() {
                         /* Example:
                         <key>com.apple.AppleFileServer</key>    -> label
                         <dict>
