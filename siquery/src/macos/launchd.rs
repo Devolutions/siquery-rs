@@ -1,6 +1,6 @@
 use walkdir::{WalkDir,DirEntry,Error};
-use std::{path::Path,fs::File};
-use plist::Plist;
+use std::{path::Path};
+use plist::Value;
 
 use tables::{LaunchdRow,Users};
 
@@ -52,8 +52,7 @@ impl LaunchdRow {
             .to_str().ok_or("Could not get filename string.")?
             .to_owned();
 
-        if let Some(Plist::Dictionary(dictionary)) = File::open(&row.path).ok()
-            .and_then(|file| Plist::read(file).ok()){
+        if let Some(Value::Dictionary(dictionary)) = Value::from_file(&row.path).ok() {
             for (k,v) in dictionary.iter() {
                 if let Some(value) = v.as_string(){
                     let string_value = value.to_string();

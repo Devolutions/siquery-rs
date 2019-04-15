@@ -1,19 +1,17 @@
-use plist::Plist;
-use std::fs::File;
+use plist::Value;
 use std::borrow::Borrow;
 
 use tables::OsVersion;
 
 pub trait OsVersionReaderIface {
-    fn get_os_info(&self) -> Option<Plist>;
+    fn get_os_info(&self) -> Option<Value>;
 }
 
 struct Reader {}
 
 impl OsVersionReaderIface for Reader {
-    fn get_os_info(&self) -> Option<Plist> {
-        File::open("/System/Library/CoreServices/SystemVersion.plist").ok()
-            .and_then(|file| Plist::read(file).ok())
+    fn get_os_info(&self) -> Option<Value> {
+        Value::from_file("/System/Library/CoreServices/SystemVersion.plist").ok()
     }
 }
 
@@ -26,12 +24,12 @@ impl OsVersion {
         let mut version = String::new();
         let mut major = 0;
         let mut minor = 0;
-        if let Some(Plist::Dictionary(dict)) = system_version {
-                    if let Some(&Plist::String(ref n)) = dict.get("ProductName") {
+        if let Some(Value::Dictionary(dict)) = system_version {
+                    if let Some(&Value::String(ref n)) = dict.get("ProductName") {
                         name = n.clone();
                     }
 
-                    if let Some(&Plist::String(ref n)) = dict.get("ProductVersion") {
+                    if let Some(&Value::String(ref n)) = dict.get("ProductVersion") {
                         version = n.clone();
                         let v: Vec<_> = version.split(".").collect();
                         if v.len() >= 2 {
@@ -62,11 +60,13 @@ impl OsVersion {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::{Cursor,BufReader};
     pub struct Test {}
     impl OsVersionReaderIface for Test {
-        fn get_os_info(&self) -> Option<Plist> {
-            File::open("../siquery_tables/test_data/SystemVersion.plist").ok()
-                .and_then(|file| Plist::read(file).ok())
+        fn get_os_info(&self) -> Option<Value> {
+            const SYSTEM_VERSION_PLIST: &'static [u8] = include_bytes!("../../test_data/SystemVersion.plist");
+            let plist_reader = BufReader::new(Cursor::new(SYSTEM_VERSION_PLIST));
+            Value::from_reader(plist_reader).ok()
         }
     }
     #[test]
