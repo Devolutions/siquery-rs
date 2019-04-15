@@ -17,7 +17,7 @@ FLAGS:
              --csv        Sets 'csv' output mode
          -h, --help       Prints help information
              --json       Sets 'json' output mode
-             --L          Lists all table names
+         -l, --list       Lists all table names
              --pretty     Sets 'print_pretty' output mode
          -V, --version    Prints version information
          -v               Sets the level of verbosity
