@@ -1,7 +1,13 @@
 [package]
 name = "siquery"
-version = "0.1.0"
+version = "1.2.0"
+readme = "../README.md"
+license = "MIT/Apache-2.0"
+homepage = "https://github.com/devolutions/siquery-rs"
+repository = "https://github.com/devolutions/siquery-rs"
 authors = ["Sébastien Duquette <sduquette@devolutions.net>"]
+description = "siquery, a Rust osquery implementation to query system information"
+keywords = ["query", "system", "information", "osquery"]
 build = "build.rs"
 
 [dependencies]

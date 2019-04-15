@@ -1,7 +1,13 @@
 [package]
 name = "siquery_cli"
-version = "0.1.0"
+version = "1.2.0"
+readme = "../README.md"
+license = "MIT/Apache-2.0"
+homepage = "https://github.com/devolutions/siquery-rs"
+repository = "https://github.com/devolutions/siquery-rs"
 authors = ["Marc-André Moreau <marcandre.moreau@gmail.com>"]
+description = "siquery, a Rust osquery implementation to query system information"
+keywords = ["query", "system", "information", "osquery"]
 
 [[bin]]
 name = "siquery"
@@ -18,3 +24,4 @@ time = "0.1.40"
 
 [dependencies.siquery]
 path = "../siquery_tables"
+version = "1.2.0"
