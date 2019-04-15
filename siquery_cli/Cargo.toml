@@ -23,5 +23,5 @@ serde_json = "1.0"
 time = "0.1.40"
 
 [dependencies.siquery]
-path = "../siquery_tables"
+path = "../siquery"
 version = "1.2.0"

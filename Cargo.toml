@@ -1,8 +1,5 @@
 [workspace]
 members = [
-    "siquery_cli",
-    "siquery_tables"
+    "siquery",
+    "siquery_cli"
 ]
-
-[profile.release]
-lto = true
