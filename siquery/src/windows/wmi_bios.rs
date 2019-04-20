@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiBios,WmiBiosIface};
-use utils;
+use crate::tables::{WmiBios,WmiBiosIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiBiosIface for Reader {

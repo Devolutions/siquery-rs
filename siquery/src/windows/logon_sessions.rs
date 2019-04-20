@@ -1,6 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
-use tables::LogonSessions;
+use crate::tables::LogonSessions;
 use winapi::{
     um::{
         ntlsa::*,

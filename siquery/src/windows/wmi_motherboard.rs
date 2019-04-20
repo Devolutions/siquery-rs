@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiMotherboard,WmiMotherboardIface};
-use utils;
+use crate::tables::{WmiMotherboard,WmiMotherboardIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiMotherboardIface for Reader {

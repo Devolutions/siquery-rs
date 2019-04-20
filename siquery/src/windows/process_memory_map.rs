@@ -3,7 +3,7 @@ use winapi::um::tlhelp32::{MODULEENTRY32W,CreateToolhelp32Snapshot,Module32First
 use winapi::um::processthreadsapi::OpenProcess;
 use winapi::um::memoryapi::VirtualQueryEx;
 use std::{ptr,mem};
-use tables::{ProcessMemoryMapRow};
+use crate::tables::{ProcessMemoryMapRow};
 use winapi::um::winnt::PROCESS_QUERY_INFORMATION;
 use winapi::shared::minwindef::FALSE;
 use winapi::um::tlhelp32::{TH32CS_SNAPMODULE,TH32CS_SNAPMODULE32};
@@ -17,7 +17,7 @@ use winapi::um::winbase::FormatMessageW;
 use winapi::um::winbase::FORMAT_MESSAGE_FROM_SYSTEM;
 use winapi::um::errhandlingapi::GetLastError;
 
-use tables::ProcessesRow;
+use crate::tables::ProcessesRow;
 
 impl ProcessMemoryMapRow {
     pub fn new() -> ProcessMemoryMapRow {

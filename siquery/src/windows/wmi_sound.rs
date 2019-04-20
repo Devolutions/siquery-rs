@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiSound,WmiSoundIface};
-use utils;
+use crate::tables::{WmiSound,WmiSoundIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiSoundIface for Reader {

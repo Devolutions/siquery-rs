@@ -1,7 +1,7 @@
 use proxy_cfg::macos::{get_proxy_config_ex,Reader,ProxyConfigReader};
 use std::borrow::Borrow;
 
-use tables::ProxiesRow;
+use crate::tables::ProxiesRow;
 
 impl ProxiesRow {
     pub fn get_specific() -> Vec<ProxiesRow> {

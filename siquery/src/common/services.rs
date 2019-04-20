@@ -1,15 +1,15 @@
-use tables::{EtcServices,EtcServicesIface};
+use crate::tables::{EtcServices,EtcServicesIface};
 use regex::Regex;
 use std::str::FromStr;
 use std::borrow::Borrow;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
-        use linux::EtcServicesReader;
+        use crate::linux::EtcServicesReader;
     } else if #[cfg(target_os = "macos")] {
-       use macos::EtcServicesReader;
+       use crate::macos::EtcServicesReader;
     } else if #[cfg(target_os = "windows")] {
-        use windows::EtcServicesReader;
+        use crate::windows::EtcServicesReader;
     }
 }
 

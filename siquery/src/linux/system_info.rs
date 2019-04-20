@@ -4,8 +4,8 @@ use std::fs::File;
 use std::io::Read;
 use sysconf::raw::{sysconf, SysconfVariable};
 
-use tables::{SystemInfoData,SystemInfoDataIface};
-use utils;
+use crate::tables::{SystemInfoData,SystemInfoDataIface};
+use crate::utils;
 
 struct CpuInfo {
     cpu_brand: String,

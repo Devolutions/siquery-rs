@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiTimeZone, WmiTimeZoneIface};
-use utils;
+use crate::tables::{WmiTimeZone, WmiTimeZoneIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiTimeZoneIface for Reader {

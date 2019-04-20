@@ -2,7 +2,7 @@ use std::ffi::CStr;
 use libc::{ c_int,statfs };
 use std::{ ptr,slice };
 
-use tables::MountsRow;
+use crate::tables::MountsRow;
 
 extern "C" {
     #[cfg_attr(target_os = "macos", link_name = "getmntinfo$INODE64")]

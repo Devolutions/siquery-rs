@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiKeyboard,WmiKeyboardIface};
-use utils;
+use crate::tables::{WmiKeyboard,WmiKeyboardIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiKeyboardIface for Reader {

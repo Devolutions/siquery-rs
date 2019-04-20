@@ -1,15 +1,15 @@
 use regex::Regex;
 use std::net::IpAddr;
-use tables::{EtcHosts,EtcHostsIface};
+use crate::tables::{EtcHosts,EtcHostsIface};
 use std::borrow::Borrow;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
-        use linux::EtcHostsReader;
+        use crate::linux::EtcHostsReader;
     } else if #[cfg(target_os = "macos")] {
-       use macos::EtcHostsReader;
+       use crate::macos::EtcHostsReader;
     } else if #[cfg(target_os = "windows")] {
-        use windows::EtcHostsReader;
+        use crate::windows::EtcHostsReader;
     }
 }
 

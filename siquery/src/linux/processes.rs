@@ -3,7 +3,7 @@ use regex::Regex;
 use std::io::Read;
 use std::fs::{read_dir, File, canonicalize, read_link};
 
-use tables::{
+use crate::tables::{
     ProcessesRow,
     ProcessEnvsRow,
     ProcessMemoryMapRow,

@@ -1,4 +1,4 @@
-use tables::LogicalDrive;
+use crate::tables::LogicalDrive;
 
 impl LogicalDrive {
     pub(crate) fn new() -> LogicalDrive {

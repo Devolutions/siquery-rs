@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiNetworkAdapters,WmiNetworkAdaptersIface};
-use utils;
+use crate::tables::{WmiNetworkAdapters,WmiNetworkAdaptersIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiNetworkAdaptersIface for Reader {

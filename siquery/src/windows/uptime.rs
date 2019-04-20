@@ -1,6 +1,4 @@
-extern crate kernel32;
-
-use tables::Uptime;
+use crate::tables::Uptime;
 
 impl Uptime {
     pub fn get_specific() -> Vec<Uptime> {

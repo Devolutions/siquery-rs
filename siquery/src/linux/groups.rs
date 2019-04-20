@@ -10,7 +10,7 @@ use std::{
 };
 use std::collections::HashSet;
 
-use tables::GroupsRow;
+use crate::tables::GroupsRow;
 
 impl GroupsRow {
     pub fn get_specific() -> Vec<GroupsRow> {
@@ -19,7 +19,7 @@ impl GroupsRow {
         unsafe {setgrent()};
         let mut group_p: *mut group = unsafe {getgrent()};
         while group_p != ptr::null_mut() {
-            let groupname = unsafe{CStr::from_ptr(unsafe {*group_p}.gr_name).to_str().unwrap_or("")};
+            let groupname = unsafe {CStr::from_ptr((*group_p).gr_name).to_str().unwrap_or("")};
             if !hash_set.contains(groupname) {
                 hash_set.insert(groupname);
                 out.push(

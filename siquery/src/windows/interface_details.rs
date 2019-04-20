@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{InterfaceDetails,InterfaceDetailsIface};
-use utils;
+use crate::tables::{InterfaceDetails,InterfaceDetailsIface};
+use crate::utils;
 
 
 pub(crate) struct Reader {}

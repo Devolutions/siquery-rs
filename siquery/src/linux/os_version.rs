@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Read;
 use uname;
 
-use tables::{OsVersion,OsVersionIface};
+use crate::tables::{OsVersion,OsVersionIface};
 
 pub struct Reader {
     uname_info: Option<uname::Info>,

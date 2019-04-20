@@ -1,6 +1,6 @@
 use proxy_cfg;
 
-use tables::ProxiesRow;
+use crate::tables::ProxiesRow;
 
 impl ProxiesRow {
     pub fn get_specific() -> Vec<ProxiesRow> {

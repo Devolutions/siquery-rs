@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{LogicalDrive,LogicalDriveIface};
-use utils;
+use crate::tables::{LogicalDrive,LogicalDriveIface};
+use crate::utils;
 
 pub struct Reader {}
 impl LogicalDriveIface for Reader {

@@ -1,8 +1,6 @@
 #![allow(unused_assignments)]
 
-extern crate winapi;
-
-use utils;
+use crate::utils;
 use std::{
     os::raw::c_void,
     mem::size_of,
@@ -84,7 +82,7 @@ use winapi::{
 use libc;
 use widestring::WideString;
 
-use tables::{
+use crate::tables::{
     ProcessesRow,
     ProcessesIface
 };

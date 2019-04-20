@@ -17,7 +17,7 @@ use std::{
     collections::HashMap
 };
 
-use tables::ProcessesRow;
+use crate::tables::ProcessesRow;
 
 pub struct ProcCred {
     parent: uint32_t,

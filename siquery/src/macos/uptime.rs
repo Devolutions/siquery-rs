@@ -1,10 +1,7 @@
-extern crate libc;
-extern crate time;
-
 use std::mem;
 use std::ptr;
 
-use tables::Uptime;
+use crate::tables::Uptime;
 
 impl Uptime {
     pub fn get_specific() -> Vec<Uptime> {

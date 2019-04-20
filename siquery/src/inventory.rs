@@ -10,7 +10,7 @@ use chrono::{NaiveDate,NaiveDateTime};
 use std::fs::File;
 use std::io::prelude::*;
 
-use tables::*;
+use crate::tables::*;
 
 fn ip_address() -> Element {
     let mut ip_address = Element::new("IPAddress");

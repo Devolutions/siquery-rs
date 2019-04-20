@@ -1,4 +1,4 @@
-use tables::Users;
+use crate::tables::Users;
 use winreg::RegKey;
 use winreg::enums::*;
 use std::{ptr, mem, i64::MAX};

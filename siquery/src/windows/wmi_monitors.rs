@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiMonitors,WmiMonitorsIface};
-use utils;
+use crate::tables::{WmiMonitors,WmiMonitorsIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiMonitorsIface for Reader {

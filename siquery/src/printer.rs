@@ -1,10 +1,8 @@
-extern crate serde;
-extern crate serde_json;
 use csv::{WriterBuilder, Terminator};
 use rusqlite::{Rows, Connection, Row as RusqliteRow, types::{Value, Type}};
 use prettytable::{Table, row::Row, cell::Cell};
-use tables::get_table_list;
-use query::{get_schema, execute_query};
+use crate::tables::get_table_list;
+use crate::query::{get_schema, execute_query};
 use serde_json::{Value as serdValue, Map};
 
 pub fn print_csv(columns: Vec<String>, values: &mut Rows) {

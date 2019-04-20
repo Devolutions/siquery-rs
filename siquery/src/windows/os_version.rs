@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{OsVersion,OsVersionIface};
-use utils;
+use crate::tables::{OsVersion,OsVersionIface};
+use crate::utils;
 
 pub struct Reader {}
 impl OsVersionIface for Reader {

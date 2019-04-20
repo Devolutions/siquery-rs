@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{SystemInfoData,SystemInfoDataIface};
-use utils;
+use crate::tables::{SystemInfoData,SystemInfoDataIface};
+use crate::utils;
 
 pub struct Reader {}
 impl SystemInfoDataIface for Reader {

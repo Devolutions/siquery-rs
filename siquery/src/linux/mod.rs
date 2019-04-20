@@ -3,9 +3,9 @@ use std::io::Read;
 #[allow(unused_imports)]
 // TODO implement to_json
 use serde_json;
-#[cfg(feature = "etc_hosts")] use tables::EtcHostsIface;
-#[cfg(feature = "etc_services")] use tables::EtcServicesIface;
-#[cfg(feature = "etc_protocols")] use tables::EtcProtocolsIface;
+#[cfg(feature = "etc_hosts")] use crate::tables::EtcHostsIface;
+#[cfg(feature = "etc_services")] use crate::tables::EtcServicesIface;
+#[cfg(feature = "etc_protocols")] use crate::tables::EtcProtocolsIface;
 #[cfg(feature = "logical_drive")] mod logical_drive;
 #[cfg(feature = "interface_address")] mod interface_address;
 #[cfg(feature = "interface_details")] mod interface_details;
