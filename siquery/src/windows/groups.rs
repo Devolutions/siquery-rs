@@ -48,10 +48,10 @@ use winapi::{
 use widestring::WideString;
 use libc;
 
-use tables::{
+use crate::tables::{
     GroupsRow,
 };
-use windows::processes;
+use crate::windows::processes;
 
 #[allow(non_upper_case_globals)]
 static NERR_Success: DWORD = 0;

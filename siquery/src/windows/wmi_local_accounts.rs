@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiLocalAccounts,WmiLocalAccountsIface};
-use utils;
+use crate::tables::{WmiLocalAccounts,WmiLocalAccountsIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiLocalAccountsIface for Reader {

@@ -1,5 +1,5 @@
 #![allow(warnings)]
-use tables::LoggedInUsers;
+use crate::tables::LoggedInUsers;
 use winapi::{
     shared::
     {

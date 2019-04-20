@@ -2,7 +2,7 @@ use walkdir::{WalkDir,DirEntry,Error};
 use std::{path::Path};
 use plist::Value;
 
-use tables::{LaunchdRow,Users};
+use crate::tables::{LaunchdRow,Users};
 
 const LAUNCHD_SEARCH_PATHS: [&'static str;4] = [
     "/System/Library/LaunchDaemons",

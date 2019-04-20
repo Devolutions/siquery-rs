@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiHotfixes,WmiHotfixesIface};
-use utils;
+use crate::tables::{WmiHotfixes,WmiHotfixesIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiHotfixesIface for Reader {

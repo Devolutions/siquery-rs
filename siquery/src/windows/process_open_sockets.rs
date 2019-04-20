@@ -2,7 +2,7 @@
 #![allow(non_camel_case_types)]
 
 use std::{ptr,net::Ipv4Addr,net::Ipv6Addr};
-use tables::ProcessOpenSocketsRow;
+use crate::tables::ProcessOpenSocketsRow;
 use winapi::shared::minwindef::{
     DWORD,
     PDWORD,

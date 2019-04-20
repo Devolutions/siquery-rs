@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiPointingDevice,WmiPointingDeviceIface};
-use utils;
+use crate::tables::{WmiPointingDevice,WmiPointingDeviceIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiPointingDeviceIface for Reader {

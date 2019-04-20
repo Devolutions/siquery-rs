@@ -1,7 +1,7 @@
 use plist::Value;
 use std::borrow::Borrow;
 
-use tables::OsVersion;
+use crate::tables::OsVersion;
 
 pub trait OsVersionReaderIface {
     fn get_os_info(&self) -> Option<Value>;

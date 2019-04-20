@@ -12,7 +12,7 @@ use chrono::offset::Local;
 use std::io::prelude::*;
 use std::fs::OpenOptions;
 
-use tables::{
+use crate::tables::{
     SystemInfoData
 };
 

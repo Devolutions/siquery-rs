@@ -1,4 +1,4 @@
-use tables::{ProcessEnvsRow, ProcessesRow};
+use crate::tables::{ProcessEnvsRow, ProcessesRow};
 
 impl ProcessEnvsRow {
     pub fn get_specific() -> Vec<ProcessEnvsRow> {

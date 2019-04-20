@@ -1,15 +1,15 @@
 use regex::Regex;
-use tables::{EtcProtocols,EtcProtocolsIface};
+use crate::tables::{EtcProtocols,EtcProtocolsIface};
 use std::str::FromStr;
 use std::borrow::Borrow;
 
 cfg_if! {
     if #[cfg(target_os = "linux")] {
-        use linux::EtcProtocolsReader;
+        use crate::linux::EtcProtocolsReader;
     } else if #[cfg(target_os = "macos")] {
-       use macos::EtcProtocolsReader;
+       use crate::macos::EtcProtocolsReader;
     } else if #[cfg(target_os = "windows")] {
-        use windows::EtcProtocolsReader;
+        use crate::windows::EtcProtocolsReader;
     }
 }
 

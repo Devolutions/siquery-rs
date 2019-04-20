@@ -23,7 +23,7 @@ use objc_foundation::{
 };
 use objc_id::Id;
 
-use tables::GroupsRow;
+use crate::tables::GroupsRow;
 
 impl GroupsRow {
     pub fn get_specific() -> Vec<GroupsRow> {

@@ -9,7 +9,7 @@ use std::{
 };
 use plist::Value;
 
-use tables::LaunchdOverridesRow;
+use crate::tables::LaunchdOverridesRow;
 
 impl LaunchdOverridesRow {
     pub fn get_specific() -> Vec<LaunchdOverridesRow> {

@@ -1,4 +1,4 @@
-use tables::LoggedInUsers;
+use crate::tables::LoggedInUsers;
 use libc::{getutxent, endutxent};
 use libc::utmpx;
 use libc::{EMPTY,

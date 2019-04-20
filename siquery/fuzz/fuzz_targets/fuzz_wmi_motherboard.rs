@@ -1,7 +1,6 @@
 #![no_main]
 #[macro_use] extern crate cfg_if;
 #[macro_use] extern crate libfuzzer_sys;
-extern crate siquery;
 
 use siquery::tables::{WmiMotherboardIface,WmiMotherboard};
 

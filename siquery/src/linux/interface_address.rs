@@ -1,4 +1,4 @@
-use tables::InterfaceAddress;
+use crate::tables::InterfaceAddress;
 use nix::ifaddrs;
 use libc::*;
 

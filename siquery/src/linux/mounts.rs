@@ -3,7 +3,7 @@ use libc::getmntent;    // Reads the next line and returns a mntent struct. [1]
 use libc::mntent;
 use libc::endmntent;       // Closes the file handle.
 use libc::statfs;
-use tables::MountsRow;
+use crate::tables::MountsRow;
 use std::{ptr,mem};
 use libc::FILE;
 use std::os::raw::c_char;

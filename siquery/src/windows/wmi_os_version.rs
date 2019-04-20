@@ -1,8 +1,8 @@
 use std::process::Command;
 use std::borrow::Borrow;
 
-use tables::{WmiOsVersion,WmiOsVersionIface};
-use utils;
+use crate::tables::{WmiOsVersion,WmiOsVersionIface};
+use crate::utils;
 
 pub struct Reader {}
 impl WmiOsVersionIface for Reader {

@@ -1,4 +1,4 @@
-use tables::InterfaceDetails;
+use crate::tables::InterfaceDetails;
 use nix::sys::socket::SockAddr;
 use libc::*;
 use std::{mem, ptr, ffi::CStr, str, fs::{read_dir, File}, io::prelude::*};

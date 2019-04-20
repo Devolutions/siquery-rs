@@ -1,9 +1,9 @@
-use tables::*;
-use vtab::*;
+use crate::tables::*;
+use crate::vtab::*;
 use rusqlite::{version_number, Connection, Error};
 use rusqlite::types::Value;
-use printer::*;
-use html::print_html;
+use crate::printer::*;
+use crate::html::print_html;
 use serde_json::{Value as serdValue, Map};
 
 fn select_all<T>(table: &Vec<T>) -> Vec<Vec<Value>> where T:Table+Sized {

@@ -1,4 +1,4 @@
-use tables::Users;
+use crate::tables::Users;
 use libc::{getpwent, passwd,endpwent,c_char};
 use std::{
     ffi::CStr,

@@ -1,8 +1,6 @@
-extern crate libc;
-
 use std::mem;
 
-use tables::Uptime;
+use crate::tables::Uptime;
 
 impl Uptime {
 

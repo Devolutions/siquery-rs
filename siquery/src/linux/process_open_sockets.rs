@@ -3,7 +3,7 @@ use std::fs::{read_dir, File, read_link};
 use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use tables::{ProcessOpenSocketsRow, ProcessesRow};
+use crate::tables::{ProcessOpenSocketsRow, ProcessesRow};
 
 pub struct InternalProcNamespaces {
     cgroup_namespace: String,

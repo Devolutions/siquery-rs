@@ -1,4 +1,4 @@
-use tables::Products;
+use crate::tables::Products;
 use winreg::RegKey;
 use winreg::enums::*;
 use chrono::{NaiveDate};

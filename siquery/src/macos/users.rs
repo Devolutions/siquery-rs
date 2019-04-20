@@ -23,7 +23,7 @@ use objc_foundation::{
 };
 use objc_id::Id;
 
-use tables::Users;
+use crate::tables::Users;
 
 extern "C" {
     fn uuid_unparse(uu: *mut c_uchar, out: *mut c_char) -> c_int;
