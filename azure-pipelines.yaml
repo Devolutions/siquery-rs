@@ -22,7 +22,7 @@ stages:
             clean: true
             fetchDepth: 1
 
-          - script: cp VERSION $(Build.ArtifactStagingDirectory)/latest.txt
+          - script: echo `cat VERSION`-`cat REVISION` > $(Build.ArtifactStagingDirectory)/latest.txt
             displayName: Generating latest.txt
 
           - task: PublishBuildArtifacts@1
