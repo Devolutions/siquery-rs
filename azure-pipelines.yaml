@@ -1,0 +1,191 @@
+name: $(BuildID)
+
+trigger:
+  branches:
+    include:
+      - master
+
+jobs:
+  - job: linux32
+    pool:
+      name: 'Devolutions - Linux containers'
+
+    workspace:
+      clean: all
+
+    container: devolutions/waykbuilder:linux
+
+    steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 1
+
+      - script: sudo apt-get install -y libc6-dev-i386
+        displayName: Install Linux 32 bit libc
+
+      - script: rustup target install i686-unknown-linux-gnu
+        displayName: Install Linux 32 bit Rust target
+
+      - script: cargo build --target i686-unknown-linux-gnu --release
+        displayName: Building siquery
+
+      - task: ArchiveFiles@2
+        inputs:
+          rootFolderOrFile: $(Build.Repository.LocalPath)/target/i686-unknown-linux-gnu/release/siquery
+          archiveType: 7z
+          includeRootFolder: false
+          archiveFile: $(Build.ArtifactStagingDirectory)/linux/x86/siquery.7z
+        displayName: Generate 7z
+
+      - script: |
+          cp $(Build.Repository.LocalPath)/target/i686-unknown-linux-gnu/release/siquery $(Build.ArtifactStagingDirectory)/linux/x86/
+          sha256sum $(Build.ArtifactStagingDirectory)/linux/x86/siquery | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/linux/x86/siquery.sha256
+          sha256sum $(Build.ArtifactStagingDirectory)/linux/x86/siquery.7z | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/linux/x86/siquery.7z.sha256
+        displayName: Post-build
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: siquery
+
+  - job: linux64
+    pool:
+      name: 'Devolutions - Linux containers'
+
+    workspace:
+      clean: all
+
+    container: devolutions/waykbuilder:linux
+
+    steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 1
+
+      - script: cargo build --target x86_64-unknown-linux-gnu --release
+        displayName: Building siquery
+
+      - task: ArchiveFiles@2
+        inputs:
+          rootFolderOrFile: $(Build.Repository.LocalPath)/target/x86_64-unknown-linux-gnu/release/siquery
+          archiveType: 7z
+          includeRootFolder: false
+          archiveFile: $(Build.ArtifactStagingDirectory)/linux/x86_64/siquery.7z
+        displayName: Generate 7z
+
+      - script: |
+          cp $(Build.Repository.LocalPath)/target/x86_64-unknown-linux-gnu/release/siquery $(Build.ArtifactStagingDirectory)/linux/x86_64/
+          sha256sum $(Build.ArtifactStagingDirectory)/linux/x86_64/siquery | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/linux/x86_64/siquery.sha256
+          sha256sum $(Build.ArtifactStagingDirectory)/linux/x86_64/siquery.7z | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/linux/x86_64/siquery.7z.sha256
+        displayName: Post-build
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: siquery
+
+  - job: macOS
+    pool:
+      name: 'Devolutions - macOS'
+
+    workspace:
+      clean: all
+
+    steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 1
+
+      - script: cargo build --target x86_64-apple-darwin --release
+        displayName: Building siquery
+
+      - task: ArchiveFiles@2
+        inputs:
+          rootFolderOrFile: $(Build.Repository.LocalPath)/target/x86_64-apple-darwin/release/siquery
+          archiveType: 7z
+          includeRootFolder: false
+          archiveFile: $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery.7z
+        displayName: Generate 7z
+
+      - script: |
+          cp $(Build.Repository.LocalPath)/target/x86_64-apple-darwin/release/siquery $(Build.ArtifactStagingDirectory)/macos/x86_64/
+          shasum -a 256 $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery.sha256
+          shasum -a 256 $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery.7z | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery.7z.sha256
+        displayName: Post-build
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: siquery
+
+  - job: windows64
+    pool:
+      name: 'Devolutions - Windows containers'
+
+    workspace:
+      clean: all
+
+    container: devolutions/waykbuilder:vstools2k19
+
+    steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 1
+
+      - script: cargo build --target x86_64-pc-windows-msvc --release
+        displayName: Building siquery
+
+      - task: ArchiveFiles@2
+        inputs:
+          rootFolderOrFile: $(Build.Repository.LocalPath)/target/x86_64-pc-windows-msvc/release/siquery.exe
+          archiveType: 7z
+          includeRootFolder: false
+          archiveFile: $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.7z
+        displayName: Generate 7z
+
+      - powershell: |
+          cp $(Build.Repository.LocalPath)/target/x86_64-pc-windows-msvc/release/siquery.exe $(Build.ArtifactStagingDirectory)/windows/x86_64/
+          Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.exe  | Select-Object -ExpandProperty Hash > $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.exe.sha256
+          Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.7z  | Select-Object -ExpandProperty Hash > $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.7z.sha256
+        displayName: Post-build
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: siquery
+
+  - job: windows32
+    pool:
+      name: 'Devolutions - Windows containers'
+
+    workspace:
+      clean: all
+
+    container: devolutions/waykbuilder:vstools2k19
+
+    steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 1
+
+      - script: cargo build --target i686-pc-windows-msvc --release
+        displayName: Building siquery
+
+      - task: ArchiveFiles@2
+        inputs:
+          rootFolderOrFile: $(Build.Repository.LocalPath)/target/i686-pc-windows-msvc/release/siquery.exe
+          archiveType: 7z
+          includeRootFolder: false
+          archiveFile: $(Build.ArtifactStagingDirectory)/windows/x86/siquery.7z
+        displayName: Generate 7z
+
+      - powershell: |
+          cp $(Build.Repository.LocalPath)/target/i686-pc-windows-msvc/release/siquery.exe $(Build.ArtifactStagingDirectory)/windows/x86/
+          Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86/siquery.exe  | Select-Object -ExpandProperty Hash > $(Build.ArtifactStagingDirectory)/windows/x86/siquery.exe.sha256
+          Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86/siquery.7z  | Select-Object -ExpandProperty Hash > $(Build.ArtifactStagingDirectory)/windows/x86/siquery.7z.sha256
+        displayName: Post-build
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: siquery
