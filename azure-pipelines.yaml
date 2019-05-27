@@ -171,8 +171,8 @@ stages:
 
           - powershell: |
               cp $(Build.Repository.LocalPath)/target/x86_64-pc-windows-msvc/release/siquery.exe $(Build.ArtifactStagingDirectory)/windows/x86_64/
-              Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.exe  | Select-Object -ExpandProperty Hash | Out-File -Encoding utf8 -FilePath $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.exe.sha256
-              Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.7z  | Select-Object -ExpandProperty Hash | Out-File -Encoding utf8 -FilePath $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.7z.sha256
+              (Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.exe | Select-Object -ExpandProperty Hash).ToLower() | Out-File -Encoding ASCII -FilePath $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.exe.sha256
+              (Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.7z | Select-Object -ExpandProperty Hash).ToLower() | Out-File -Encoding ASCII -FilePath $(Build.ArtifactStagingDirectory)/windows/x86_64/siquery.7z.sha256
             displayName: Post-build
 
           - task: PublishBuildArtifacts@1
@@ -207,8 +207,8 @@ stages:
 
           - powershell: |
               cp $(Build.Repository.LocalPath)/target/i686-pc-windows-msvc/release/siquery.exe $(Build.ArtifactStagingDirectory)/windows/x86/
-              Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86/siquery.exe  | Select-Object -ExpandProperty Hash | Out-File -Encoding utf8 -FilePath $(Build.ArtifactStagingDirectory)/windows/x86/siquery.exe.sha256
-              Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86/siquery.7z  | Select-Object -ExpandProperty Hash | Out-File -Encoding utf8 -FilePath $(Build.ArtifactStagingDirectory)/windows/x86/siquery.7z.sha256
+              (Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86/siquery.exe | Select-Object -ExpandProperty Hash).ToLower() | Out-File -Encoding ASCII -FilePath $(Build.ArtifactStagingDirectory)/windows/x86/siquery.exe.sha256
+              (Get-FileHash $(Build.ArtifactStagingDirectory)/windows/x86/siquery.7z | Select-Object -ExpandProperty Hash).ToLower() | Out-File -Encoding ASCII -FilePath $(Build.ArtifactStagingDirectory)/windows/x86/siquery.7z.sha256
             displayName: Post-build
 
           - task: PublishBuildArtifacts@1
