@@ -42,21 +42,21 @@ impl Users {
 
 pub fn gen_users(users: &mut Vec<Users>, pwd: *mut passwd) {
     let mut user = Users::new();
-    unsafe{
+    unsafe {
         user.uid = (*pwd).pw_uid as i64;
         user.gid = (*pwd).pw_gid as i64;
         user.uid_signed = (*pwd).pw_uid as i32 as i64;
         user.gid_signed = (*pwd).pw_gid as i32 as i64;
-        if (*pwd).pw_name != ptr::null_mut() {
+        if !(*pwd).pw_name.is_null() {
             user.username = c_string_to_string((*pwd).pw_name);
         }
-        if (*pwd).pw_gecos != ptr::null_mut() {
+        if !(*pwd).pw_gecos.is_null() {
             user.description = c_string_to_string((*pwd).pw_gecos);
         }
-        if (*pwd).pw_dir != ptr::null_mut() {
+        if !(*pwd).pw_dir.is_null() {
             user.directory = c_string_to_string((*pwd).pw_dir);
         }
-        if (*pwd).pw_shell != ptr::null_mut() {
+        if !(*pwd).pw_shell.is_null() {
             user.shell = c_string_to_string((*pwd).pw_shell);
         }
         user.uuid = "".to_string();

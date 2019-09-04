@@ -41,7 +41,7 @@ impl MountsRow {
                 CString::new("r").ok()?.as_ptr() as *const i8
             )
         };
-        if mounts == ptr::null_mut::<FILE>() {
+        if mounts.is_null() {
             return {
                 None
             };
@@ -50,33 +50,33 @@ impl MountsRow {
         let mut ent_ptr: *mut mntent = ptr::null_mut::<mntent>();
         loop {
             ent_ptr = unsafe { getmntent(mounts) };
-            if ent_ptr != ptr::null_mut() {
+            if !ent_ptr.is_null() {
                 let mut row = MountsRow::new();
                 let ent = unsafe{ *ent_ptr };
 
-                row.device = unsafe{
+                row.device = unsafe {
                     CStr::from_ptr(ent.mnt_fsname).to_str().unwrap_or("invalid data").to_owned()
                 };
-                row.path = unsafe{
+                row.path = unsafe {
                     CStr::from_ptr(ent.mnt_dir).to_str().unwrap_or("invalid data").to_owned()
                 };
-                row.device_type = unsafe{
+                row.device_type = unsafe {
                     CStr::from_ptr(ent.mnt_type).to_str().unwrap_or("invalid data").to_owned()
                 };
-                row.flags = unsafe{
+                row.flags = unsafe {
                     CStr::from_ptr(ent.mnt_opts).to_str().unwrap_or("invalid data").to_owned()
                 };
 
                 let canonical_file_name_ptr = unsafe {
                     canonicalize_file_name(ent.mnt_fsname)
                 };
-                if canonical_file_name_ptr != ptr::null_mut() {
-                    row.device_alias = unsafe{
+                if !canonical_file_name_ptr.is_null() {
+                    row.device_alias = unsafe {
                         CStr::from_ptr(canonical_file_name_ptr).to_str().unwrap_or("").to_owned()
                     };
                 } else {
                     // canonicalize_file_name() returns ENOENT[2] on names without forward slashes.
-                    row.device_alias = unsafe{
+                    row.device_alias = unsafe {
                         CStr::from_ptr(ent.mnt_fsname).to_str().unwrap_or("invalid data").to_owned()
                     };
                 }
