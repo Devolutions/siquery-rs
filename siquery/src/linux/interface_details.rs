@@ -60,7 +60,8 @@ impl InterfaceDetails {
         let mut output: Vec<InterfaceDetails> = Vec::new();
         let mut interface_detail;
 
-        let mut addrs: *mut ifaddrs = unsafe { mem::uninitialized() };
+        let mut addrs_uninit =  mem::MaybeUninit::uninit();
+        let mut addrs: *mut ifaddrs = addrs_uninit.as_mut_ptr();
 
         if unsafe { getifaddrs(&mut addrs) } != 0 || addrs == ptr::null_mut() {
             return output
