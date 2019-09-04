@@ -32,7 +32,7 @@ impl EtcServices {
         }
     }
 
-    pub fn get_specific_ex(reader: &EtcServicesIface) -> Vec<EtcServices> {
+    pub fn get_specific_ex(reader: &dyn EtcServicesIface) -> Vec<EtcServices> {
 
         let mut services: Vec<EtcServices> = Vec::new();
 
@@ -106,7 +106,7 @@ impl EtcServices {
     }
 
     pub fn get_specific() -> Vec<EtcServices> {
-        let reader: Box<EtcServicesIface> = Box::new(EtcServicesReader{});
+        let reader: Box<dyn EtcServicesIface> = Box::new(EtcServicesReader{});
         let out = EtcServices::get_specific_ex(reader.borrow());
         out
     }
@@ -123,7 +123,7 @@ mod tests {
     }
     #[test]
     fn test_etc_services() {
-        let reader: Box<EtcServicesIface> = Box::new(EtcServicesTest {});
+        let reader: Box<dyn EtcServicesIface> = Box::new(EtcServicesTest {});
         let etc_services = EtcServices::get_specific_ex(reader.borrow());
         assert_eq!(etc_services.get(0).unwrap().name, "echo");
         assert_eq!(etc_services.get(0).unwrap().port, 7);

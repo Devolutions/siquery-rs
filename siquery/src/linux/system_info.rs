@@ -55,7 +55,7 @@ impl SystemInfoData {
         }
     }
 
-    pub fn get_specific_ex(reader: &SystemInfoDataIface) -> Vec<SystemInfoData> {
+    pub fn get_specific_ex(reader: &dyn SystemInfoDataIface) -> Vec<SystemInfoData> {
         let mut output : Vec<SystemInfoData> = Vec::new();
         let mut system_info = SystemInfoData::new();
         system_info.computer_name = reader.hostname().unwrap_or_else(|| String::from(""));
@@ -64,7 +64,7 @@ impl SystemInfoData {
             Some(s) => {
                 let n = s.split('\n').find(|line| line.starts_with("MemTotal"))
                          .and_then(|line| line.split(':').last())
-                         .and_then(|v| v.trim_left_matches(' ').split(' ').next())
+                         .and_then(|v| v.trim_start_matches(' ').split(' ').next())
                          .and_then(|v| v.parse::<i64>().ok());
                 n.unwrap_or(0) * 1024
             }
@@ -80,7 +80,7 @@ impl SystemInfoData {
         output
     }
 
-    fn get_cpu_info(&mut self, reader: &SystemInfoDataIface) -> Option<CpuInfo> {
+    fn get_cpu_info(&mut self, reader: &dyn SystemInfoDataIface) -> Option<CpuInfo> {
         let s = reader.cpuinfo()?;
         let model_name = s.split('\n').find(|line| line.starts_with("model name"))
                           .and_then(|line| line.split(':').last())
@@ -91,7 +91,7 @@ impl SystemInfoData {
     }
 
     pub(crate) fn get_specific() -> Vec<SystemInfoData> {
-        let reader: Box<SystemInfoDataIface> = Box::new(Reader{});
+        let reader: Box<dyn SystemInfoDataIface> = Box::new(Reader{});
         let out = SystemInfoData::get_specific_ex(reader.borrow());
         out
     }
@@ -123,7 +123,7 @@ mod tests {
     }
     #[test]
     fn test_system_info() {
-        let reader: Box<SystemInfoDataIface> = Box::new(Test{});
+        let reader: Box<dyn SystemInfoDataIface> = Box::new(Test{});
         let system_info = &SystemInfoData::get_specific_ex(reader.borrow())[0];
         assert_eq!(system_info.computer_name, "galaxy500");
         assert_eq!(system_info.cpu_brand, "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz");
