@@ -173,6 +173,8 @@ stages:
 
           - script: cargo build --target x86_64-pc-windows-msvc --release
             displayName: Building siquery
+            env:
+              RUSTFLAGS: -Ctarget-feature=+crt-static
 
           - script: signtool sign /n Devolutions /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 /v $(Build.Repository.LocalPath)/target/x86_64-pc-windows-msvc/release/siquery.exe
 
@@ -221,6 +223,8 @@ stages:
 
           - script: cargo build --target i686-pc-windows-msvc --release
             displayName: Building siquery
+            env:
+              RUSTFLAGS: -Ctarget-feature=+crt-static
 
           - script: signtool sign /n Devolutions /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 /v $(Build.Repository.LocalPath)/target/i686-pc-windows-msvc/release/siquery.exe
 
