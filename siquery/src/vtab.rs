@@ -16,7 +16,7 @@ pub fn load_module(conn: &Connection) -> Result<()> {
 }
 
 lazy_static! {
-    static ref SIQUERY_MODULE: Module<SiqueryTab> = read_only_module::<SiqueryTab>(1);
+    static ref SIQUERY_MODULE: &'static Module<SiqueryTab> = read_only_module::<SiqueryTab>();
 }
 
 #[repr(C)]
@@ -41,7 +41,7 @@ impl SiqueryTab {
     }
 }
 
-impl VTab for SiqueryTab {
+unsafe impl VTab for SiqueryTab {
     type Aux = ();
     type Cursor = SiqueryTabCursor;
 
@@ -107,7 +107,7 @@ struct SiqueryTabCursor {
     eot : bool,
 }
 
-impl VTabCursor for SiqueryTabCursor {
+unsafe impl VTabCursor for SiqueryTabCursor {
 
     fn filter(
         &mut self,
@@ -158,6 +158,7 @@ impl VTabCursor for SiqueryTabCursor {
 
 #[test]
 fn test_siquery_module() {
+    use rusqlite::NO_PARAMS;
     use crate::query::init_db;
 
     let db = init_db();
@@ -165,12 +166,12 @@ fn test_siquery_module() {
 
     match stmt {
         Ok(mut stmt_resp) => {
-            let mut resp = stmt_resp.query(&[]).unwrap();
+            let mut resp = stmt_resp.query(NO_PARAMS).unwrap();
             loop {
-                if let Some(val) = resp.next() {
-                    if let Some(v) = val.ok() {
-                        assert_eq!(25, v.get::<usize, u32>(0));
-                        assert_eq!(25, v.get::<usize, i32>(1));
+                if let Ok(val) = resp.next() {
+                    if let Some(v) = val {
+                        assert_eq!(25, v.get_unwrap::<usize, u32>(0));
+                        assert_eq!(25, v.get_unwrap::<usize, i32>(1));
                     } else {
                         break
                     }

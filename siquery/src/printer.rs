@@ -17,26 +17,24 @@ pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
     //write header first
     wtr.write_record(columns).expect("could not write columns");
     loop {
-        if let Some(v) = values.next(){
-            if let Some (res) = v.ok() {
-                for i in 0..res.column_count() {
-                    let val = Value::data_type(&res.get(i));
-                    match val {
-                        Type::Real | Type::Integer => {
-                            row.push(res.get::<usize,i64>(i).to_string());
-                        },
-                        Type::Text => {
-                            row.push(res.get::<usize,String>(i))
-                        },
-                        _ => {
-                            // Do nothing.
-                        }
+        if let Ok(Some(res)) = values.next(){
+            for i in 0..res.column_count() {
+                let val = Value::data_type(&res.get_unwrap(i));
+                match val {
+                    Type::Real | Type::Integer => {
+                        row.push(res.get_unwrap::<usize,i64>(i).to_string());
+                    },
+                    Type::Text => {
+                        row.push(res.get_unwrap::<usize,String>(i))
+                    },
+                    _ => {
+                        // Do nothing.
                     }
                 }
-                // write row values
-                wtr.write_record(row).expect("could not write row");;
-                row = Vec::new();
             }
+            // write row values
+            wtr.write_record(row).expect("could not write row");;
+            row = Vec::new();
         } else {
             break
         }
@@ -50,25 +48,23 @@ pub fn print_pretty(columns: Vec<String>, values: &mut Rows) {
     //write header first
     table.set_titles(columns.iter().collect());
     loop {
-        if let Some(v) = values.next(){
-            if let Some (res) = v.ok() {
-                for i in 0..res.column_count() {
-                    let val = Value::data_type(&res.get(i));
-                    match val {
-                        Type::Real | Type::Integer => {
-                            row.add_cell(Cell::new(&res.get::<usize,i64>(i).to_string()));
-                        },
-                        Type::Text => {
-                            row.add_cell(Cell::new(&res.get::<usize,String>(i)))
-                        },
-                        _ => {
-                            // Do nothing.
-                        }
+        if let Ok(Some(res)) = values.next(){
+            for i in 0..res.column_count() {
+                let val = Value::data_type(&res.get_unwrap(i));
+                match val {
+                    Type::Real | Type::Integer => {
+                        row.add_cell(Cell::new(&res.get_unwrap::<usize,i64>(i).to_string()));
+                    },
+                    Type::Text => {
+                        row.add_cell(Cell::new(&res.get_unwrap::<usize,String>(i)))
+                    },
+                    _ => {
+                        // Do nothing.
                     }
                 }
-                table.add_row(row);
-                row = Row::empty();
             }
+            table.add_row(row);
+            row = Row::empty();
         } else {
             break
         }
@@ -76,15 +72,13 @@ pub fn print_pretty(columns: Vec<String>, values: &mut Rows) {
     println!("{}", table);
 }
 
-pub fn print_json (table_name: String, col_names: &Vec<String>, values: &mut Rows) -> Vec<Map<String,serdValue>> {
+pub fn print_json(table_name: String, col_names: &Vec<String>, values: &mut Rows) -> Vec<Map<String,serdValue>> {
     let mut writer: Vec<Map<String,serdValue>> = Vec::new();
     let mut _value: Map<String, serdValue> = Map::new();
     loop {
-        if let Some(v) = values.next() {
-            if let Some(res) = v.ok() {
-                _value = format_to_json(&col_names, &res);
-                writer.push(_value);
-            }
+        if let Ok(Some(res)) = values.next() {
+            _value = format_to_json(&col_names, &res);
+            writer.push(_value);
         } else {
             break
         }
@@ -96,27 +90,27 @@ pub fn print_json (table_name: String, col_names: &Vec<String>, values: &mut Row
     writer
 }
 
-fn format_to_json (col_names: &Vec<String>, row_value : &RusqliteRow) -> Map<String, serdValue> {
+fn format_to_json(col_names: &Vec<String>, row_value : &RusqliteRow) -> Map<String, serdValue> {
     let mut value_json: Map<String, serdValue> = Map::new();
-    match Value::data_type(&row_value.get(0)) {
+    match Value::data_type(&row_value.get_unwrap(0)) {
         Type::Real | Type::Integer => {
-            value_json.insert(col_names[0].clone(),json!(row_value.get::<usize,i64>(0)));
+            value_json.insert(col_names[0].clone(),json!(row_value.get_unwrap::<usize,i64>(0)));
         },
         Type::Text => {
-            value_json.insert(col_names[0].clone(),json!(row_value.get::<usize,String>(0)));
+            value_json.insert(col_names[0].clone(),json!(row_value.get_unwrap::<usize,String>(0)));
         },
         _ => {
             // Do nothing.
         }
     }
     for i in 1..row_value.column_count() {
-        let v: Value = row_value.get(i);
+        let v: Value = row_value.get_unwrap(i);
         match Value::data_type(&v) {
             Type::Real | Type::Integer => {
-                value_json.insert(col_names[i].clone(),json!(row_value.get::<usize,i64>(i)));
+                value_json.insert(col_names[i].clone(),json!(row_value.get_unwrap::<usize,i64>(i)));
             },
             Type::Text => {
-                value_json.insert(col_names[i].clone(),json!(row_value.get::<usize,String>(i)));
+                value_json.insert(col_names[i].clone(),json!(row_value.get_unwrap::<usize,String>(i)));
             },
             _ => {
                 // Do nothing.
