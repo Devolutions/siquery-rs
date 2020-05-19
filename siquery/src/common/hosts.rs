@@ -27,7 +27,7 @@ impl EtcHosts {
         }
     }
 
-    pub fn get_specific_ex(reader: &EtcHostsIface) -> Vec<EtcHosts> {
+    pub fn get_specific_ex(reader: &dyn EtcHostsIface) -> Vec<EtcHosts> {
         let mut hosts: Vec<EtcHosts> = Vec::new();
 
         for line in reader
@@ -62,7 +62,7 @@ impl EtcHosts {
     }
 
     pub fn get_specific() -> Vec<EtcHosts> {
-        let reader: Box<EtcHostsIface> = Box::new(EtcHostsReader{});
+        let reader: Box<dyn EtcHostsIface> = Box::new(EtcHostsReader{});
         let out = EtcHosts::get_specific_ex(reader.borrow());
         out
     }
@@ -79,7 +79,7 @@ mod tests {
     }
     #[test]
     fn test_etc_hosts() {
-        let reader: Box<EtcHostsIface> = Box::new(EtcHostsTest {});
+        let reader: Box<dyn EtcHostsIface> = Box::new(EtcHostsTest {});
         let etc_hosts = EtcHosts::get_specific_ex(reader.borrow());
         assert_eq!(etc_hosts.get(0).unwrap().address, "127.0.0.1");
         assert_eq!(etc_hosts.get(0).unwrap().hostnames, "localhost");

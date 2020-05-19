@@ -43,7 +43,7 @@ impl WmiServices {
         }
     }
 
-    pub fn get_specific_ex (reader: &WmiServicesIface) -> Vec<WmiServices> {
+    pub fn get_specific_ex (reader: &dyn WmiServicesIface) -> Vec<WmiServices> {
 
         let mut output: Vec<WmiServices> = Vec::new();
 
@@ -135,7 +135,7 @@ impl WmiServices {
     }
 
     pub(crate) fn get_specific () -> Vec<WmiServices> {
-        let reader: Box<WmiServicesIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiServicesIface> = Box::new(Reader{});
         let out = WmiServices::get_specific_ex(reader.borrow());
         out
     }
@@ -152,7 +152,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_services () {
-        let reader: Box<WmiServicesIface> = Box::new(Test{});
+        let reader: Box<dyn WmiServicesIface> = Box::new(Test{});
         let test_services = &WmiServices::get_specific_ex(reader.borrow())[0];
         assert_eq!(test_services.accept_pause, "false");
         assert_eq!(test_services.accept_stop, "true");

@@ -31,7 +31,7 @@ impl WmiMemory {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiMemoryIface) -> Vec<WmiMemory> {
+    pub fn get_specific_ex(reader: &dyn WmiMemoryIface) -> Vec<WmiMemory> {
 
         let mut physical_memories: Vec<WmiMemory> = Vec::new();
 
@@ -102,7 +102,7 @@ impl WmiMemory {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiMemory> {
-        let reader: Box<WmiMemoryIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiMemoryIface> = Box::new(Reader{});
         let out = WmiMemory::get_specific_ex(reader.borrow());
         out
     }
@@ -119,7 +119,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_physical_memory () {
-        let reader: Box<WmiMemoryIface> = Box::new(Test{});
+        let reader: Box<dyn WmiMemoryIface> = Box::new(Test{});
         let physical_memory = &WmiMemory::get_specific_ex(reader.borrow())[0];
         assert_eq!(physical_memory.name, "Physical Memory");
         assert_eq!(physical_memory.bank_label, "BANK 0");

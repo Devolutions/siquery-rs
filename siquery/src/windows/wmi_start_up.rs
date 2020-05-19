@@ -26,7 +26,7 @@ impl WmiStartUp {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiStartUpIface) -> Vec<WmiStartUp> {
+    pub fn get_specific_ex(reader: &dyn WmiStartUpIface) -> Vec<WmiStartUp> {
 
         let mut start_ups: Vec<WmiStartUp> = Vec::new();
 
@@ -73,7 +73,7 @@ impl WmiStartUp {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiStartUp> {
-        let reader: Box<WmiStartUpIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiStartUpIface> = Box::new(Reader{});
         let out = WmiStartUp::get_specific_ex(reader.borrow());
         out
     }

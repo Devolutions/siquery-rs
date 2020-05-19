@@ -39,7 +39,7 @@ impl InterfaceDetails {
         }
     }
 
-    pub(crate) fn get_specific_ex(system_reader: &InterfaceDetailsIface) -> Vec<InterfaceDetails> {
+    pub(crate) fn get_specific_ex(system_reader: &dyn InterfaceDetailsIface) -> Vec<InterfaceDetails> {
         let mut interfaces: Vec<InterfaceDetails> = Vec::new();
 
         if let Some(interface_info) = system_reader.get_wmi_nicconfig_details() {
@@ -89,7 +89,7 @@ impl InterfaceDetails {
     }
 
     pub(crate) fn get_specific() -> Vec<InterfaceDetails> {
-        let reader: Box<InterfaceDetailsIface> = Box::new(Reader{});
+        let reader: Box<dyn InterfaceDetailsIface> = Box::new(Reader{});
         let out = InterfaceDetails::get_specific_ex(reader.borrow());
         out
     }
@@ -106,7 +106,7 @@ mod tests {
     }
     #[test]
     fn test_interface_details () {
-        let reader: Box<InterfaceDetailsIface> = Box::new(Test{});
+        let reader: Box<dyn InterfaceDetailsIface> = Box::new(Test{});
         let interface_details = &InterfaceDetails::get_specific_ex(reader.borrow())[0];
         assert_eq!(InterfaceDetails::get_specific_ex(reader.borrow()).len(), 1);
         assert_eq!(interface_details.interface, "1");

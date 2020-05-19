@@ -28,7 +28,7 @@ struct SiqueryTab {
 
 impl SiqueryTab {
     fn parameter(c_slice: &[u8]) -> Result<(&str, &str)> {
-        let arg = r#try!(str::from_utf8(c_slice)).trim();
+        let arg = str::from_utf8(c_slice)?.trim();
         let mut split = arg.split('=');
         if let Some(key) = split.next() {
             if let Some(value) = split.next() {
@@ -62,7 +62,7 @@ unsafe impl VTab for SiqueryTab {
         let args= &_args[3..];
 
         for c_slice in args {
-            let (param, value) = r#try!(SiqueryTab::parameter(c_slice));
+            let (param, value) = SiqueryTab::parameter(c_slice)?;
             match param {
                 "table_name" => {
                     vtab.table_name = value.to_string();

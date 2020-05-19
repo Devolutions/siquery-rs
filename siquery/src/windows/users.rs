@@ -111,7 +111,7 @@ fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String
 
             for _i in 0..unsafe { *dw_num_users_read }  {
                 let mut user = Users::new();
-                let mut dw_detailed_user_info_level: c_ulong = 4;
+                let dw_detailed_user_info_level: c_ulong = 4;
                 let mut user_lvl_4buff: Vec<*mut u8> = Vec::with_capacity((mem::size_of::<USER_INFO_4>()) as usize);
 
                 ret = unsafe {
@@ -133,8 +133,8 @@ fn process_local_accounts(users: &mut Vec<Users>, processed_sid: &mut Vec<String
                     continue;
                 }
                 // Will return empty string on fail
-                let mut lp_user_info_4: LPUSER_INFO_4 = unsafe { ptr::read(user_lvl_4buff.as_mut_ptr() as _) };
-                let mut sid: *mut c_void = unsafe { (*lp_user_info_4).usri4_user_sid };
+                let lp_user_info_4: LPUSER_INFO_4 = unsafe { ptr::read(user_lvl_4buff.as_mut_ptr() as _) };
+                let sid: *mut c_void = unsafe { (*lp_user_info_4).usri4_user_sid };
                 unsafe {
                     if let Ok(username) = lpwstr_to_string((*iter_buff).usri3_name) {
                         user.username = username;
@@ -185,7 +185,7 @@ fn process_roaming_profiles(users: &mut Vec<Users>, processed_sid: &mut Vec<Stri
     let hklm = &RegKey::predef(HKEY_LOCAL_MACHINE);
 
     if let Ok(profile) = hklm.open_subkey_with_flags(key, KEY_READ) {
-        let mut type_ : String = "".to_string();
+        let type_ : String = "".to_string();
 
         for _x in 0..profile.enum_keys().count() {
             let mut user = Users::new();
@@ -220,7 +220,7 @@ fn process_roaming_profiles(users: &mut Vec<Users>, processed_sid: &mut Vec<Stri
                     if !known_sid {
                         user.type_ = "roaming".to_string();
                     }
-                    let mut sid: *mut PSID = convert_string_sid_to_sid(sid_string.clone());
+                    let sid: *mut PSID = convert_string_sid_to_sid(sid_string.clone());
                     user.username = get_roaming_profiles_username(sid);
                     user.shell = "C:\\Windows\\system32\\cmd.exe".to_string();
                     user.description = "".to_string();

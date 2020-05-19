@@ -32,7 +32,7 @@ impl WmiVideo {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiVideoIface) -> Vec<WmiVideo> {
+    pub fn get_specific_ex(reader: &dyn WmiVideoIface) -> Vec<WmiVideo> {
 
         let mut videos: Vec<WmiVideo> = Vec::new();
 
@@ -66,7 +66,7 @@ impl WmiVideo {
                     },
                     "AdapterRAM" => {
                         // convert bytes to GB
-                        let mut ram = v.parse::<u32>().unwrap_or(0) / 1073741824;
+                        let ram = v.parse::<u32>().unwrap_or(0) / 1073741824;
                         video.adapter_ram = ram;
                     },
                     "Availability" => {
@@ -110,7 +110,7 @@ impl WmiVideo {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiVideo> {
-        let reader: Box<WmiVideoIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiVideoIface> = Box::new(Reader{});
         let out = WmiVideo::get_specific_ex(reader.borrow());
         out
     }
@@ -127,7 +127,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_video () {
-        let reader: Box<WmiVideoIface> = Box::new(Test{});
+        let reader: Box<dyn WmiVideoIface> = Box::new(Test{});
         let video_info = &WmiVideo::get_specific_ex(reader.borrow())[0];
         assert_eq!(WmiVideo::get_specific_ex(reader.borrow()).len(), 3);
         assert_eq!(video_info.name, "Graphic Design Institute 940MX");

@@ -31,7 +31,7 @@ impl EtcProtocols {
         }
     }
 
-    pub fn get_specific_ex(reader: &EtcProtocolsIface) -> Vec<EtcProtocols> {
+    pub fn get_specific_ex(reader: &dyn EtcProtocolsIface) -> Vec<EtcProtocols> {
         let mut protocols: Vec<EtcProtocols> = Vec::new();
 
         for line in reader
@@ -83,7 +83,7 @@ impl EtcProtocols {
     }
 
     pub fn get_specific() -> Vec<EtcProtocols> {
-        let reader: Box<EtcProtocolsIface> = Box::new(EtcProtocolsReader{});
+        let reader: Box<dyn EtcProtocolsIface> = Box::new(EtcProtocolsReader{});
         let out = EtcProtocols::get_specific_ex(reader.borrow());
         out
     }
@@ -100,7 +100,7 @@ mod tests {
     }
     #[test]
     fn test_etc_protocols () {
-        let reader: Box<EtcProtocolsIface> = Box::new(EtcProtocolsTest {});
+        let reader: Box<dyn EtcProtocolsIface> = Box::new(EtcProtocolsTest {});
         let etc_protocols = EtcProtocols::get_specific_ex(reader.borrow());
         assert_eq!(etc_protocols.get(0).unwrap().name, "ip");
         assert_eq!(etc_protocols.get(0).unwrap().number, 0);

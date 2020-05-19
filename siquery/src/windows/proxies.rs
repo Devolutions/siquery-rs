@@ -9,7 +9,7 @@ impl ProxiesRow {
             for (protocol,url) in proxies {
                 out.push(
                     ProxiesRow{
-                        url:url.to_string().trim_right_matches('/').to_string(),
+                        url:url.to_string().trim_end_matches('/').to_string(),
                         protocol,
                         host:url.host_str().unwrap_or("").to_string(),
                         port:url.port().unwrap_or(0),

@@ -1,6 +1,6 @@
 use std::env;
 
-const WINDOWS_TABLES: &'static [(&'static str)] = &[
+const WINDOWS_TABLES: &'static [&'static str] = &[
     "etc_hosts",
     "etc_protocols",
     "etc_services",
@@ -41,7 +41,7 @@ const WINDOWS_TABLES: &'static [(&'static str)] = &[
     "proxies"
 ];
 
-const LINUX_TABLES: &'static [(&'static str)] = &[
+const LINUX_TABLES: &'static [&'static str] = &[
     "etc_hosts",
     "etc_protocols",
     "etc_services",
@@ -61,7 +61,7 @@ const LINUX_TABLES: &'static [(&'static str)] = &[
     "proxies"
 ];
 
-const MACOS_TABLES: &'static [(&'static str)] = &[
+const MACOS_TABLES: &'static [&'static str] = &[
     "etc_hosts",
     "etc_protocols",
     "etc_services",
@@ -79,7 +79,7 @@ const MACOS_TABLES: &'static [(&'static str)] = &[
     "launchd_overrides",
 ];
 
-fn emit_features(features: &'static [(&'static str)]) {
+fn emit_features(features: &'static [&'static str]) {
     for feature in features.iter() {
         println!("cargo:rustc-cfg=feature=\"{}\"", feature);
     }

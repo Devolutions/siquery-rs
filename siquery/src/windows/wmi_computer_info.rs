@@ -25,7 +25,7 @@ impl WmiComputerInfo {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiComputerInfoIface) -> Vec<WmiComputerInfo> {
+    pub fn get_specific_ex(reader: &dyn WmiComputerInfoIface) -> Vec<WmiComputerInfo> {
         let mut output : Vec<WmiComputerInfo> = Vec::new();
         let mut computer = WmiComputerInfo::new();
 
@@ -72,7 +72,7 @@ impl WmiComputerInfo {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiComputerInfo> {
-        let reader: Box<WmiComputerInfoIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiComputerInfoIface> = Box::new(Reader{});
         let out = WmiComputerInfo::get_specific_ex(reader.borrow());
         out
     }
@@ -89,7 +89,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_computer_info () {
-        let reader: Box<WmiComputerInfoIface> = Box::new(Test{});
+        let reader: Box<dyn WmiComputerInfoIface> = Box::new(Test{});
         let wmi_computer_info = &WmiComputerInfo::get_specific_ex(reader.borrow())[0];
         assert_eq!(wmi_computer_info.computer_name, "Lucerne Publishing");
         assert_eq!(wmi_computer_info.domain, "STANDALONE");

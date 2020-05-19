@@ -28,7 +28,7 @@ impl WmiLocalAccounts {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiLocalAccountsIface) -> Vec<WmiLocalAccounts> {
+    pub fn get_specific_ex(reader: &dyn WmiLocalAccountsIface) -> Vec<WmiLocalAccounts> {
 
         let mut local_accounts: Vec<WmiLocalAccounts> = Vec::new();
 
@@ -108,7 +108,7 @@ impl WmiLocalAccounts {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiLocalAccounts> {
-        let reader: Box<WmiLocalAccountsIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiLocalAccountsIface> = Box::new(Reader{});
         let out = WmiLocalAccounts::get_specific_ex(reader.borrow());
         out
     }
@@ -125,7 +125,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_local_account () {
-        let reader: Box<WmiLocalAccountsIface> = Box::new(Test{});
+        let reader: Box<dyn WmiLocalAccountsIface> = Box::new(Test{});
         let wmi_local_accounts = &WmiLocalAccounts::get_specific_ex(reader.borrow())[0];
         assert_eq!(wmi_local_accounts.account_type, "Server trust account");
         assert_eq!(wmi_local_accounts.caption, "bipbip\\Acc");

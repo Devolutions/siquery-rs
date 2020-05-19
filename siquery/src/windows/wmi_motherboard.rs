@@ -14,7 +14,7 @@ impl WmiMotherboardIface for Reader {
 }
 
 impl WmiMotherboard {
-    pub fn get_specific_ex(reader: &WmiMotherboardIface) -> Vec<WmiMotherboard> {
+    pub fn get_specific_ex(reader: &dyn WmiMotherboardIface) -> Vec<WmiMotherboard> {
         let mut output : Vec<WmiMotherboard> = Vec::new();
         let mut motherboard = WmiMotherboard {
             name: String::new(),
@@ -63,7 +63,7 @@ impl WmiMotherboard {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiMotherboard> {
-        let reader: Box<WmiMotherboardIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiMotherboardIface> = Box::new(Reader{});
         let out = WmiMotherboard::get_specific_ex(reader.borrow());
         out
     }
@@ -80,7 +80,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_motherboard () {
-        let reader: Box<WmiMotherboardIface> = Box::new(Test{});
+        let reader: Box<dyn WmiMotherboardIface> = Box::new(Test{});
         let motherboard_info = &WmiMotherboard::get_specific_ex(reader.borrow())[0];
         assert_eq!(motherboard_info.name, "Base Board");
         assert_eq!(motherboard_info.manufacturer, " The Phone Company");

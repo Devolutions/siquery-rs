@@ -29,7 +29,7 @@ impl WmiShares {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiSharesIface) -> Vec<WmiShares> {
+    pub fn get_specific_ex(reader: &dyn WmiSharesIface) -> Vec<WmiShares> {
 
         let mut shares: Vec<WmiShares> = Vec::new();
 
@@ -112,7 +112,7 @@ impl WmiShares {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiShares> {
-        let reader: Box<WmiSharesIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiSharesIface> = Box::new(Reader{});
         let out = WmiShares::get_specific_ex(reader.borrow());
         out
     }
@@ -129,7 +129,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_shares () {
-        let reader: Box<WmiSharesIface> = Box::new(Test{});
+        let reader: Box<dyn WmiSharesIface> = Box::new(Test{});
         let test_shares = &WmiShares::get_specific_ex(reader.borrow())[0];
         assert_eq!(test_shares.name, "print$");
         assert_eq!(test_shares.caption, "Printer Drivers");
