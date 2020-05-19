@@ -171,12 +171,12 @@ stages:
               Import-PfxCertificate -FilePath $(signingCert.secureFilePath) -CertStoreLocation Cert:\CurrentUser\My -Password $secureString
             displayName: Import signing certificate
 
-          - script: cargo build --target x86_64-pc-windows-msvc --release
+          - powershell: cargo build --target x86_64-pc-windows-msvc --release
             displayName: Building siquery
             env:
               RUSTFLAGS: -Ctarget-feature=+crt-static
 
-          - script: signtool sign /n Devolutions /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 /v $(Build.Repository.LocalPath)/target/x86_64-pc-windows-msvc/release/siquery.exe
+          - powershell: signtool sign /n Devolutions /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 /v $(Build.Repository.LocalPath)/target/x86_64-pc-windows-msvc/release/siquery.exe
 
           - task: ArchiveFiles@2
             inputs:
@@ -221,12 +221,12 @@ stages:
               Import-PfxCertificate -FilePath $(signingCert.secureFilePath) -CertStoreLocation Cert:\CurrentUser\My -Password $secureString
             displayName: Import signing certificate
 
-          - script: cargo build --target i686-pc-windows-msvc --release
+          - powershell: cargo build --target i686-pc-windows-msvc --release
             displayName: Building siquery
             env:
               RUSTFLAGS: -Ctarget-feature=+crt-static
 
-          - script: signtool sign /n Devolutions /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 /v $(Build.Repository.LocalPath)/target/i686-pc-windows-msvc/release/siquery.exe
+          - powershell: signtool sign /n Devolutions /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 /v $(Build.Repository.LocalPath)/target/i686-pc-windows-msvc/release/siquery.exe
 
           - task: ArchiveFiles@2
             inputs:
