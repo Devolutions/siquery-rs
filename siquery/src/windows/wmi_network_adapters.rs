@@ -26,7 +26,7 @@ impl WmiNetworkAdapters {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiNetworkAdaptersIface) -> Vec<WmiNetworkAdapters> {
+    pub fn get_specific_ex(reader: &dyn WmiNetworkAdaptersIface) -> Vec<WmiNetworkAdapters> {
 
         let mut network_adapters: Vec<WmiNetworkAdapters> = Vec::new();
         if let Some(network_adapter_info) = reader.get_wmi_network_adapters_info() {
@@ -81,7 +81,7 @@ impl WmiNetworkAdapters {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiNetworkAdapters> {
-        let reader: Box<WmiNetworkAdaptersIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiNetworkAdaptersIface> = Box::new(Reader{});
         let out = WmiNetworkAdapters::get_specific_ex(reader.borrow());
         out
     }
@@ -113,7 +113,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_network_adapters () {
-        let reader: Box<WmiNetworkAdaptersIface> = Box::new(Test{});
+        let reader: Box<dyn WmiNetworkAdaptersIface> = Box::new(Test{});
         let wmi_network_adapter = &WmiNetworkAdapters::get_specific_ex(reader.borrow())[0];
         assert_eq!(wmi_network_adapter.description, "VMware Virtual Ethernet Adapter for VMnet8");
         assert_eq!(wmi_network_adapter.database_path, "%SystemRoot%\\System32\\drivers\\etc");

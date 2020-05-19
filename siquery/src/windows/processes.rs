@@ -276,7 +276,7 @@ impl ProcessesRow {
         gid
     }
 
-    pub(crate) fn get_specific_ex (reader: &ProcessesIface) -> Vec<ProcessesRow> {
+    pub(crate) fn get_specific_ex (reader: &dyn ProcessesIface) -> Vec<ProcessesRow> {
         let mut out: Vec<ProcessesRow> = Vec::new();
         let current_pid = unsafe{GetCurrentProcessId()} as i64;
 
@@ -335,19 +335,19 @@ impl ProcessesRow {
                             };
                         }
                         processes_row.cwd = String::from_utf16(&file_name).unwrap_or("could not parse cwd".to_string());
-                        let mut create_time: *mut FILETIME = &mut FILETIME {
+                        let create_time: *mut FILETIME = &mut FILETIME {
                             dwLowDateTime: 0,
                             dwHighDateTime: 0,
                         };
-                        let mut exit_time: *mut FILETIME = &mut FILETIME {
+                        let exit_time: *mut FILETIME = &mut FILETIME {
                             dwLowDateTime: 0,
                             dwHighDateTime: 0,
                         };
-                        let mut kernel_time: *mut FILETIME = &mut FILETIME {
+                        let kernel_time: *mut FILETIME = &mut FILETIME {
                             dwLowDateTime: 0,
                             dwHighDateTime: 0,
                         };
-                        let mut user_time: *mut FILETIME = &mut FILETIME {
+                        let user_time: *mut FILETIME = &mut FILETIME {
                             dwLowDateTime: 0,
                             dwHighDateTime: 0,
                         };
@@ -361,11 +361,11 @@ impl ProcessesRow {
                                 LowPart: 0,
                                 HighPart: 0,
                             };
-                            utime.HighPart = unsafe {(*user_time)}.dwHighDateTime;
-                            utime.LowPart = unsafe {(*user_time)}.dwLowDateTime;
+                            utime.HighPart = unsafe {*user_time}.dwHighDateTime;
+                            utime.LowPart = unsafe {*user_time}.dwLowDateTime;
                             // Windows stores proc times in 100 nanosecond ticks
-                            utime.HighPart = unsafe{(*kernel_time)}.dwHighDateTime;
-                            utime.LowPart = unsafe{(*kernel_time)}.dwLowDateTime;
+                            utime.HighPart = unsafe{*kernel_time}.dwHighDateTime;
+                            utime.LowPart = unsafe{*kernel_time}.dwLowDateTime;
                             processes_row.system_time = 0;//TODO QuadPart of utime / 10000000
                             processes_row.start_time = 0;//TODO filetime to unix time
                         }
@@ -443,7 +443,7 @@ impl ProcessesRow {
     }
 
     pub(crate) fn get_specific () -> Vec<ProcessesRow> {
-        let reader: Box<ProcessesIface> = Box::new(Reader{});
+        let reader: Box<dyn ProcessesIface> = Box::new(Reader{});
         let out = ProcessesRow::get_specific_ex(reader.borrow());
         out
     }

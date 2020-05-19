@@ -171,7 +171,7 @@ impl GroupsRow {
             };
             // Offset the pointer.
             let local_group_info_1 = unsafe {
-                (*local_group_info_buf_p.add(entry as usize))
+                *local_group_info_buf_p.add(entry as usize)
             };
             let lgrpi1_name = local_group_info_1.lgrpi1_name;
             let lgrpi1_comment = local_group_info_1.lgrpi1_comment;

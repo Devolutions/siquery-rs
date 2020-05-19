@@ -24,7 +24,7 @@ impl WmiPointingDevice {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiPointingDeviceIface) -> Vec<WmiPointingDevice> {
+    pub fn get_specific_ex(reader: &dyn WmiPointingDeviceIface) -> Vec<WmiPointingDevice> {
 
         let mut pointing_devices: Vec<WmiPointingDevice> = Vec::new();
 
@@ -102,7 +102,7 @@ impl WmiPointingDevice {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiPointingDevice> {
-        let reader: Box<WmiPointingDeviceIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiPointingDeviceIface> = Box::new(Reader{});
         let out = WmiPointingDevice::get_specific_ex(reader.borrow());
         out
     }
@@ -119,7 +119,7 @@ mod tests {
     }
     #[test]
     fn tset_wmi_pointing_device () {
-        let reader: Box<WmiPointingDeviceIface> = Box::new(Test{});
+        let reader: Box<dyn WmiPointingDeviceIface> = Box::new(Test{});
         assert_eq!(WmiPointingDevice::get_specific_ex(reader.borrow()).len(), 3);
         let pointing_device_info = &WmiPointingDevice::get_specific_ex(reader.borrow())[0];
         assert_eq!(pointing_device_info.name,"PS/2 Compatible Mouse");

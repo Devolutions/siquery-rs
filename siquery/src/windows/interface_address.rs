@@ -35,7 +35,7 @@ impl InterfaceAddress {
         }
     }
 
-    pub fn get_specific_ex(reader: &InterfaceAddressIface) -> Vec<InterfaceAddress> {
+    pub fn get_specific_ex(reader: &dyn InterfaceAddressIface) -> Vec<InterfaceAddress> {
         let mut interfaces: Vec<InterfaceAddress> = Vec::new();
 
         if let Some(interface_info) = reader.get_wmi_nicconfig() {
@@ -97,7 +97,7 @@ impl InterfaceAddress {
     }
 
     pub fn get_specific() -> Vec<InterfaceAddress> {
-        let reader: Box<InterfaceAddressIface> = Box::new(Reader{});
+        let reader: Box<dyn InterfaceAddressIface> = Box::new(Reader{});
         let out = InterfaceAddress::get_specific_ex(reader.borrow());
         out
     }
@@ -114,7 +114,7 @@ mod tests {
     }
     #[test]
     fn test_interface_addresses () {
-        let reader: Box<InterfaceAddressIface> = Box::new(Test {});
+        let reader: Box<dyn InterfaceAddressIface> = Box::new(Test {});
         assert_eq!(InterfaceAddress::get_specific_ex(reader.borrow()).len(), 1);
         let interface = &InterfaceAddress::get_specific_ex(reader.borrow())[0];
         assert_eq!(interface.interface, "1");

@@ -28,7 +28,7 @@ impl WmiHotfixes {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiHotfixesIface) -> Vec<WmiHotfixes> {
+    pub fn get_specific_ex(reader: &dyn WmiHotfixesIface) -> Vec<WmiHotfixes> {
 
         let mut hotfixes: Vec<WmiHotfixes> = Vec::new();
 
@@ -81,7 +81,7 @@ impl WmiHotfixes {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiHotfixes> {
-        let reader: Box<WmiHotfixesIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiHotfixesIface> = Box::new(Reader{});
         let out = WmiHotfixes::get_specific_ex(reader.borrow());
         out
     }
@@ -98,7 +98,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_hotfixes () {
-        let reader: Box<WmiHotfixesIface> = Box::new(Test{});
+        let reader: Box<dyn WmiHotfixesIface> = Box::new(Test{});
         let wmi_hotfixes = &WmiHotfixes::get_specific_ex(reader.borrow())[0];
         assert_eq!(wmi_hotfixes.caption, "http://support.microsoft.com/?kbid=4103");
         assert_eq!(wmi_hotfixes.csname, "wakwaka");

@@ -14,7 +14,7 @@ impl WmiBiosIface for Reader {
 }
 
 impl WmiBios {
-    pub(crate) fn get_specific_ex(reader: &WmiBiosIface) -> Vec<WmiBios> {
+    pub(crate) fn get_specific_ex(reader: &dyn WmiBiosIface) -> Vec<WmiBios> {
         let mut out = Vec::new();
         let mut bios = WmiBios {
             caption : String::new(),
@@ -63,7 +63,7 @@ impl WmiBios {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiBios> {
-        let reader: Box<WmiBiosIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiBiosIface> = Box::new(Reader{});
         let out = WmiBios::get_specific_ex(reader.borrow());
         out
     }
@@ -80,7 +80,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_bios () {
-        let reader: Box<WmiBiosIface> = Box::new(Test{});
+        let reader: Box<dyn WmiBiosIface> = Box::new(Test{});
         let bios_info = &WmiBios::get_specific_ex(reader.borrow())[0];
         assert_eq!(bios_info.caption, "1.23.3");
         assert_eq!(bios_info.manufacturer, "Lucerne Publishing");

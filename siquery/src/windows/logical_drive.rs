@@ -31,7 +31,7 @@ impl LogicalDrive {
         }
     }
 
-    pub(crate) fn get_specific_ex (reader: &LogicalDriveIface) -> Vec<LogicalDrive> {
+    pub(crate) fn get_specific_ex (reader: &dyn LogicalDriveIface) -> Vec<LogicalDrive> {
         let mut drives: Vec<LogicalDrive> = Vec::new();
 
         if let Some(drive_info) = reader.get_wmi_drives_info() {
@@ -92,7 +92,7 @@ impl LogicalDrive {
     }
 
     pub(crate) fn get_specific() -> Vec<LogicalDrive> {
-        let reader: Box<LogicalDriveIface> = Box::new(Reader{});
+        let reader: Box<dyn LogicalDriveIface> = Box::new(Reader{});
         let out = LogicalDrive::get_specific_ex(reader.borrow());
         out
     }
@@ -109,7 +109,7 @@ mod tests {
     }
     #[test]
     fn test_logical_drives () {
-        let reader: Box<LogicalDriveIface> = Box::new(Test {});
+        let reader: Box<dyn LogicalDriveIface> = Box::new(Test {});
         let drive = LogicalDrive::get_specific_ex(reader.borrow());
         assert_eq!(drive.len(), 3);
         assert_eq!(drive[0].name, "C:");

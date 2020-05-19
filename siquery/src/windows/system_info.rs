@@ -35,7 +35,7 @@ impl SystemInfoData {
         }
     }
 
-    pub(crate) fn get_specific_ex(reader: &SystemInfoDataIface) -> Vec<SystemInfoData>{
+    pub(crate) fn get_specific_ex(reader: &dyn SystemInfoDataIface) -> Vec<SystemInfoData>{
         let mut output : Vec<SystemInfoData> = Vec::new();
         let mut system_info = SystemInfoData::new();
         if let Some(os_info) = reader.get_wmi_cpu_info() {
@@ -81,7 +81,7 @@ impl SystemInfoData {
 
     #[cfg(not(fuzzing))]
     pub(crate) fn get_specific() -> Vec<SystemInfoData> {
-        let reader: Box<SystemInfoDataIface> = Box::new(Reader{});
+        let reader: Box<dyn SystemInfoDataIface> = Box::new(Reader{});
         let out = SystemInfoData::get_specific_ex(reader.borrow());
         out
     }
@@ -106,7 +106,7 @@ mod tests {
     }
     #[test]
     fn test_system_info () {
-        let reader: Box<SystemInfoDataIface> = Box::new(Test{});
+        let reader: Box<dyn SystemInfoDataIface> = Box::new(Test{});
         let system_info = &SystemInfoData::get_specific_ex(reader.borrow())[0];
         assert_eq!(system_info.computer_name, "galaxy500");
         assert_eq!(system_info.cpu_logical_cores, 4);

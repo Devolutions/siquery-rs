@@ -14,7 +14,7 @@ impl WmiOsVersionIface for Reader {
 }
 
 impl WmiOsVersion {
-    pub fn get_specific_ex(reader: &WmiOsVersionIface) -> Vec<WmiOsVersion> {
+    pub fn get_specific_ex(reader: &dyn WmiOsVersionIface) -> Vec<WmiOsVersion> {
         let mut output : Vec<WmiOsVersion> = Vec::new();
         let mut os_version = WmiOsVersion {
             csname: String::new(),
@@ -130,7 +130,7 @@ impl WmiOsVersion {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiOsVersion> {
-        let reader: Box<WmiOsVersionIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiOsVersionIface> = Box::new(Reader{});
         let out = WmiOsVersion::get_specific_ex(reader.borrow());
         out
     }
@@ -147,7 +147,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_os_version () {
-        let reader: Box<WmiOsVersionIface> = Box::new(Test{});
+        let reader: Box<dyn WmiOsVersionIface> = Box::new(Test{});
         let wmi_os_version = &WmiOsVersion::get_specific_ex(reader.borrow())[0];
         assert_eq!(wmi_os_version.platform, "Windows");
         assert_eq!(wmi_os_version.csname, "Olympia");

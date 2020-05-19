@@ -23,7 +23,7 @@ impl WmiSound {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiSoundIface) -> Vec<WmiSound> {
+    pub fn get_specific_ex(reader: &dyn WmiSoundIface) -> Vec<WmiSound> {
 
         let mut sounds: Vec<WmiSound> = Vec::new();
 
@@ -69,7 +69,7 @@ impl WmiSound {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiSound> {
-        let reader: Box<WmiSoundIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiSoundIface> = Box::new(Reader{});
         let out = WmiSound::get_specific_ex(reader.borrow());
         out
     }
@@ -86,7 +86,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_sound () {
-        let reader: Box<WmiSoundIface> = Box::new(Test{});
+        let reader: Box<dyn WmiSoundIface> = Box::new(Test{});
         let sound_info = &WmiSound::get_specific_ex(reader.borrow())[0];
         assert_eq!(sound_info.name, "Fabrikam Audio");
         assert_eq!(sound_info.manufacturer, "Fabrikam, Inc.");

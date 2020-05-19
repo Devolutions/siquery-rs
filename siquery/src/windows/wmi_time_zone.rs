@@ -23,7 +23,7 @@ impl WmiTimeZone {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiTimeZoneIface) -> Vec<WmiTimeZone> {
+    pub fn get_specific_ex(reader: &dyn WmiTimeZoneIface) -> Vec<WmiTimeZone> {
 
         let mut time_zones: Vec<WmiTimeZone> = Vec::new();
 
@@ -61,7 +61,7 @@ impl WmiTimeZone {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiTimeZone> {
-        let reader: Box<WmiTimeZoneIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiTimeZoneIface> = Box::new(Reader{});
         let out = WmiTimeZone::get_specific_ex(reader.borrow());
         out
     }

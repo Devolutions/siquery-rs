@@ -23,7 +23,7 @@ impl WmiKeyboard {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiKeyboardIface) -> Vec<WmiKeyboard> {
+    pub fn get_specific_ex(reader: &dyn WmiKeyboardIface) -> Vec<WmiKeyboard> {
 
         let mut keyboards: Vec<WmiKeyboard> = Vec::new();
 
@@ -70,7 +70,7 @@ impl WmiKeyboard {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiKeyboard> {
-        let reader: Box<WmiKeyboardIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiKeyboardIface> = Box::new(Reader{});
         let out = WmiKeyboard::get_specific_ex(reader.borrow());
         out
     }
@@ -87,7 +87,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_keyboard () {
-        let reader: Box<WmiKeyboardIface> = Box::new(Test {});
+        let reader: Box<dyn WmiKeyboardIface> = Box::new(Test {});
         let keyboard_info = &WmiKeyboard::get_specific_ex(reader.borrow())[0];
         assert_eq!(WmiKeyboard::get_specific_ex(reader.borrow()).len(), 2);
         assert_eq!(keyboard_info.name, "Enhanced (101- or 102-key)");

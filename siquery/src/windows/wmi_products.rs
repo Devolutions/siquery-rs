@@ -28,7 +28,7 @@ impl WmiProducts {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiProductsIface) -> Vec<WmiProducts> {
+    pub fn get_specific_ex(reader: &dyn WmiProductsIface) -> Vec<WmiProducts> {
 
         let mut products: Vec<WmiProducts> = Vec::new();
         if let Some(product_info) = reader.get_wmi_products_info() {
@@ -80,7 +80,7 @@ impl WmiProducts {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiProducts> {
-        let reader: Box<WmiProductsIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiProductsIface> = Box::new(Reader{});
         let out = WmiProducts::get_specific_ex(reader.borrow());
         out
     }

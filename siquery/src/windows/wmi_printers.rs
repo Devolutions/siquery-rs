@@ -44,7 +44,7 @@ impl WmiPrinters {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiPrintersIface) -> Vec<WmiPrinters> {
+    pub fn get_specific_ex(reader: &dyn WmiPrintersIface) -> Vec<WmiPrinters> {
 
         let mut output: Vec<WmiPrinters> = Vec::new();
 
@@ -136,7 +136,7 @@ impl WmiPrinters {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiPrinters> {
-        let reader: Box<WmiPrintersIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiPrintersIface> = Box::new(Reader{});
         let out = WmiPrinters::get_specific_ex(reader.borrow());
         out
     }
@@ -153,7 +153,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_printers () {
-        let reader: Box<WmiPrintersIface> = Box::new(Test{});
+        let reader: Box<dyn WmiPrintersIface> = Box::new(Test{});
         let test_printers = &WmiPrinters::get_specific_ex(reader.borrow())[0];
         assert_eq!(test_printers.caption, "Snagit 2018");
         assert_eq!(test_printers.creation_class_name, "Win32_Printer");

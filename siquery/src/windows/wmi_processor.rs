@@ -14,7 +14,7 @@ impl WmiProcessorIface for Reader {
 }
 
 impl WmiProcessor {
-    pub fn get_specific_ex(reader: &WmiProcessorIface) -> Vec<WmiProcessor> {
+    pub fn get_specific_ex(reader: &dyn WmiProcessorIface) -> Vec<WmiProcessor> {
         let mut output : Vec<WmiProcessor> = Vec::new();
         let mut processor = WmiProcessor {
             address_width: 0,
@@ -123,7 +123,7 @@ impl WmiProcessor {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiProcessor> {
-        let reader: Box<WmiProcessorIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiProcessorIface> = Box::new(Reader{});
         let out = WmiProcessor::get_specific_ex(reader.borrow());
         out
     }
@@ -140,7 +140,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_processor () {
-        let reader: Box<WmiProcessorIface> = Box::new(Test{});
+        let reader: Box<dyn WmiProcessorIface> = Box::new(Test{});
         let processor_info = &WmiProcessor::get_specific_ex(reader.borrow())[0];
         assert_eq!(processor_info.name, "Fabrikam Core(TM) i7-7500U CPU @ 2.70GHz");
         assert_eq!(processor_info.address_width, 64);

@@ -33,7 +33,7 @@ pub fn print_csv(columns: Vec<String>, values: &mut Rows) {
                 }
             }
             // write row values
-            wtr.write_record(row).expect("could not write row");;
+            wtr.write_record(row).expect("could not write row");
             row = Vec::new();
         } else {
             break

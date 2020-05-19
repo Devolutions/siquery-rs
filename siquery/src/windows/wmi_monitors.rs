@@ -25,7 +25,7 @@ impl WmiMonitors {
         }
     }
 
-    pub fn get_specific_ex(reader: &WmiMonitorsIface) -> Vec<WmiMonitors> {
+    pub fn get_specific_ex(reader: &dyn WmiMonitorsIface) -> Vec<WmiMonitors> {
 
         let mut monitors: Vec<WmiMonitors> = Vec::new();
 
@@ -143,7 +143,7 @@ impl WmiMonitors {
     }
 
     pub(crate) fn get_specific() -> Vec<WmiMonitors> {
-        let reader: Box<WmiMonitorsIface> = Box::new(Reader{});
+        let reader: Box<dyn WmiMonitorsIface> = Box::new(Reader{});
         let out = WmiMonitors::get_specific_ex(reader.borrow());
         out
     }
@@ -160,7 +160,7 @@ mod tests {
     }
     #[test]
     fn test_wmi_monitors () {
-        let reader: Box<WmiMonitorsIface> = Box::new(Test{});
+        let reader: Box<dyn WmiMonitorsIface> = Box::new(Test{});
         assert_eq!(WmiMonitors::get_specific_ex(reader.borrow()).len(), 3);
         let monitor_info = &WmiMonitors::get_specific_ex(reader.borrow())[0];
         assert_eq!(monitor_info.name, "Default Monitor");
