@@ -20,25 +20,23 @@ pub fn map(values: &mut Rows) -> Vec<Vec<String>> {
     let mut table: Vec<Vec<String>> = Vec::new();
     let mut row: Vec<String> = Vec::new();
     loop {
-        if let Some(v) = values.next() {
-            if let Some(res) = v.ok() {
-                for i in 0..res.column_count() {
-                    let val = Value::data_type(&res.get(i));
-                    match val {
-                        Type::Real | Type::Integer => {
-                            row.push(res.get::<usize, i64>(i).to_string());
-                        },
-                        Type::Text => {
-                            row.push(res.get::<usize, String>(i))
-                        },
-                        _ => {
-                            // Do nothing.
-                        }
+        if let Ok(Some(res)) = values.next() {
+            for i in 0..res.column_count() {
+                let val = Value::data_type(&res.get_unwrap(i));
+                match val {
+                    Type::Real | Type::Integer => {
+                        row.push(res.get_unwrap::<usize, i64>(i).to_string());
+                    },
+                    Type::Text => {
+                        row.push(res.get_unwrap::<usize, String>(i))
+                    },
+                    _ => {
+                        // Do nothing.
                     }
                 }
-                table.push(row);
-                row = Vec::new();
             }
+            table.push(row);
+            row = Vec::new();
         } else {
             break
         }
