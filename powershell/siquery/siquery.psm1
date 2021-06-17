@@ -1,29 +1,28 @@
-
-$ModuleName = $(Get-Item $PSCommandPath).BaseName
-$Manifest = Import-PowerShellDataFile -Path $(Join-Path $PSScriptRoot "${ModuleName}.psd1")
-
-if (-Not (Test-Path 'variable:global:IsWindows')) {
-    $script:IsWindows = $true; # Windows PowerShell 5.1 or earlier
-}
+using namespace System.Collections.Generic
+$ErrorActionPreference = 'Stop'
 
 if ($IsWindows) {
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 }
 
-Export-ModuleMember -Cmdlet @($manifest.CmdletsToExport)
+# Load Private Functions
+$PrivateFunctions = Get-ChildItem "$PSScriptRoot\Private\*.ps1" -Exclude '*.Tests.ps1'
+Foreach ($Function in $PrivateFunctions) { . $Function.FullName }
 
-$ScriptFiles = @(Get-ChildItem -Path "$PSScriptRoot/*.ps1" -Recurse)
+#Region TestCode
+# Add siquery executable location to the path. I added this because I couldnt get the .dll working.
+# if ($Env:PATH -inotlike '*siquery*') { $env:PATH += ($IsWindows) ? ';C:\siquery-rs' : ':/mnt/c/siquery-rs' }
 
-Foreach ($Import in $ScriptFiles)
-{
-    Try
-    {
-        . $Import.FullName
-    }
-    Catch
-    {
-        Write-Error -Message "Failed to import $($Import.FullName): $_"
-    }
+# Please come up with a better method than this - its just meant as POC!
+$AllOsCompatCount = 11
+# Check for first run
+$PublicFunctions = Get-ChildItem "$PSScriptRoot\Public\" -Exclude '*.Tests.ps1'
+if ($PublicFunctions.Count -eq $AllOsCompatCount) { New-SiqOSSpecificFunctions }
+#EndRegion TestCode
+
+# Load Public Functions
+$PublicFunctions = Get-ChildItem "$PSScriptRoot\Public\*.ps1" -Exclude '*.Tests.ps1'
+Foreach ($Function in $PublicFunctions) {
+    . $Function.FullName
+    Export-ModuleMember -Function $Function.BaseName -Alias '*' -Verbose
 }
-
-Export-ModuleMember -Function @($Manifest.FunctionsToExport)
