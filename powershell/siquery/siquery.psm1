@@ -1,4 +1,3 @@
-using namespace System.Collections.Generic
 $ErrorActionPreference = 'Stop'
 
 if ($IsWindows) {
