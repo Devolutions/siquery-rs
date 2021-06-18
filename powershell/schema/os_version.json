@@ -1,0 +1,49 @@
+{
+  "$id": "https://siquery.com/schema/os-version.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "os_version",
+  "type": "object",
+  "required": [ "name", "version", "major", "minor", "platform" ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Distribution or product name"
+    },
+    "version": {
+      "type": "string",
+      "description": "Pretty, suitable for presentation, OS version"
+    },
+    "major": {
+      "type": "integer",
+      "description": "Major release version"
+    },
+    "minor": {
+      "description": "Minor release version",
+      "type": "integer"
+    },
+    "patch": {
+      "description": "Optional patch release",
+      "type": "integer"
+    },
+    "build": {
+      "description": "Optional build-specific or variant string",
+      "type": "integer"
+    },
+    "platform": {
+      "description": "OS Platform or ID",
+      "type": "string"
+    },
+    "platform_like": {
+        "description": "Closely related platforms",
+        "type": "string"
+    },
+    "codename": {
+        "description": "OS version codename",
+        "type": "string"
+    },
+    "arch": {
+        "description": "OS architecture",
+        "type": "string"
+    }
+  }
+}

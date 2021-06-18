@@ -17,9 +17,14 @@ if (Test-Path Env:PSMODULE_OUTPUT_PATH) {
 Remove-Item -Path "$PSModuleOutputPath\$ModuleName" -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -Path "$PSModuleOutputPath\$ModuleName" -ItemType 'Directory' -Force | Out-Null
 
-@('bin', 'lib', 'Public', 'Private') | % {
+@('bin', 'lib', 'schema', 'Public', 'Private') | % {
     New-Item -Path "$PSModuleOutputPath\$ModuleName\$_" -ItemType 'Directory' -Force | Out-Null
 }
+
+# copy schema
+
+Copy-Item "$PSScriptRoot\schema" -Destination "$PSScriptRoot\$ModuleName\schema" -Recurse -Force
+Copy-Item "$PSScriptRoot\$ModuleName\schema" -Destination "$PSModuleOutputPath\$ModuleName" -Recurse -Force
 
 # build Rust component
 

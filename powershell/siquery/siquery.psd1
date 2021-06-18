@@ -61,14 +61,13 @@
     # FormatsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules = @('bin\siquery.dll')
+    NestedModules = @('lib\siquery.dll')
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
-        'Find-SiqExecutable',
-        'Get-SiqTableSchema',
-        'Get-SiqTableName',
-        'Get-SiqTableJson'
+        'Get-SiqList'
+        'Get-SiqSchema',
+        'Get-Siq'
     )
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
