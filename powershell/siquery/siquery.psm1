@@ -9,8 +9,8 @@ $PrivateFunctions = Get-ChildItem "$PSScriptRoot\Private\*.ps1" -Exclude '*.Test
 Foreach ($Function in $PrivateFunctions) { . $Function.FullName }
 
 #Region TestCode
-# Add siquery executable location to the path. I added this because I couldnt get the .dll working.
-# if ($Env:PATH -inotlike '*siquery*') { $env:PATH += ($IsWindows) ? ';C:\siquery-rs' : ':/mnt/c/siquery-rs' }
+# Add siquery executable location to the path - for testing only.
+if ($Env:SIQUERY -inotlike '*siquery*') { $env:SIQUERY = ($IsWindows) ? 'C:\Temp\siquery\siquery.exe' : '/mnt/c/Temp/siquery/siquery.exe' }
 
 # Please come up with a better method than this - its just meant as POC!
 $AllOsCompatCount = 11

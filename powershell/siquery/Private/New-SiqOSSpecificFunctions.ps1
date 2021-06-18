@@ -5,7 +5,13 @@ Function New-SiqOSSpecificFunctions {
 	Begin {
 		$GenericFunctionTemplate = "function Get-Siq{Table} {`n`t[CmdletBinding()]`n`tparam()`n`n`tGet-SiqTableJson '{TableName}'`n}"
 		$Tables = Get-SiqTableName
-		$Tables2 = $tables | ForEach-Object { [PSCustomOBject]@{ TableName = $_ ; TableNoUnderScore = (ConvertTo-PascalCase $_.Replace('_', '')) } }
+		$Tables2 = $tables | ForEach-Object {
+			[PSCustomOBject]@{
+				TableName         = $_
+				TableNoUnderScore = (ConvertTo-PascalCase $_).Replace('_', '')
+			}
+		}
+		# $TableSchemas = Get-SiqTableSchema
 		$PublicFolder = Get-Item "$PSScriptRoot\..\Public"
 		$PublicFunctions = Get-ChildItem "$PublicFolder\*.ps1"
 	}
