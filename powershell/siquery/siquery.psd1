@@ -65,19 +65,10 @@
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
-        'Get-SiqEtcHosts',
-        'Get-SiqEtcProtocols',
-        'Get-SiqEtcServices',
-        'Get-SiqGroups',
-        'Get-SiqLoggedInUsers',
-        'Get-SiqOSVersion',
-        'Get-SiqProcesses',
-        'Get-SiqProxies',
-        'Get-SiqSystemInfo',
-        'Get-SiqUptime',
-        'Get-SiqUsers',
-        '*' # Only have all OS compatible modules on base install.
-        # Dynamically build all OS specific functions on first run by using 'New-SiqOSSpecificFunctions'
+        'Find-SiqExecutable',
+        'Get-SiqTableSchema',
+        'Get-SiqTableName',
+        'Get-SiqTableJson'
     )
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
