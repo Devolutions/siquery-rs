@@ -1,6 +1,8 @@
-Function Get-SiqTableSchema {
+Function Get-SiqSchema {
 	[CmdletBinding()]
-	param([String]$Table = '*')
+	param(
+		[String] $Table = '*'
+	)
 
 	Begin {
 		$Schema = [System.Collections.Generic.List[Object]]::New()

@@ -1,4 +1,4 @@
-function Get-SiqTableName {
+function Get-SiqList {
 	[CmdletBinding()]
 	param()
 

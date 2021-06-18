@@ -1,0 +1,145 @@
+{
+    "$id": "https://siquery.com/schema/processes.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "uptime",
+    "type": "object",
+    "required": [ "pid", "name" ],
+    "properties": {
+        "pid": {
+            "type": "integer",
+            "description": "Process (or thread) ID"
+        },
+        "name": {
+            "type": "string",
+            "description": "The process path or shorthand argv[0]"
+        },
+        "path": {
+            "type": "string",
+            "description": "Path to executed binary"
+        },
+        "cmdline": {
+            "type": "string",
+            "description": "Complete argv"
+        },
+        "state": {
+            "type": "string",
+            "description": "Process state"
+        },
+        "cwd": {
+            "type": "string",
+            "description": "Process current working directory"
+        },
+        "root": {
+            "type": "string",
+            "description": "Process virtual root directory"
+        },
+        "uid": {
+            "type": "integer",
+            "description": "Unsigned user ID"
+        },
+        "gid": {
+            "type": "integer",
+            "description": "Unsigned group ID"
+        },
+        "euid": {
+            "type": "integer",
+            "description": "Unsigned effective group ID"
+        },
+        "egid": {
+            "type": "integer",
+            "description": "Unsigned effective user ID"
+        },
+        "suid": {
+            "type": "integer",
+            "description": "Unsigned saved user ID"
+        },
+        "sgid": {
+            "type": "integer",
+            "description": "Unsigned saved group ID"
+        },
+        "on_disk": {
+            "type": "integer",
+            "description": "The process path exists yes=1, no=0, unknown=-1"
+        },
+        "wired_size": {
+            "type": "integer",
+            "description": "Bytes of unpageable memory used by process"
+        },
+        "resident_size": {
+            "type": "integer",
+            "description": "Bytes of private memory used by process"
+        },
+        "total_size": {
+            "type": "integer",
+            "description": "Total virtual memory size"
+        },
+        "user_time": {
+            "type": "integer",
+            "description": "CPU time in milliseconds spent in user space"
+        },
+        "system_time": {
+            "type": "integer",
+            "description": "CPU time in milliseconds spent in kernel space"
+        },
+        "disk_bytes_read": {
+            "type": "integer",
+            "description": "Bytes read from disk"
+        },
+        "disk_bytes_written": {
+            "type": "integer",
+            "description": "Bytes written to disk"
+        },
+        "start_time": {
+            "type": "integer",
+            "description": "Process start time in seconds since Epoch, in case of error -1"
+        },
+        "parent": {
+            "type": "integer",
+            "description": "Process parent's PID"
+        },
+        "pgroup": {
+            "type": "integer",
+            "description": "Process group"
+        },
+        "threads": {
+            "type": "integer",
+            "description": "Number of threads used by process"
+        },
+        "nice": {
+            "type": "integer",
+            "description": "Process nice level (-20 to 20, default 0)"
+        },
+        "is_elevated_token": {
+            "type": "integer",
+            "description": "Process uses elevated token yes=1, no=0"
+        },
+        "cgroup_namespace": {
+            "type": "string",
+            "description": "cgroup namespace inode"
+        },
+        "ipc_namespace": {
+            "type": "string",
+            "description": "ipc namespace inode"
+        },
+        "mnt_namespace": {
+            "type": "string",
+            "description": "mnt namespace inode"
+        },
+        "net_namespace": {
+            "type": "string",
+            "description": "net namespace inode"
+        },
+        "pid_namespace": {
+            "type": "string",
+            "description": "pid namespace inode"
+        },
+        "user_namespace": {
+            "type": "string",
+            "description": "user namespace inode"
+        },
+        "uts_namespace": {
+            "type": "string",
+            "description": "uts namespace inode"
+        }
+    }
+}

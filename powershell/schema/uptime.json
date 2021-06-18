@@ -1,0 +1,29 @@
+{
+    "$id": "https://siquery.com/schema/uptime.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "uptime",
+    "type": "object",
+    "required": [ "days", "hours", "minutes", "seconds", "total_seconds" ],
+    "properties": {
+        "days": {
+            "type": "integer",
+            "description": "Days of uptime"
+        },
+        "hours": {
+            "type": "integer",
+            "description": "Hours of uptime"
+        },
+        "minutes": {
+            "type": "integer",
+            "description": "Minutes of uptime"
+        },
+        "seconds": {
+            "type": "integer",
+            "description": "Seconds of uptime"
+        },
+        "total_seconds": {
+            "type": "integer",
+            "description": "Total uptime seconds"
+        }
+    }
+}

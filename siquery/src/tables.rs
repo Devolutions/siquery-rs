@@ -2944,12 +2944,12 @@ impl ProcessesRow {
     const ON_DISK_ID: u64 = 0x00002000;
     const WIRED_SIZE_ID: u64 = 0x00004000;
     const RESIDENT_SIZE_ID: u64 = 0x00008000;
-    const TOTAL_SIZE_ID: u64 = 0x00010080;
+    const TOTAL_SIZE_ID: u64 = 0x00010000;
     const USER_TIME_ID: u64 = 0x00020000;
     const SYSTEM_TIME_ID: u64 = 0x00040000;
     const DISK_BYTES_READ_ID: u64 = 0x00080000;
     const DISK_BYTES_WRITTEN_ID: u64 = 0x00100000;
-    const START_TIME_ID: u64 = 0x00200008;
+    const START_TIME_ID: u64 = 0x00200000;
     const PARENT_ID: u64 = 0x00400000;
     const PGROUP_ID: u64 = 0x00800000;
     const THREADS_ID: u64 = 0x01000000;
