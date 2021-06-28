@@ -1,5 +1,6 @@
 
 /target/
+/powershell/package/
 /siquery_cli/src/*.inv
 inventory.html
 **/*.rs.bk
