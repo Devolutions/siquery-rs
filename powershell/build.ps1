@@ -1,61 +1,72 @@
-
-$ModuleName = 'siquery'
 Push-Location $PSScriptRoot
+#region Init
+$ModuleName = 'siquery'
 
 # Check for .NET SDK
-Get-Command -Name 'dotnet' -CommandType 'Application' -ErrorAction Stop | Out-Null
+Try {
+    Get-Command -Name 'dotnet' -CommandType 'Application' -ErrorAction Stop | Out-Null
+} Catch {
+    Throw 'Missing required build tool. Please install dotnet before attempting to build.'
+}
 
 # Check for Rust SDK
-Get-Command -Name 'cargo' -CommandType 'Application' -ErrorAction Stop | Out-Null
-
-if (Test-Path Env:PSMODULE_OUTPUT_PATH) {
-    $PSModuleOutputPath = $Env:PSMODULE_OUTPUT_PATH
-} else {
-    $PSModuleOutputPath = Join-Path $PSScriptRoot 'package'
+Try {
+    Get-Command -Name 'cargo' -CommandType 'Application' -ErrorAction Stop | Out-Null
+} Catch {
+    Throw 'Missing required build tool. Please install rust/cargo before attempting to build.'
 }
 
-Remove-Item -Path "$PSModuleOutputPath\$ModuleName" -Recurse -Force -ErrorAction SilentlyContinue
-New-Item -Path "$PSModuleOutputPath\$ModuleName" -ItemType 'Directory' -Force | Out-Null
+$PSModuleOutputPath = (Test-Path Env:PSMODULE_OUTPUT_PATH) ?
+    $Env:PSMODULE_OUTPUT_PATH :
+    (Join-Path -path $PSScriptRoot -childpath 'package')
 
-@('bin', 'lib', 'schema', 'Public', 'Private') | % {
-    New-Item -Path "$PSModuleOutputPath\$ModuleName\$_" -ItemType 'Directory' -Force | Out-Null
+$NewModuleOutputPath = Join-Path -Path $PSModuleOutputPath -ChildPath $ModuleName
+Remove-Item -Path $NewModuleOutputPath -Recurse -Force -ErrorAction SilentlyContinue
+#endregion Init
+
+
+#region BuildModule
+New-Item -Path $NewModuleOutputPath -ItemType 'Directory' -Force | Out-Null
+
+@('bin', 'lib', 'schema', 'Public', 'Private') | ForEach-Object {
+    New-Item -Path "$NewModuleOutputPath\$_" -ItemType 'Directory' -Force | Out-Null
 }
 
-# copy schema
+Copy-Item -Path "$PSScriptRoot\schema" -Destination "$NewModuleOutputPath" -Recurse -Force
 
-Copy-Item "$PSScriptRoot\schema" -Destination "$PSScriptRoot\$ModuleName\schema" -Recurse -Force
-Copy-Item "$PSScriptRoot\$ModuleName\schema" -Destination "$PSModuleOutputPath\$ModuleName" -Recurse -Force
+Copy-Item -Path "$PSScriptRoot\$ModuleName\Private" -Destination $NewModuleOutputPath -Recurse -Force
+Copy-Item -Path "$PSScriptRoot\$ModuleName\Public" -Destination $NewModuleOutputPath -Recurse -Force
 
-# build Rust component
+Copy-Item "$PSScriptRoot\$ModuleName\$ModuleName.psd1" -Destination $NewModuleOutputPath -Force
+Copy-Item "$PSScriptRoot\$ModuleName\$ModuleName.psm1" -Destination $NewModuleOutputPath -Force
 
-New-Item -Path "$PSScriptRoot\$ModuleName\bin" -ItemType 'Directory' -Force | Out-Null
+if ("$PSModuleOutputPath".EndsWith('package')) {
+    # Copy tests to package folder for easier testing after build.
+    Copy-Item -Path "$PSScriptRoot\pester" -Destination $PSModuleOutputPath -Recurse -Force
+}
+#endregion BuildModule
 
+
+#region buildRustComponent
 Push-Location
-Set-Location ".."
+Set-Location '..'
 
-& 'cargo' 'build' '--release'
+& 'cargo' build --release
 
-$ExecutableName = "siquery"
-if ($IsWindows) {
-    $ExecutableName += ".exe"
-}
+$ExecutableName = 'siquery'
+if ($IsWindows) { $ExecutableName += '.exe' }
+
+Copy-Item ".\target\release\$ExecutableName" -Destination "$NewModuleOutputPath\bin" -Recurse -Force
+
+Remove-Item -Path '.\target' -Recurse -Force | Out-Null
 
 Pop-Location
-Copy-Item "..\target\release\${ExecutableName}" -Destination "$PSScriptRoot\$ModuleName\bin"
+#endregion buildRustComponent
 
-# build .NET component
 
-& dotnet nuget add source "https://api.nuget.org/v3/index.json" -n "nuget.org" | Out-Null
+#region build.NetComponent
+& dotnet nuget add source 'https://api.nuget.org/v3/index.json' -n 'nuget.org' | Out-Null
 
-& dotnet publish "$PSScriptRoot\$ModuleName\src" -f 'netcoreapp3.1' -c 'Release' -o "$PSScriptRoot\$ModuleName\lib"
-
-Copy-Item "$PSScriptRoot\$ModuleName\bin" -Destination "$PSModuleOutputPath\$ModuleName" -Recurse -Force
-Copy-Item "$PSScriptRoot\$ModuleName\lib" -Destination "$PSModuleOutputPath\$ModuleName" -Recurse -Force
-
-Copy-Item "$PSScriptRoot\$ModuleName\Private" -Destination "$PSModuleOutputPath\$ModuleName" -Recurse -Force
-Copy-Item "$PSScriptRoot\$ModuleName\Public" -Destination "$PSModuleOutputPath\$ModuleName" -Recurse -Force
-
-Copy-Item "$PSScriptRoot\$ModuleName\$ModuleName.psd1" -Destination "$PSModuleOutputPath\$ModuleName" -Force
-Copy-Item "$PSScriptRoot\$ModuleName\$ModuleName.psm1" -Destination "$PSModuleOutputPath\$ModuleName" -Force
-
+& dotnet publish "$PSScriptRoot\$ModuleName\src" -f 'netcoreapp3.1' -c 'Release' -o "$NewModuleOutputPath\lib"
+#endregion build.NetComponent
 Pop-Location
