@@ -37,10 +37,10 @@
     # PowerShellHostVersion = ''
 
     # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-    # DotNetFrameworkVersion = '4.7.2'
+    # DotNetFrameworkVersion = ''
 
     # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-    # CLRVersion = '4.0'
+    # CLRVersion = ''
 
     # Processor architecture (None, X86, Amd64) required by this module
     # ProcessorArchitecture = ''
