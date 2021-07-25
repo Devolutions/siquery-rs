@@ -1,47 +1,59 @@
+using namespace System.Management.Automation
+using namespace System.Collections.Generic
+
 Function Get-SiqSchema {
 	[CmdletBinding()]
 	param(
-		[String] $Table = '*'
+		[Parameter( Position = 0, ValueFromPipeline )]
+		[Alias('Name', 'Table')]
+		[string]$TableName = '*'
 	)
 
 	Begin {
-		$Schema = [System.Collections.Generic.List[Object]]::New()
+		$Schema = [List[Object]]::New()
 		$siq_exe = Find-SiqExecutable
 	}
+
 	Process {
-		$SchemaCall = ($Table -ne '*') ? (& "$siq_exe" --schema $Table) : (& "$siq_exe" --schema)
+		$SchemaCall = ($Table -ne '*') ? (& "$siq_exe" --schema $TableName) : (& "$siq_exe" --schema)
 		if ($SchemaCall -inotlike 'no such table ') {
 			Foreach ($Line in $SchemaCall) {
-				$ConvertedTableSchema = [Ordered]@{}
+				$ConvertedTableSchema = [PSCustomObject]@{}
+
 				$Line = $Line -Replace '^CREATE TABLE ', ''
-				$TableName = $Line.Split('(')[0]
-				$ConvertedTableSchema.Add('TableName', $TableName)
+				$SchemaTableName = $Line.Split('(')[0]
+				$ConvertedTableSchema.PSObject.Properties.Add([PSNoteProperty]::New('TableName', $SchemaTableName))
+
 				$TableFields = $Line.Split('(')[1].TrimEnd(');')
 				Foreach ($Field in $TableFields.Split(',').Trim()) {
 					$FieldSplit = $Field.Split('" ')
 					$FieldName = $FieldSplit[0].TrimStart('"').Trim()
-					$FieldType = $FieldSplit[1].Trim()
-					$Type = switch ($FieldType) {
-						'INTEGER' { '[int32]' }
-						'TEXT' { '[string]' }
+
+					# Determine Field Type
+					$Type = switch ($FieldSplit[1].Trim()) {
+						'INTEGER' { 'System.Int32' }
+						'TEXT' { 'System.String' }
 						Default {
 							Write-Host "`$_: $_"
-							$TypeCheck = Get-TypeData -TypeName "*$FieldType*"
+							$TypeCheck = Get-TypeData -TypeName "*$_*"
 							if ($TypeCheck.Count -ne 1) {
-								Write-Error "Unable to find type $FieldType for field $FieldName on table $TableName. Defaulting to [String]."
-								'[string]' #Default to string if we cant determine type.
+								Write-Error "Unable to find type '$_' for field $FieldName on table $SchemaTableName. Defaulting to [string]."
+								'System.String' #Default to string if we cant determine type.
 							} else {
-								"[$($TypeCheck.TypeName)]"
+								"$($TypeCheck.TypeName)"
 							}
 						}
 					}
-					$ConvertedTableSchema.Add($FieldName, $Type)
+
+					$ConvertedTableSchema.PSObject.Properties.Add([PSNoteProperty]::New($FieldName, $Type))
 				}
+
 				$Schema.Add($ConvertedTableSchema)
 			}
 		} else {
-			$Schema.Add([Ordered]@{'TableName' = $SchemaCall })
+			$Schema.Add([PSCustomObject]@{'TableName' = $SchemaCall })
 		}
 	}
+
 	End { Return $Schema }
 }
