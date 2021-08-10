@@ -16,7 +16,7 @@ pub fn load_module(conn: &Connection) -> Result<()> {
 }
 
 lazy_static! {
-    static ref SIQUERY_MODULE: &'static Module<SiqueryTab> = read_only_module::<SiqueryTab>();
+    static ref SIQUERY_MODULE: &'static Module<'static, SiqueryTab> = read_only_module::<SiqueryTab>();
 }
 
 #[repr(C)]
@@ -41,7 +41,7 @@ impl SiqueryTab {
     }
 }
 
-unsafe impl VTab for SiqueryTab {
+unsafe impl VTab<'_> for SiqueryTab {
     type Aux = ();
     type Cursor = SiqueryTabCursor;
 
@@ -88,7 +88,7 @@ unsafe impl VTab for SiqueryTab {
     fn open(&self) -> Result<SiqueryTabCursor> {Ok(SiqueryTabCursor::default())}
 }
 
-impl CreateVTab for SiqueryTab {}
+impl CreateVTab<'_> for SiqueryTab {}
 
 #[derive(Default)]
 #[repr(C)]
