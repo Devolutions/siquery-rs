@@ -113,7 +113,7 @@ stages:
               pathToPublish: $(Build.ArtifactStagingDirectory)
               artifactName: siquery
 
-      - job: macOS
+      - job: macOS64
         pool:
           name: 'Devolutions - macOS'
 
@@ -140,6 +140,40 @@ stages:
               cp $(Build.Repository.LocalPath)/target/x86_64-apple-darwin/release/siquery $(Build.ArtifactStagingDirectory)/macos/x86_64/
               shasum -a 256 $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery.sha256
               shasum -a 256 $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery.7z | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/macos/x86_64/siquery.7z.sha256
+            displayName: Post-build
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: $(Build.ArtifactStagingDirectory)
+              artifactName: siquery
+
+      - job: macOSArm64
+        pool:
+          name: 'Devolutions - macOS'
+
+        workspace:
+          clean: all
+
+        steps:
+          - checkout: self
+            clean: true
+            fetchDepth: 1
+
+          - script: cargo build --target aarch64-apple-darwin --release
+            displayName: Building siquery
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: $(Build.Repository.LocalPath)/target/aarch64-apple-darwin/release/siquery
+              archiveType: 7z
+              includeRootFolder: false
+              archiveFile: $(Build.ArtifactStagingDirectory)/macos/arm64/siquery.7z
+            displayName: Generate 7z
+
+          - script: |
+              cp $(Build.Repository.LocalPath)/target/aarch64-apple-darwin/release/siquery $(Build.ArtifactStagingDirectory)/macos/arm64/
+              shasum -a 256 $(Build.ArtifactStagingDirectory)/macos/arm64/siquery | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/macos/arm64/siquery.sha256
+              shasum -a 256 $(Build.ArtifactStagingDirectory)/macos/arm64/siquery.7z | awk '{ print $1 }' > $(Build.ArtifactStagingDirectory)/macos/arm64/siquery.7z.sha256
             displayName: Post-build
 
           - task: PublishBuildArtifacts@1
