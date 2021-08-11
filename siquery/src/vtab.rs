@@ -158,7 +158,6 @@ unsafe impl VTabCursor for SiqueryTabCursor {
 
 #[test]
 fn test_siquery_module() {
-    use rusqlite::NO_PARAMS;
     use crate::query::init_db;
 
     let db = init_db();
@@ -166,7 +165,7 @@ fn test_siquery_module() {
 
     match stmt {
         Ok(mut stmt_resp) => {
-            let mut resp = stmt_resp.query(NO_PARAMS).unwrap();
+            let mut resp = stmt_resp.query([]).unwrap();
             loop {
                 if let Ok(val) = resp.next() {
                     if let Some(v) = val {
