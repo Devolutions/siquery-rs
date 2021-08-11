@@ -1,5 +1,11 @@
 use crate::tables::Uptime;
 
+use winapi::{
+    um::{
+        sysinfoapi::GetTickCount64
+    }
+};
+
 impl Uptime {
     pub fn get_specific() -> Vec<Uptime> {
         let mut output : Vec<Uptime> = Vec::new();
@@ -11,7 +17,7 @@ impl Uptime {
             total_seconds: 0,
         };
 
-        let t: i64 = unsafe { kernel32::GetTickCount64() } as i64;
+        let t: i64 = unsafe { GetTickCount64() } as i64;
         let mut remaining_time;
         let milli_to_days_converter = 1000 * 60 * 60 * 24;
         let milli_to_hours_converter = 1000 * 60 * 60;
