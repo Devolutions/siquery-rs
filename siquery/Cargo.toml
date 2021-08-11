@@ -41,7 +41,6 @@ objc_id = "0.1.1"
 plist = "0.4"
 walkdir = "2.2.7"
 glob = "0.2"
-mach = "0.2.3"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 kernel32-sys = "0.2"
