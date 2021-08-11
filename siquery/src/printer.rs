@@ -1,6 +1,6 @@
 use csv::{WriterBuilder, Terminator};
 use rusqlite::{Rows, Connection, Row as RusqliteRow, types::{Value, Type}};
-use prettytable::{Table, row::Row, cell::Cell};
+use prettytable::{Table, Row, Cell};
 use crate::tables::get_table_list;
 use crate::query::{get_schema, execute_query};
 use serde_json::{Value as serdValue, Map};

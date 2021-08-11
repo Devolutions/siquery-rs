@@ -177,8 +177,8 @@ pub fn pwstr_to_string(pwstr: PWSTR, buf_size: u16) -> Result<String, DWORD> {
 
 pub fn long_int_to_unixtime(ft: &mut LARGE_INTEGER ) -> i64  {
     unsafe {
-        let mut ull: LARGE_INTEGER = mem::uninitialized();
-        let mut adjust: LARGE_INTEGER = mem::uninitialized();
+        let mut ull: LARGE_INTEGER = mem::zeroed();
+        let mut adjust: LARGE_INTEGER = mem::zeroed();
 
         ull.u_mut().LowPart = ft.u_mut().LowPart;
         ull.u_mut().HighPart = ft.u_mut().HighPart;
