@@ -20,10 +20,10 @@ use std::{
 use crate::tables::ProcessesRow;
 
 pub struct ProcCred {
-    parent: uint32_t,
-    group: uint32_t,
-    status: uint32_t,
-    nice: int32_t,
+    parent: u32,
+    group: u32,
+    status: u32,
+    nice: i32,
     real_uid: uid_t,
     real_gid: gid_t,
     effective_uid: uid_t,
@@ -64,25 +64,25 @@ extern "C" {
     fn proc_pidinfo(
         pid: c_int,
         flavor: c_int,
-        arg: uint64_t,
+        arg: u64,
         buffer: *mut c_void,
         buffersize: c_int,
     ) -> c_int;
     fn proc_listpids(
-        proc_type: uint32_t,
-        typeinfo: uint32_t,
+        proc_type: u32,
+        typeinfo: u32,
         buffer: *mut c_void,
         buffersize: c_int,
     ) -> c_int;
     fn proc_pidpath(
         pid: c_int,
         buffer: *mut c_void,
-        buffersize: uint32_t,
+        buffersize: u32,
     ) -> c_int;
     fn proc_name(
         pid: c_int,
         buffer: *mut c_void,
-        buffersize: uint32_t,
+        buffersize: u32,
     ) -> c_int;
     fn proc_pid_rusage(
         pid: i32,
@@ -93,19 +93,19 @@ extern "C" {
 
 #[repr(C)]
 struct proc_bsdshortinfo {
-    pbsi_pid: uint32_t, // process id
-    pbsi_ppid: uint32_t, // process parent id
-    pbsi_pgid: uint32_t, // process perp id
-    pbsi_status: uint32_t, // p_stat value, SZOMB, SRUN, etc
+    pbsi_pid: u32, // process id
+    pbsi_ppid: u32, // process parent id
+    pbsi_pgid: u32, // process perp id
+    pbsi_status: u32, // p_stat value, SZOMB, SRUN, etc
     pbsi_comm: [c_char; 16], // MAXCOMLEN - upto 16 characters of process name
-    pbsi_flags: uint32_t, // 64bit; emulated etc
+    pbsi_flags: u32, // 64bit; emulated etc
     pbsi_uid: uid_t, // current uid on process
     pbsi_gid: gid_t, // current gid on process
     pbsi_ruid: uid_t, // current ruid on process
     pbsi_rgid: gid_t, // current tgid on process
     pbsi_svuid: uid_t, // current svuid on process
     pbsi_svgid: gid_t, // current svgid on process
-    pbsi_rfu: uint32_t, // reserved for future use
+    pbsi_rfu: u32, // reserved for future use
 }
 
 #[repr(C)]
@@ -130,72 +130,72 @@ struct vnode_info {
 
 #[repr(C)]
 struct vinfo_stat {
-    vst_dev: uint32_t,
-    vst_mode: uint16_t,
-    vst_nlink: uint16_t,
-    vst_ino: uint64_t,
+    vst_dev: u32,
+    vst_mode: u16,
+    vst_nlink: u16,
+    vst_ino: u64,
     vst_uid: uid_t,
     vst_gid: gid_t,
-    vst_atime: int64_t,
-    vst_atimensec: int64_t,
-    vst_mtime: int64_t,
-    vst_mtimensec: int64_t,
-    vst_ctime: int64_t,
-    vst_ctimensec: int64_t,
-    vst_birthtime: int64_t,
-    vst_birthtimensec: int64_t,
+    vst_atime: i64,
+    vst_atimensec: i64,
+    vst_mtime: i64,
+    vst_mtimensec: i64,
+    vst_ctime: i64,
+    vst_ctimensec: i64,
+    vst_birthtime: i64,
+    vst_birthtimensec: i64,
     vst_size: off_t,
-    vst_blocks: int64_t,
-    vst_blksize: int32_t,
-    vst_flags: uint32_t,
-    vst_gen: uint32_t,
-    vst_rdev: uint32_t,
-    vst_qspare: [int64_t; 2],
+    vst_blocks: i64,
+    vst_blksize: i32,
+    vst_flags: u32,
+    vst_gen: u32,
+    vst_rdev: u32,
+    vst_qspare: [i64; 2],
 }
 
 #[repr(C)]
 struct proc_taskinfo {
-    pti_virtual_size: uint64_t, // virtual memory size (bytes)
-    pti_resident_size: uint64_t, // resident memory size (bytes)
-    pti_total_user: uint64_t, // total time
-    pti_total_system: uint64_t,
-    pti_threads_user: uint64_t, // existing threads only
-    pti_threads_system: uint64_t,
-    pti_policy: int32_t, // default policy for new threads
-    pti_faults: int32_t, // number of page faults
-    pti_pageins: int32_t, // number of actual pageins
-    pti_cow_faults: int32_t, // number of copy-on-write faults
-    pti_messages_sent: int32_t, // number of messages sent
-    pti_messages_received: int32_t, // number of messages received
-    pti_syscalls_mach: int32_t, // number of mach system calls
-    pti_syscalls_unix: int32_t, // number of unix system calls
-    pti_csw: int32_t, // number of context switches
-    pti_threadnum: int32_t, // number of threads in the task
-    pti_numrunning: int32_t, // number of running threads
-    pti_priority: int32_t,  // task priority
+    pti_virtual_size: u64, // virtual memory size (bytes)
+    pti_resident_size: u64, // resident memory size (bytes)
+    pti_total_user: u64, // total time
+    pti_total_system: u64,
+    pti_threads_user: u64, // existing threads only
+    pti_threads_system: u64,
+    pti_policy: i32, // default policy for new threads
+    pti_faults: i32, // number of page faults
+    pti_pageins: i32, // number of actual pageins
+    pti_cow_faults: i32, // number of copy-on-write faults
+    pti_messages_sent: i32, // number of messages sent
+    pti_messages_received: i32, // number of messages received
+    pti_syscalls_mach: i32, // number of mach system calls
+    pti_syscalls_unix: i32, // number of unix system calls
+    pti_csw: i32, // number of context switches
+    pti_threadnum: i32, // number of threads in the task
+    pti_numrunning: i32, // number of running threads
+    pti_priority: i32,  // task priority
 }
 
 #[repr(C)]
 struct rusage_info_v2 {
-    ri_uuid: [uint8_t; 16],
-    ri_user_time: uint64_t,
-    ri_system_time: uint64_t,
-    ri_pkg_idle_wkups: uint64_t,
-    ri_interrupt_wkups: uint64_t,
-    ri_pageins: uint64_t,
-    ri_wired_size: uint64_t,
-    ri_resident_size: uint64_t,
-    ri_phys_footprint: uint64_t,
-    ri_proc_start_abstime: uint64_t,
-    ri_proc_exit_abstime: uint64_t,
-    ri_child_user_time: uint64_t,
-    ri_child_system_time: uint64_t,
-    ri_child_pkg_idle_wkups: uint64_t,
-    ri_child_interrupt_wkups: uint64_t,
-    ri_child_pageins: uint64_t,
-    ri_child_elapsed_abstime: uint64_t,
-    ri_diskio_bytesread: uint64_t,
-    ri_diskio_byteswritten: uint64_t,
+    ri_uuid: [u8; 16],
+    ri_user_time: u64,
+    ri_system_time: u64,
+    ri_pkg_idle_wkups: u64,
+    ri_interrupt_wkups: u64,
+    ri_pageins: u64,
+    ri_wired_size: u64,
+    ri_resident_size: u64,
+    ri_phys_footprint: u64,
+    ri_proc_start_abstime: u64,
+    ri_proc_exit_abstime: u64,
+    ri_child_user_time: u64,
+    ri_child_system_time: u64,
+    ri_child_pkg_idle_wkups: u64,
+    ri_child_interrupt_wkups: u64,
+    ri_child_pageins: u64,
+    ri_child_elapsed_abstime: u64,
+    ri_diskio_bytesread: u64,
+    ri_diskio_byteswritten: u64,
 }
 
 type mach_timebase_info_data_t = mach_timebase_info;
@@ -253,7 +253,7 @@ impl ProcessesRow {
             )
         };
         if bufsize <= 0 {
-            println!("An error occurred while retrieving the process list");;
+            println!("An error occurred while retrieving the process list");
             return out;
         }
         // Use twice the number of PIDs returned to handle races.
@@ -542,7 +542,7 @@ impl ProcessesRow {
         unsafe { gettimeofday(&mut tv as *mut timeval, ptr::null::<c_void>() as *mut _) };
 
         // Ignoring boot_time.tv_usec
-        unsafe { (difftime(tv.tv_sec.into(), seconds_since_boot).round() as i64 * CPU_TIME_RATIO + tv.tv_usec as i64) }
+        unsafe { difftime(tv.tv_sec.into(), seconds_since_boot).round() as i64 * CPU_TIME_RATIO + tv.tv_usec as i64 }
     }
 
     fn gen_proc_ressource_usage(pid: i32) -> RessourceUsageInternal {
@@ -579,7 +579,7 @@ impl ProcessesRow {
             // Below is the logic to caculate the start_time since boot time
             // with higher precision
             let uptime = ProcessesRow::get_uptime_in_usec();
-            let absoluteTime: uint64_t = unsafe { mach_absolute_time() };
+            let absoluteTime: u64 = unsafe { mach_absolute_time() };
 
             let multiply = time_base.numer as c_double / time_base.denom as c_double;
             let diff = (absoluteTime - rusage_info_data.ri_proc_start_abstime) as c_long;

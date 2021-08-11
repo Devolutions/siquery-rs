@@ -1,6 +1,6 @@
 use crate::tables::*;
 use crate::vtab::*;
-use rusqlite::{version_number, Connection, Error, NO_PARAMS};
+use rusqlite::{version_number, Connection, Error};
 use rusqlite::types::Value;
 use crate::printer::*;
 use crate::html::print_html;
@@ -603,7 +603,7 @@ pub fn execute_query(db: &Connection, query: &str, table_name: String, flag: u8)
             }
             table_result.push(row);
 
-            let mut response = statement_res.query(NO_PARAMS).unwrap();
+            let mut response = statement_res.query([]).unwrap();
             if flag == 2 {
                 print_csv(col_name_internal, &mut response);
             } else if flag == 3 {

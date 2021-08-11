@@ -5,8 +5,15 @@ use std::{ ptr,slice };
 use crate::tables::MountsRow;
 
 extern "C" {
-    #[cfg_attr(target_os = "macos", link_name = "getmntinfo$INODE64")]
-    pub fn getmntinfo (mntbufp: &*mut statfs, flags: c_int) -> c_int;
+    cfg_if::cfg_if! {
+        if #[cfg(target_arch = "aarch64")] {
+            #[link_name = "getmntinfo"]
+            pub fn getmntinfo (mntbufp: &*mut statfs, flags: c_int) -> c_int;
+        } else {
+            #[link_name = "getmntinfo$INODE64"]
+            pub fn getmntinfo (mntbufp: &*mut statfs, flags: c_int) -> c_int;
+        }
+    }
 }
 
 static MNT_WAIT : i32 = 1;
