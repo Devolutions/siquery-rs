@@ -314,7 +314,7 @@ impl ProcessesRow {
         let p_bsdinfo: *mut c_void = &mut bsdinfo as *mut _ as *mut c_void;
         let mut bsdinfo_short: proc_bsdshortinfo = unsafe { mem::zeroed() };
         let p_bsdinfo_short: *mut c_void = &mut bsdinfo_short as *mut _ as *mut c_void;
-        let PROC_PIDTBSDINFO = 3;
+        let proc_pidtbsdinfo_var = 3;
         let PROC_PIDTBSDINFO_SIZE = mem::size_of::<proc_bsdinfo>() as i32;
         let PROC_PIDT_SHORTBSDINFO = 13;
         let PROC_PIDT_SHORTBSDINFO_SIZE = mem::size_of::<proc_bsdshortinfo>() as i32;
@@ -322,7 +322,7 @@ impl ProcessesRow {
         if unsafe {
             proc_pidinfo(
                 pid,
-                PROC_PIDTBSDINFO,
+                proc_pidtbsdinfo_var,
                 1,
                 p_bsdinfo,
                 PROC_PIDTBSDINFO_SIZE,
@@ -383,14 +383,14 @@ impl ProcessesRow {
     }
 
     fn get_proc_root_and_cwd(pid: i32) -> RootAndCwdInternal {
-        let PROC_PIDVNODEPATHINFO = 9;
+        let proc_pidvnodepathinfo_var = 9;
         let mut pathinfo: proc_vnodepathinfo = unsafe { mem::zeroed() };
         let mut stringarray: RootAndCwdInternal = unsafe { mem::zeroed() };
 
         if unsafe {
             proc_pidinfo(
                 pid,
-                PROC_PIDVNODEPATHINFO,
+                proc_pidvnodepathinfo_var,
                 0,
                 &mut pathinfo as *mut _ as *mut c_void,
                 mem::size_of::<proc_vnodepathinfo>() as i32,
