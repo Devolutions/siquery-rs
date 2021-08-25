@@ -92,7 +92,7 @@ impl ProcessOpenSocketsRow {
                             let local_address_and_port: Vec<_> = v[1].split(':').collect();
                             let remote_address_and_port: Vec<_> = v[2].split(':').collect();
                             if local_address_and_port.len() == 2 && remote_address_and_port.len() == 2 {
-                                let mut local_address: String;
+                                let local_address: String;
                                 match local_address_and_port[0].len() {
                                     8 => {
                                         // IPv4 is represented as 8 bytes in the tcp6 file in linux.
@@ -134,7 +134,7 @@ impl ProcessOpenSocketsRow {
                                         local_address = "An error occurred while parsing the local address: the address does not have an expected format".to_string();
                                     }
                                 }
-                                let mut remote_address: String;
+                                let remote_address: String;
                                 match local_address_and_port[0].len() {
                                     8 => {
                                         // IPv4 is represented as 8 bytes in the tcp6 file in linux.
@@ -265,7 +265,7 @@ impl ProcessOpenSocketsRow {
         for dir_entry in dir_entries {
             let pid = dir_entry.ok()?.file_name().into_string().ok()?;
             let pid_ns = InternalProcNamespaces::read_full_proc_namespace(&pid).unwrap_or(InternalProcNamespaces::new());
-            let mut net_ns : String;
+            let net_ns : String;
             /* When net_namespace is not available, assign the current pid to a net_namespace of 0.
             Basic socket information will be collect for the first pid in the list.*/
             if pid_ns.net_namespace.is_empty() {
@@ -295,7 +295,7 @@ impl ProcessOpenSocketsRow {
         for (_namespace_key, val) in all_namespaces.iter_mut() {
             for entry in &all_pid_ino {
                 if let Some(ns) = val.remove(&entry.inode) {
-                    let mut state_string : String;
+                    let state_string : String;
                     match &ns.state as &str {
                         "01" => state_string = "ESTABLISHED".to_owned(),
                         "02" => state_string = "SYN_SENT".to_owned(),
@@ -330,7 +330,7 @@ impl ProcessOpenSocketsRow {
             }
             // Set the pid and fd of all the orphan net_namespace inodes to -1.
             for (_key, ns) in val.drain() {
-                let mut state_string : String;
+                let state_string : String;
                 match &ns.state as &str {
                     "01" => state_string = "ESTABLISHED".to_owned(),
                     "02" => state_string = "SYN_SENT".to_owned(),
