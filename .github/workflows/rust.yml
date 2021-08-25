@@ -25,7 +25,7 @@ jobs:
           - os: macos
             runner: macos-10.15
           - os: linux
-            runner: ubuntu-18.05
+            runner: ubuntu-18.04
 
     steps:
     - uses: actions/checkout@v2
