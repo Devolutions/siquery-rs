@@ -15,6 +15,7 @@ use libc::{EMPTY,
 use std::{
     ffi::CStr,
     sync::{Mutex,RwLock},
+    os::raw::c_char,
     str,
     ptr
 };
@@ -90,7 +91,7 @@ pub fn gen_logged_in_users(logged_in_users: &mut Vec<LoggedInUsers>, entry: *mut
     logged_in_users.push(logged_in_user);
 }
 
-pub fn c_char_arr_to_string(c_char_ptr : *const i8) -> String {
+pub fn c_char_arr_to_string(c_char_ptr : *const c_char) -> String {
     let str_ = unsafe { CStr::from_ptr(c_char_ptr)};
     let str_ = str_.to_owned();
     str_.into_string().unwrap()
