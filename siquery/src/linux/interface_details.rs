@@ -257,7 +257,7 @@ impl IfReqUnion {
 
         // basically a memcpy
         for (i, b) in self.data[2..16].iter().enumerate() {
-            s.sa_data[i] = *b as i8;
+            s.sa_data[i] = *b as c_char;
         }
 
         s

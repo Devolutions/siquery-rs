@@ -37,8 +37,8 @@ impl MountsRow {
         let mut out = Vec::new();
         let mounts: *mut FILE  = unsafe {
             setmntent(
-                CString::new("/proc/mounts").ok()?.as_ptr() as *const i8,
-                CString::new("r").ok()?.as_ptr() as *const i8
+                CString::new("/proc/mounts").ok()?.as_ptr() as *const c_char,
+                CString::new("r").ok()?.as_ptr() as *const c_char
             )
         };
         if mounts == ptr::null_mut::<FILE>() {
