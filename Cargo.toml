@@ -3,3 +3,6 @@ members = [
     "siquery",
     "siquery_cli"
 ]
+
+[patch.crates-io]
+objc_exception = { git = "https://github.com/awakecoding/rust-objc-exception", branch = "fix-cross-compile" }
