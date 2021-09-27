@@ -552,7 +552,7 @@ impl ProcessesRow {
 
         let mut rusage_info_data: rusage_info_v2 = unsafe { mem::zeroed() };
 
-        let RUSAGE_INFO_V2 = 2;
+        let rusage_info_v2_var = 2;
         let status = unsafe { proc_pid_rusage(pid, RUSAGE_INFO_V2, &mut rusage_info_data as *mut _ as *mut c_void) }; //(rusage_info_t*) &rusage_info_data);
         // proc_pid_rusage returns -1 if it was unable to gather information
         if status == 0 {
