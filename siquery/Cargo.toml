@@ -1,6 +1,6 @@
 [package]
 name = "siquery"
-version = "1.2.4"
+version = "1.2.5"
 edition = "2018"
 readme = "../README.md"
 license = "MIT/Apache-2.0"
