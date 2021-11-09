@@ -24,7 +24,6 @@ const CLIENTNAME_LENGTH: usize = 20;
 const CLIENTADDRESS_LENGTH: usize = 30;
 const MAX_PATH : usize = 260;
 
-#[repr(C)]
 macro_rules! enum_str {
     (pub enum $name:ident {
         $($variant:ident),*,
