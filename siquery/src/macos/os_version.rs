@@ -16,7 +16,7 @@ impl OsVersionReaderIface for Reader {
 }
 
 impl OsVersion {
-    pub(crate) fn get_specific_ex(reader: &OsVersionReaderIface) -> Vec<OsVersion> {
+    pub(crate) fn get_specific_ex(reader: &dyn OsVersionReaderIface) -> Vec<OsVersion> {
         let mut output : Vec<OsVersion> = Vec::new();
         let system_version = reader.get_os_info();
 
@@ -51,7 +51,7 @@ impl OsVersion {
         output
     }
     pub(crate) fn get_specific() -> Vec<OsVersion> {
-        let reader: Box<OsVersionReaderIface> = Box::new(Reader{});
+        let reader: Box<dyn OsVersionReaderIface> = Box::new(Reader{});
         let out = OsVersion::get_specific_ex(reader.borrow());
         out
     }
@@ -71,7 +71,7 @@ mod tests {
     }
     #[test]
     fn test_os_version () {
-        let reader: Box<OsVersionReaderIface> = Box::new(Test{});
+        let reader: Box<dyn OsVersionReaderIface> = Box::new(Test{});
         let os_version = &OsVersion::get_specific_ex(reader.borrow())[0];
         assert_eq!(os_version.platform, "MacOS");
         assert_eq!(os_version.name, "Mac OS X");
