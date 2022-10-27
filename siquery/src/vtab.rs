@@ -1,6 +1,6 @@
 use rusqlite::vtab::{
     sqlite3_vtab, sqlite3_vtab_cursor, Context, IndexInfo,
-    VTab, VTabConnection, VTabCursor, Values, read_only_module,
+    VTab, VTabConnection, VTabCursor, VTabKind, Values, read_only_module,
     dequote, Module, CreateVTab};
 
 use rusqlite::types::*;
@@ -85,10 +85,13 @@ unsafe impl VTab<'_> for SiqueryTab {
         Ok(())
     }
 
-    fn open(&self) -> Result<SiqueryTabCursor> {Ok(SiqueryTabCursor::default())}
+    fn open(&mut self) -> Result<SiqueryTabCursor> {Ok(SiqueryTabCursor::default())}
 }
 
-impl CreateVTab<'_> for SiqueryTab {}
+impl CreateVTab<'_> for SiqueryTab {
+    const KIND: VTabKind = VTabKind::Default;
+
+}
 
 #[derive(Default)]
 #[repr(C)]

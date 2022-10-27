@@ -603,15 +603,16 @@ pub fn execute_query(db: &Connection, query: &str, table_name: String, flag: u8)
             }
             table_result.push(row);
 
+            let column_count = statement_res.column_count();
             let mut response = statement_res.query([]).unwrap();
             if flag == 2 {
-                print_csv(col_name_internal, &mut response);
+                print_csv(col_name_internal, &mut response, column_count);
             } else if flag == 3 {
-                print_html(col_name_internal, &mut response, query);
+                print_html(col_name_internal, &mut response, query, column_count);
             } else if flag == 1 {
-                writer = print_json(table_name, &col_name_internal, &mut response);
+                writer = print_json(table_name, &col_name_internal, &mut response, column_count);
             } else {
-                print_pretty(col_name_internal, &mut response);
+                print_pretty(col_name_internal, &mut response, column_count);
             }
         },
         Err(e) =>
