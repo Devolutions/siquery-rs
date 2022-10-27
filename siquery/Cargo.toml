@@ -54,7 +54,7 @@ libc = "0.2"
 nix = "0.11.0"
 
 [dependencies.rusqlite]
-version = "0.25"
+version = "0.28"
 features = ["vtab", "bundled"]
 
 [dependencies.proxy_cfg]
