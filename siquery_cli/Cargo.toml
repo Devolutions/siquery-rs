@@ -15,7 +15,7 @@ name = "siquery"
 path = "src/main.rs"
 
 [dependencies]
-prettytable-rs = "0.8"
+prettytable-rs = "0.10"
 clap = { version = "2.31", features = ["yaml"] }
 lazy_static = "1.0"
 serde = "1.0"
