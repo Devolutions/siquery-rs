@@ -1,5 +1,5 @@
 use crate::tables::InterfaceDetails;
-use nix::sys::socket::SockAddr;
+use nix::sys::socket::{SockAddr, SockaddrLike};
 use libc::*;
 use std::{mem, ptr, ffi::CStr, str, fs::{read_dir, File}, io::prelude::*};
 
@@ -89,7 +89,7 @@ fn gen_details_from_addr(addrs: *mut ifaddrs) -> InterfaceDetails {
         interface_detail.interface = str_slice.to_string();
 
         // mac address
-        let address = SockAddr::from_libc_sockaddr((*addrs).ifa_addr);
+        let address = SockAddr::from_raw((*addrs).ifa_addr, None);
         interface_detail.mac = address.unwrap().to_string();
 
         let interface_address_data = (*addrs).ifa_data;

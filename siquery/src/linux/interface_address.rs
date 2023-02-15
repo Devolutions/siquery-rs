@@ -25,23 +25,23 @@ impl InterfaceAddress {
             match ifaddr.address {
                 Some(address) => {
                     interface_address.interface = ifaddr.interface_name;
-                    interface_address.address = address.to_str();
+                    interface_address.address = address.to_string();
 
                     if let Some(broadcast) = ifaddr.broadcast {
-                        interface_address.broadcast = broadcast.to_str();
+                        interface_address.broadcast = broadcast.to_string();
                     }
 
                     // The destination address is used for either a broadcast or PtP address.
                     if let Some(point_to_point) = ifaddr.destination {
                         if ifaddr.flags.bits() & IFF_BROADCAST == IFF_BROADCAST {
-                            interface_address.broadcast = point_to_point.to_str();
+                            interface_address.broadcast = point_to_point.to_string();
                         } else {
-                            interface_address.point_to_point = point_to_point.to_str();
+                            interface_address.point_to_point = point_to_point.to_string();
                         }
                     }
 
                     if let Some(netmask) = ifaddr.netmask {
-                        interface_address.mask = netmask.to_str();
+                        interface_address.mask = netmask.to_string();
                         output.push(interface_address);
 
                     }

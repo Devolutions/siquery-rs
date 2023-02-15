@@ -2,6 +2,7 @@ use std::mem;
 use std::ptr;
 
 use crate::tables::Uptime;
+use time::{Duration, OffsetDateTime};
 
 impl Uptime {
     pub fn get_specific() -> Vec<Uptime> {
@@ -35,8 +36,10 @@ impl Uptime {
             let sec_to_days_converter = 60 * 60 * 24;
             let sec_to_hours_converter = 60 * 60;
             let sec_to_minutes_converter = 60;
-
-            let t = (time::now().to_timespec() - time::Timespec::new(boottime.tv_sec, boottime.tv_usec * 1000)).num_seconds();
+            
+            let boot_time = OffsetDateTime::from_unix_timestamp(boottime.tv_sec as i64).unwrap() + Duration::microseconds(boottime.tv_usec as i64);
+            let duration = OffsetDateTime::now_utc() - boot_time;
+            let t = duration.as_seconds_f64().round() as i64;
 
             if let Some(get_days) = Some(t / sec_to_days_converter) {
                 remaining_time = t - (get_days * sec_to_days_converter);
