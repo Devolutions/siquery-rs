@@ -314,7 +314,7 @@ impl ProcessesRow {
 
                         let pid = v.to_owned().parse::<i64>().unwrap_or(-1);
                         processes_row.pid = pid;
-                        let mut h_process: *mut winapi::ctypes::c_void = 0 as *mut c_void;
+                        let mut h_process: *mut winapi::ctypes::c_void = 0 as *mut winapi::ctypes::c_void;
                         if pid == current_pid {
                             h_process = unsafe {GetCurrentProcess()};
                         } else {
@@ -378,7 +378,7 @@ impl ProcessesRow {
                             ret = unsafe {GetTokenInformation(*tok, TokenUser, ptr::null_mut(), 0, &mut tok_owner_buff_len)};
                             if ret == 0 && unsafe{GetLastError()} == ERROR_INSUFFICIENT_BUFFER {
                                 tok_owner = Vec::with_capacity(tok_owner_buff_len as usize);
-                                ret = unsafe{GetTokenInformation(*tok, TokenUser,tok_owner.as_mut_ptr() as *mut c_void , tok_owner_buff_len, &mut tok_owner_buff_len)};
+                                ret = unsafe{GetTokenInformation(*tok, TokenUser,tok_owner.as_mut_ptr() as *mut winapi::ctypes::c_void , tok_owner_buff_len, &mut tok_owner_buff_len)};
                                 unsafe {tok_owner.set_len(tok_owner_buff_len as usize)};
 
                             }
@@ -387,7 +387,7 @@ impl ProcessesRow {
                                 TokenIsElevated: 0
                             };
                             let mut cb_size: DWORD = size_of::<TOKEN_ELEVATION>() as u32;
-                            if unsafe {GetTokenInformation(*tok, TokenElevation, &mut elevation as *mut _ as *mut c_void, size_of::<TOKEN_ELEVATION>() as u32, &mut cb_size)} != 0 {
+                            if unsafe {GetTokenInformation(*tok, TokenElevation, &mut elevation as *mut _ as *mut winapi::ctypes::c_void, size_of::<TOKEN_ELEVATION>() as u32, &mut cb_size)} != 0 {
                                 processes_row.is_elevated_token = elevation.TokenIsElevated as i32;
                             }
                         }
