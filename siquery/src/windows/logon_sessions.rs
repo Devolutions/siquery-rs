@@ -2,6 +2,7 @@
 #![allow(non_snake_case)]
 use crate::tables::LogonSessions;
 use winapi::{
+    ctypes::c_void,
     um::{
         ntlsa::*,
         winnt::{LUID, PWSTR, LPWSTR, PSID, LARGE_INTEGER}
@@ -12,7 +13,6 @@ use winapi::{
 use winapi::um::errhandlingapi::GetLastError;
 use widestring::WideString;
 use std::{ptr, mem};
-use std::ffi::c_void;
 use libc;
 
 impl LogonSessions {
@@ -103,11 +103,11 @@ fn get_logon_sessions() ->  Vec<LogonSessions> {
 
                 logon_sessions.push(logon_session);
 
-                LsaFreeReturnBuffer(&mut _session_data as *mut _ as *mut c_void);
+                LsaFreeReturnBuffer(_session_data as *mut c_void);
             }
         }
 
-        LsaFreeReturnBuffer(&mut _sessions as *mut _ as *mut c_void);
+        LsaFreeReturnBuffer(_sessions as *mut c_void);
     }
 
     logon_sessions
