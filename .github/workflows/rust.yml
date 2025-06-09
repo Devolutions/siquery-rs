@@ -22,11 +22,11 @@ jobs:
         
         include:
           - os: windows
-            runner: windows-2019
+            runner: windows-latest
           - os: macos
-            runner: macos-10.15
+            runner: macos-latest
           - os: linux
-            runner: ubuntu-18.04
+            runner: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
